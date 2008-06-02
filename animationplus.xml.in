@@ -1,8 +1,8 @@
 <compiz>
   <!-- animation metadata -->
-  <plugin name="animation">
-    <_short>Animations</_short>
-    <_long>Use various animations as window effects</_long>
+  <plugin name="animationplus">
+    <_short>Animations Plus</_short>
+    <_long>Use various animations as window effects, including various additional animations not in the Animation plugin</_long>
     <feature>windowanimations</feature>
     <category>Effects</category>
     <deps>
@@ -30,9 +30,9 @@
 	    <_long>The animation effect shown when closing a window.</_long>
 	    <type>int</type>
 	    <min>0</min>
-	    <max>21</max>
+	    <max>22</max>
 	    <default>
-	      <value>21</value>
+	      <value>22</value>
 	      <value>9</value>
 	      <value>9</value>
 	    </default>
@@ -88,40 +88,44 @@
 	      <value>12</value>
 	      <_name>Glide 2</_name>
 	    </desc>
+        <desc>
+          <value>13</value>
+          <_name>Helix</_name>
+        </desc>
 	    <desc>
-	      <value>13</value>
+	      <value>14</value>
 	      <_name>Horizontal Folds</_name>
 	    </desc>
 	    <desc>
-	      <value>14</value>
+	      <value>15</value>
 	      <_name>Leaf Spread</_name>
 	    </desc>
 	    <desc>
-	      <value>15</value>
+	      <value>16</value>
 	      <_name>Magic Lamp</_name>
 	    </desc>
 	    <desc>
-	      <value>16</value>
+	      <value>17</value>
 	      <_name>Razr</_name>
 	    </desc>
 	    <desc>
-	      <value>17</value>
+	      <value>18</value>
 	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
-	      <value>18</value>
+	      <value>19</value>
 	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
-	      <value>19</value>
+	      <value>20</value>
 	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
-	      <value>20</value>
+	      <value>21</value>
 	      <_name>Wave</_name>
 	    </desc>
 	    <desc>
-	      <value>21</value>
+	      <value>22</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
@@ -188,6 +192,7 @@
 	      <value>17</value>
 	      <value>18</value>
 	      <value>19</value>
+              <value>20</value>
 	    </default>
 	    <desc>
 	      <value>0</value>
@@ -234,39 +239,43 @@
 	      <_name>Glide 2</_name>
 	    </desc>
 	    <desc>
-	      <value>11</value>
+              <value>11</value>
+              <_name>Helix</_name>
+            </desc>
+	    <desc>
+	      <value>12</value>
 	      <_name>Horizontal Folds</_name>
 	    </desc>
 	    <desc>
-	      <value>12</value>
+	      <value>13</value>
 	      <_name>Leaf Spread</_name>
 	    </desc>
 	    <desc>
-	      <value>13</value>
+	      <value>14</value>
 	      <_name>Magic Lamp</_name>
 	    </desc>
 	    <desc>
-	      <value>14</value>
+	      <value>15</value>
 	      <_name>Razr</_name>
 	    </desc>
 	    <desc>
-	      <value>15</value>
+	      <value>16</value>
 	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
-	      <value>16</value>
+	      <value>17</value>
 	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
-	      <value>17</value>
+	      <value>18</value>
 	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
-	      <value>18</value>
+	      <value>19</value>
 	      <_name>Wave</_name>
 	    </desc>
 	    <desc>
-	      <value>19</value>
+	      <value>20</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
@@ -284,9 +293,9 @@
 	    <_long>The animation effect shown when creating a window.</_long>
 	    <type>int</type>
 	    <min>0</min>
-	    <max>21</max>
+	    <max>22</max>
 	    <default>
-	      <value>21</value>
+	      <value>22</value>
 	      <value>9</value>
 	      <value>9</value>
 	    </default>
@@ -343,39 +352,43 @@
 	      <_name>Glide 2</_name>
 	    </desc>
 	    <desc>
-	      <value>13</value>
+          <value>13</value>
+          <_name>Helix</_name>
+		</desc>
+	    <desc>
+	      <value>14</value>
 	      <_name>Horizontal Folds</_name>
 	    </desc>
 	    <desc>
-	      <value>14</value>
+	      <value>15</value>
 	      <_name>Leaf Spread</_name>
 	    </desc>
 	    <desc>
-	      <value>15</value>
+	      <value>16</value>
 	      <_name>Magic Lamp</_name>
 	    </desc>
 	    <desc>
-	      <value>16</value>
+	      <value>17</value>
 	      <_name>Razr</_name>
 	    </desc>
 	    <desc>
-	      <value>17</value>
+	      <value>18</value>
 	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
-	      <value>18</value>
+	      <value>19</value>
 	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
-	      <value>19</value>
+	      <value>20</value>
 	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
-	      <value>20</value>
+	      <value>21</value>
 	      <_name>Wave</_name>
 	    </desc>
 	    <desc>
-	      <value>21</value>
+	      <value>22</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
@@ -442,6 +455,7 @@
 	      <value>17</value>
 	      <value>18</value>
 	      <value>19</value>
+	      <value>20</value>
 	    </default>
 	    <desc>
 	      <value>0</value>
@@ -489,38 +503,42 @@
 	    </desc>
 	    <desc>
 	      <value>11</value>
-	      <_name>Horizontal Folds</_name>
+	      <_name>Helix</_name>
 	    </desc>
 	    <desc>
 	      <value>12</value>
-	      <_name>Leaf Spread</_name>
+	      <_name>Horizontal Folds</_name>
 	    </desc>
 	    <desc>
 	      <value>13</value>
-	      <_name>Magic Lamp</_name>
+	      <_name>Leaf Spread</_name>
 	    </desc>
 	    <desc>
 	      <value>14</value>
-	      <_name>Razr</_name>
+	      <_name>Magic Lamp</_name>
 	    </desc>
 	    <desc>
 	      <value>15</value>
-	      <_name>Sidekick</_name>
+	      <_name>Razr</_name>
 	    </desc>
 	    <desc>
 	      <value>16</value>
-	      <_name>Skewer</_name>
+	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
 	      <value>17</value>
-	      <_name>Vacuum</_name>
+	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
 	      <value>18</value>
-	      <_name>Wave</_name>
+	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
 	      <value>19</value>
+	      <_name>Wave</_name>
+	    </desc>
+	    <desc>
+	      <value>20</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
@@ -1064,6 +1082,38 @@
 	  </option>
 	</subgroup>
 
+	<subgroup>
+	  <_short>Helix</_short>
+	  <option name="helix_num_twists" type="int">
+	    <_short>Helix Number of Twists</_short>
+	    <_long>Number of twists to do in the animation</_long>
+	    <default>2</default>
+	    <min>1</min>
+	    <max>10</max>
+	  </option>
+	  <option name="helix_gridy" type="int">
+	    <_short>Helix Gridsize Y</_short>
+	    <_long>Number of blocks in the animation</_long>
+	    <default>90</default>
+	    <min>5</min>
+	    <max>300</max>
+	  </option>
+	  <option name="helix_thickness" type="float">
+	    <_short>Helix Thickness</_short>
+	    <_long>Thickness of blocks in the animation</_long>
+	    <default>0</default>
+	    <min>0</min>
+	    <max>50</max>
+	  </option>
+	  <option name="helix_direction" type="bool">
+	    <_short>Vertical Helix</_short>
+	    <_long>Whether Helix should rotate with its axis up/down or in/out of the screen</_long>
+	    <default>false</default>
+	  </option>
+	</subgroup>
+	
+	
+	
 	<subgroup>
 	  <_short>Glide 1</_short>
 	  <option name="glide1_away_position" type="float">
