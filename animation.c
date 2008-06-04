@@ -135,6 +135,7 @@ static AnimEffect closeEffects[] = {
     AnimEffectFold3D,
     AnimEffectGlide3D1,
     AnimEffectGlide3D2,
+    AnimEffectHelix,
     AnimEffectHorizontalFolds,
     AnimEffectLeafSpread3D,
     AnimEffectMagicLamp,
@@ -826,6 +827,10 @@ AnimEffectProperties animEffectProperties[AnimEffectNum] = {
      polygonsDeceleratingAnimStepPolygon,
      fxGlideLetOthersDrawGeoms, fxGlideUpdateWindowTransform, 0,
      fxGlideUpdateBB},
+    // AnimEffectHelix
+    {0, polygonsPrePaintWindow, polygonsPostPaintWindow, polygonsAnimStep,
+     fxHelixInit, 0, polygonsStoreClips, polygonsDrawCustomGeometry, 0,
+     polygonsLinearAnimStepPolygon, 0, 0, 0, polygonsUpdateBB},
     // AnimEffectHorizontalFolds
     {fxFoldUpdateWindowAttrib, 0, 0, fxHorizontalFoldsModelStep,
      defaultMinimizeAnimInit, fxHorizontalFoldsInitGrid, 0, 0, 0, 0, 0,
@@ -1091,6 +1096,10 @@ static const CompMetadataOptionInfo animScreenOptionInfo[] = {
     { "glide2_away_angle", "float", 0, 0, 0 },
     { "glide2_thickness", "float", "<min>0</min>", 0, 0 },
     { "glide2_zoom_to_taskbar", "bool", 0, 0, 0 },
+    { "helix_num_twists", "int", "<min>1</min>", 0, 0 },
+    { "helix_gridy", "int", "<min>5</min>", 0, 0 },
+    { "helix_thickness", "float", 0, 0, 0 },
+    { "helix_direction", "bool", 0, 0, 0 },
     { "horizontal_folds_amp", "float", "<min>-0.5</min><max>0.5</max>", 0, 0 },
     { "horizontal_folds_num_folds", "int", "<min>1</min>", 0, 0 },
     { "horizontal_folds_zoom_to_taskbar", "bool", 0, 0, 0 },
@@ -4620,7 +4629,7 @@ animGetMetadata (CompPlugin *plugin)
 }
 
 CompPluginVTable animVTable = {
-    "animation",
+    "animationplus",
     animGetMetadata,
     animInit,
     animFini,

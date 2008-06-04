@@ -333,6 +333,7 @@ typedef enum
     AnimEffectFold3D,
     AnimEffectGlide3D1,
     AnimEffectGlide3D2,
+    AnimEffectHelix,
     AnimEffectHorizontalFolds,
     AnimEffectLeafSpread3D,
     AnimEffectMagicLamp,
@@ -484,6 +485,10 @@ typedef enum
     ANIM_SCREEN_OPTION_GLIDE2_AWAY_ANGLE,
     ANIM_SCREEN_OPTION_GLIDE2_THICKNESS,
     ANIM_SCREEN_OPTION_GLIDE2_Z2TOM,
+    ANIM_SCREEN_OPTION_HELIX_NUM_TWISTS,
+    ANIM_SCREEN_OPTION_HELIX_GRIDSIZE_Y,
+    ANIM_SCREEN_OPTION_HELIX_THICKNESS,
+    ANIM_SCREEN_OPTION_HELIX_DIRECTION,
     ANIM_SCREEN_OPTION_HORIZONTAL_FOLDS_AMP,
     ANIM_SCREEN_OPTION_HORIZONTAL_FOLDS_NUM_FOLDS,
     ANIM_SCREEN_OPTION_HORIZONTAL_FOLDS_Z2TOM,
@@ -1009,6 +1014,12 @@ fxGlidePostPaintWindow(CompScreen * s, CompWindow * w);
 void
 fxGlideUpdateBB (CompOutput *output,
 		 CompWindow *w);
+
+
+/* helix.c */
+void
+fxHelixInit (CompScreen *s, CompWindow *w);
+
 
 /* horizontalfold.c */
 
