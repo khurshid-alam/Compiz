@@ -312,7 +312,8 @@ typedef enum
 typedef enum
 {
     PolygonTessRect = 0,
-    PolygonTessHex
+    PolygonTessHex,
+    PolygonTessTri
 } PolygonTess;
 #define LAST_POLYGON_TESS 1
 
@@ -1150,6 +1151,12 @@ tessellateIntoRectangles (CompWindow * w,
  
 Bool
 tessellateIntoHexagons (CompWindow * w,
+			int gridSizeX,
+			int gridSizeY,
+			float thickness);
+
+Bool
+tessellateIntoTriangles (CompWindow * w,
 			int gridSizeX,
 			int gridSizeY,
 			float thickness);
