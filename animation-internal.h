@@ -322,6 +322,7 @@ typedef enum
     AnimEffectRandom,
     AnimEffectAirplane3D,
     AnimEffectBeamUp,
+    AnimEffectBlinds,
     AnimEffectBurn,
     AnimEffectCurvedFold,
     AnimEffectDodge,
@@ -356,13 +357,13 @@ typedef enum
    LAST_RANDOM_*_EFFECT always must be LAST_*_EFFECT - RANDOM_EFFECT_OFFSET
 */
 
-#define NUM_MINIMIZE_EFFECT 20
-#define LAST_MINIMIZE_EFFECT 19
-#define LAST_RANDOM_MINIMIZE_EFFECT 17
+#define NUM_MINIMIZE_EFFECT 21
+#define LAST_MINIMIZE_EFFECT 20
+#define LAST_RANDOM_MINIMIZE_EFFECT 18
 
-#define NUM_CLOSE_EFFECT 22
-#define LAST_CLOSE_EFFECT 21
-#define LAST_RANDOM_CLOSE_EFFECT 19
+#define NUM_CLOSE_EFFECT 23
+#define LAST_CLOSE_EFFECT 24
+#define LAST_RANDOM_CLOSE_EFFECT 20
 
 #define NUM_FOCUS_EFFECT 4
 #define LAST_FOCUS_EFFECT 3
@@ -455,6 +456,9 @@ typedef enum
     ANIM_SCREEN_OPTION_BEAMUP_COLOR,
     ANIM_SCREEN_OPTION_BEAMUP_SLOWDOWN,
     ANIM_SCREEN_OPTION_BEAMUP_LIFE,
+    ANIM_SCREEN_OPTION_BLINDS_HALFTWISTS,
+    ANIM_SCREEN_OPTION_BLINDS_GRIDX,
+    ANIM_SCREEN_OPTION_BLINDS_THICKNESS, 
     ANIM_SCREEN_OPTION_CURVED_FOLD_AMP,
     ANIM_SCREEN_OPTION_CURVED_FOLD_Z2TOM,
     ANIM_SCREEN_OPTION_DODGE_GAP_RATIO,
@@ -874,6 +878,10 @@ fxBeamUpModelStep (CompScreen *s,
 void fxBeamUpInit (CompScreen *s,
 		   CompWindow *w);
 
+
+/* blinds.c */
+void fxBlindsInit (CompScreen *s,
+		   CompWindow *w);
 
 /* burn.c */
 

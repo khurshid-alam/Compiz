@@ -103,6 +103,7 @@ static AnimEffect minimizeEffects[] = {
     AnimEffectRandom,
     AnimEffectAirplane3D,
     AnimEffectBeamUp,
+    AnimEffectBlinds,
     AnimEffectBurn,
     AnimEffectCurvedFold,
     AnimEffectDomino3D,
@@ -126,6 +127,7 @@ static AnimEffect closeEffects[] = {
     AnimEffectRandom,
     AnimEffectAirplane3D,
     AnimEffectBeamUp,
+    AnimEffectBlinds,
     AnimEffectBurn,
     AnimEffectCurvedFold,
     AnimEffectDomino3D,
@@ -779,6 +781,10 @@ AnimEffectProperties animEffectProperties[AnimEffectNum] = {
     // AnimEffectBeamUp
     {fxBeamupUpdateWindowAttrib, 0, drawParticleSystems, fxBeamUpModelStep,
      fxBeamUpInit, 0, 0, 0, 1, 0, 0, 0, 0, particlesUpdateBB},
+    // AnimEffectBlinds
+    {0, polygonsPrePaintWindow, polygonsPostPaintWindow, polygonsAnimStep,
+     fxBlindsInit, 0, polygonsStoreClips, polygonsDrawCustomGeometry, 0,
+     polygonsLinearAnimStepPolygon, 0, 0, 0, polygonsUpdateBB},
     // AnimEffectBurn
     {0, 0, drawParticleSystems, fxBurnModelStep, fxBurnInit, 0, 0, 0, 1, 0,
      0, 0, 0, particlesUpdateBB},
@@ -1066,6 +1072,9 @@ static const CompMetadataOptionInfo animScreenOptionInfo[] = {
     { "beam_color", "color", 0, 0, 0 },
     { "beam_slowdown", "float", "<min>0.1</min>", 0, 0 },
     { "beam_life", "float", "<min>0.1</min>", 0, 0 },
+    { "blinds_num_halftwists", "int", "<min>1</min>", 0, 0 },
+    { "blinds_gridx", "int", "<min>1</min>", 0, 0 },
+    { "blinds_thickness", "float", 0, 0, 0 },
     { "curved_fold_amp", "float", "<min>-0.5</min><max>0.5</max>", 0, 0 },
     { "curved_fold_zoom_to_taskbar", "bool", 0, 0, 0 },
     { "dodge_gap_ratio", "float", "<min>0.0</min><max>1.0</max>", 0, 0 },
