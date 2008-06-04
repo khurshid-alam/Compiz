@@ -1260,6 +1260,27 @@
 	  </option>
 	</subgroup>
 
+
+
+	<subgroup>
+	  <_short>Leafspread</_short>
+	  <option name="leafspread_tessellation" type="int">
+	    <_short>Tessellation Type</_short>
+	    <_long>Tessellation type for window pieces.</_long>
+	    <default>0</default>
+	    <min>0</min>
+	    <max>1</max>
+	    <desc>
+	      <value>0</value>
+	      <_name>Rectangular</_name>
+	    </desc>
+	    <desc>
+	      <value>1</value>
+	      <_name>Hexagonal</_name>
+	    </desc>
+	  </option>
+	</subgroup>
+	
 	<subgroup>
 	  <_short>Roll Up</_short>
 	  <option name="rollup_fixed_interior" type="bool">

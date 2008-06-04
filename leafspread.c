@@ -39,9 +39,16 @@
 void fxLeafSpread3DInit(CompScreen * s, CompWindow * w)
 {
     ANIM_WINDOW(w);
+    ANIM_SCREEN (s);
 
-    if (!tessellateIntoRectangles(w, 20, 14, 15.0f))
-	return;
+	if (animGetI(as, aw, ANIM_SCREEN_OPTION_LEAFSPREAD_TESSELLATION) == 1)
+	{
+    	if (!tessellateIntoHexagons(w, 14, 14, 15.0f))
+		return;
+	} else {
+	   	if (!tessellateIntoRectangles(w, 20, 14, 15.0f))
+		return;
+	}
 
     PolygonSet *pset = aw->polygonSet;
     PolygonObject *p = pset->polygons;

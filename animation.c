@@ -1112,6 +1112,7 @@ static const CompMetadataOptionInfo animScreenOptionInfo[] = {
     { "horizontal_folds_amp", "float", "<min>-0.5</min><max>0.5</max>", 0, 0 },
     { "horizontal_folds_num_folds", "int", "<min>1</min>", 0, 0 },
     { "horizontal_folds_zoom_to_taskbar", "bool", 0, 0, 0 },
+    { "leafspread_tessellation" ,"int", RESTOSTRING (0, LAST_POLYGON_TESS), 0, 0 },
     { "magic_lamp_moving_end", "bool", 0, 0, 0 },
     { "magic_lamp_grid_res", "int", "<min>4</min>", 0, 0 },
     { "magic_lamp_max_waves", "int", "<min>3</min>", 0, 0 },
