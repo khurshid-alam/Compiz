@@ -374,14 +374,14 @@ Bool
 tessellateIntoTriangles(CompWindow *w, 
 				int gridSizeX, int gridSizeY, float thickness)
 {
-	ANIM_WINDOW(w);
-	
-	PolygonSet *pset = aw->polygonSet;
-	
-	if (!pset )
+    ANIM_WINDOW(w);
+
+    PolygonSet *pset = aw->polygonSet;
+
+    if (!pset)
 	return FALSE;
-	
-	int winLimitsX;				// boundaries of polygon tessellation
+
+    int winLimitsX;				// boundaries of polygon tessellation
     int winLimitsY;
     int winLimitsW;
     int winLimitsH;
@@ -400,24 +400,21 @@ tessellateIntoTriangles(CompWindow *w,
 	winLimitsW = BORDER_W(w);
 	winLimitsH = BORDER_H(w);
     }
-    
-    float minsize = 30;
-    float triH = winLimitsW / (float)gridSizeX;
-    float triW = winLimitsH / (float)gridSizeY;
-    
-    if (triH < minsize)
-    triH = winLimitsH / minsize;
-	if (triW < minsize)
-	triW = winLimitsW / minsize;
-	
-	
-	//set the number of polygons needed
-   if (pset->nPolygons != gridSizeX * (gridSizeY + 1))
-   {
+    float minRectSize = MIN_WINDOW_GRID_SIZE;
+    float rectW = winLimitsW / (float)gridSizeX;
+    float rectH = winLimitsH / (float)gridSizeY;
+
+    if (rectW < minRectSize)
+	gridSizeX = winLimitsW / minRectSize;	// int div.
+    if (rectH < minRectSize)
+	gridSizeY = winLimitsH / minRectSize;	// int div.
+
+    if (pset->nPolygons != gridSizeX * gridSizeY)
+    {
 	if (pset->nPolygons > 0)
 	    freePolygonObjects(pset);
 
-	pset->nPolygons = gridSizeX * (gridSizeY + 1);
+	pset->nPolygons = gridSizeX * gridSizeY;
 
 	pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
 	if (!pset->polygons)
@@ -427,49 +424,34 @@ tessellateIntoTriangles(CompWindow *w,
 	    pset->nPolygons = 0;
 	    return FALSE;
 	}
-	}
-	
-	float cellW = (float)winLimitsW / gridSizeX;
+    }
+
+    thickness /= w->screen->width;
+    pset->thickness = thickness;
+    pset->nTotalFrontVertices = 0;
+
+    float cellW = (float)winLimitsW / gridSizeX;
     float cellH = (float)winLimitsH / gridSizeY;
     float halfW = cellW / 2;
     float halfH = cellH / 2;
-    float thirdH = cellH  / 3;
+    float thirdH = cellH / 3;
 
     float halfThick = pset->thickness / 2;
     PolygonObject *p = pset->polygons;
     int x, y;
-    
-    
 
-	
-   for (y = 0; y < gridSizeY; y++)
+    for (y = 0; y < gridSizeY; y++)
     {
-    float posY = winLimitsY + cellH * (y + (1/3) * ((y%2) + 1 )  );
-	//float posY = winLimitsY + cellH * (y + 0.5);
+	float posY = winLimitsY + cellH * (y + 0.5);
 
 	for (x = 0; x < gridSizeX; x++, p++)
 	{
-	    
-	    if (x == 0)
-	    {
 	    p->centerPos.x = p->centerPosStart.x =
-		winLimitsX + cellW * (x + 0.25);
-		}
-		else if (x == gridSizeX -1) 
-		{
-		p->centerPos.x = p->centerPosStart.x =
-		winLimitsX + cellW * (x + 0.75);
-		}
-		else
-		{
-		p->centerPos.x = p->centerPosStart.x =
 		winLimitsX + cellW * (x + 0.5);
-		}
 	    p->centerPos.y = p->centerPosStart.y = posY;
 	    p->centerPos.z = p->centerPosStart.z = -halfThick;
 	    p->rotAngle = p->rotAngleStart = 0;
 
-		//i dont know what this is for...
 	    p->centerRelPos.x = (x + 0.5) / gridSizeX;
 	    p->centerRelPos.y = (y + 0.5) / gridSizeY;
 
@@ -477,7 +459,7 @@ tessellateIntoTriangles(CompWindow *w,
 	    p->nVertices = 2 * 3;
 	    pset->nTotalFrontVertices += 3;
 
-	    // 3 front, 3 back vertices
+	    // 4 front, 4 back vertices
 	    if (!p->vertices)
 	    {
 		p->vertices = calloc(6 * 3, sizeof(GLfloat));
@@ -494,7 +476,7 @@ tessellateIntoTriangles(CompWindow *w,
 	    // Vertex normals
 	    if (!p->normals)
 	    {
-		p->normals = calloc(6 * 3, sizeof(GLfloat));
+		p->normals = calloc(8 * 3, sizeof(GLfloat));
 	    }
 	    if (!p->normals)
 	    {
@@ -507,37 +489,70 @@ tessellateIntoTriangles(CompWindow *w,
 
 	    GLfloat *pv = p->vertices;
 
-	    // Determine 3 front vertices in ccw direction
+
+		if ((x%2) == 1)
+		{
+	    // Determine 4 front vertices in ccw direction
 	    pv[0] = -halfW;
 	    pv[1] = -halfH;
 	    pv[2] = halfThick;
 
-	    pv[3] = -halfW;
+	    pv[3] = 0;
 	    pv[4] = halfH;
 	    pv[5] = halfThick;
 
 	    pv[6] = halfW;
-	    pv[7] = halfH;
+	    pv[7] = -halfH;
 	    pv[8] = halfThick;
-
-	    // Determine 3 back vertices in cw direction
+	    
+	    // Determine 4 back vertices in cw direction
 	    pv[9] = halfW;
 	    pv[10] = -halfH;
 	    pv[11] = -halfThick;
 
-	    pv[12] = halfW;
+
+	    pv[12] = 0;
+	    pv[13] = halfH;
+	    pv[14] = -halfThick;
+
+	    pv[15] = -halfW;
+	    pv[16] = -halfH;
+	    pv[17] = -halfThick;
+
+		}
+		else
+		{
+		pv[0] = halfW;
+	    pv[1] = halfH;
+	    pv[2] = halfThick;
+
+	    pv[3] = 0;
+	    pv[4] = -halfH;
+	    pv[5] = halfThick;
+
+	    pv[6] = -halfW;
+	    pv[7] = halfH;
+	    pv[8] = halfThick;
+	    
+	    // Determine 4 back vertices in cw direction
+	    pv[9] = -halfW;
+	    pv[10] = halfH;
+	    pv[11] = -halfThick;
+
+
+	    pv[12] = 0;
 	    pv[13] = -halfH;
 	    pv[14] = -halfThick;
 
 	    pv[15] = halfW;
 	    pv[16] = halfH;
 	    pv[17] = -halfThick;
-
+		}
 
 	    // 16 indices for 4 sides (for quads)
 	    if (!p->sideIndices)
 	    {
-		p->sideIndices = calloc(4 * 4, sizeof(GLushort));
+		p->sideIndices = calloc(3 * 4, sizeof(GLushort));
 	    }
 	    if (!p->sideIndices)
 	    {
@@ -553,18 +568,18 @@ tessellateIntoTriangles(CompWindow *w,
 	    int id = 0;
 	    
 	    // Left face
-	    ind[id++] = 6; // First vertex
+	    ind[id++] = 4; // First vertex
 	    ind[id++] = 1;
 	    ind[id++] = 0;
-	    ind[id++] = 7;
-	    nor[6 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
-	    nor[6 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
-	    nor[6 * 3 + 2] = 0;
+	    ind[id++] = 5;
+	    nor[4 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
+	    nor[4 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
+	    nor[4 * 3 + 2] = 0;
 
 	    // Bottom face
 	    ind[id++] = 1;
-	    ind[id++] = 6;
-	    ind[id++] = 5;
+	    ind[id++] = 4;
+	    ind[id++] = 3;
 	    ind[id++] = 2;
 	    nor[1 * 3 + 0] = 0;
 	    nor[1 * 3 + 1] = 1;
@@ -572,21 +587,23 @@ tessellateIntoTriangles(CompWindow *w,
 
 	    // Right face
 	    ind[id++] = 2;
-	    ind[id++] = 5;
-	    ind[id++] = 4;
 	    ind[id++] = 3;
+	    ind[id++] = 5;
+	    ind[id++] = 0;
 	    nor[2 * 3 + 0] = 1;
 	    nor[2 * 3 + 1] = 0;
 	    nor[2 * 3 + 2] = 0;
 
 	    // Top face
-	    ind[id++] = 7;
+/*	    ind[id++] = 7;
 	    ind[id++] = 0;
 	    ind[id++] = 3;
-	    ind[id++] = 4;
+	    ind[id++] = 4;*/
 	    nor[7 * 3 + 0] = 0;
 	    nor[7 * 3 + 1] = -1;
 	    nor[7 * 3 + 2] = 0;
+
+	
 
 	    // Front face normal
 	    nor[0] = 0;
@@ -594,9 +611,10 @@ tessellateIntoTriangles(CompWindow *w,
 	    nor[2] = 1;
 
 	    // Back face normal
-	    nor[4 * 3 + 0] = 0;
-	    nor[4 * 3 + 1] = 0;
-	    nor[4 * 3 + 2] = -1;
+	    nor[3 * 3 + 0] = 0;
+	    nor[3 * 3 + 1] = 0;
+	    nor[3 * 3 + 2] = 1;
+
 
 	    // Determine bounding box (to test intersection with clips)
 	    p->boundingBox.x1 = -halfW + p->centerPos.x;
