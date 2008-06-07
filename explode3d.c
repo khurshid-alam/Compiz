@@ -44,7 +44,7 @@ void fxExplode3DInit(CompScreen * s, CompWindow * w)
     switch (animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_TESS))
     {
     case PolygonTessRect:
-	if (!tessellateIntoTriangles(w, 
+	if (!tessellateIntoRectangles(w, 
 				      animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_X),
 				      animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
 				      animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)))
@@ -56,6 +56,13 @@ void fxExplode3DInit(CompScreen * s, CompWindow * w)
 				    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
 				    animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)))
 	    return;
+	break;
+	case PolygonTessTri:
+	if (!tessellateIntoTriangles(w, 
+				    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_X),
+				    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
+				    animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)))
+		return;
 	break;
     default:
 	return;

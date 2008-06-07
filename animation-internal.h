@@ -308,14 +308,14 @@ typedef enum
 } ZoomFromCenter;
 #define LAST_ZOOM_FROM_CENTER 3
 
-// Polygon tesselation type: Rectangular, Hexagonal
+// Polygon tesselation type: Rectangular, Hexagonal, Triangular
 typedef enum
 {
     PolygonTessRect = 0,
     PolygonTessHex,
     PolygonTessTri
 } PolygonTess;
-#define LAST_POLYGON_TESS 1
+#define LAST_POLYGON_TESS 2
 
 typedef enum
 {

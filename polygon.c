@@ -434,7 +434,6 @@ tessellateIntoTriangles(CompWindow *w,
     float cellH = (float)winLimitsH / gridSizeY;
     float halfW = cellW / 2;
     float halfH = cellH / 2;
-    float thirdH = cellH / 3;
 
     float halfThick = pset->thickness / 2;
     PolygonObject *p = pset->polygons;
