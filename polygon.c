@@ -493,21 +493,21 @@ tessellateIntoTriangles(CompWindow *w,
 		if ((x%2) == 1)
 		{
 	    // Determine 4 front vertices in ccw direction
-	    pv[0] = -halfW;
-	    pv[1] = -halfH;
+	    pv[0] = -2*halfW;
+	    pv[1] = -2*halfH;
 	    pv[2] = halfThick;
 
 	    pv[3] = 0;
 	    pv[4] = halfH;
 	    pv[5] = halfThick;
 
-	    pv[6] = halfW;
-	    pv[7] = -halfH;
+	    pv[6] = 2*halfW;
+	    pv[7] = -2*halfH;
 	    pv[8] = halfThick;
 	    
 	    // Determine 4 back vertices in cw direction
-	    pv[9] = halfW;
-	    pv[10] = -halfH;
+	    pv[9] = 2*halfW;
+	    pv[10] = -2*halfH;
 	    pv[11] = -halfThick;
 
 
@@ -515,28 +515,28 @@ tessellateIntoTriangles(CompWindow *w,
 	    pv[13] = halfH;
 	    pv[14] = -halfThick;
 
-	    pv[15] = -halfW;
-	    pv[16] = -halfH;
+	    pv[15] = -2*halfW;
+	    pv[16] = -2*halfH;
 	    pv[17] = -halfThick;
 
 		}
 		else
 		{
-		pv[0] = halfW;
-	    pv[1] = halfH;
+		pv[0] = 2*halfW;
+	    pv[1] = 2*halfH;
 	    pv[2] = halfThick;
 
 	    pv[3] = 0;
 	    pv[4] = -halfH;
 	    pv[5] = halfThick;
 
-	    pv[6] = -halfW;
-	    pv[7] = halfH;
+	    pv[6] = -2*halfW;
+	    pv[7] = 2*halfH;
 	    pv[8] = halfThick;
 	    
 	    // Determine 4 back vertices in cw direction
-	    pv[9] = -halfW;
-	    pv[10] = halfH;
+	    pv[9] = -2*halfW;
+	    pv[10] = 2*halfH;
 	    pv[11] = -halfThick;
 
 
@@ -544,8 +544,8 @@ tessellateIntoTriangles(CompWindow *w,
 	    pv[13] = -halfH;
 	    pv[14] = -halfThick;
 
-	    pv[15] = halfW;
-	    pv[16] = halfH;
+	    pv[15] = 2*halfW;
+	    pv[16] = 2*halfH;
 	    pv[17] = -halfThick;
 		}
 
