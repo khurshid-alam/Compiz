@@ -574,7 +574,7 @@
 	    <_long>The animation effect shown when minimizing a window.</_long>
 	    <type>int</type>
 	    <min>0</min>
-	    <max>19</max>
+	    <max>20</max>
 	    <default>
 	      <value>15</value>
 	    </default>
@@ -596,66 +596,70 @@
 	    </desc>
 	    <desc>
 	      <value>4</value>
-	      <_name>Burn</_name>
+	      <_name>Blinds</_name>
 	    </desc>
 	    <desc>
 	      <value>5</value>
-	      <_name>Curved Fold</_name>
+	      <_name>Burn</_name>
 	    </desc>
 	    <desc>
 	      <value>6</value>
-	      <_name>Domino</_name>
+	      <_name>Curved Fold</_name>
 	    </desc>
 	    <desc>
 	      <value>7</value>
-	      <_name>Dream</_name>
+	      <_name>Domino</_name>
 	    </desc>
 	    <desc>
 	      <value>8</value>
-	      <_name>Explode</_name>
+	      <_name>Dream</_name>
 	    </desc>
 	    <desc>
 	      <value>9</value>
-	      <_name>Fade</_name>
+	      <_name>Explode</_name>
 	    </desc>
 	    <desc>
 	      <value>10</value>
-	      <_name>Fold</_name>
+	      <_name>Fade</_name>
 	    </desc>
 	    <desc>
 	      <value>11</value>
-	      <_name>Glide 1</_name>
+	      <_name>Fold</_name>
 	    </desc>
 	    <desc>
 	      <value>12</value>
-	      <_name>Glide 2</_name>
+	      <_name>Glide 1</_name>
 	    </desc>
 	    <desc>
 	      <value>13</value>
-	      <_name>Horizontal Folds</_name>
+	      <_name>Glide 2</_name>
 	    </desc>
 	    <desc>
 	      <value>14</value>
-	      <_name>Leaf Spread</_name>
+	      <_name>Horizontal Folds</_name>
 	    </desc>
 	    <desc>
 	      <value>15</value>
-	      <_name>Magic Lamp</_name>
+	      <_name>Leaf Spread</_name>
 	    </desc>
 	    <desc>
 	      <value>16</value>
-	      <_name>Razr</_name>
+	      <_name>Magic Lamp</_name>
 	    </desc>
 	    <desc>
 	      <value>17</value>
-	      <_name>Sidekick</_name>
+	      <_name>Razr</_name>
 	    </desc>
 	    <desc>
 	      <value>18</value>
-	      <_name>Skewer</_name>
+	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
 	      <value>19</value>
+	      <_name>Skewer</_name>
+	    </desc>
+	    <desc>
+	      <value>20</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
