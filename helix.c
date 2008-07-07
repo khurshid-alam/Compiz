@@ -20,7 +20,7 @@
  * E-mail                       : mikeslegeir@mail.utexas.edu>
  *
  * Helix and Blinds Effects by : Kevin DuBois
- * Email           			   : kdub432@gmail.com
+ * Email                       : kdub432@gmail.com
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,47 +44,47 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     ANIM_WINDOW (w);
     ANIM_SCREEN (s);
 
-	int gridsizeY = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_GRIDSIZE_Y);
+    int gridsizeY = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_GRIDSIZE_Y);
 
-	tessellateIntoRectangles(w, 
-						     1,
-					    	 gridsizeY,
-						     animGetF(as, aw, ANIM_SCREEN_OPTION_HELIX_THICKNESS));
+    tessellateIntoRectangles(w, 
+                             1,
+                             gridsizeY,
+                             animGetF(as, aw, ANIM_SCREEN_OPTION_HELIX_THICKNESS));
 
     PolygonSet *pset = aw->polygonSet;
     PolygonObject *p = pset->polygons;
 
 
-	int i;
+    int i;
     for (i = 0; i < pset->nPolygons; i++, p++)
     {
-    	
+        
     //rotate around y axis normally, or the z axis if the effect is in vertical mode
-	p->rotAxis.x = 0;
-	
-	if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
-	{
-		p->rotAxis.y = 0;
-		p->rotAxis.z = 1;
-	} else {
-		p->rotAxis.y = 1;
-		p->rotAxis.z = 0;
-	}
-	
-	//only move the pieces in a 'vertical' rotation
-	p->finalRelPos.x = 0;	
-	
-	if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
-	{
-	p->finalRelPos.y = -1 * ((w->height)/ gridsizeY) * (i -  gridsizeY/2);
-	} else {
-	p->finalRelPos.y = 0;
-	}	
-		 
-	p->finalRelPos.z = 0;
-	
-	int numberOfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_NUM_TWISTS);
-	p->finalRotAng = 270 - ( 2 * numberOfTwists * i); 
+    p->rotAxis.x = 0;
+    
+    if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
+    {
+        p->rotAxis.y = 0;
+        p->rotAxis.z = 1;
+    } else {
+        p->rotAxis.y = 1;
+        p->rotAxis.z = 0;
+    }
+    
+    //only move the pieces in a 'vertical' rotation
+    p->finalRelPos.x = 0;   
+    
+    if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
+    {
+    p->finalRelPos.y = -1 * ((w->height)/ gridsizeY) * (i -  gridsizeY/2);
+    } else {
+    p->finalRelPos.y = 0;
+    }   
+         
+    p->finalRelPos.z = 0;
+    
+    int numberOfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_NUM_TWISTS);
+    p->finalRotAng = 270 - ( 2 * numberOfTwists * i); 
     }
     
     

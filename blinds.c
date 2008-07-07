@@ -20,7 +20,7 @@
  * E-mail                       : mikeslegeir@mail.utexas.edu>
  *
  * Helix and Blinds Effects by  : Kevin DuBois
- * Email           				: kdub432@gmail.com
+ * Email                        : kdub432@gmail.com
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,9 +45,9 @@ void fxBlindsInit(CompScreen * s, CompWindow * w)
     ANIM_SCREEN (s);
 
 tessellateIntoRectangles(w, 
-				      animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_GRIDX),
-				      1,
-				      animGetF(as, aw, ANIM_SCREEN_OPTION_BLINDS_THICKNESS));
+                      animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_GRIDX),
+                      1,
+                      animGetF(as, aw, ANIM_SCREEN_OPTION_BLINDS_THICKNESS));
 
     PolygonSet *pset = aw->polygonSet;
     PolygonObject *p = pset->polygons;
@@ -57,17 +57,17 @@ tessellateIntoRectangles(w,
     for (i = 0; i < pset->nPolygons; i++, p++)
     {
     //rotate around y axis
-	p->rotAxis.x = 0;
-	p->rotAxis.y = 1;
-	p->rotAxis.z = 0;
+    p->rotAxis.x = 0;
+    p->rotAxis.y = 1;
+    p->rotAxis.z = 0;
 
-	//dont translate the pieces
-	p->finalRelPos.x = 0;
-	p->finalRelPos.y = 0;
-	p->finalRelPos.z = 0;
-	
-	int numberOfHalfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_HALFTWISTS);
-	p->finalRotAng = 180 * numberOfHalfTwists ;
+    //dont translate the pieces
+    p->finalRelPos.x = 0;
+    p->finalRelPos.y = 0;
+    p->finalRelPos.z = 0;
+    
+    int numberOfHalfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_HALFTWISTS);
+    p->finalRotAng = 180 * numberOfHalfTwists ;
     }
     
     
