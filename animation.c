@@ -1109,6 +1109,7 @@ static const CompMetadataOptionInfo animScreenOptionInfo[] = {
     { "helix_gridy", "int", "<min>5</min>", 0, 0 },
     { "helix_thickness", "float", 0, 0, 0 },
     { "helix_direction", "bool", 0, 0, 0 },
+    { "helix_spin_direction", "int", "<min>0</min>", 0, 0 },
     { "horizontal_folds_amp", "float", "<min>-0.5</min><max>0.5</max>", 0, 0 },
     { "horizontal_folds_num_folds", "int", "<min>1</min>", 0, 0 },
     { "horizontal_folds_zoom_to_taskbar", "bool", 0, 0, 0 },

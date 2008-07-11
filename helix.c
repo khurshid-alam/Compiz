@@ -75,16 +75,23 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     p->finalRelPos.x = 0;   
     
     if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
-    {
-    p->finalRelPos.y = -1 * ((w->height)/ gridsizeY) * (i -  gridsizeY/2);
-    } else {
-    p->finalRelPos.y = 0;
-    }   
+        p->finalRelPos.y = -1 * ((w->height)/ gridsizeY) * (i -  gridsizeY/2);
+    else 
+        p->finalRelPos.y = 0;
+    
          
     p->finalRelPos.z = 0;
     
+    //determine how long, and what direction to spin
     int numberOfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_NUM_TWISTS);
-    p->finalRotAng = 270 - ( 2 * numberOfTwists * i); 
+    int spin_dir =animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_SPIN_DIRECTION);
+    
+    if (spin_dir)
+        p->finalRotAng = 270 - ( 2 * numberOfTwists * i); 
+    else
+        p->finalRotAng = ( 2 * numberOfTwists * i) - 270; 
+        
+       
     }
     
     

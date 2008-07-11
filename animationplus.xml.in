@@ -1154,6 +1154,21 @@
 	    <min>0</min>
 	    <max>50</max>
 	  </option>
+	  <option name="helix_spin_direction" type="int">
+	    <_short>Spin Direction</_short>
+	    <_long>Direction the strips spin.</_long>
+	    <default>1</default>
+	    <min>0</min>
+	    <max>1</max>
+	    <desc>
+	      <value>0</value>
+	      <_name>Counter-Clockwise</_name>
+	    </desc>
+	    <desc>
+	      <value>1</value>
+	      <_name>Clockwise</_name>
+	    </desc>
+	  </option>
 	  <option name="helix_direction" type="bool">
 	    <_short>Vertical Helix</_short>
 	    <_long>Whether Helix should rotate with its axis up/down or in/out of the screen</_long>
