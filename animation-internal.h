@@ -1162,6 +1162,12 @@ tessellateIntoTriangles (CompWindow * w,
             int gridSizeY,
             float thickness);
 
+Bool 
+tessellateIntoGlass (CompWindow * w,
+            int gridSizeX,
+            int gridSizeY,
+            float thickness);
+
 void
 polygonsStoreClips (CompScreen * s,
             CompWindow * w,

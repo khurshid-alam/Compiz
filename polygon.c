@@ -628,7 +628,35 @@ tessellateIntoTriangles(CompWindow *w,
     return TRUE;
 }
 
-
+Bool 
+tessellateIntoGlass(CompWindow * w, 
+                int gridSizeX, int gridSizeY, float thickness)
+{
+    ANIM_WINDOW(w);
+    
+    PolygonSet *pset = aw->polygonSet;
+    
+    int winLimitsX, winLimitsY, winLimitsW, winLimitsH;
+    int centerX, centerY;
+    
+    if (pset->includeShadows)
+    {
+    winLimitsX = WIN_X(w);
+    winLimitsY = WIN_Y(w);
+    winLimitsW = WIN_W(w) - 1; // avoid artifact on right edge
+    winLimitsH = WIN_H(w);
+    }
+    else
+    {
+    winLimitsX = BORDER_X(w);
+    winLimitsY = BORDER_Y(w);
+    winLimitsW = BORDER_W(w);
+    winLimitsH = BORDER_H(w);
+    }
+    
+    return TRUE;
+    
+}
 
 // Tessellates window into extruded hexagon objects
 Bool
