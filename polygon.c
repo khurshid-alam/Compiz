@@ -628,6 +628,16 @@ tessellateIntoTriangles(CompWindow *w,
     return TRUE;
 }
 
+
+#define SPOKE_NUM 8
+#define RANDOM 0
+
+typedef struct
+{
+    int direction;
+    int length;
+} spoke_t;
+
 Bool 
 tessellateIntoGlass(CompWindow * w, 
                 int gridSizeX, int gridSizeY, float thickness)
@@ -637,7 +647,9 @@ tessellateIntoGlass(CompWindow * w,
     PolygonSet *pset = aw->polygonSet;
     
     int winLimitsX, winLimitsY, winLimitsW, winLimitsH;
-    int centerX, centerY;
+    float centerX, centerY;
+    int spoke_num, spoke_range;
+    int i; 
     
     if (pset->includeShadows)
     {
@@ -654,6 +666,73 @@ tessellateIntoGlass(CompWindow * w,
     winLimitsH = BORDER_H(w);
     }
     
+#if RANDOM   //random numbers
+    centerX = (( rand()/(float)RAND_MAX ) * winLimitsW ) + winLimitsX;
+    centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
+    
+#else   //kevin generated numbers, for testing
+    centerX = ( 1.0/3.0 * winLimitsW ) + winLimitsX;
+    centerY = ( 2.0/3.0 * winLimitsH ) + winLimitsY;
+
+#endif
+
+    fprintf(stderr, "Center %f    %f\n", centerX, centerY);
+
+    //create radial spokes
+    //between 8 and 10
+    
+#if RANDOM
+    spoke_num = SPOKE_NUM + (((int)centerX) % 3); //essentially a random number (0, 1 or 2), avoids a call to rand()
+#else
+    spoke_num = 9;
+#endif
+
+
+
+    spoke_t spoke[spoke_num];
+    memset(spoke, 0, sizeof(spoke_t) * spoke_num);
+    
+    spoke_range = 360 / spoke_num;
+
+    for (i = 0; i < spoke_num ; i++)       //evenly distribute the spokes from the center
+    {
+#if RANDOM        
+        spoke[i].direction = (i * spoke_range) + (( rand()/(float)RAND_MAX ) * spoke_range);
+#else
+        spoke[i].direction = i * spoke_range;
+#endif
+
+        fprintf (stderr, "spoke direction is %i\n", spoke[i].direction);
+
+        //calculate the length of the spoke
+        //calculate top/bottom intercept
+        if ((spoke[i].direction < 90 ) || (spoke[i].direction > 270))
+        {
+            
+            
+        } else
+        {
+            
+            
+        }
+        
+        //calculate left right intercept
+        if (spoke[i].direction < 180 )
+        {
+            
+            
+        } else
+        {
+            
+            
+        }
+        
+        //calculate distance of each
+        //take the smaller of the two
+        
+        
+    } 
+
     
     return FALSE;
     
