@@ -64,6 +64,13 @@ void fxExplode3DInit(CompScreen * s, CompWindow * w)
 				    animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)))
 		return;
 	break;
+	case PolygonTessGlass:
+	if (!tessellateIntoGlass(w, 
+				    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_X),
+				    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
+				    animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)))
+        return;
+    break;
     default:
 	return;
     }

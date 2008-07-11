@@ -313,7 +313,8 @@ typedef enum
 {
     PolygonTessRect = 0,
     PolygonTessHex,
-    PolygonTessTri
+    PolygonTessTri,
+    PolygonTessGlass
 } PolygonTess;
 #define LAST_POLYGON_TESS 2
 
