@@ -1602,7 +1602,7 @@
 	    <_long>Tessellation type for exploding window pieces.</_long>
 	    <default>0</default>
 	    <min>0</min>
-	    <max>2</max>
+	    <max>3</max>
 	    <desc>
 	      <value>0</value>
 	      <_name>Rectangular</_name>
@@ -1613,8 +1613,12 @@
 	    </desc>
 	    <desc>
 	      <value>2</value>
-	      <_name>Triangular</_name>
+	      <_name>Trianjgular</_name>
 	    </desc>
+	    <desc>
+          <value>3</value>
+          <name>Glass</_name>
+        </desc>
 	  </option>
 	</subgroup>
 

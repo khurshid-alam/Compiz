@@ -654,7 +654,8 @@ tessellateIntoGlass(CompWindow * w,
     winLimitsH = BORDER_H(w);
     }
     
-    return TRUE;
+    
+    return FALSE;
     
 }
 

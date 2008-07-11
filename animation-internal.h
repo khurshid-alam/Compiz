@@ -316,7 +316,7 @@ typedef enum
     PolygonTessTri,
     PolygonTessGlass
 } PolygonTess;
-#define LAST_POLYGON_TESS 2
+#define LAST_POLYGON_TESS 3
 
 typedef enum
 {
