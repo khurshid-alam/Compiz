@@ -633,12 +633,23 @@ tessellateIntoTriangles(CompWindow *w,
 #define RANDOM 0
 #define PI 3.1415
 #define DEG_TO_RAD 2*PI/360
+#define TIERS 5
+typedef struct
+{
+    float dist;
+    Bool connected_to_next;
+    float x, y; //relative from center
+    
+} spoke_vertex_t;
 
 typedef struct
 {
     float direction;
     float length;
+    spoke_vertex_t spoke_vertex[TIERS];
+
 } spoke_t;
+
 
 /*        90
  *         |
@@ -658,7 +669,7 @@ tessellateIntoGlass(CompWindow * w,
     int winLimitsX, winLimitsY, winLimitsW, winLimitsH;
     float centerX, centerY;
     int spoke_num, spoke_range;
-    int i; 
+    int i,j; 
     float top_bottom_length, left_right_length;
     
     if (pset->includeShadows)
@@ -713,15 +724,19 @@ tessellateIntoGlass(CompWindow * w,
         spoke[i].direction = i * spoke_range;
 #endif
 
+        if ( (int)spoke[i].direction % 90 == 0) //deal with divide by zeros
+            spoke[i].direction++;
+
         //calculate the length of the spoke
         //calculate top/bottom lenght
         if ((spoke[i].direction < 180))
             top_bottom_length = (centerY-winLimitsY);
         else
             top_bottom_length = ((winLimitsY + winLimitsH)- centerY);
-        if ((spoke[i].direction == 0) || (spoke[i].direction == 180 ))
-            spoke[i].direction++;
+
         top_bottom_length /= sin( abs( spoke[i].direction) * DEG_TO_RAD);
+        if ((spoke[i].direction == 0) || (spoke[i].direction == 180 ))
+            spoke[i].direction--;
         top_bottom_length = abs(top_bottom_length);
         
         //calculate left right length
@@ -729,12 +744,12 @@ tessellateIntoGlass(CompWindow * w,
             left_right_length = (winLimitsX + winLimitsW) - centerX;
         else
             left_right_length = centerX - winLimitsX;
-                if ((spoke[i].direction == 270) || (spoke[i].direction == 90 ))
-            spoke[i].direction++;
+
         left_right_length /= cos (spoke[i].direction * DEG_TO_RAD); 
+        if ((spoke[i].direction == 270) || (spoke[i].direction == 90 ))
+            spoke[i].direction--;
         left_right_length = abs( left_right_length);
         
-
         
         //take the smaller of the two
         if (left_right_length < top_bottom_length) 
@@ -742,12 +757,33 @@ tessellateIntoGlass(CompWindow * w,
         else 
             spoke[i].length = top_bottom_length;
         
-        fprintf (stderr, "spoke %i direction is %f, length is %f\n",i, spoke[i].direction, spoke[i].length);
+        //fprintf (stderr, "spoke %i direction is %f, length is %f\n",i, spoke[i].direction, spoke[i].length);
 
 
+        //calculate spoke vertexes
+        for ( j = 0 ; j < TIERS ; j++)
+        {
+            spoke[i].spoke_vertex[j].dist = 0.2 * j * spoke[i].length;
+            
+            spoke[i].spoke_vertex[j].x = 
+                centerX + (spoke[i].spoke_vertex[j].dist * cos(spoke[i].direction * DEG_TO_RAD) );
+            spoke[i].spoke_vertex[j].y = 
+                centerY + (spoke[i].spoke_vertex[j].dist * sin(spoke[i].direction * DEG_TO_RAD) );
 
+            spoke[i].spoke_vertex[j].connected_to_next = TRUE; 
+            //fprintf(stderr, "Spoke %i is %f from center\n", j, spoke[i].spoke_vertex[j].dist );
+            fprintf(stderr, "(%f ,%f)\n", spoke[i].spoke_vertex[j].x ,spoke[i].spoke_vertex[j].y);
+        }
+
+    
+    //fprintf(stderr, "\n");
 
     } 
+    
+    
+    //the first tier is composed of triangular polygons
+    
+    //all tiers after the first are composed of 4 sided polygons
 
     fprintf(stderr, "\n\n\n");
     return FALSE;
