@@ -631,12 +631,21 @@ tessellateIntoTriangles(CompWindow *w,
 
 #define SPOKE_NUM 8
 #define RANDOM 0
+#define PI 3.1415
+#define DEG_TO_RAD 2*PI/360
 
 typedef struct
 {
-    int direction;
-    int length;
+    float direction;
+    float length;
 } spoke_t;
+
+/*        90
+ *         |
+ *    180--+--0
+ *         |
+ *        270
+ */
 
 Bool 
 tessellateIntoGlass(CompWindow * w, 
@@ -650,6 +659,7 @@ tessellateIntoGlass(CompWindow * w,
     float centerX, centerY;
     int spoke_num, spoke_range;
     int i; 
+    float top_bottom_length, left_right_length;
     
     if (pset->includeShadows)
     {
@@ -671,11 +681,12 @@ tessellateIntoGlass(CompWindow * w,
     centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
     
 #else   //kevin generated numbers, for testing
-    centerX = ( 1.0/3.0 * winLimitsW ) + winLimitsX;
-    centerY = ( 2.0/3.0 * winLimitsH ) + winLimitsY;
+    centerX = ( 1.0/2.0 * winLimitsW ) + winLimitsX;
+    centerY = ( 2.0/4.0 * winLimitsH ) + winLimitsY;
 
 #endif
-
+    
+    fprintf(stderr, "WindowXY is %i:%i width/height %i:%i ", winLimitsX, winLimitsY, winLimitsW, winLimitsH);
     fprintf(stderr, "Center %f    %f\n", centerX, centerY);
 
     //create radial spokes
@@ -684,7 +695,7 @@ tessellateIntoGlass(CompWindow * w,
 #if RANDOM
     spoke_num = SPOKE_NUM + (((int)centerX) % 3); //essentially a random number (0, 1 or 2), avoids a call to rand()
 #else
-    spoke_num = 9;
+    spoke_num = 8;
 #endif
 
 
@@ -702,38 +713,43 @@ tessellateIntoGlass(CompWindow * w,
         spoke[i].direction = i * spoke_range;
 #endif
 
-        fprintf (stderr, "spoke direction is %i\n", spoke[i].direction);
-
         //calculate the length of the spoke
-        //calculate top/bottom intercept
-        if ((spoke[i].direction < 90 ) || (spoke[i].direction > 270))
-        {
-            
-            
-        } else
-        {
-            
-            
-        }
+        //calculate top/bottom lenght
+        if ((spoke[i].direction < 180))
+            top_bottom_length = (centerY-winLimitsY);
+        else
+            top_bottom_length = ((winLimitsY + winLimitsH)- centerY);
+        if ((spoke[i].direction == 0) || (spoke[i].direction == 180 ))
+            spoke[i].direction++;
+        top_bottom_length /= sin( abs( spoke[i].direction) * DEG_TO_RAD);
+        top_bottom_length = abs(top_bottom_length);
         
-        //calculate left right intercept
-        if (spoke[i].direction < 180 )
-        {
-            
-            
-        } else
-        {
-            
-            
-        }
+        //calculate left right length
+        if ((spoke[i].direction < 90 ) || (spoke[i].direction >270))
+            left_right_length = (winLimitsX + winLimitsW) - centerX;
+        else
+            left_right_length = centerX - winLimitsX;
+                if ((spoke[i].direction == 270) || (spoke[i].direction == 90 ))
+            spoke[i].direction++;
+        left_right_length /= cos (spoke[i].direction * DEG_TO_RAD); 
+        left_right_length = abs( left_right_length);
         
-        //calculate distance of each
+
+        
         //take the smaller of the two
+        if (left_right_length < top_bottom_length) 
+            spoke[i].length = left_right_length;
+        else 
+            spoke[i].length = top_bottom_length;
         
-        
+        fprintf (stderr, "spoke %i direction is %f, length is %f\n",i, spoke[i].direction, spoke[i].length);
+
+
+
+
     } 
 
-    
+    fprintf(stderr, "\n\n\n");
     return FALSE;
     
 }
