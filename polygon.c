@@ -650,6 +650,17 @@ typedef struct
 
 } spoke_t;
 
+typedef struct
+{
+    Bool is_triangle;       //false if 4 sided, true if 3 sided
+    float centerX, centerY;
+    float   pt0X, pt0Y, 
+            pt1X, pt1Y,
+            pt2X, pt2Y,
+            pt3X, pt3Y;     //if is_triangle is true, these are unused
+    
+    
+} shard_t;
 
 /*        90
  *         |
@@ -671,6 +682,8 @@ tessellateIntoGlass(CompWindow * w,
     int spoke_num, spoke_range;
     int i,j; 
     float top_bottom_length, left_right_length;
+    float half_direction;
+    
     
     if (pset->includeShadows)
     {
@@ -716,7 +729,10 @@ tessellateIntoGlass(CompWindow * w,
     
     spoke_range = 360 / spoke_num;
 
-    for (i = 0; i < spoke_num ; i++)       //evenly distribute the spokes from the center
+
+
+//calculate the vertex positions
+    for (i = 0; i < spoke_num ; i++) 
     {
 #if RANDOM        
         spoke[i].direction = (i * spoke_range) + (( rand()/(float)RAND_MAX ) * spoke_range);
@@ -775,14 +791,257 @@ tessellateIntoGlass(CompWindow * w,
             fprintf(stderr, "(%f ,%f)\n", spoke[i].spoke_vertex[j].x ,spoke[i].spoke_vertex[j].y);
         }
 
+    }
     
-    //fprintf(stderr, "\n");
+    
+    shard_t shards[spoke_num][TIERS];
+    float x,y,z,gamma, beta, theta, midlength, halftheta;
+    
+    //calculate the center and bounds of each polygon
+    for ( i = 0; i < spoke_num ; i++ )
+    {
+        for ( j = 0; j < TIERS ; j++)
+        {
+            switch (j)
+            {
+            case 0:
+            //the first tier is triangles
+            shards[i][j].is_triangle = TRUE;
+            shards[i][j].pt0X = centerX;
+            shards[i][j].pt0Y = centerY;
+            
+            shards[i][j].pt1X = spoke[i].spoke_vertex[j].x;
+            shards[i][j].pt1Y = spoke[i].spoke_vertex[j].y;
+            
+            shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j].x;
+            shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j].y;
+            
+            shards[i][j].pt3X = -1;          //fourth point is not used
+            shards[i][j].pt3Y = -1;
+            
+            
+            //find lengths
+            y = pow((spoke[i].spoke_vertex[j].x - spoke[i+1].spoke_vertex[j].x),2) +
+                pow((spoke[i].spoke_vertex[j].y - spoke[i+1].spoke_vertex[j].y),2);
+            y = pow(y, 0.5);
+            x = spoke[i + 1].spoke_vertex[j].dist;
+            z = spoke[i].spoke_vertex[j].dist;
+            
+            //find degrees
+            theta = spoke[i + 1].direction - spoke[i].direction;
+            halftheta = theta/2;
+            gamma = asin( x / y * sin( theta ) );
+            beta = 180 - halftheta - gamma;
+            
+            midlength = sin( gamma ) / sin (beta) * z;
+            midlength *= 2/3;
+            
+            shards[i][j].centerX =
+                centerX + (cos(spoke[i].direction + halftheta) * midlength);
+            shards[i][j].centerY =
+                centerY + (sin(spoke[i].direction + halftheta) * midlength);
 
-    } 
+            break;
+            
+            default:        //the other tiers are 4 sided polygons
+
+            
+            
+            break;
+            }
+        }
+    }
     
+    
+    //Set up the polygons here
+/*    int nPolygons = SPOKE_NUM * TIERS;
+
+    if (pset->nPolygons != nPolygons)
+    {
+    if (pset->nPolygons > 0)
+        freePolygonObjects(pset);
+
+    pset->nPolygons = nPolygons;
+
+    pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
+    if (!pset->polygons)
+    {
+        compLogMessage (w->screen->display, "animation", CompLogLevelError,
+                "Not enough memory");
+        pset->nPolygons = 0;
+        return FALSE;
+    }
+    }
+
+    thickness /= w->screen->width;
+    pset->thickness = thickness;
+    pset->nTotalFrontVertices = 0;
+
+    float halfThick = pset->thickness / 2;
+    PolygonObject *p = pset->polygons;
     
     //the first tier is composed of triangular polygons
-    
+    for (i = 0; i < SPOKE_NUM ; i++ )
+    {
+        p->centerPos.x = p->centerPosStart.x =
+        winLimits
+        p->centerPos.z = p->centerPosStart.z = -halfThick;
+        p->rotAngle = p->rotAngleStart = 0;
+
+        p->nSides = 3;
+        p->nVertices = 2 * 3;
+        */
+    /*  p->centerPos.x = p->centerPosStart.x =
+        winLimitsX + cellW * (x + 0.5);
+        p->centerPos.y = p->centerPosStart.y = posY;
+        p->centerPos.z = p->centerPosStart.z = -halfThick;
+        p->rotAngle = p->rotAngleStart = 0;
+
+        p->centerRelPos.x = (x + 0.5) / gridSizeX;
+        p->centerRelPos.y = (y + 0.5) / gridSizeY;
+
+        p->nSides = 4;
+        p->nVertices = 2 * 4;
+        pset->nTotalFrontVertices += 4;
+
+        // 4 front, 4 back vertices
+        if (!p->vertices)
+        {
+        p->vertices = calloc(8 * 3, sizeof(GLfloat));
+        }
+
+        if (!p->vertices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        // Vertex normals
+        if (!p->normals)
+        {
+        p->normals = calloc(8 * 3, sizeof(GLfloat));
+        }
+        if (!p->normals)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError,
+                "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLfloat *pv = p->vertices;
+
+        // Determine 4 front vertices in ccw direction
+        pv[0] = -halfW;
+        pv[1] = -halfH;
+        pv[2] = halfThick;
+
+        pv[3] = -halfW;
+        pv[4] = halfH;
+        pv[5] = halfThick;
+
+        pv[6] = halfW;
+        pv[7] = halfH;
+        pv[8] = halfThick;
+
+        pv[9] = halfW;
+        pv[10] = -halfH;
+        pv[11] = halfThick;
+
+        // Determine 4 back vertices in cw direction
+        pv[12] = halfW;
+        pv[13] = -halfH;
+        pv[14] = -halfThick;
+
+        pv[15] = halfW;
+        pv[16] = halfH;
+        pv[17] = -halfThick;
+
+        pv[18] = -halfW;
+        pv[19] = halfH;
+        pv[20] = -halfThick;
+
+        pv[21] = -halfW;
+        pv[22] = -halfH;
+        pv[23] = -halfThick;
+
+        // 16 indices for 4 sides (for quads)
+        if (!p->sideIndices)
+        {
+        p->sideIndices = calloc(4 * 4, sizeof(GLushort));
+        }
+        if (!p->sideIndices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLushort *ind = p->sideIndices;
+        GLfloat *nor = p->normals;
+
+        int id = 0;
+        
+        // Left face
+        ind[id++] = 6; // First vertex
+        ind[id++] = 1;
+        ind[id++] = 0;
+        ind[id++] = 7;
+        nor[6 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
+        nor[6 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
+        nor[6 * 3 + 2] = 0;
+
+        // Bottom face
+        ind[id++] = 1;
+        ind[id++] = 6;
+        ind[id++] = 5;
+        ind[id++] = 2;
+        nor[1 * 3 + 0] = 0;
+        nor[1 * 3 + 1] = 1;
+        nor[1 * 3 + 2] = 0;
+
+        // Right face
+        ind[id++] = 2;
+        ind[id++] = 5;
+        ind[id++] = 4;
+        ind[id++] = 3;
+        nor[2 * 3 + 0] = 1;
+        nor[2 * 3 + 1] = 0;
+        nor[2 * 3 + 2] = 0;
+
+        // Top face
+        ind[id++] = 7;
+        ind[id++] = 0;
+        ind[id++] = 3;
+        ind[id++] = 4;
+        nor[7 * 3 + 0] = 0;
+        nor[7 * 3 + 1] = -1;
+        nor[7 * 3 + 2] = 0;
+
+        // Front face normal
+        nor[0] = 0;
+        nor[1] = 0;
+        nor[2] = 1;
+
+        // Back face normal
+        nor[4 * 3 + 0] = 0;
+        nor[4 * 3 + 1] = 0;
+        nor[4 * 3 + 2] = -1;
+
+        // Determine bounding box (to test intersection with clips)
+        p->boundingBox.x1 = -halfW + p->centerPos.x;
+        p->boundingBox.y1 = -halfH + p->centerPos.y;
+        p->boundingBox.x2 = ceil(halfW + p->centerPos.x);
+        p->boundingBox.y2 = ceil(halfH + p->centerPos.y);
+
+        p->boundSphereRadius =
+        sqrt (halfW * halfW + halfH * halfH + halfThick * halfThick);*/
+        
+//    }
     //all tiers after the first are composed of 4 sided polygons
 
     fprintf(stderr, "\n\n\n");
