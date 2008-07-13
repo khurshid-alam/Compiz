@@ -844,8 +844,21 @@ tessellateIntoGlass(CompWindow * w,
             break;
             
             default:        //the other tiers are 4 sided polygons
-
+            shards[i][j].is_triangle = FALSE;
+            shards[i][j].pt0X = spoke[i].spoke_vertex[j].x;
+            shards[i][j].pt0Y = spoke[i].spoke_vertex[j].y;
             
+            shards[i][j].pt1X = spoke[i].spoke_vertex[j + 1].x;
+            shards[i][j].pt1Y = spoke[i].spoke_vertex[j + 1].y;
+            
+            shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j + 1].x;
+            shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j + 1].y;
+            
+            shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j].x;
+            shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j].y;
+            
+            
+            //calculate the center of the polygon
             
             break;
             }
