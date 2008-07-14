@@ -953,7 +953,7 @@ tessellateIntoGlass(CompWindow * w,
         return FALSE;
     }
     }
-/*
+
     thickness /= w->screen->width;
     pset->thickness = thickness;
     pset->nTotalFrontVertices = 0;
@@ -965,16 +965,16 @@ tessellateIntoGlass(CompWindow * w,
     for (i = 0; i < SPOKE_NUM ; i++ )
     {
         p->centerPos.x = p->centerPosStart.x =
-        winLimits
+        winLimitsX;
         p->centerPos.z = p->centerPosStart.z = -halfThick;
         p->rotAngle = p->rotAngleStart = 0;
 
         p->nSides = 3;
         p->nVertices = 2 * 3;
-        */
-    /*  p->centerPos.x = p->centerPosStart.x =
-        winLimitsX + cellW * (x + 0.5);
-        p->centerPos.y = p->centerPosStart.y = posY;
+        
+        p->centerPos.x = p->centerPosStart.x =
+        shards[i][0].centerX;
+        p->centerPos.y = p->centerPosStart.y = shards[i][0].centerX;
         p->centerPos.z = p->centerPosStart.z = -halfThick;
         p->rotAngle = p->rotAngleStart = 0;
 
@@ -1016,38 +1016,38 @@ tessellateIntoGlass(CompWindow * w,
         GLfloat *pv = p->vertices;
 
         // Determine 4 front vertices in ccw direction
-        pv[0] = -halfW;
-        pv[1] = -halfH;
+        pv[0] = shards[i][0].pt0X -centerX;
+        pv[1] = shards[i][0].pt0Y -centerY;
         pv[2] = halfThick;
 
-        pv[3] = -halfW;
-        pv[4] = halfH;
+        pv[3] = shards[i][0].pt1X -centerX;
+        pv[4] = shards[i][0].pt1Y -centerY;
         pv[5] = halfThick;
 
-        pv[6] = halfW;
-        pv[7] = halfH;
+        pv[6] = shards[i][0].pt2X -centerX;
+        pv[7] = shards[i][0].pt2Y -centerY;
         pv[8] = halfThick;
 
-        pv[9] = halfW;
-        pv[10] = -halfH;
+        pv[9] = shards[i][0].pt0X -centerX;
+        pv[10] = shards[i][0].pt0Y -centerY;
         pv[11] = halfThick;
 
-        // Determine 4 back vertices in cw direction
-        pv[12] = halfW;
-        pv[13] = -halfH;
-        pv[14] = -halfThick;
+        pv[0] = shards[i][0].pt0X -centerX;
+        pv[1] = shards[i][0].pt0Y -centerY;
+        pv[2] = halfThick;
 
-        pv[15] = halfW;
-        pv[16] = halfH;
-        pv[17] = -halfThick;
+        pv[3] = shards[i][0].pt2X -centerX;
+        pv[4] = shards[i][0].pt2Y -centerY;
+        pv[5] = halfThick;
 
-        pv[18] = -halfW;
-        pv[19] = halfH;
-        pv[20] = -halfThick;
+        pv[6] = shards[i][0].pt1X -centerX;
+        pv[7] = shards[i][0].pt1Y -centerY;
+        pv[8] = halfThick;
 
-        pv[21] = -halfW;
-        pv[22] = -halfH;
-        pv[23] = -halfThick;
+        pv[9] = shards[i][0].pt0X -centerX;
+        pv[10] = shards[i][0].pt0Y -centerY;
+        pv[11] = halfThick;
+
 
         // 16 indices for 4 sides (for quads)
         if (!p->sideIndices)
@@ -1114,20 +1114,21 @@ tessellateIntoGlass(CompWindow * w,
         nor[4 * 3 + 2] = -1;
 
         // Determine bounding box (to test intersection with clips)
-        p->boundingBox.x1 = -halfW + p->centerPos.x;
-        p->boundingBox.y1 = -halfH + p->centerPos.y;
-        p->boundingBox.x2 = ceil(halfW + p->centerPos.x);
-        p->boundingBox.y2 = ceil(halfH + p->centerPos.y);
+        p->boundingBox.x1 =  p->centerPos.x;
+        p->boundingBox.y1 =  p->centerPos.y;
+        p->boundingBox.x2 = ceil(p->centerPos.x);
+        p->boundingBox.y2 = ceil(p->centerPos.y);
 
         p->boundSphereRadius =
-        sqrt (halfW * halfW + halfH * halfH + halfThick * halfThick);*/
-        
-//    }
+        sqrt ( halfThick * halfThick);
+  
+
     //all tiers after the first are composed of 4 sided polygons
 
     fprintf(stderr, "\n\n\n");
     return FALSE;
     
+}
 }
 
 // Tessellates window into extruded hexagon objects
