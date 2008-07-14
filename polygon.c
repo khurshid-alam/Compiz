@@ -801,7 +801,7 @@ tessellateIntoGlass(CompWindow * w,
     //calculate the center and bounds of each polygon
     for ( i = 0; i < spoke_num ; i++ )
     {
-        for ( j = 0; j < TIERS  ; j++)
+        for ( j = 0; j < TIERS -1  ; j++)
         {
             switch (j)
             {
@@ -845,7 +845,7 @@ tessellateIntoGlass(CompWindow * w,
             
             y = pow(y, 0.5);
             z = spoke[i].spoke_vertex[j].dist;
-            fprintf(stderr, "pgon %i:: z is %f\n",i, z);
+            //fprintf(stderr, "pgon %i:: z is %f\n",i, z);
             
             //find degrees
             if (i != spoke_num -1)
@@ -853,34 +853,36 @@ tessellateIntoGlass(CompWindow * w,
             else
                 theta = 360 - spoke[i].direction;
 
-            fprintf(stderr, "theta is %f\n", theta);
+            //fprintf(stderr, "theta is %f\n", theta);
 
             
             halftheta = theta/2;
             gamma = RAD_TO_DEG * asin( x / y * sin( theta * DEG_TO_RAD ) );
-            fprintf(stderr, "gamma is %f\n", gamma);
+            //fprintf(stderr, "gamma is %f\n", gamma);
 
             
             beta = 180 - halftheta - gamma;
-            fprintf(stderr, "beta is %f\n", beta);
+            //fprintf(stderr, "beta is %f\n", beta);
 
             
             midlength =  sin( DEG_TO_RAD * gamma ) / sin (DEG_TO_RAD * beta) * z;
             midlength *= 0.66;
-            fprintf(stderr, "midlength is %f\n", midlength);
+            //fprintf(stderr, "midlength is %f\n", midlength);
             shards[i][j].centerX =
                 centerX + (cos( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
             shards[i][j].centerY =
                 centerY + (sin( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
 
             //fprintf(stderr, "Shard is %i:%i\n", i , j);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt0X, shards[i][j].pt0Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt1X, shards[i][j].pt1Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt2X, shards[i][j].pt2Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
-            fprintf(stderr, "\n");
+            //fprintf(stderr, "%f %f\n", shards[i][j].pt0X, shards[i][j].pt0Y);
+            //fprintf(stderr, "%f %f\n", shards[i][j].pt1X, shards[i][j].pt1Y);
+            //fprintf(stderr, "%f %f\n", shards[i][j].pt2X, shards[i][j].pt2Y);
+            //fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
+            //fprintf(stderr, "\n");
 
             break;
+            
+            
             
             default:        //the other tiers are 4 sided polygons
             shards[i][j].is_triangle = FALSE;
@@ -890,15 +892,41 @@ tessellateIntoGlass(CompWindow * w,
             shards[i][j].pt1X = spoke[i].spoke_vertex[j + 1].x;
             shards[i][j].pt1Y = spoke[i].spoke_vertex[j + 1].y;
             
-            shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j + 1].x;
-            shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j + 1].y;
             
-            shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j].x;
-            shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j].y;
+            if (i != spoke_num -1 )
+            {
+                shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j + 1].x;
+                shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j + 1].y;
+            
+                shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j].x;
+                shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j].y;
+            }
+            else
+            {
+                shards[i][j].pt2X = spoke[0].spoke_vertex[j + 1].x;
+                shards[i][j].pt2Y = spoke[0].spoke_vertex[j + 1].y;
+            
+                shards[i][j].pt3X = spoke[0].spoke_vertex[j].x;
+                shards[i][j].pt3Y = spoke[0].spoke_vertex[j].y;
+            }
+            
+            //print out points 
+            fprintf(stderr, "%f %f\n", shards[i][j].pt0X, shards[i][j].pt0Y);
+            fprintf(stderr, "%f %f\n", shards[i][j].pt1X, shards[i][j].pt1Y);
+            fprintf(stderr, "%f %f\n", shards[i][j].pt2X, shards[i][j].pt2Y);
+            fprintf(stderr, "%f %f\n", shards[i][j].pt3X, shards[i][j].pt3Y);
+            //fprintf(stderr, "\n");
+
             
             
             //calculate the center of the polygon
-            
+            shards[i][j].centerX = 
+                (shards[i][j].pt0X + shards[i][j].pt1X + shards[i][j].pt2X + shards[i][j].pt3X)/4;
+            shards[i][j].centerY = 
+                (shards[i][j].pt0Y + shards[i][j].pt1Y + shards[i][j].pt2Y + shards[i][j].pt3Y)/4;
+                 
+            fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
+    
             
             break;
             }
@@ -907,7 +935,7 @@ tessellateIntoGlass(CompWindow * w,
     
     
     //Set up the polygons here
-/*    int nPolygons = SPOKE_NUM * TIERS;
+    int nPolygons = SPOKE_NUM * TIERS;
 
     if (pset->nPolygons != nPolygons)
     {
@@ -925,7 +953,7 @@ tessellateIntoGlass(CompWindow * w,
         return FALSE;
     }
     }
-
+/*
     thickness /= w->screen->width;
     pset->thickness = thickness;
     pset->nTotalFrontVertices = 0;
