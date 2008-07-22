@@ -831,8 +831,8 @@ tessellateIntoGlass(CompWindow * w,
                 shards[i][j].pt2Y = spoke[0].spoke_vertex[j].y;
             }
             
-            shards[i][j].pt3X = centerX;          //fourth point is not used
-            shards[i][j].pt3Y = centerY;
+            shards[i][j].pt3X = shards[i][j].pt0X;          //fourth point is not used
+            shards[i][j].pt3Y = shards[i][j].pt0Y;
             
             
             //find lengths
@@ -968,7 +968,7 @@ tessellateIntoGlass(CompWindow * w,
        
 
 
-    for (xc = 1; xc < TIERS; xc++, p++) //tiers
+    for (xc = 0; xc <4 ; xc++, p++) //tiers
     {
 
 
