@@ -223,6 +223,8 @@ tessellateIntoRectangles(CompWindow * w,
 
         p->centerRelPos.x = (x + 0.5) / gridSizeX;
         p->centerRelPos.y = (y + 0.5) / gridSizeY;
+        fprintf(stderr, "%f %f\n", p->centerRelPos.x, p->centerRelPos.y);
+
 
         p->nSides = 4;
         p->nVertices = 2 * 4;
@@ -275,6 +277,13 @@ tessellateIntoRectangles(CompWindow * w,
         pv[10] = -halfH;
         pv[11] = halfThick;
 
+#if 0 
+        fprintf(stderr, "%f %f %f\n", pv[0], pv[1], pv[2]);
+        fprintf(stderr, "%f %f %f\n", pv[3], pv[4], pv[5]);
+        fprintf(stderr, "%f %f %f\n", pv[6], pv[7], pv[8]);
+        fprintf(stderr, "%f %f %f\n", pv[9], pv[10], pv[11]);
+        fprintf(stderr, "\n");
+#endif
         // Determine 4 back vertices in cw direction
         pv[12] = halfW;
         pv[13] = -halfH;
@@ -670,6 +679,9 @@ typedef struct
  *        270
  */
 
+    //shard_t shards[spoke_num][TIERS];
+
+
 Bool 
 tessellateIntoGlass(CompWindow * w, 
                 int gridSizeX, int gridSizeY, float thickness)
@@ -700,7 +712,6 @@ tessellateIntoGlass(CompWindow * w,
     winLimitsW = BORDER_W(w);
     winLimitsH = BORDER_H(w);
     }
-    
 #if RANDOM   //random numbers
     centerX = (( rand()/(float)RAND_MAX ) * winLimitsW ) + winLimitsX;
     centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
@@ -773,9 +784,6 @@ tessellateIntoGlass(CompWindow * w,
             spoke[i].length = left_right_length;
         else 
             spoke[i].length = top_bottom_length;
-        
-        //fprintf (stderr, "spoke %i direction is %f, length is %f\n",i, spoke[i].direction, spoke[i].length);
-
 
         //calculate spoke vertexes
         for ( j = 0 ; j < TIERS ; j++)
@@ -788,9 +796,7 @@ tessellateIntoGlass(CompWindow * w,
                 centerY + (spoke[i].spoke_vertex[j].dist * sin(spoke[i].direction * DEG_TO_RAD) );
 
             spoke[i].spoke_vertex[j].connected_to_next = TRUE; 
-            //fprintf(stderr, "Spoke %i is %f from center\n", j, spoke[i].spoke_vertex[j].dist );
-            //fprintf(stderr, "%i, %i (%f ,%f)\n",i,j, spoke[i].spoke_vertex[j].x ,spoke[i].spoke_vertex[j].y);
-        }
+       }
 
     }
     
@@ -825,8 +831,8 @@ tessellateIntoGlass(CompWindow * w,
                 shards[i][j].pt2Y = spoke[0].spoke_vertex[j].y;
             }
             
-            shards[i][j].pt3X = -1;          //fourth point is not used
-            shards[i][j].pt3Y = -1;
+            shards[i][j].pt3X = centerX;          //fourth point is not used
+            shards[i][j].pt3Y = centerY;
             
             
             //find lengths
@@ -845,41 +851,24 @@ tessellateIntoGlass(CompWindow * w,
             
             y = pow(y, 0.5);
             z = spoke[i].spoke_vertex[j].dist;
-            //fprintf(stderr, "pgon %i:: z is %f\n",i, z);
             
             //find degrees
             if (i != spoke_num -1)
                 theta = spoke[i + 1].direction - spoke[i].direction;
             else
                 theta = 360 - spoke[i].direction;
-
-            //fprintf(stderr, "theta is %f\n", theta);
-
             
             halftheta = theta/2;
             gamma = RAD_TO_DEG * asin( x / y * sin( theta * DEG_TO_RAD ) );
-            //fprintf(stderr, "gamma is %f\n", gamma);
-
             
             beta = 180 - halftheta - gamma;
-            //fprintf(stderr, "beta is %f\n", beta);
-
             
             midlength =  sin( DEG_TO_RAD * gamma ) / sin (DEG_TO_RAD * beta) * z;
             midlength *= 0.66;
-            //fprintf(stderr, "midlength is %f\n", midlength);
             shards[i][j].centerX =
                 centerX + (cos( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
             shards[i][j].centerY =
                 centerY + (sin( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
-
-            //fprintf(stderr, "Shard is %i:%i\n", i , j);
-            //fprintf(stderr, "%f %f\n", shards[i][j].pt0X, shards[i][j].pt0Y);
-            //fprintf(stderr, "%f %f\n", shards[i][j].pt1X, shards[i][j].pt1Y);
-            //fprintf(stderr, "%f %f\n", shards[i][j].pt2X, shards[i][j].pt2Y);
-            //fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
-            //fprintf(stderr, "\n");
-
             break;
             
             
@@ -910,14 +899,6 @@ tessellateIntoGlass(CompWindow * w,
                 shards[i][j].pt3Y = spoke[0].spoke_vertex[j].y;
             }
             
-            //print out points 
-            fprintf(stderr, "%f %f\n", shards[i][j].pt0X, shards[i][j].pt0Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt1X, shards[i][j].pt1Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt2X, shards[i][j].pt2Y);
-            fprintf(stderr, "%f %f\n", shards[i][j].pt3X, shards[i][j].pt3Y);
-            //fprintf(stderr, "\n");
-
-            
             
             //calculate the center of the polygon
             shards[i][j].centerX = 
@@ -925,30 +906,40 @@ tessellateIntoGlass(CompWindow * w,
             shards[i][j].centerY = 
                 (shards[i][j].pt0Y + shards[i][j].pt1Y + shards[i][j].pt2Y + shards[i][j].pt3Y)/4;
                  
-            fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
+            //fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
     
             
             break;
             }
+            
         }
+        
     }
-    
-    
-    //Set up the polygons here
-    int nPolygons = SPOKE_NUM * TIERS;
 
-    if (pset->nPolygons != nPolygons)
+    
+    //set up polygons
+    
+    float minRectSize = MIN_WINDOW_GRID_SIZE;
+    float rectW = winLimitsW / (float)gridSizeX;
+    float rectH = winLimitsH / (float)gridSizeY;
+
+    if (rectW < minRectSize)
+    gridSizeX = winLimitsW / minRectSize;   // int div.
+    if (rectH < minRectSize)
+    gridSizeY = winLimitsH / minRectSize;   // int div.
+
+    if (pset->nPolygons != gridSizeX * gridSizeY)
     {
     if (pset->nPolygons > 0)
         freePolygonObjects(pset);
 
-    pset->nPolygons = nPolygons;
+    pset->nPolygons = gridSizeX * gridSizeY;
 
     pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
     if (!pset->polygons)
     {
-        compLogMessage (w->screen->display, "animation", CompLogLevelError,
-                "Not enough memory");
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
         pset->nPolygons = 0;
         return FALSE;
     }
@@ -958,28 +949,43 @@ tessellateIntoGlass(CompWindow * w,
     pset->thickness = thickness;
     pset->nTotalFrontVertices = 0;
 
+    float cellW = (float)winLimitsW / gridSizeX;
+    float cellH = (float)winLimitsH / gridSizeY;
+    float halfW = cellW / 2;
+    float halfH = cellH / 2;
+
     float halfThick = pset->thickness / 2;
     PolygonObject *p = pset->polygons;
+    int xc, yc;
+
+    fprintf(stderr, "Window Bounds are X:%i--%i , Y:%i--%i\n",
+                winLimitsX, winLimitsX+winLimitsW, winLimitsY,
+                winLimitsY + winLimitsH);
     
-    //the first tier is composed of triangular polygons
-    for (i = 0; i < SPOKE_NUM ; i++ )
+    xc =1; 
+    for (yc = 0; yc <  SPOKE_NUM; yc++, p++) //spokes
     {
-        p->centerPos.x = p->centerPosStart.x =
-        winLimitsX;
+       
+
+
+    for (xc = 1; xc < TIERS; xc++, p++) //tiers
+    {
+
+
+        p->centerPos.y = p->centerPosStart.y =
+            shards[yc][xc].centerY; 
+
+         p->centerPos.x = p->centerPosStart.x = 
+            shards[yc][xc].centerX;
+
         p->centerPos.z = p->centerPosStart.z = -halfThick;
+        p->centerRelPos.x = (shards[yc][xc].centerX - winLimitsX)/ winLimitsW;
+        p->centerRelPos.y = (shards[yc][xc].centerY - winLimitsY) /winLimitsH;
+
         p->rotAngle = p->rotAngleStart = 0;
 
-        p->nSides = 3;
-        p->nVertices = 2 * 3;
-        
-        p->centerPos.x = p->centerPosStart.x =
-        shards[i][0].centerX;
-        p->centerPos.y = p->centerPosStart.y = shards[i][0].centerX;
-        p->centerPos.z = p->centerPosStart.z = -halfThick;
-        p->rotAngle = p->rotAngleStart = 0;
 
-        p->centerRelPos.x = (x + 0.5) / gridSizeX;
-        p->centerRelPos.y = (y + 0.5) / gridSizeY;
+        fprintf(stderr, "%f %f\n", p->centerPos.x ,p->centerPos.y );
 
         p->nSides = 4;
         p->nVertices = 2 * 4;
@@ -1016,38 +1022,44 @@ tessellateIntoGlass(CompWindow * w,
         GLfloat *pv = p->vertices;
 
         // Determine 4 front vertices in ccw direction
-        pv[0] = shards[i][0].pt0X -centerX;
-        pv[1] = shards[i][0].pt0Y -centerY;
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
         pv[2] = halfThick;
 
-        pv[3] = shards[i][0].pt1X -centerX;
-        pv[4] = shards[i][0].pt1Y -centerY;
+        pv[3] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
+        pv[4] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
         pv[5] = halfThick;
 
-        pv[6] = shards[i][0].pt2X -centerX;
-        pv[7] = shards[i][0].pt2Y -centerY;
+        pv[6] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
+        pv[7] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
         pv[8] = halfThick;
 
-        pv[9] = shards[i][0].pt0X -centerX;
-        pv[10] = shards[i][0].pt0Y -centerY;
+        pv[9] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
+        pv[10] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
         pv[11] = halfThick;
+#if 1
+        fprintf(stderr, " %f %f\n", pv[0] + shards[yc][xc].centerX, pv[1] + shards[yc][xc].centerY);
+        fprintf(stderr," %f %f\n", pv[3] + shards[yc][xc].centerX, pv[4]+ shards[yc][xc].centerY);
+        fprintf(stderr," %f %f\n", pv[6] + shards[yc][xc].centerX, pv[7]+ shards[yc][xc].centerY);
+        fprintf(stderr," %f %f\n\n", pv[10]+ shards[yc][xc].centerX, pv[10]+ shards[yc][xc].centerY);
+#endif
 
-        pv[0] = shards[i][0].pt0X -centerX;
-        pv[1] = shards[i][0].pt0Y -centerY;
-        pv[2] = halfThick;
+        // Determine 4 back vertices in cw direction
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
+        pv[14] = -halfThick;
 
-        pv[3] = shards[i][0].pt2X -centerX;
-        pv[4] = shards[i][0].pt2Y -centerY;
-        pv[5] = halfThick;
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
+        pv[17] = -halfThick;
 
-        pv[6] = shards[i][0].pt1X -centerX;
-        pv[7] = shards[i][0].pt1Y -centerY;
-        pv[8] = halfThick;
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
+        pv[20] = -halfThick;
 
-        pv[9] = shards[i][0].pt0X -centerX;
-        pv[10] = shards[i][0].pt0Y -centerY;
-        pv[11] = halfThick;
-
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
+        pv[23] = -halfThick;
 
         // 16 indices for 4 sides (for quads)
         if (!p->sideIndices)
@@ -1114,21 +1126,21 @@ tessellateIntoGlass(CompWindow * w,
         nor[4 * 3 + 2] = -1;
 
         // Determine bounding box (to test intersection with clips)
-        p->boundingBox.x1 =  p->centerPos.x;
-        p->boundingBox.y1 =  p->centerPos.y;
-        p->boundingBox.x2 = ceil(p->centerPos.x);
-        p->boundingBox.y2 = ceil(p->centerPos.y);
+        p->boundingBox.x1 = -halfW + p->centerPos.x;
+        p->boundingBox.y1 = -halfH + p->centerPos.y;
+        p->boundingBox.x2 = ceil(halfW + p->centerPos.x);
+        p->boundingBox.y2 = ceil(halfH + p->centerPos.y);
 
         p->boundSphereRadius =
-        sqrt ( halfThick * halfThick);
-  
-
-    //all tiers after the first are composed of 4 sided polygons
-
-    fprintf(stderr, "\n\n\n");
-    return FALSE;
-    
+        sqrt (halfW * halfW + halfH * halfH + halfThick * halfThick);
+    }
 }
+
+
+
+    return TRUE;
+    
+
 }
 
 // Tessellates window into extruded hexagon objects
@@ -1432,10 +1444,10 @@ tessellateIntoHexagons(CompWindow * w,
         nor[6 * 3 + 2] = -1;
 
         // Determine bounding box (to test intersection with clips)
-        p->boundingBox.x1 = topLeftX + p->centerPos.x;
-        p->boundingBox.y1 = topY + p->centerPos.y;
-        p->boundingBox.x2 = ceil(bottomRightX + p->centerPos.x);
-        p->boundingBox.y2 = ceil(bottomY + p->centerPos.y);
+        p->boundingBox.x1 = 1 + p->centerPos.x;
+        p->boundingBox.y1 = 1 + p->centerPos.y;
+        p->boundingBox.x2 = ceil(1 + p->centerPos.x);
+        p->boundingBox.y2 = ceil(1 + p->centerPos.y);
 
         p->boundSphereRadius = sqrt((topRightX - topLeftX) * (topRightX - topLeftX) / 4 +
                     (bottomY - topY) * (bottomY - topY) / 4 +
@@ -1960,6 +1972,7 @@ void polygonsDrawCustomGeometry(CompScreen * s, CompWindow * w)
         // Center
         glTranslatef(p->centerPos.x, p->centerPos.y, p->centerPos.z);
 
+
         // Scale z first
         glScalef(1.0f, 1.0f, 1.0f / s->width);
 
@@ -2147,6 +2160,11 @@ polygonsLinearAnimStepPolygon(CompWindow * w,
 
     p->centerPos.x = moveProgress * p->finalRelPos.x + p->centerPosStart.x;
     p->centerPos.y = moveProgress * p->finalRelPos.y + p->centerPosStart.y;
+/*    fprintf(stderr, "centerposstart %f %f \n", p->centerPosStart.x, p->centerPosStart.y);
+    fprintf(stderr, "centerpos      %f %f \n", p->centerPos.x, p->centerPos.y);
+    fprintf(stderr, "finalrelpos    %f %f \n", p->finalRelPos.x, p->finalRelPos.y);
+*/
+
     p->centerPos.z = 1.0f / w->screen->width *
     moveProgress * p->finalRelPos.z + p->centerPosStart.z;
 
