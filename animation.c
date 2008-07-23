@@ -142,6 +142,7 @@ static AnimEffect closeEffects[] = {
     AnimEffectLeafSpread3D,
     AnimEffectMagicLamp,
     AnimEffectRazr3D,
+    AnimEffectShatter,
     AnimEffectSidekick,
     AnimEffectSkewer,
     AnimEffectVacuum,
@@ -855,6 +856,10 @@ AnimEffectProperties animEffectProperties[AnimEffectNum] = {
     // AnimEffectRollUp
     {0, 0, 0, fxRollUpModelStep, fxRollUpAnimInit, fxRollUpInitGrid, 0, 0, 1,
      0, 0, 0, 0, modelUpdateBB},
+    //AnimEffectShatter 
+    {0, polygonsPrePaintWindow, polygonsPostPaintWindow, polygonsAnimStep,
+     fxShatterInit, 0, polygonsStoreClips, polygonsDrawCustomGeometry, 0,
+     polygonsLinearAnimStepPolygon, 0, 0, 0, polygonsUpdateBB},
     // AnimEffectSidekick
     {fxZoomUpdateWindowAttrib, 0, 0, defaultAnimStep, fxSidekickInit,
      0, 0, 0, 1, 0, defaultLetOthersDrawGeoms, fxZoomUpdateWindowTransform,

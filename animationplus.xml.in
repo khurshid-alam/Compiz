@@ -30,7 +30,7 @@
 	    <_long>The animation effect shown when closing a window.</_long>
 	    <type>int</type>
 	    <min>0</min>
-	    <max>23</max>
+	    <max>24</max>
 	    <default>
 	      <value>21</value>
 	      <value>9</value>
@@ -112,24 +112,28 @@
 	      <value>18</value>
 	      <_name>Razr</_name>
 	    </desc>
-	    <desc>
+        <desc>
 	      <value>19</value>
-	      <_name>Sidekick</_name>
+	      <_name>Shatter</_name>
 	    </desc>
 	    <desc>
 	      <value>20</value>
-	      <_name>Skewer</_name>
+	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
 	      <value>21</value>
-	      <_name>Vacuum</_name>
+	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
 	      <value>22</value>
-	      <_name>Wave</_name>
+	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
 	      <value>23</value>
+	      <_name>Wave</_name>
+	    </desc>
+	    <desc>
+	      <value>24</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>
@@ -302,7 +306,7 @@
 	    <_long>The animation effect shown when creating a window.</_long>
 	    <type>int</type>
 	    <min>0</min>
-	    <max>22</max>
+	    <max>24</max>
 	    <default>
 	      <value>23</value>
 	      <value>9</value>
@@ -384,24 +388,28 @@
 	      <value>18</value>
 	      <_name>Razr</_name>
 	    </desc>
-	    <desc>
+        <desc>
 	      <value>19</value>
-	      <_name>Sidekick</_name>
+	      <_name>Shatter</_name>
 	    </desc>
 	    <desc>
 	      <value>20</value>
-	      <_name>Skewer</_name>
+	      <_name>Sidekick</_name>
 	    </desc>
 	    <desc>
 	      <value>21</value>
-	      <_name>Vacuum</_name>
+	      <_name>Skewer</_name>
 	    </desc>
 	    <desc>
 	      <value>22</value>
-	      <_name>Wave</_name>
+	      <_name>Vacuum</_name>
 	    </desc>
 	    <desc>
 	      <value>23</value>
+	      <_name>Wave</_name>
+	    </desc>
+	    <desc>
+	      <value>24</value>
 	      <_name>Zoom</_name>
 	    </desc>
 	  </option>

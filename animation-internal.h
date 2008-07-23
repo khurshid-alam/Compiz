@@ -342,6 +342,7 @@ typedef enum
     AnimEffectMagicLamp,
     AnimEffectRazr3D,
     AnimEffectRollUp,
+    AnimEffectShatter,
     AnimEffectSidekick,
     AnimEffectSkewer,
     AnimEffectVacuum,
@@ -363,9 +364,9 @@ typedef enum
 #define LAST_MINIMIZE_EFFECT 20
 #define LAST_RANDOM_MINIMIZE_EFFECT 18
 
-#define NUM_CLOSE_EFFECT 23
-#define LAST_CLOSE_EFFECT 24
-#define LAST_RANDOM_CLOSE_EFFECT 20
+#define NUM_CLOSE_EFFECT 24
+#define LAST_CLOSE_EFFECT 23
+#define LAST_RANDOM_CLOSE_EFFECT 22
 
 #define NUM_FOCUS_EFFECT 4
 #define LAST_FOCUS_EFFECT 3
@@ -1218,6 +1219,10 @@ void fxRollUpInitGrid (AnimScreen *as,
                int *gridHeight);
  
 void fxRollUpAnimInit(CompScreen * s, CompWindow * w);
+
+/* shatter.c */
+
+void fxShatterInit(CompScreen * s, CompWindow * w);
 
 /* skewer.c */
 
