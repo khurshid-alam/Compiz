@@ -811,7 +811,7 @@ tessellateIntoGlass(CompWindow * w,
     //calculate the center and bounds of each polygon
     for ( i = 0; i < spoke_num ; i++ )
     {
-        for ( j = 0; j < TIERS -1  ; j++)
+        for ( j = 0; j < TIERS   ; j++)
         {
             switch (j)
             {
@@ -970,7 +970,7 @@ tessellateIntoGlass(CompWindow * w,
        
 
 
-    for (xc = 0; xc <4 ; xc++, p++) //tiers
+    for (xc = 0; xc < TIERS; xc++, p++) //tiers
     {
 
         fprintf(stderr, "%i:%i\n", yc, xc );
