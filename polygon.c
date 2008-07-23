@@ -712,6 +712,10 @@ tessellateIntoGlass(CompWindow * w,
     winLimitsW = BORDER_W(w);
     winLimitsH = BORDER_H(w);
     }
+    
+    if (winLimitsW < 100 || winLimitsH < 100)
+        return FALSE;
+    
 #if RANDOM   //random numbers
     centerX = (( rand()/(float)RAND_MAX ) * winLimitsW ) + winLimitsX;
     centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
@@ -812,6 +816,8 @@ tessellateIntoGlass(CompWindow * w,
             switch (j)
             {
             case 0:
+            
+            fprintf(stderr, "3side %i:%i\n", j, j+1);
             //the first tier is triangles
             shards[i][j].is_triangle = TRUE;
             shards[i][j].pt0X = centerX;
@@ -869,34 +875,37 @@ tessellateIntoGlass(CompWindow * w,
                 centerX + (cos( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
             shards[i][j].centerY =
                 centerY + (sin( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
+            
             break;
             
             
             
-            default:        //the other tiers are 4 sided polygons
+            default:
+            fprintf(stderr, "4side %i%i \n", j, j+1);
+            //the other tiers are 4 sided polygons
             shards[i][j].is_triangle = FALSE;
-            shards[i][j].pt0X = spoke[i].spoke_vertex[j].x;
-            shards[i][j].pt0Y = spoke[i].spoke_vertex[j].y;
+            shards[i][j].pt0X = spoke[i].spoke_vertex[j-1].x;
+            shards[i][j].pt0Y = spoke[i].spoke_vertex[j -1].y;
             
-            shards[i][j].pt1X = spoke[i].spoke_vertex[j + 1].x;
-            shards[i][j].pt1Y = spoke[i].spoke_vertex[j + 1].y;
+            shards[i][j].pt1X = spoke[i].spoke_vertex[j].x;
+            shards[i][j].pt1Y = spoke[i].spoke_vertex[j].y;
             
             
             if (i != spoke_num -1 )
             {
-                shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j + 1].x;
-                shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j + 1].y;
+                shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j ].x;
+                shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j ].y;
             
-                shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j].x;
-                shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j].y;
+                shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j-1].x;
+                shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j-1].y;
             }
             else
             {
-                shards[i][j].pt2X = spoke[0].spoke_vertex[j + 1].x;
-                shards[i][j].pt2Y = spoke[0].spoke_vertex[j + 1].y;
+                shards[i][j].pt2X = spoke[0].spoke_vertex[j ].x;
+                shards[i][j].pt2Y = spoke[0].spoke_vertex[j ].y;
             
-                shards[i][j].pt3X = spoke[0].spoke_vertex[j].x;
-                shards[i][j].pt3Y = spoke[0].spoke_vertex[j].y;
+                shards[i][j].pt3X = spoke[0].spoke_vertex[j-1].x;
+                shards[i][j].pt3Y = spoke[0].spoke_vertex[j-1].y;
             }
             
             
@@ -907,8 +916,7 @@ tessellateIntoGlass(CompWindow * w,
                 (shards[i][j].pt0Y + shards[i][j].pt1Y + shards[i][j].pt2Y + shards[i][j].pt3Y)/4;
                  
             //fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
-    
-            
+
             break;
             }
             
@@ -948,12 +956,7 @@ tessellateIntoGlass(CompWindow * w,
     thickness /= w->screen->width;
     pset->thickness = thickness;
     pset->nTotalFrontVertices = 0;
-
-    float cellW = (float)winLimitsW / gridSizeX;
-    float cellH = (float)winLimitsH / gridSizeY;
-    float halfW = cellW / 2;
-    float halfH = cellH / 2;
-
+    
     float halfThick = pset->thickness / 2;
     PolygonObject *p = pset->polygons;
     int xc, yc;
@@ -962,7 +965,6 @@ tessellateIntoGlass(CompWindow * w,
                 winLimitsX, winLimitsX+winLimitsW, winLimitsY,
                 winLimitsY + winLimitsH);
     
-    xc =1; 
     for (yc = 0; yc <  SPOKE_NUM; yc++, p++) //spokes
     {
        
@@ -971,7 +973,7 @@ tessellateIntoGlass(CompWindow * w,
     for (xc = 0; xc <4 ; xc++, p++) //tiers
     {
 
-
+        fprintf(stderr, "%i:%i\n", yc, xc );
         p->centerPos.y = p->centerPosStart.y =
             shards[yc][xc].centerY; 
 
@@ -1045,20 +1047,20 @@ tessellateIntoGlass(CompWindow * w,
 #endif
 
         // Determine 4 back vertices in cw direction
-        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
-        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
+        pv[12] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
+        pv[13] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
         pv[14] = -halfThick;
 
-        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
-        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
+        pv[15] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
+        pv[16] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
         pv[17] = -halfThick;
 
-        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
-        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
+        pv[18] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
+        pv[19] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
         pv[20] = -halfThick;
 
-        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
-        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
+        pv[21] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
+        pv[22] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
         pv[23] = -halfThick;
 
         // 16 indices for 4 sides (for quads)
@@ -1126,13 +1128,32 @@ tessellateIntoGlass(CompWindow * w,
         nor[4 * 3 + 2] = -1;
 
         // Determine bounding box (to test intersection with clips)
-        p->boundingBox.x1 = -halfW + p->centerPos.x;
-        p->boundingBox.y1 = -halfH + p->centerPos.y;
-        p->boundingBox.x2 = ceil(halfW + p->centerPos.x);
-        p->boundingBox.y2 = ceil(halfH + p->centerPos.y);
+        p->boundingBox.x1 = p->centerPos.x - shards[xc][yc].pt3X ;
+        p->boundingBox.y1 = p->centerPos.y - shards[xc][yc].pt3Y ;
+        p->boundingBox.x2 = ceil(shards[xc][yc].pt1X + p->centerPos.x);
+        p->boundingBox.y2 = ceil(shards[xc][yc].pt1X + p->centerPos.y);
 
-        p->boundSphereRadius =
-        sqrt (halfW * halfW + halfH * halfH + halfThick * halfThick);
+        float dist[4] = {0}, longest_dist = 0;
+        dist[0] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt0X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt0Y), 2));
+        dist[1] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt1X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt1Y), 2));
+        dist[2] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt2X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt2Y), 2));
+        dist[3] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt3X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt3Y), 2));
+        
+        int k;
+        for (k = 0; k < 4; k++)
+        {
+            if ( dist[k] > longest_dist )
+            longest_dist = dist[k];
+        }
+        
+        longest_dist++; //good measure
+        
+        
+        p->boundSphereRadius = longest_dist;
     }
 }
 
