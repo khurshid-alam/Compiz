@@ -638,8 +638,8 @@ tessellateIntoTriangles(CompWindow *w,
 }
 
 
-#define SPOKE_NUM 8
-#define RANDOM 0
+#define SPOKE_NUM 10
+#define RANDOM 1
 #define PI 3.1415
 #define DEG_TO_RAD 2*PI/360
 #define RAD_TO_DEG 360/(2*PI)
@@ -716,7 +716,7 @@ tessellateIntoGlass(CompWindow * w,
     if (winLimitsW < 100 || winLimitsH < 100)
         return FALSE;
     
-#if RANDOM   //random numbers
+#if 0   //random numbers
     centerX = (( rand()/(float)RAND_MAX ) * winLimitsW ) + winLimitsX;
     centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
     
@@ -789,10 +789,16 @@ tessellateIntoGlass(CompWindow * w,
         else 
             spoke[i].length = top_bottom_length;
 
+
+        float percent;
         //calculate spoke vertexes
         for ( j = 0 ; j < TIERS ; j++)
         {
-            spoke[i].spoke_vertex[j].dist = 0.2 * (j +1) * spoke[i].length;
+            if (j < 2)
+                percent = 0.1;
+            else
+                percent = 0.8/3.0;
+            spoke[i].spoke_vertex[j].dist = percent * (j +1) * spoke[i].length;
             
             spoke[i].spoke_vertex[j].x = 
                 centerX + (spoke[i].spoke_vertex[j].dist * cos(spoke[i].direction * DEG_TO_RAD) );
@@ -965,11 +971,9 @@ tessellateIntoGlass(CompWindow * w,
                 winLimitsX, winLimitsX+winLimitsW, winLimitsY,
                 winLimitsY + winLimitsH);
     
-    for (yc = 0; yc <  SPOKE_NUM; yc++, p++) //spokes
+    for (yc = 0; yc <  spoke_num; yc++, p++) //spokes
     {
-       
-
-
+    
     for (xc = 0; xc < TIERS; xc++, p++) //tiers
     {
 
@@ -1039,7 +1043,7 @@ tessellateIntoGlass(CompWindow * w,
         pv[9] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
         pv[10] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
         pv[11] = halfThick;
-#if 1
+#if 0
         fprintf(stderr, " %f %f\n", pv[0] + shards[yc][xc].centerX, pv[1] + shards[yc][xc].centerY);
         fprintf(stderr," %f %f\n", pv[3] + shards[yc][xc].centerX, pv[4]+ shards[yc][xc].centerY);
         fprintf(stderr," %f %f\n", pv[6] + shards[yc][xc].centerX, pv[7]+ shards[yc][xc].centerY);
@@ -1151,11 +1155,9 @@ tessellateIntoGlass(CompWindow * w,
         }
         
         longest_dist++; //good measure
-        
-        
         p->boundSphereRadius = longest_dist;
     }
-}
+    }
 
 
 
