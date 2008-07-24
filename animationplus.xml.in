@@ -1580,7 +1580,31 @@
 	    </desc>
 	  </option>
 	</subgroup>
-
+	<subgroup>
+	  <_short>Shatter</_short>
+	  <option name="shatter_num_tiers" type="int">
+	    <_short>Number of Tiers</_short>
+	    <_long>The number of circular tiers the effect will have</_long>
+	    <default>5</default>
+	    <min>3</min>
+	    <max>8</max>
+	  </option>
+	  <option name="shatter_num_spokes" type="int">
+	    <_short>Number of Spokes</_short>
+	    <_long>The number of wedges that will compose the window</_long>
+	    <default>10</default>
+	    <min>4</min>
+	    <max>16</max>
+	  </option>
+	  <option name="shatter_thickness" type="float">
+	    <_short>Thickness of Shattered Pieces</_short>
+	    <_long>Thickness of the shattered window pieces (in pixels).</_long>
+	    <default>15</default>
+	    <min>0</min>
+	    <max>100</max>
+	    <precision>1</precision>
+	  </option>
+	</subgroup>
 	<subgroup>
 	  <_short>Explode</_short>
 	  <option name="explode_gridx" type="int">

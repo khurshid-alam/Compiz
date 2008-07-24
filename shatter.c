@@ -38,11 +38,15 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
 
     int screen_height = s->outputDev[outputDeviceForWindow(w)].height;
 
-    int spoke_num = 10 + (int)(3*(rand()/(float)RAND_MAX)) ;
+    int spoke_num = animGetI(as, aw, ANIM_SCREEN_OPTION_SHATTER_NUM_SPOKES);
+    int tier_num = animGetI(as, aw, ANIM_SCREEN_OPTION_SHATTER_NUM_TIERS);
+
+    spoke_num = spoke_num + (int)(3*(rand()/(float)RAND_MAX)) ;
+    tier_num = tier_num + (int) (rand()/(float)RAND_MAX);
 
     if (!tessellateIntoGlass(w, 
                     spoke_num,
-                    5,
+                    tier_num,
                     animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)));
 
     PolygonSet *pset = aw->polygonSet;
@@ -55,9 +59,6 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
      * and the ones towards the edge are still held in by the 'windowframe'
      * so they won't fall
      */
-
-
-
 
     for (i = 0; i < pset->nPolygons; i++, p++)
     {
@@ -72,7 +73,7 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
                             (-p->centerPosStart.y + screen_height);
         p->finalRelPos.z = 0;
         if (p->finalRelPos.y)
-            p->finalRotAng = RAND_FLOAT() * 120;
+            p->finalRotAng = RAND_FLOAT() * 120 * ( RAND_FLOAT() < 0.5 ? -1 : 1 );
     }
     
     
@@ -86,4 +87,3 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
     aw->animTotalTime /= EXPLODE_PERCEIVED_T;
     aw->animRemainingTime = aw->animTotalTime;
 }
-
