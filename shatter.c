@@ -42,7 +42,7 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
 
     if (!tessellateIntoGlass(w, 
                     spoke_num,
-                    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
+                    5,
                     animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)));
 
     PolygonSet *pset = aw->polygonSet;

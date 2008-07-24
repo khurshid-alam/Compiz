@@ -629,12 +629,11 @@ tessellateIntoTriangles(CompWindow *w,
 }
 
 
-#define SPOKE_NUM 10
 #define RANDOM 1
 #define PI 3.1415
 #define DEG_TO_RAD 2*PI/360
 #define RAD_TO_DEG 360/(2*PI)
-#define TIERS 5
+
 typedef struct
 {
     float dist;
@@ -647,7 +646,7 @@ typedef struct
 {
     float direction;
     float length;
-    spoke_vertex_t spoke_vertex[TIERS];
+    spoke_vertex_t * spoke_vertex;
 
 } spoke_t;
 
@@ -674,7 +673,7 @@ typedef struct
  */
 Bool 
 tessellateIntoGlass(CompWindow * w, 
-                int spoke_num, int gridSizeY, float thickness)
+                int spoke_num, int tier_num, float thickness)
 {
     ANIM_WINDOW(w);
     
@@ -685,22 +684,33 @@ tessellateIntoGlass(CompWindow * w,
     int  spoke_range;
     int i,j; 
     float top_bottom_length, left_right_length;
+    spoke_t spoke[spoke_num];
+    memset(spoke, 0, sizeof(spoke_t) * spoke_num);
+
+    for (i = 0; i < spoke_num; i++)
+    {
+        spoke[i].spoke_vertex = malloc(sizeof(spoke_vertex_t)* tier_num);
+        
+    }
+    spoke_range = 360 / spoke_num;
     
     if (pset->includeShadows)
     {
-    winLimitsX = WIN_X(w);
-    winLimitsY = WIN_Y(w);
-    winLimitsW = WIN_W(w) - 1; // avoid artifact on right edge
-    winLimitsH = WIN_H(w);
+        winLimitsX = WIN_X(w);
+        winLimitsY = WIN_Y(w);
+        winLimitsW = WIN_W(w) - 1; // avoid artifact on right edge
+        winLimitsH = WIN_H(w);
     }
     else
     {
-    winLimitsX = BORDER_X(w);
-    winLimitsY = BORDER_Y(w);
-    winLimitsW = BORDER_W(w);
-    winLimitsH = BORDER_H(w);
+        winLimitsX = BORDER_X(w);
+        winLimitsY = BORDER_Y(w);
+        winLimitsW = BORDER_W(w);
+        winLimitsH = BORDER_H(w);
     }
     
+    //tessellation looks horrible if its too small, its better
+    //just to skip it :P
     if (winLimitsW < 100 || winLimitsH < 100)
         return FALSE;
     
@@ -713,24 +723,6 @@ tessellateIntoGlass(CompWindow * w,
     centerY = ( 2.0/4.0 * winLimitsH ) + winLimitsY;
 
 #endif
-    
-    //create radial spokes
-    //between 8 and 10
-/*
-#if RANDOM
-    spoke_num = med_spoke_num + (((int)centerX) % 3); //essentially a random number (0, 1 or 2), avoids a call to rand()
-#else
-    spoke_num = 8;
-#endif
-*/
-
-
-    spoke_t spoke[spoke_num];
-    memset(spoke, 0, sizeof(spoke_t) * spoke_num);
-    
-    spoke_range = 360 / spoke_num;
-
-
 
 //calculate the vertex positions
     for (i = 0; i < spoke_num ; i++) 
@@ -777,12 +769,13 @@ tessellateIntoGlass(CompWindow * w,
 
         float percent;
         //calculate spoke vertexes
-        for ( j = 0 ; j < TIERS ; j++)
+        for ( j = 0 ; j < tier_num ; j++)
         {
+            //effect looks better if first two tiers are small
             if (j < 2)
                 percent = 0.1;
             else
-                percent = 0.8/3.0;
+                percent = 0.8/( tier_num -2 );
             spoke[i].spoke_vertex[j].dist = percent * (j +1) * spoke[i].length;
             
             spoke[i].spoke_vertex[j].x = 
@@ -796,13 +789,13 @@ tessellateIntoGlass(CompWindow * w,
     }
     
     
-    shard_t shards[spoke_num][TIERS];
+    shard_t shards[spoke_num][tier_num];
     float x,y,z,gamma, beta, theta, midlength, halftheta;
     
     //calculate the center and bounds of each polygon
     for ( i = 0; i < spoke_num ; i++ )
     {
-        for ( j = 0; j < TIERS   ; j++)
+        for ( j = 0; j < tier_num   ; j++)
         {
             switch (j)
             {
@@ -924,12 +917,12 @@ tessellateIntoGlass(CompWindow * w,
     if (rectH < minRectSize)
     gridSizeY = winLimitsH / minRectSize;   // int div.
 */
-    if (pset->nPolygons != spoke_num * TIERS)
+    if (pset->nPolygons != spoke_num * tier_num)
     {
     if (pset->nPolygons > 0)
         freePolygonObjects(pset);
 
-    pset->nPolygons = spoke_num * (TIERS + 1);
+    pset->nPolygons = spoke_num * (tier_num + 1);
 
     pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
     if (!pset->polygons)
@@ -952,7 +945,7 @@ tessellateIntoGlass(CompWindow * w,
     for (yc = 0; yc <  spoke_num; yc++, p++) //spokes
     {
     
-    for (xc = 0; xc < TIERS; xc++, p++) //tiers
+    for (xc = 0; xc < tier_num; xc++, p++) //tiers
     {
         p->centerPos.y = p->centerPosStart.y =
             shards[yc][xc].centerY; 
