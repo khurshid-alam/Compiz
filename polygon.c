@@ -223,8 +223,6 @@ tessellateIntoRectangles(CompWindow * w,
 
         p->centerRelPos.x = (x + 0.5) / gridSizeX;
         p->centerRelPos.y = (y + 0.5) / gridSizeY;
-        fprintf(stderr, "%f %f\n", p->centerRelPos.x, p->centerRelPos.y);
-
 
         p->nSides = 4;
         p->nVertices = 2 * 4;
@@ -277,13 +275,6 @@ tessellateIntoRectangles(CompWindow * w,
         pv[10] = -halfH;
         pv[11] = halfThick;
 
-#if 0 
-        fprintf(stderr, "%f %f %f\n", pv[0], pv[1], pv[2]);
-        fprintf(stderr, "%f %f %f\n", pv[3], pv[4], pv[5]);
-        fprintf(stderr, "%f %f %f\n", pv[6], pv[7], pv[8]);
-        fprintf(stderr, "%f %f %f\n", pv[9], pv[10], pv[11]);
-        fprintf(stderr, "\n");
-#endif
         // Determine 4 back vertices in cw direction
         pv[12] = halfW;
         pv[13] = -halfH;
@@ -695,8 +686,6 @@ tessellateIntoGlass(CompWindow * w,
     int spoke_num, spoke_range;
     int i,j; 
     float top_bottom_length, left_right_length;
-    float half_direction;
-    
     
     if (pset->includeShadows)
     {
@@ -726,9 +715,6 @@ tessellateIntoGlass(CompWindow * w,
 
 #endif
     
-    fprintf(stderr, "WindowXY is %i:%i width/height %i:%i ", winLimitsX, winLimitsY, winLimitsW, winLimitsH);
-    fprintf(stderr, "Center %f    %f\n", centerX, centerY);
-
     //create radial spokes
     //between 8 and 10
     
@@ -822,8 +808,6 @@ tessellateIntoGlass(CompWindow * w,
             switch (j)
             {
             case 0:
-            
-            fprintf(stderr, "3side %i:%i\n", j, j+1);
             //the first tier is triangles
             shards[i][j].is_triangle = TRUE;
             shards[i][j].pt0X = centerX;
@@ -887,7 +871,6 @@ tessellateIntoGlass(CompWindow * w,
             
             
             default:
-            fprintf(stderr, "4side %i%i \n", j, j+1);
             //the other tiers are 4 sided polygons
             shards[i][j].is_triangle = FALSE;
             shards[i][j].pt0X = spoke[i].spoke_vertex[j-1].x;
@@ -976,8 +959,6 @@ tessellateIntoGlass(CompWindow * w,
     
     for (xc = 0; xc < TIERS; xc++, p++) //tiers
     {
-
-        fprintf(stderr, "%i:%i\n", yc, xc );
         p->centerPos.y = p->centerPosStart.y =
             shards[yc][xc].centerY; 
 
@@ -989,9 +970,6 @@ tessellateIntoGlass(CompWindow * w,
         p->centerRelPos.y = (shards[yc][xc].centerY - winLimitsY) /winLimitsH;
 
         p->rotAngle = p->rotAngleStart = 0;
-
-
-        fprintf(stderr, "%f %f\n", p->centerPos.x ,p->centerPos.y );
 
         p->nSides = 4;
         p->nVertices = 2 * 4;
@@ -1043,12 +1021,6 @@ tessellateIntoGlass(CompWindow * w,
         pv[9] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
         pv[10] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
         pv[11] = halfThick;
-#if 0
-        fprintf(stderr, " %f %f\n", pv[0] + shards[yc][xc].centerX, pv[1] + shards[yc][xc].centerY);
-        fprintf(stderr," %f %f\n", pv[3] + shards[yc][xc].centerX, pv[4]+ shards[yc][xc].centerY);
-        fprintf(stderr," %f %f\n", pv[6] + shards[yc][xc].centerX, pv[7]+ shards[yc][xc].centerY);
-        fprintf(stderr," %f %f\n\n", pv[10]+ shards[yc][xc].centerX, pv[10]+ shards[yc][xc].centerY);
-#endif
 
         // Determine 4 back vertices in cw direction
         pv[12] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
