@@ -38,18 +38,26 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
 
     int screen_height = s->outputDev[outputDeviceForWindow(w)].height;
 
-    fprintf(stderr, "height is %i\n", screen_height);
+    int spoke_num = 10 + (int)(3*(rand()/(float)RAND_MAX)) ;
 
     if (!tessellateIntoGlass(w, 
-                    animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_X),
+                    spoke_num,
                     animGetI(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_GRIDSIZE_Y),
                     animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)));
 
     PolygonSet *pset = aw->polygonSet;
     PolygonObject *p = pset->polygons;
-    double sqrt2 = sqrt(2);
-
     int i, static_polygon;
+
+    /* calculate which polygons fall and which remain stationary.
+     * this is supposed to model glass breaking with a single concussion
+     * point in the center, so the peices in the middle will always fall,
+     * and the ones towards the edge are still held in by the 'windowframe'
+     * so they won't fall
+     */
+
+
+
 
     for (i = 0; i < pset->nPolygons; i++, p++)
     {
@@ -57,10 +65,7 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
         p->rotAxis.y = 0;
         p->rotAxis.z = 1;
 
-        if ( RAND_FLOAT() < 0.7 )    
-            static_polygon = 1;
-        else
-            static_polygon = 0;
+        static_polygon = 1;
 
         p->finalRelPos.x = 0;
         p->finalRelPos.y = static_polygon *

@@ -663,19 +663,18 @@ typedef struct
     
 } shard_t;
 
-/*        90
+/*        90        //degree orientation
  *         |
  *    180--+--0
  *         |
  *        270
+ * This function tessellates the window into radial shards, with
+ * each shard split into the number of "tiers". This forms a broken
+ * glass or spiderweb appearance.
  */
-
-    //shard_t shards[spoke_num][TIERS];
-
-
 Bool 
 tessellateIntoGlass(CompWindow * w, 
-                int gridSizeX, int gridSizeY, float thickness)
+                int spoke_num, int gridSizeY, float thickness)
 {
     ANIM_WINDOW(w);
     
@@ -683,7 +682,7 @@ tessellateIntoGlass(CompWindow * w,
     
     int winLimitsX, winLimitsY, winLimitsW, winLimitsH;
     float centerX, centerY;
-    int spoke_num, spoke_range;
+    int  spoke_range;
     int i,j; 
     float top_bottom_length, left_right_length;
     
@@ -717,13 +716,13 @@ tessellateIntoGlass(CompWindow * w,
     
     //create radial spokes
     //between 8 and 10
-    
+/*
 #if RANDOM
-    spoke_num = SPOKE_NUM + (((int)centerX) % 3); //essentially a random number (0, 1 or 2), avoids a call to rand()
+    spoke_num = med_spoke_num + (((int)centerX) % 3); //essentially a random number (0, 1 or 2), avoids a call to rand()
 #else
     spoke_num = 8;
 #endif
-
+*/
 
 
     spoke_t spoke[spoke_num];
@@ -915,7 +914,7 @@ tessellateIntoGlass(CompWindow * w,
 
     
     //set up polygons
-    
+    /*
     float minRectSize = MIN_WINDOW_GRID_SIZE;
     float rectW = winLimitsW / (float)gridSizeX;
     float rectH = winLimitsH / (float)gridSizeY;
@@ -924,13 +923,13 @@ tessellateIntoGlass(CompWindow * w,
     gridSizeX = winLimitsW / minRectSize;   // int div.
     if (rectH < minRectSize)
     gridSizeY = winLimitsH / minRectSize;   // int div.
-
-    if (pset->nPolygons != gridSizeX * gridSizeY)
+*/
+    if (pset->nPolygons != spoke_num * TIERS)
     {
     if (pset->nPolygons > 0)
         freePolygonObjects(pset);
 
-    pset->nPolygons = gridSizeX * gridSizeY;
+    pset->nPolygons = spoke_num * (TIERS + 1);
 
     pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
     if (!pset->polygons)
@@ -949,10 +948,6 @@ tessellateIntoGlass(CompWindow * w,
     float halfThick = pset->thickness / 2;
     PolygonObject *p = pset->polygons;
     int xc, yc;
-
-    fprintf(stderr, "Window Bounds are X:%i--%i , Y:%i--%i\n",
-                winLimitsX, winLimitsX+winLimitsW, winLimitsY,
-                winLimitsY + winLimitsH);
     
     for (yc = 0; yc <  spoke_num; yc++, p++) //spokes
     {
