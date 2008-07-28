@@ -3,25 +3,17 @@
  *
  * animation.c
  *
- * Copyright : (C) 2006 Erkin Bahceci
- * E-mail    : erkinbah@gmail.com
+ * Copyright : (C) 2008 Kevin DuBois
+ * E-mail    : kdub432@gmail.com
  *
- * Based on Wobbly and Minimize plugins by
+ * Based on other animations by
+ *           : Erkin Bahceci
+ * E-mail    : erkinbah@gmail.com
+ * 
+ * Which were based on Wobbly and Minimize plugins by
  *           : David Reveman
  * E-mail    : davidr@novell.com>
  *
- * Particle system added by : (C) 2006 Dennis Kasprzyk
- * E-mail                   : onestone@beryl-project.org
- *
- * Beam-Up added by : Florencio Guimaraes
- * E-mail           : florencio@nexcorp.com.br
- * 
- * Hexagon tessellator added by : Mike Slegeir
- * E-mail                       : mikeslegeir@mail.utexas.edu>
- *
- * Helix and Blinds Effects by : Kevin DuBois
- * Email                       : kdub432@gmail.com
- * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
