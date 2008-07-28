@@ -53,13 +53,8 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
     PolygonObject *p = pset->polygons;
     int i, static_polygon;
 
-    /* calculate which polygons fall and which remain stationary.
-     * this is supposed to model glass breaking with a single concussion
-     * point in the center, so the peices in the middle will always fall,
-     * and the ones towards the edge are still held in by the 'windowframe'
-     * so they won't fall
-     */
-
+    //have all polygons fall to the bottom and rotating between 
+    //either 120 and 0 degrees
     for (i = 0; i < pset->nPolygons; i++, p++)
     {
         p->rotAxis.x = 0;

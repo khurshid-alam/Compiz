@@ -896,8 +896,6 @@ tessellateIntoGlass(CompWindow * w,
             shards[i][j].centerY = 
                 (shards[i][j].pt0Y + shards[i][j].pt1Y + shards[i][j].pt2Y + shards[i][j].pt3Y)/4;
                  
-            //fprintf(stderr, "%f %f\n", shards[i][j].centerX, shards[i][j].centerY);
-
             break;
             }
             
@@ -907,16 +905,6 @@ tessellateIntoGlass(CompWindow * w,
 
     
     //set up polygons
-    /*
-    float minRectSize = MIN_WINDOW_GRID_SIZE;
-    float rectW = winLimitsW / (float)gridSizeX;
-    float rectH = winLimitsH / (float)gridSizeY;
-
-    if (rectW < minRectSize)
-    gridSizeX = winLimitsW / minRectSize;   // int div.
-    if (rectH < minRectSize)
-    gridSizeY = winLimitsH / minRectSize;   // int div.
-*/
     if (pset->nPolygons != spoke_num * tier_num)
     {
     if (pset->nPolygons > 0)
