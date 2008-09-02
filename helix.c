@@ -29,21 +29,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "animation-internal.h"
+#include "animationaddon.h"
 
 void fxHelixInit(CompScreen * s, CompWindow * w)
 {
-    ANIM_WINDOW (w);
-    ANIM_SCREEN (s);
+    ANIMADDON_WINDOW (w);
+    ANIMADDON_SCREEN (s);
 
-    int gridsizeY = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_GRIDSIZE_Y);
+    int gridsizeY = animGetI( w, ANIMADDON_SCREEN_OPTION_HELIX_GRIDSIZE_Y);
 
     tessellateIntoRectangles(w, 
                              1,
                              gridsizeY,
-                             animGetF(as, aw, ANIM_SCREEN_OPTION_HELIX_THICKNESS));
+                             animGetF( w, ANIMADDON_SCREEN_OPTION_HELIX_THICKNESS));
 
-    PolygonSet *pset = aw->polygonSet;
+    PolygonSet *pset = aw->eng.polygonSet;
     PolygonObject *p = pset->polygons;
 
 
@@ -54,7 +54,7 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     //rotate around y axis normally, or the z axis if the effect is in vertical mode
     p->rotAxis.x = 0;
     
-    if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
+    if (animGetB( w, ANIMADDON_SCREEN_OPTION_HELIX_DIRECTION))
     {
         p->rotAxis.y = 0;
         p->rotAxis.z = 1;
@@ -66,7 +66,7 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     //only move the pieces in a 'vertical' rotation
     p->finalRelPos.x = 0;   
     
-    if (animGetB(as, aw, ANIM_SCREEN_OPTION_HELIX_DIRECTION))
+    if (animGetB( w, ANIMADDON_SCREEN_OPTION_HELIX_DIRECTION))
         p->finalRelPos.y = -1 * ((w->height)/ gridsizeY) * (i -  gridsizeY/2);
     else 
         p->finalRelPos.y = 0;
@@ -75,8 +75,8 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     p->finalRelPos.z = 0;
     
     //determine how long, and what direction to spin
-    int numberOfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_NUM_TWISTS);
-    int spin_dir =animGetI(as, aw, ANIM_SCREEN_OPTION_HELIX_SPIN_DIRECTION);
+    int numberOfTwists = animGetI( w, ANIMADDON_SCREEN_OPTION_HELIX_NUM_TWISTS);
+    int spin_dir = animGetI( w, ANIMADDON_SCREEN_OPTION_HELIX_SPIN_DIRECTION);
     
     if (spin_dir)
         p->finalRotAng = 270 - ( 2 * numberOfTwists * i); 
@@ -93,7 +93,7 @@ void fxHelixInit(CompScreen * s, CompWindow * w)
     pset->doLighting = TRUE;
     pset->correctPerspective = CorrectPerspectivePolygon;
 
-    aw->animTotalTime /= EXPLODE_PERCEIVED_T;
-    aw->animRemainingTime = aw->animTotalTime;
+    aw->com->animTotalTime /= EXPLODE_PERCEIVED_T;
+    aw->com->animRemainingTime = aw->com->animTotalTime;
 }
 
