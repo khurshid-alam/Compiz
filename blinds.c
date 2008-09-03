@@ -36,7 +36,6 @@ Bool fxBlindsInit( CompWindow * w)
     if (!polygonsAnimInit (w))
         return FALSE;
 
-    CompScreen *s = w->screen;
     ANIMPLUS_WINDOW (w);
 
 tessellateIntoRectangles(w, 
@@ -44,7 +43,7 @@ tessellateIntoRectangles(w,
                       1,
                       animGetF( w, ANIMPLUS_SCREEN_OPTION_BLINDS_THICKNESS));
 
-    PolygonSet *pset = aw->polygonSet;
+    PolygonSet *pset = aw->eng.polygonSet;
     PolygonObject *p = pset->polygons;
 
     int i;
@@ -72,7 +71,9 @@ tessellateIntoRectangles(w,
     pset->doLighting = TRUE;
     pset->correctPerspective = CorrectPerspectivePolygon;
 
-    aw->animTotalTime /= EXPLODE_PERCEIVED_T;
-    aw->animRemainingTime = aw->animTotalTime;
+    aw->com->animTotalTime /= EXPLODE_PERCEIVED_T;
+    aw->com->animRemainingTime = aw->com->animTotalTime;
+
+    return TRUE;
 }
 

@@ -110,6 +110,10 @@
 	<option>close_random_effects</option>
 	<option>minimize_effects</option>
 	<option>minimize_random_effects</option>
+        <restriction>
+          <value>animationplus:Blinds</value>
+          <_name>Blinds</_name>
+        </restriction>
 	<restriction>
 	  <value>animationplus:Helix</value>
 	  <_name>Helix</_name>

@@ -219,11 +219,15 @@ static const CompMetadataOptionInfo animPlusScreenOptionInfo[] = {
     { "time_step_intense", "int", "<min>1</min>", 0, 0 },
     // Effect settings
 
+    { "blinds_num_halftwists", "int", "<min>1</min>", 0, 0 },
+    { "blinds_gridx", "int", "<min>1</min>", 0, 0 },
+    { "blinds_thickness", "float", 0, 0, 0 },
     { "helix_num_twists", "int", "<min>1</min>", 0, 0 },
     { "helix_gridy", "int", "<min>5</min>", 0, 0 },
     { "helix_thickness", "float", 0, 0, 0 },
     { "helix_direction", "bool", 0, 0, 0 },
     { "helix_spin_direction", "int", "<min>0</min>", 0, 0 },
+
 
 };
 
@@ -237,10 +241,27 @@ animGetScreenOptions(CompPlugin *plugin, CompScreen * screen, int *count)
 }
 
 AnimEffect AnimEffectHelix	= &(AnimEffectInfo) {};
+AnimEffect AnimEffectBlinds     = &(AnimEffectInfo) {};
 
 static void
 initEffectProperties (AnimPlusDisplay *ad)
 {
+
+    memcpy ((AnimEffectInfo *)AnimEffectBlinds, &(AnimEffectInfo)
+        {"animationplus:Blinds",
+         {TRUE, TRUE, TRUE, FALSE, FALSE}, 
+         {.prePaintWindowFunc           = polygonsPrePaintWindow,
+          .postPaintWindowFunc          = polygonsPostPaintWindow,
+          .animStepFunc                 = polygonsAnimStep,
+          .initFunc                     = fxBlindsInit,
+          .addCustomGeometryFunc        = polygonsStoreClips,
+          .drawCustomGeometryFunc       = polygonsDrawCustomGeometry,
+          .updateBBFunc                 = ad->animBaseFunctions->updateBBScreen,
+          .prePrepPaintScreenFunc       = polygonsPrePreparePaintScreen,
+          .cleanupFunc                  = polygonsCleanup,
+          .refreshFunc                  = polygonsRefresh}},
+          sizeof (AnimEffectInfo));
+
     memcpy ((AnimEffectInfo *)AnimEffectHelix, &(AnimEffectInfo)
 	{"animationplus:Helix",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
@@ -256,8 +277,10 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .refreshFunc			= polygonsRefresh}},
 	  sizeof (AnimEffectInfo));
 
+
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
     {
+        AnimEffectBlinds,
 	AnimEffectHelix
     };
     memcpy (animEffects,
