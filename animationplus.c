@@ -279,7 +279,7 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .refreshFunc			= polygonsRefresh}},
 	  sizeof (AnimEffectInfo));
 
-    memcpy ((AnimEffectInfo *)AnimEffectHelix, &(AnimEffectInfo)
+    memcpy ((AnimEffectInfo *)AnimEffectShatter, &(AnimEffectInfo)
 	{"animationplus:Shatter",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
 	 {.prePaintWindowFunc		= polygonsPrePaintWindow,
