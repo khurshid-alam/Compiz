@@ -33,20 +33,23 @@
 
 Bool fxHelixInit(CompWindow * w)
 {
-    if (!polygonsAnimInit(w))
+    CompScreen *s = w->screen;
+    ANIMPLUS_DISPLAY (s->display);
+    ANIMPLUS_WINDOW (w);
+
+    if (!ad->animAddonFunc->polygonsAnimInit(w))
         return FALSE;
 
    // CompScreen *s = w->screen;
-    ANIMPLUS_WINDOW (w);
 
     int gridsizeY = animGetI( w, ANIMPLUS_SCREEN_OPTION_HELIX_GRIDSIZE_Y);
 
-    tessellateIntoRectangles(w, 
+    ad->animAddonFunc->tessellateIntoRectangles(w, 
                              1,
                              gridsizeY,
                              animGetF( w, ANIMPLUS_SCREEN_OPTION_HELIX_THICKNESS));
 
-    PolygonSet *pset = aw->eng.polygonSet;
+    PolygonSet *pset = aw->eng->polygonSet;
     PolygonObject *p = pset->polygons;
 
 

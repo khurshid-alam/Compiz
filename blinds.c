@@ -33,17 +33,20 @@
 
 Bool fxBlindsInit( CompWindow * w)
 {
-    if (!polygonsAnimInit (w))
-        return FALSE;
-
+    CompScreen *s = w->screen;
+    ANIMPLUS_DISPLAY (s->display);
     ANIMPLUS_WINDOW (w);
 
-tessellateIntoRectangles(w, 
+    if (!ad->animAddonFunc->polygonsAnimInit (w))
+        return FALSE;
+
+
+    ad->animAddonFunc->tessellateIntoRectangles(w, 
                       animGetI( w, ANIMPLUS_SCREEN_OPTION_BLINDS_GRIDX),
                       1,
                       animGetF( w, ANIMPLUS_SCREEN_OPTION_BLINDS_THICKNESS));
 
-    PolygonSet *pset = aw->eng.polygonSet;
+    PolygonSet *pset = aw->eng->polygonSet;
     PolygonObject *p = pset->polygons;
 
     int i;

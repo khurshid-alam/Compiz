@@ -13,22 +13,18 @@
 
 #include <compiz-core.h>
 #include <compiz-animation.h>
-#include "compiz-animationplus.h"
+#include <compiz-animationaddon.h>
 
 extern int animDisplayPrivateIndex;
 extern CompMetadata animMetadata;
 
-
 extern AnimEffect AnimEffectBlinds;
 extern AnimEffect AnimEffectHelix;
-extern AnimEffect AnimEffectShatter;
 
-#define NUM_EFFECTS 3
+#define NUM_EFFECTS 2
 
 typedef enum
 {
-    // Misc. settings
-    ANIMPLUS_SCREEN_OPTION_TIME_STEP_INTENSE = 0,
     // Effect settings
     ANIMPLUS_SCREEN_OPTION_BLINDS_HALFTWISTS,
     ANIMPLUS_SCREEN_OPTION_BLINDS_GRIDX,
@@ -38,15 +34,13 @@ typedef enum
     ANIMPLUS_SCREEN_OPTION_HELIX_THICKNESS,
     ANIMPLUS_SCREEN_OPTION_HELIX_DIRECTION,
     ANIMPLUS_SCREEN_OPTION_HELIX_SPIN_DIRECTION,
-    ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_SPOKES,
-    ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_TIERS,
 
     ANIMPLUS_SCREEN_OPTION_NUM
 } AnimPlusScreenOptions;
 
 // This must have the value of the first "effect setting" above
-// in AnimPlusScreenOptions
-#define NUM_NONEFFECT_OPTIONS ANIMPLUS_SCREEN_OPTION_HELIX_NUM_TWISTS
+// in AnimEgScreenOptions
+#define NUM_NONEFFECT_OPTIONS 0
 
 typedef enum _AnimPlusDisplayOptions
 {
@@ -58,7 +52,8 @@ typedef enum _AnimPlusDisplayOptions
 typedef struct _AnimPlusDisplay
 {
     int screenPrivateIndex;
-    AnimBaseFunctions *animBaseFunctions;
+    AnimBaseFunctions *animBaseFunc;
+    AnimAddonFunctions *animAddonFunc;
 
     CompOption opt[ANIMPLUS_DISPLAY_OPTION_NUM];
 } AnimPlusDisplay;
@@ -75,14 +70,8 @@ typedef struct _AnimPlusScreen
 typedef struct _AnimPlusWindow
 {
     AnimWindowCommon *com;
-    AnimWindowEngineData eng;
+    AnimWindowEngineData *eng;
 
-    // for polygon engine
-    int nDrawGeometryCalls;
-    Bool deceleratingMotion;	// For effects that have decel. motion
-    int nClipsPassed;	        /* # of clips passed to animAddWindowGeometry so far
-				   in this draw step */
-    Bool clipsUpdated;          // whether stored clips are updated in this anim step
 } AnimPlusWindow;
 
 #define GET_ANIMPLUS_DISPLAY(d)						\
@@ -117,132 +106,14 @@ typedef struct _AnimPlusWindow
 
 OPTION_GETTERS_HDR
 
-int
-getIntenseTimeStep (CompScreen *s);
-
 /* blinds.c */
 
-Bool 
+Bool
 fxBlindsInit( CompWindow *w );
 
 /* helix.c */
 
-Bool 
-fxHelixInit( CompWindow *w ); 
-
-/* particle.c */
-
-void
-initParticles (int numParticles,
-               ParticleSystem * ps);
-
-void
-drawParticles (CompWindow * w,
-               ParticleSystem * ps);
-
-void
-updateParticles (ParticleSystem * ps,
-                 float time);
-
-void
-finiParticles (ParticleSystem * ps);
-
-void
-drawParticleSystems (CompWindow *w);
-
-void
-particlesUpdateBB (CompOutput *output,
-                   CompWindow * w,
-                   Box *BB);
-
-void
-particlesCleanup (CompWindow * w);
-
 Bool
-particlesPrePrepPaintScreen (CompWindow * w,
-                             int msSinceLastPaint);
+fxHelixInit( CompWindow *w );
 
-/* polygon.c */
-
-Bool 
-tessellateIntoGlass(CompWindow * w, 
-                int spoke_num, int tier_num, float thickness);
-
-
-Bool
-tessellateIntoTriangles(CompWindow *w, 
-                int gridSizeX, int gridSizeY, float thickness);
-
-Bool
-tessellateIntoRectangles (CompWindow * w,
-			  int gridSizeX,
-			  int gridSizeY,
-			  float thickness);
- 
-Bool
-tessellateIntoHexagons (CompWindow * w,
-			int gridSizeX,
-			int gridSizeY,
-			float thickness);
-
-void
-polygonsStoreClips (CompWindow * w,
-		    int nClip, BoxPtr pClip,
-		    int nMatrix, CompMatrix * matrix);
- 
-void
-polygonsDrawCustomGeometry (CompWindow * w);
-
-void
-polygonsPrePaintWindow (CompWindow * w);
- 
-void
-polygonsPostPaintWindow (CompWindow * w);
-
-void
-freePolygonSet (AnimPlusWindow * aw);
-
-void
-freePolygonObjects (PolygonSet * pset);
- 
-void
-polygonsLinearAnimStepPolygon (CompWindow * w,
-			       PolygonObject *p,
-			       float forwardProgress);
-
-void
-polygonsDeceleratingAnimStepPolygon (CompWindow * w,
-				     PolygonObject *p,
-				     float forwardProgress);
-
-void
-polygonsUpdateBB (CompOutput *output,
-		  CompWindow * w,
-		  Box *BB);
-
-void
-polygonsAnimStep (CompWindow *w,
-		  float time);
-
-Bool
-polygonsPrePreparePaintScreen (CompWindow *w,
-			       int msSinceLastPaint);
-
-void
-polygonsCleanup (CompWindow *w);
-
-Bool
-polygonsAnimInit (CompWindow *w);
-
-void
-polygonsPrePaintOutput (CompScreen *s, CompOutput *output);
-
-void
-polygonsRefresh (CompWindow *w,
-		 Bool animInitialized);
-
-
-/* shatter.c */
-Bool
-fxShatterInit(CompWindow * w);
 

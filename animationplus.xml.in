@@ -1,22 +1,17 @@
 <compiz>
-  <!-- animationaddon metadata -->
+  <!-- animationplus metadata -->
   <plugin name="animationplus">
     <_short>Animations Plus</_short>
-    <_long>Extra window animations and animation engines</_long>
+    <_long>More window animations</_long>
     <category>Effects</category>
     <deps>
       <requirement>
-	<plugin>animation</plugin>
+	<plugin>animationaddon</plugin>
       </requirement>
       <relation type="after">
-	<plugin>animation</plugin>
+	<plugin>animationaddon</plugin>
       </relation>
     </deps>
-
-    <display>
-      <option name="abi" type="int" read_only="true"/>
-      <option name="index" type="int" read_only="true"/>
-    </display>
 
     <screen>
 
@@ -94,32 +89,7 @@
 	  </option>
 	</subgroup>
 
-	<subgroup>
-	  <_short>Shatter</_short>
-	  <option name="shatter_num_tiers" type="int">
-	    <_short>Number of Tiers</_short>
-	    <_long>The number of circular tiers the effect will have</_long>
-	    <default>5</default>
-	    <min>3</min>
-	    <max>8</max>
-	  </option>
-	  <option name="shatter_num_spokes" type="int">
-	    <_short>Number of Spokes</_short>
-	    <_long>The number of wedges that will compose the window</_long>
-	    <default>10</default>
-	    <min>4</min>
-	    <max>16</max>
-	  </option>
-	</subgroup>
-	
-	<option name="time_step_intense" type="int">
-	  <_short>Animation Time Step For Intense Effects</_short>
-	  <_long>The amount of time in milliseconds between each render of the intense animation (Ex. Burn, Beam). The higher the number, the jerkier the movements become.</_long>
-	  <default>30</default>
-	  <min>1</min>
-	  <max>400</max>
-	</option>
-      </group> 
+      </group>
 
       <extension plugin="animation">
 	<option>open_effects</option>
@@ -128,18 +98,14 @@
 	<option>close_random_effects</option>
 	<option>minimize_effects</option>
 	<option>minimize_random_effects</option>
-        <restriction>
-          <value>animationplus:Blinds</value>
-          <_name>Blinds</_name>
-        </restriction>
+	<restriction>
+	  <value>animationplus:Blinds</value>
+	  <_name>Blinds</_name>
+	</restriction>
 	<restriction>
 	  <value>animationplus:Helix</value>
 	  <_name>Helix</_name>
 	</restriction>
-        <restriction>
-          <value>animationplus:Shatter</value>
-          <_name>Shatter</_name>
-        </restriction>
       </extension>
       
     </screen>
