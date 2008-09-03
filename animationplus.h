@@ -168,6 +168,10 @@ tessellateIntoGlass(CompWindow * w,
 
 
 Bool
+tessellateIntoTriangles(CompWindow *w, 
+                int gridSizeX, int gridSizeY, float thickness);
+
+Bool
 tessellateIntoRectangles (CompWindow * w,
 			  int gridSizeX,
 			  int gridSizeY,

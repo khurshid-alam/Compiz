@@ -375,6 +375,267 @@ tessellateIntoRectangles(CompWindow * w,
     return TRUE;
 }
 
+
+Bool
+tessellateIntoTriangles(CompWindow *w, 
+                int gridSizeX, int gridSizeY, float thickness)
+{
+    ANIMPLUS_WINDOW(w);
+
+    PolygonSet *pset = aw->eng.polygonSet;
+
+    if (!pset)
+    return FALSE;
+
+    int winLimitsX;             // boundaries of polygon tessellation
+    int winLimitsY;
+    int winLimitsW;
+    int winLimitsH;
+
+    if (pset->includeShadows)
+    {
+    winLimitsX = WIN_X(w);
+    winLimitsY = WIN_Y(w);
+    winLimitsW = WIN_W(w) - 1; // avoid artifact on right edge
+    winLimitsH = WIN_H(w);
+    }
+    else
+    {
+    winLimitsX = BORDER_X(w);
+    winLimitsY = BORDER_Y(w);
+    winLimitsW = BORDER_W(w);
+    winLimitsH = BORDER_H(w);
+    }
+    float minRectSize = MIN_WINDOW_GRID_SIZE;
+    float rectW = winLimitsW / (float)gridSizeX;
+    float rectH = winLimitsH / (float)gridSizeY;
+
+    if (rectW < minRectSize)
+    gridSizeX = winLimitsW / minRectSize;   // int div.
+    if (rectH < minRectSize)
+    gridSizeY = winLimitsH / minRectSize;   // int div.
+
+    if (pset->nPolygons != gridSizeX * gridSizeY)
+    {
+    if (pset->nPolygons > 0)
+        freePolygonObjects(pset);
+
+    pset->nPolygons = gridSizeX * gridSizeY;
+
+    pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
+    if (!pset->polygons)
+    {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        pset->nPolygons = 0;
+        return FALSE;
+    }
+    }
+
+    thickness /= w->screen->width;
+    pset->thickness = thickness;
+    pset->nTotalFrontVertices = 0;
+
+    float cellW = (float)winLimitsW / gridSizeX;
+    float cellH = (float)winLimitsH / gridSizeY;
+    float halfW = cellW / 2;
+    float halfH = cellH / 2;
+
+    float halfThick = pset->thickness / 2;
+    PolygonObject *p = pset->polygons;
+    int x, y;
+
+    for (y = 0; y < gridSizeY; y++)
+    {
+    float posY = winLimitsY + cellH * (y + 0.5);
+
+    for (x = 0; x < gridSizeX; x++, p++)
+    {
+        p->centerPos.x = p->centerPosStart.x =
+        winLimitsX + cellW * (x + 0.5);
+        p->centerPos.y = p->centerPosStart.y = posY;
+        p->centerPos.z = p->centerPosStart.z = -halfThick;
+        p->rotAngle = p->rotAngleStart = 0;
+
+        p->centerRelPos.x = (x + 0.5) / gridSizeX;
+        p->centerRelPos.y = (y + 0.5) / gridSizeY;
+
+        p->nSides = 3;
+        p->nVertices = 2 * 3;
+        pset->nTotalFrontVertices += 3;
+
+        // 4 front, 4 back vertices
+        if (!p->vertices)
+        {
+        p->vertices = calloc(6 * 3, sizeof(GLfloat));
+        }
+
+        if (!p->vertices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        // Vertex normals
+        if (!p->normals)
+        {
+        p->normals = calloc(8 * 3, sizeof(GLfloat));
+        }
+        if (!p->normals)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError,
+                "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLfloat *pv = p->vertices;
+
+
+        if ((x%2) == 1)
+        {
+        // Determine 4 front vertices in ccw direction
+        pv[0] = -2*halfW;
+        pv[1] = -2*halfH;
+        pv[2] = halfThick;
+
+        pv[3] = 0;
+        pv[4] = halfH;
+        pv[5] = halfThick;
+
+        pv[6] = 2*halfW;
+        pv[7] = -2*halfH;
+        pv[8] = halfThick;
+        
+        // Determine 4 back vertices in cw direction
+        pv[9] = 2*halfW;
+        pv[10] = -2*halfH;
+        pv[11] = -halfThick;
+
+
+        pv[12] = 0;
+        pv[13] = halfH;
+        pv[14] = -halfThick;
+
+        pv[15] = -2*halfW;
+        pv[16] = -2*halfH;
+        pv[17] = -halfThick;
+
+        }
+        else
+        {
+        pv[0] = 2*halfW;
+        pv[1] = 2*halfH;
+        pv[2] = halfThick;
+
+        pv[3] = 0;
+        pv[4] = -halfH;
+        pv[5] = halfThick;
+
+        pv[6] = -2*halfW;
+        pv[7] = 2*halfH;
+        pv[8] = halfThick;
+        
+        // Determine 4 back vertices in cw direction
+        pv[9] = -2*halfW;
+        pv[10] = 2*halfH;
+        pv[11] = -halfThick;
+
+
+        pv[12] = 0;
+        pv[13] = -halfH;
+        pv[14] = -halfThick;
+
+        pv[15] = 2*halfW;
+        pv[16] = 2*halfH;
+        pv[17] = -halfThick;
+        }
+
+        // 16 indices for 4 sides (for quads)
+        if (!p->sideIndices)
+        {
+        p->sideIndices = calloc(3 * 4, sizeof(GLushort));
+        }
+        if (!p->sideIndices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLushort *ind = p->sideIndices;
+        GLfloat *nor = p->normals;
+
+        int id = 0;
+        
+        // Left face
+        ind[id++] = 4; // First vertex
+        ind[id++] = 1;
+        ind[id++] = 0;
+        ind[id++] = 5;
+        nor[4 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
+        nor[4 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
+        nor[4 * 3 + 2] = 0;
+
+        // Bottom face
+        ind[id++] = 1;
+        ind[id++] = 4;
+        ind[id++] = 3;
+        ind[id++] = 2;
+        nor[1 * 3 + 0] = 0;
+        nor[1 * 3 + 1] = 1;
+        nor[1 * 3 + 2] = 0;
+
+        // Right face
+        ind[id++] = 2;
+        ind[id++] = 3;
+        ind[id++] = 5;
+        ind[id++] = 0;
+        nor[2 * 3 + 0] = 1;
+        nor[2 * 3 + 1] = 0;
+        nor[2 * 3 + 2] = 0;
+
+        // Top face
+/*      ind[id++] = 7;
+        ind[id++] = 0;
+        ind[id++] = 3;
+        ind[id++] = 4;*/
+        nor[7 * 3 + 0] = 0;
+        nor[7 * 3 + 1] = -1;
+        nor[7 * 3 + 2] = 0;
+
+    
+
+        // Front face normal
+        nor[0] = 0;
+        nor[1] = 0;
+        nor[2] = 1;
+
+        // Back face normal
+        nor[3 * 3 + 0] = 0;
+        nor[3 * 3 + 1] = 0;
+        nor[3 * 3 + 2] = 1;
+
+
+        // Determine bounding box (to test intersection with clips)
+        p->boundingBox.x1 = -halfW + p->centerPos.x;
+        p->boundingBox.y1 = -halfH + p->centerPos.y;
+        p->boundingBox.x2 = ceil(halfW + p->centerPos.x);
+        p->boundingBox.y2 = ceil(halfH + p->centerPos.y);
+
+        p->boundSphereRadius =
+        sqrt (halfW * halfW + halfH * halfH + halfThick * halfThick);
+    }
+    }
+    return TRUE;
+}
+
+
+
 #define RANDOM 1
 #define PI 3.1415
 #define DEG_TO_RAD 2*PI/360
