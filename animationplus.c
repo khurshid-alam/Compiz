@@ -85,10 +85,10 @@
 
 #include <limits.h>
 #include <GL/glu.h>
-#include "animationaddon.h"
+#include "animationplus.h"
 
 int animDisplayPrivateIndex;
-int animAddonFunctionsPrivateIndex;
+int animPlusFunctionsPrivateIndex;
 CompMetadata animMetadata;
 
 
@@ -98,12 +98,12 @@ ExtensionPluginInfo animExtensionPluginInfo = {
     .nEffects		= NUM_EFFECTS,
     .effects		= animEffects,
 
-    .nEffectOptions	= ANIMADDON_SCREEN_OPTION_NUM,
+    .nEffectOptions	= ANIMPLUS_SCREEN_OPTION_NUM,
 
     .prePaintOutputFunc	= polygonsPrePaintOutput
 };
 
-OPTION_GETTERS (GET_ANIMADDON_DISPLAY(w->screen->display)->animBaseFunctions,
+OPTION_GETTERS (GET_ANIMPLUS_DISPLAY(w->screen->display)->animBaseFunctions,
 		&animExtensionPluginInfo, NUM_NONEFFECT_OPTIONS)
 
 static Bool
@@ -115,7 +115,7 @@ animSetScreenOptions(CompPlugin *plugin,
     CompOption *o;
     int index;
 
-    ANIMADDON_SCREEN (screen);
+    ANIMPLUS_SCREEN (screen);
 
     o = compFindOption(as->opt, NUM_OPTIONS(as), name, &index);
     if (!o)
@@ -131,7 +131,7 @@ animSetScreenOptions(CompPlugin *plugin,
     return FALSE;
 }
 
-static const CompMetadataOptionInfo animAddonDisplayOptionInfo[] = {
+static const CompMetadataOptionInfo animPlusDisplayOptionInfo[] = {
     { "abi", "int", 0, 0, 0 },
     { "index", "int", 0, 0, 0 }
 };
@@ -141,7 +141,7 @@ animGetDisplayOptions (CompPlugin  *plugin,
 		       CompDisplay *display,
 		       int         *count)
 {
-    ANIMADDON_DISPLAY (display);
+    ANIMPLUS_DISPLAY (display);
     *count = NUM_OPTIONS (ad);
     return ad->opt;
 }
@@ -154,14 +154,14 @@ animSetDisplayOption (CompPlugin      *plugin,
 {
     CompOption      *o;
     int	            index;
-    ANIMADDON_DISPLAY (display);
+    ANIMPLUS_DISPLAY (display);
     o = compFindOption (ad->opt, NUM_OPTIONS (ad), name, &index);
     if (!o)
 	return FALSE;
 
     switch (index) {
-    case ANIMADDON_DISPLAY_OPTION_ABI:
-    case ANIMADDON_DISPLAY_OPTION_INDEX:
+    case ANIMPLUS_DISPLAY_OPTION_ABI:
+    case ANIMPLUS_DISPLAY_OPTION_INDEX:
         break;
     default:
         return compSetDisplayOption (display, o, value);
@@ -173,7 +173,7 @@ animSetDisplayOption (CompPlugin      *plugin,
 static AnimWindowEngineData *
 getAnimWindowEngineData (CompWindow *w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     return &aw->eng;
 }
@@ -181,12 +181,12 @@ getAnimWindowEngineData (CompWindow *w)
 int
 getIntenseTimeStep (CompScreen *s)
 {
-    ANIMADDON_SCREEN (s);
+    ANIMPLUS_SCREEN (s);
 
-    return as->opt[ANIMADDON_SCREEN_OPTION_TIME_STEP_INTENSE].value.i;
+    return as->opt[ANIMPLUS_SCREEN_OPTION_TIME_STEP_INTENSE].value.i;
 }
 
-AnimAddonFunctions animAddonFunctions =
+AnimPlusFunctions animPlusFunctions =
 {
     .getAnimWindowEngineData		= getAnimWindowEngineData,
     .getIntenseTimeStep			= getIntenseTimeStep,
@@ -214,10 +214,11 @@ AnimAddonFunctions animAddonFunctions =
     .tessellateIntoHexagons		= tessellateIntoHexagons
 };
 
-static const CompMetadataOptionInfo animAddonScreenOptionInfo[] = {
+static const CompMetadataOptionInfo animPlusScreenOptionInfo[] = {
     // Misc. settings
     { "time_step_intense", "int", "<min>1</min>", 0, 0 },
     // Effect settings
+
     { "helix_num_twists", "int", "<min>1</min>", 0, 0 },
     { "helix_gridy", "int", "<min>5</min>", 0, 0 },
     { "helix_thickness", "float", 0, 0, 0 },
@@ -229,7 +230,7 @@ static const CompMetadataOptionInfo animAddonScreenOptionInfo[] = {
 static CompOption *
 animGetScreenOptions(CompPlugin *plugin, CompScreen * screen, int *count)
 {
-    ANIMADDON_SCREEN (screen);
+    ANIMPLUS_SCREEN (screen);
 
     *count = NUM_OPTIONS(as);
     return as->opt;
@@ -238,10 +239,10 @@ animGetScreenOptions(CompPlugin *plugin, CompScreen * screen, int *count)
 AnimEffect AnimEffectHelix	= &(AnimEffectInfo) {};
 
 static void
-initEffectProperties (AnimAddonDisplay *ad)
+initEffectProperties (AnimPlusDisplay *ad)
 {
     memcpy ((AnimEffectInfo *)AnimEffectHelix, &(AnimEffectInfo)
-	{"animationaddon:Helix",
+	{"animationplus:Helix",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
 	 {.prePaintWindowFunc		= polygonsPrePaintWindow,
 	  .postPaintWindowFunc		= polygonsPostPaintWindow,
@@ -266,7 +267,7 @@ initEffectProperties (AnimAddonDisplay *ad)
 
 static Bool animInitDisplay(CompPlugin * p, CompDisplay * d)
 {
-    AnimAddonDisplay *ad;
+    AnimPlusDisplay *ad;
     int animFunctionIndex;
 
     if (!checkPluginABI ("core", CORE_ABIVERSION) ||
@@ -276,15 +277,15 @@ static Bool animInitDisplay(CompPlugin * p, CompDisplay * d)
     if (!getPluginDisplayIndex (d, "animation", &animFunctionIndex))
 	return FALSE;
 
-    ad = calloc(1, sizeof(AnimAddonDisplay));
+    ad = calloc(1, sizeof(AnimPlusDisplay));
     if (!ad)
 	return FALSE;
 
     if (!compInitDisplayOptionsFromMetadata (d,
 					     &animMetadata,
-					     animAddonDisplayOptionInfo,
+					     animPlusDisplayOptionInfo,
 					     ad->opt,
-					     ANIMADDON_DISPLAY_OPTION_NUM))
+					     ANIMPLUS_DISPLAY_OPTION_NUM))
     {
 	free (ad);
 	return FALSE;
@@ -301,18 +302,18 @@ static Bool animInitDisplay(CompPlugin * p, CompDisplay * d)
 
     initEffectProperties (ad);
 
-    ad->opt[ANIMADDON_DISPLAY_OPTION_ABI].value.i   = ANIMATIONADDON_ABIVERSION;
-    ad->opt[ANIMADDON_DISPLAY_OPTION_INDEX].value.i = animAddonFunctionsPrivateIndex;
+    ad->opt[ANIMPLUS_DISPLAY_OPTION_ABI].value.i   = ANIMATION_ABIVERSION;
+    ad->opt[ANIMPLUS_DISPLAY_OPTION_INDEX].value.i = animPlusFunctionsPrivateIndex;
 
     d->base.privates[animDisplayPrivateIndex].ptr = ad;
-    d->base.privates[animAddonFunctionsPrivateIndex].ptr = &animAddonFunctions;
+    d->base.privates[animPlusFunctionsPrivateIndex].ptr = &animPlusFunctions;
 
     return TRUE;
 }
 
 static void animFiniDisplay(CompPlugin * p, CompDisplay * d)
 {
-    ANIMADDON_DISPLAY (d);
+    ANIMPLUS_DISPLAY (d);
 
     freeScreenPrivateIndex(d, ad->screenPrivateIndex);
 
@@ -321,19 +322,19 @@ static void animFiniDisplay(CompPlugin * p, CompDisplay * d)
 
 static Bool animInitScreen(CompPlugin * p, CompScreen * s)
 {
-    AnimAddonScreen *as;
+    AnimPlusScreen *as;
 
-    ANIMADDON_DISPLAY (s->display);
+    ANIMPLUS_DISPLAY (s->display);
 
-    as = calloc(1, sizeof(AnimAddonScreen));
+    as = calloc(1, sizeof(AnimPlusScreen));
     if (!as)
 	return FALSE;
 
     if (!compInitScreenOptionsFromMetadata (s,
 					    &animMetadata,
-					    animAddonScreenOptionInfo,
+					    animPlusScreenOptionInfo,
 					    as->opt,
-					    ANIMADDON_SCREEN_OPTION_NUM))
+					    ANIMPLUS_SCREEN_OPTION_NUM))
     {
 	free (as);
 	return FALSE;
@@ -342,7 +343,7 @@ static Bool animInitScreen(CompPlugin * p, CompScreen * s)
     as->windowPrivateIndex = allocateWindowPrivateIndex(s);
     if (as->windowPrivateIndex < 0)
     {
-	compFiniScreenOptions (s, as->opt, ANIMADDON_SCREEN_OPTION_NUM);
+	compFiniScreenOptions (s, as->opt, ANIMPLUS_SCREEN_OPTION_NUM);
 	free(as);
 	return FALSE;
     }
@@ -360,14 +361,14 @@ static Bool animInitScreen(CompPlugin * p, CompScreen * s)
 
 static void animFiniScreen(CompPlugin * p, CompScreen * s)
 {
-    ANIMADDON_SCREEN (s);
-    ANIMADDON_DISPLAY (s->display);
+    ANIMPLUS_SCREEN (s);
+    ANIMPLUS_DISPLAY (s->display);
 
     ad->animBaseFunctions->removeExtension (s, &animExtensionPluginInfo);
 
     freeWindowPrivateIndex(s, as->windowPrivateIndex);
 
-    compFiniScreenOptions (s, as->opt, ANIMADDON_SCREEN_OPTION_NUM);
+    compFiniScreenOptions (s, as->opt, ANIMPLUS_SCREEN_OPTION_NUM);
 
     free(as);
 }
@@ -375,12 +376,12 @@ static void animFiniScreen(CompPlugin * p, CompScreen * s)
 static Bool animInitWindow(CompPlugin * p, CompWindow * w)
 {
     CompScreen *s = w->screen;
-    AnimAddonWindow *aw;
+    AnimPlusWindow *aw;
 
-    ANIMADDON_DISPLAY (s->display);
-    ANIMADDON_SCREEN (s);
+    ANIMPLUS_DISPLAY (s->display);
+    ANIMPLUS_SCREEN (s);
 
-    aw = calloc(1, sizeof(AnimAddonWindow));
+    aw = calloc(1, sizeof(AnimPlusWindow));
     if (!aw)
 	return FALSE;
 
@@ -395,7 +396,7 @@ static Bool animInitWindow(CompPlugin * p, CompWindow * w)
 
 static void animFiniWindow(CompPlugin * p, CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     free(aw);
 }
@@ -464,8 +465,8 @@ static Bool animInit(CompPlugin * p)
     if (!compInitPluginMetadataFromInfo (&animMetadata,
 					 p->vTable->name,
 					 0, 0,
-					 animAddonScreenOptionInfo,
-					 ANIMADDON_SCREEN_OPTION_NUM))
+					 animPlusScreenOptionInfo,
+					 ANIMPLUS_SCREEN_OPTION_NUM))
 	return FALSE;
 
     animDisplayPrivateIndex = allocateDisplayPrivateIndex();
@@ -475,8 +476,8 @@ static Bool animInit(CompPlugin * p)
 	return FALSE;
     }
 
-    animAddonFunctionsPrivateIndex = allocateDisplayPrivateIndex ();
-    if (animAddonFunctionsPrivateIndex < 0)
+    animPlusFunctionsPrivateIndex = allocateDisplayPrivateIndex ();
+    if (animPlusFunctionsPrivateIndex < 0)
     {
 	freeDisplayPrivateIndex (animDisplayPrivateIndex);
 	compFiniMetadata (&animMetadata);
@@ -491,7 +492,7 @@ static Bool animInit(CompPlugin * p)
 static void animFini(CompPlugin * p)
 {
     freeDisplayPrivateIndex(animDisplayPrivateIndex);
-    freeDisplayPrivateIndex (animAddonFunctionsPrivateIndex);
+    freeDisplayPrivateIndex (animPlusFunctionsPrivateIndex);
     compFiniMetadata (&animMetadata);
 }
 
@@ -502,7 +503,7 @@ animGetMetadata (CompPlugin *plugin)
 }
 
 CompPluginVTable animVTable = {
-    "animationaddon",
+    "animationplus",
     animGetMetadata,
     animInit,
     animFini,

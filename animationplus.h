@@ -13,7 +13,7 @@
 
 #include <compiz-core.h>
 #include <compiz-animation.h>
-#include "compiz-animationaddon.h"
+#include "compiz-animationplus.h"
 
 extern int animDisplayPrivateIndex;
 extern CompMetadata animMetadata;
@@ -28,46 +28,46 @@ extern AnimEffect AnimEffectShatter;
 typedef enum
 {
     // Misc. settings
-    ANIMADDON_SCREEN_OPTION_TIME_STEP_INTENSE = 0,
+    ANIMPLUS_SCREEN_OPTION_TIME_STEP_INTENSE = 0,
     // Effect settings
-    ANIMADDON_SCREEN_OPTION_HELIX_NUM_TWISTS,
-    ANIMADDON_SCREEN_OPTION_HELIX_THICKNESS,
-    ANIMADDON_SCREEN_OPTION_HELIX_GRIDSIZE_Y,
-    ANIMADDON_SCREEN_OPTION_HELIX_DIRECTION,
-    ANIMADDON_SCREEN_OPTION_HELIX_SPIN_DIRECTION,
+    ANIMPLUS_SCREEN_OPTION_HELIX_NUM_TWISTS,
+    ANIMPLUS_SCREEN_OPTION_HELIX_GRIDSIZE_Y,
+    ANIMPLUS_SCREEN_OPTION_HELIX_THICKNESS,
+    ANIMPLUS_SCREEN_OPTION_HELIX_DIRECTION,
+    ANIMPLUS_SCREEN_OPTION_HELIX_SPIN_DIRECTION,
 
-    ANIMADDON_SCREEN_OPTION_NUM
-} AnimAddonScreenOptions;
+    ANIMPLUS_SCREEN_OPTION_NUM
+} AnimPlusScreenOptions;
 
 // This must have the value of the first "effect setting" above
-// in AnimAddonScreenOptions
-#define NUM_NONEFFECT_OPTIONS ANIMADDON_SCREEN_OPTION_HELIX_NUM_TWISTS
+// in AnimPlusScreenOptions
+#define NUM_NONEFFECT_OPTIONS ANIMPLUS_SCREEN_OPTION_HELIX_NUM_TWISTS
 
-typedef enum _AnimAddonDisplayOptions
+typedef enum _AnimPlusDisplayOptions
 {
-    ANIMADDON_DISPLAY_OPTION_ABI = 0,
-    ANIMADDON_DISPLAY_OPTION_INDEX,
-    ANIMADDON_DISPLAY_OPTION_NUM
-} AnimAddonDisplayOptions;
+    ANIMPLUS_DISPLAY_OPTION_ABI = 0,
+    ANIMPLUS_DISPLAY_OPTION_INDEX,
+    ANIMPLUS_DISPLAY_OPTION_NUM
+} AnimPlusDisplayOptions;
 
-typedef struct _AnimAddonDisplay
+typedef struct _AnimPlusDisplay
 {
     int screenPrivateIndex;
     AnimBaseFunctions *animBaseFunctions;
 
-    CompOption opt[ANIMADDON_DISPLAY_OPTION_NUM];
-} AnimAddonDisplay;
+    CompOption opt[ANIMPLUS_DISPLAY_OPTION_NUM];
+} AnimPlusDisplay;
 
-typedef struct _AnimAddonScreen
+typedef struct _AnimPlusScreen
 {
     int windowPrivateIndex;
 
     CompOutput *output;
 
-    CompOption opt[ANIMADDON_SCREEN_OPTION_NUM];
-} AnimAddonScreen;
+    CompOption opt[ANIMPLUS_SCREEN_OPTION_NUM];
+} AnimPlusScreen;
 
-typedef struct _AnimAddonWindow
+typedef struct _AnimPlusWindow
 {
     AnimWindowCommon *com;
     AnimWindowEngineData eng;
@@ -78,27 +78,27 @@ typedef struct _AnimAddonWindow
     int nClipsPassed;	        /* # of clips passed to animAddWindowGeometry so far
 				   in this draw step */
     Bool clipsUpdated;          // whether stored clips are updated in this anim step
-} AnimAddonWindow;
+} AnimPlusWindow;
 
-#define GET_ANIMADDON_DISPLAY(d)						\
-    ((AnimAddonDisplay *) (d)->base.privates[animDisplayPrivateIndex].ptr)
+#define GET_ANIMPLUS_DISPLAY(d)						\
+    ((AnimPlusDisplay *) (d)->base.privates[animDisplayPrivateIndex].ptr)
 
-#define ANIMADDON_DISPLAY(d)				\
-    AnimAddonDisplay *ad = GET_ANIMADDON_DISPLAY (d)
+#define ANIMPLUS_DISPLAY(d)				\
+    AnimPlusDisplay *ad = GET_ANIMPLUS_DISPLAY (d)
 
-#define GET_ANIMADDON_SCREEN(s, ad)						\
-    ((AnimAddonScreen *) (s)->base.privates[(ad)->screenPrivateIndex].ptr)
+#define GET_ANIMPLUS_SCREEN(s, ad)						\
+    ((AnimPlusScreen *) (s)->base.privates[(ad)->screenPrivateIndex].ptr)
 
-#define ANIMADDON_SCREEN(s)							\
-    AnimAddonScreen *as = GET_ANIMADDON_SCREEN (s, GET_ANIMADDON_DISPLAY (s->display))
+#define ANIMPLUS_SCREEN(s)							\
+    AnimPlusScreen *as = GET_ANIMPLUS_SCREEN (s, GET_ANIMPLUS_DISPLAY (s->display))
 
-#define GET_ANIMADDON_WINDOW(w, as)						\
-    ((AnimAddonWindow *) (w)->base.privates[(as)->windowPrivateIndex].ptr)
+#define GET_ANIMPLUS_WINDOW(w, as)						\
+    ((AnimPlusWindow *) (w)->base.privates[(as)->windowPrivateIndex].ptr)
 
-#define ANIMADDON_WINDOW(w)					     \
-    AnimAddonWindow *aw = GET_ANIMADDON_WINDOW (w,                     \
-		     GET_ANIMADDON_SCREEN (w->screen,             \
-		     GET_ANIMADDON_DISPLAY (w->screen->display)))
+#define ANIMPLUS_WINDOW(w)					     \
+    AnimPlusWindow *aw = GET_ANIMPLUS_WINDOW (w,                     \
+		     GET_ANIMPLUS_SCREEN (w->screen,             \
+		     GET_ANIMPLUS_DISPLAY (w->screen->display)))
 
 // ratio of perceived length of animation compared to real duration
 // to make it appear to have the same speed with other animation effects
@@ -115,11 +115,15 @@ OPTION_GETTERS_HDR
 int
 getIntenseTimeStep (CompScreen *s);
 
+/* blinds.c */
+
+Bool 
+fxBlindsInit( CompWindow *w );
+
 /* helix.c */
 
-void 
-fxHelixInit( CompScreen *s, CompWindow *w);
-
+Bool 
+fxHelixInit( CompWindow *w ); 
 
 /* particle.c */
 
@@ -182,7 +186,7 @@ void
 polygonsPostPaintWindow (CompWindow * w);
 
 void
-freePolygonSet (AnimAddonWindow * aw);
+freePolygonSet (AnimPlusWindow * aw);
 
 void
 freePolygonObjects (PolygonSet * pset);

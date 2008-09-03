@@ -34,7 +34,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "animationaddon.h"
+#include "animationplus.h"
 
 void initParticles(int numParticles, ParticleSystem * ps)
 {
@@ -221,7 +221,7 @@ void drawParticles (CompWindow * w, ParticleSystem * ps)
 
 void drawParticleSystems (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     if (aw->eng.numPs && !WINDOW_INVISIBLE(w))
     {
@@ -288,8 +288,8 @@ particlesUpdateBB (CompOutput *output,
 		   CompWindow * w,
 		   Box *BB)
 {
-    ANIMADDON_DISPLAY (w->screen->display);
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_DISPLAY (w->screen->display);
+    ANIMPLUS_WINDOW (w);
 
     int i;
     for (i = 0; i < aw->eng.numPs; i++)
@@ -333,7 +333,7 @@ particlesUpdateBB (CompOutput *output,
 void
 particlesCleanup (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     if (aw->eng.numPs)
     {
@@ -350,7 +350,7 @@ particlesCleanup (CompWindow * w)
 Bool
 particlesPrePrepPaintScreen (CompWindow * w, int msSinceLastPaint)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     Bool particleAnimInProgress = FALSE;
 

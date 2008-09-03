@@ -35,7 +35,7 @@
  */
 
 #include <GL/glu.h>
-#include "animationaddon.h"
+#include "animationplus.h"
 
 #define CLIP_LIST_INCREMENT 20
 #define MIN_WINDOW_GRID_SIZE 10
@@ -129,7 +129,7 @@ static void freeClipsPolygons(PolygonSet * pset)
 
 // Frees up the whole polygon set
 void
-freePolygonSet (AnimAddonWindow * aw)
+freePolygonSet (AnimPlusWindow * aw)
 {
     PolygonSet *pset = aw->eng.polygonSet;
 
@@ -150,7 +150,7 @@ Bool
 tessellateIntoRectangles(CompWindow * w,
 			 int gridSizeX, int gridSizeY, float thickness)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     PolygonSet *pset = aw->eng.polygonSet;
 
@@ -195,7 +195,7 @@ tessellateIntoRectangles(CompWindow * w,
 	pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
 	if (!pset->polygons)
 	{
-	    compLogMessage (w->screen->display, "animationaddon",
+	    compLogMessage (w->screen->display, "animationplus",
 			    CompLogLevelError, "Not enough memory");
 	    pset->nPolygons = 0;
 	    return FALSE;
@@ -242,7 +242,7 @@ tessellateIntoRectangles(CompWindow * w,
 
 	    if (!p->vertices)
 	    {
-		compLogMessage (w->screen->display, "animationaddon",
+		compLogMessage (w->screen->display, "animationplus",
 				CompLogLevelError, "Not enough memory");
 		freePolygonObjects(pset);
 		return FALSE;
@@ -255,7 +255,7 @@ tessellateIntoRectangles(CompWindow * w,
 	    }
 	    if (!p->normals)
 	    {
-		compLogMessage (w->screen->display, "animationaddon",
+		compLogMessage (w->screen->display, "animationplus",
 				CompLogLevelError,
 				"Not enough memory");
 		freePolygonObjects(pset);
@@ -305,7 +305,7 @@ tessellateIntoRectangles(CompWindow * w,
 	    }
 	    if (!p->sideIndices)
 	    {
-		compLogMessage (w->screen->display, "animationaddon",
+		compLogMessage (w->screen->display, "animationplus",
 				CompLogLevelError, "Not enough memory");
 		freePolygonObjects(pset);
 		return FALSE;
@@ -380,7 +380,7 @@ Bool
 tessellateIntoHexagons(CompWindow * w,
 		       int gridSizeX, int gridSizeY, float thickness)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     PolygonSet *pset = aw->eng.polygonSet;
 
@@ -427,7 +427,7 @@ tessellateIntoHexagons(CompWindow * w,
 	pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
 	if (!pset->polygons)
 	{
-	    compLogMessage (w->screen->display, "animationaddon",
+	    compLogMessage (w->screen->display, "animationplus",
 			    CompLogLevelError, "Not enough memory");
 	    pset->nPolygons = 0;
 	    return FALSE;
@@ -510,7 +510,7 @@ tessellateIntoHexagons(CompWindow * w,
 		p->vertices = calloc(6 * 2 * 3, sizeof(GLfloat));
 		if (!p->vertices)
 		{
-		    compLogMessage (w->screen->display, "animationaddon",
+		    compLogMessage (w->screen->display, "animationplus",
 				    CompLogLevelError, "Not enough memory");
 		    freePolygonObjects(pset);
 		    return FALSE;
@@ -524,7 +524,7 @@ tessellateIntoHexagons(CompWindow * w,
 	    }
 	    if (!p->normals)
 	    {
-		compLogMessage (w->screen->display, "animationaddon",
+		compLogMessage (w->screen->display, "animationplus",
 				CompLogLevelError, "Not enough memory");
 		freePolygonObjects(pset);
 		return FALSE;
@@ -590,7 +590,7 @@ tessellateIntoHexagons(CompWindow * w,
 	    }
 	    if (!p->sideIndices)
 	    {
-		compLogMessage (w->screen->display, "animationaddon",
+		compLogMessage (w->screen->display, "animationplus",
 				CompLogLevelError, "Not enough memory");
 		freePolygonObjects(pset);
 		return FALSE;
@@ -687,7 +687,7 @@ tessellateIntoHexagons(CompWindow * w,
 	}
     }
     if (pset->nPolygons != p - pset->polygons)
-	compLogMessage (w->screen->display, "animationaddon", CompLogLevelError,
+	compLogMessage (w->screen->display, "animationplus", CompLogLevelError,
 			"%s: Error in tessellateIntoHexagons at line %d!",
 			__FILE__, __LINE__);
     return TRUE;
@@ -698,7 +698,7 @@ polygonsStoreClips (CompWindow * w,
 		    int nClip, BoxPtr pClip, int nMatrix, CompMatrix * matrix)
 {
     CompScreen *s = w->screen;
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     PolygonSet *pset = aw->eng.polygonSet;
 
@@ -742,7 +742,7 @@ polygonsStoreClips (CompWindow * w,
 
 	if (!ensureLargerClipCapacity(pset))
 	{
-	    compLogMessage (s->display, "animationaddon", CompLogLevelError,
+	    compLogMessage (s->display, "animationplus", CompLogLevelError,
 			    "Not enough memory");
 	    return;
 	}
@@ -833,7 +833,7 @@ static Bool processIntersectingPolygons(CompScreen * s, PolygonSet * pset)
 	    }
 	    if (!c->intersectingPolygons || !c->polygonVertexTexCoords)
 	    {
-		compLogMessage (s->display, "animationaddon", CompLogLevelError,
+		compLogMessage (s->display, "animationplus", CompLogLevelError,
 				"Not enough memory");
 		freeClipsPolygons(pset);
 		return FALSE;
@@ -888,7 +888,7 @@ getPerspectiveCorrectionMat (CompWindow *w,
 			     CompTransform *matf)
 {
     CompScreen *s = w->screen;
-    ANIMADDON_SCREEN (s);
+    ANIMPLUS_SCREEN (s);
     Point center;
 
     if (p) // for CorrectPerspectivePolygon
@@ -976,8 +976,8 @@ polygonsDrawCustomGeometry (CompWindow * w)
 {
     CompScreen *s = w->screen;
 
-    ANIMADDON_DISPLAY (s->display);
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_DISPLAY (s->display);
+    ANIMPLUS_WINDOW (w);
 
     aw->nDrawGeometryCalls++;
 
@@ -1368,7 +1368,7 @@ polygonsDrawCustomGeometry (CompWindow * w)
 void
 polygonsPrePaintWindow (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     aw->nDrawGeometryCalls = 0;
 
@@ -1379,7 +1379,7 @@ polygonsPrePaintWindow (CompWindow * w)
 void
 polygonsPostPaintWindow (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
     if (aw->clipsUpdated &&	// clips should be dropped only in the 1st step
 	aw->eng.polygonSet && aw->nDrawGeometryCalls == 0)	// if clips not drawn
     {
@@ -1419,7 +1419,7 @@ polygonsDeceleratingAnimStepPolygon (CompWindow *w,
 				     PolygonObject *p,
 				     float forwardProgress)
 {
-    ANIMADDON_DISPLAY (w->screen->display);
+    ANIMPLUS_DISPLAY (w->screen->display);
 
     float moveProgress = forwardProgress - p->moveStartTime;
 
@@ -1441,11 +1441,11 @@ polygonsDeceleratingAnimStepPolygon (CompWindow *w,
 }
 
 static inline AnimStepPolygonProc
-getAnimStepPolygonFunc (AnimAddonWindow *aw)
+getAnimStepPolygonFunc (AnimPlusWindow *aw)
 {
     void *extraProp = aw->com->curAnimEffect->properties.extraProperties;
     if (extraProp)
-	return ((AnimAddonEffectProperties *)extraProp)->animStepPolygonFunc;
+	return ((AnimPlusEffectProperties *)extraProp)->animStepPolygonFunc;
     return &polygonsLinearAnimStepPolygon; // Use linear polygon step by default
 }
 
@@ -1454,8 +1454,8 @@ polygonsAnimStep (CompWindow *w, float time)
 {
     CompScreen *s = w->screen;
 
-    ANIMADDON_DISPLAY (s->display);
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_DISPLAY (s->display);
+    ANIMPLUS_WINDOW (w);
 
     ad->animBaseFunctions->defaultAnimStep (w, time);
 
@@ -1470,7 +1470,7 @@ polygonsAnimStep (CompWindow *w, float time)
 	    polygonStepFunc (w, &aw->eng.polygonSet->polygons[i], forwardProgress);
     }
     else
-	compLogMessage (s->display, "animationaddon", CompLogLevelDebug,
+	compLogMessage (s->display, "animationplus", CompLogLevelDebug,
 			"%s: pset null at line %d\n",__FILE__,  __LINE__);
 }
 
@@ -1480,8 +1480,8 @@ polygonsUpdateBB (CompOutput *output,
 		  Box *BB)
 {
     CompScreen *s = w->screen;
-    ANIMADDON_DISPLAY (s->display);
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_DISPLAY (s->display);
+    ANIMPLUS_WINDOW (w);
 
     PolygonSet *pset = aw->eng.polygonSet;
     if (!pset)
@@ -1585,7 +1585,7 @@ polygonsUpdateBB (CompOutput *output,
 Bool
 polygonsAnimInit (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     aw->deceleratingMotion = (getAnimStepPolygonFunc (aw) ==
 			      polygonsDeceleratingAnimStepPolygon);
@@ -1597,7 +1597,7 @@ polygonsAnimInit (CompWindow * w)
     if (!aw->eng.polygonSet)
     {
 	compLogMessage (w->screen->display, 
-			"animationaddon", CompLogLevelError,
+			"animationplus", CompLogLevelError,
 			"Not enough memory");
 	return FALSE;
     }
@@ -1609,7 +1609,7 @@ Bool
 polygonsPrePreparePaintScreen (CompWindow * w,
 			       int msSinceLastPaint)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     aw->nClipsPassed = 0;
     aw->clipsUpdated = FALSE;
@@ -1620,7 +1620,7 @@ polygonsPrePreparePaintScreen (CompWindow * w,
 void
 polygonsRefresh (CompWindow * w, Bool animInitialized)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     if (aw->eng.polygonSet && !animInitialized)
 	// to refresh polygon coords
@@ -1630,7 +1630,7 @@ polygonsRefresh (CompWindow * w, Bool animInitialized)
 void
 polygonsCleanup (CompWindow * w)
 {
-    ANIMADDON_WINDOW (w);
+    ANIMPLUS_WINDOW (w);
 
     if (aw->eng.polygonSet)
 	freePolygonSet(aw);
@@ -1639,7 +1639,7 @@ polygonsCleanup (CompWindow * w)
 void
 polygonsPrePaintOutput (CompScreen *s, CompOutput *output)
 {
-    ANIMADDON_SCREEN (s);
+    ANIMPLUS_SCREEN (s);
 
     as->output = output;
 
@@ -1648,7 +1648,7 @@ polygonsPrePaintOutput (CompScreen *s, CompOutput *output)
     CompWindow *w;
     for (w = s->windows; w; w = w->next)
     {
-	ANIMADDON_WINDOW (w);
+	ANIMPLUS_WINDOW (w);
 	if (aw->com->animRemainingTime > 0 &&
 	    aw->eng.polygonSet &&
 	    aw->eng.polygonSet->doDepthTest)

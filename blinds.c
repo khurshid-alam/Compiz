@@ -29,17 +29,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "animation-internal.h"
+#include "animationplus.h"
 
-void fxBlindsInit(CompScreen * s, CompWindow * w)
+Bool fxBlindsInit( CompWindow * w)
 {
-    ANIM_WINDOW (w);
-    ANIM_SCREEN (s);
+    if (!polygonsAnimInit (w))
+        return FALSE;
+
+    CompScreen *s = w->screen;
+    ANIMPLUS_WINDOW (w);
 
 tessellateIntoRectangles(w, 
-                      animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_GRIDX),
+                      animGetI( w, ANIMPLUS_SCREEN_OPTION_BLINDS_GRIDX),
                       1,
-                      animGetF(as, aw, ANIM_SCREEN_OPTION_BLINDS_THICKNESS));
+                      animGetF( w, ANIMPLUS_SCREEN_OPTION_BLINDS_THICKNESS));
 
     PolygonSet *pset = aw->polygonSet;
     PolygonObject *p = pset->polygons;
@@ -58,7 +61,7 @@ tessellateIntoRectangles(w,
     p->finalRelPos.y = 0;
     p->finalRelPos.z = 0;
     
-    int numberOfHalfTwists = animGetI(as, aw, ANIM_SCREEN_OPTION_BLINDS_HALFTWISTS);
+    int numberOfHalfTwists = animGetI( w, ANIMPLUS_SCREEN_OPTION_BLINDS_HALFTWISTS);
     p->finalRotAng = 180 * numberOfHalfTwists ;
     }
     

@@ -1,7 +1,7 @@
-#ifndef _COMPIZ_ANIMATIONADDON_H
-#define _COMPIZ_ANIMATIONADDON_H
+#ifndef _COMPIZ_ANIMATIONPLUS_H
+#define _COMPIZ_ANIMATIOPLUS_H
 
-#define ANIMATIONADDON_ABIVERSION 20080824
+#define ANIMATIONPLUS_ABIVERSION 20080824
 
 
 // Polygon tesselation type: Rectangular, Hexagonal
@@ -173,9 +173,9 @@ typedef Bool
 		   int gridSizeY,
 		   float thickness);
 
-// Animaddon plugin functions for extension plugins to call
+// Animplus plugin functions for extension plugins to call
 // (only for plugins with effects that use polygon or particle engines).
-typedef struct _AnimAddonFunctions {
+typedef struct _AnimPlusFunctions {
     AnimWindowEngineData * (*getAnimWindowEngineData) (CompWindow *w);
     int (*getIntenseTimeStep) (CompScreen *s);
 
@@ -210,16 +210,16 @@ typedef struct _AnimAddonFunctions {
     void (*freePolygonObjects) (PolygonSet * pset);
     tessellateProc	tessellateIntoRectangles;
     tessellateProc	tessellateIntoHexagons;
-} AnimAddonFunctions;
+} AnimPlusFunctions;
 
 typedef void (*AnimStepPolygonProc) (CompWindow *w,
 				     PolygonObject *p,
 				     float forwardProgress);
 
-typedef struct _AnimAddonEffectProperties
+typedef struct _AnimPlusEffectProperties
 {
     AnimStepPolygonProc animStepPolygonFunc;
-} AnimAddonEffectProperties;
+} AnimPlusEffectProperties;
 
 #endif
 
