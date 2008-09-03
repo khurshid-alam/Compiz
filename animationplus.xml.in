@@ -94,6 +94,24 @@
 	  </option>
 	</subgroup>
 
+	<subgroup>
+	  <_short>Shatter</_short>
+	  <option name="shatter_num_tiers" type="int">
+	    <_short>Number of Tiers</_short>
+	    <_long>The number of circular tiers the effect will have</_long>
+	    <default>5</default>
+	    <min>3</min>
+	    <max>8</max>
+	  </option>
+	  <option name="shatter_num_spokes" type="int">
+	    <_short>Number of Spokes</_short>
+	    <_long>The number of wedges that will compose the window</_long>
+	    <default>10</default>
+	    <min>4</min>
+	    <max>16</max>
+	  </option>
+	</subgroup>
+	
 	<option name="time_step_intense" type="int">
 	  <_short>Animation Time Step For Intense Effects</_short>
 	  <_long>The amount of time in milliseconds between each render of the intense animation (Ex. Burn, Beam). The higher the number, the jerkier the movements become.</_long>
@@ -118,6 +136,10 @@
 	  <value>animationplus:Helix</value>
 	  <_name>Helix</_name>
 	</restriction>
+        <restriction>
+          <value>animationplus:Shatter</value>
+          <_name>Shatter</_name>
+        </restriction>
       </extension>
       
     </screen>

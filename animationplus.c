@@ -227,7 +227,8 @@ static const CompMetadataOptionInfo animPlusScreenOptionInfo[] = {
     { "helix_thickness", "float", 0, 0, 0 },
     { "helix_direction", "bool", 0, 0, 0 },
     { "helix_spin_direction", "int", "<min>0</min>", 0, 0 },
-
+    { "shatter_num_tiers", "int", "<min>3</min><max>8</max>", 0, 0},
+    { "shatter_num_spokes", "int", "<min>4</min><max>16</max>", 0, 0}
 
 };
 
@@ -242,6 +243,7 @@ animGetScreenOptions(CompPlugin *plugin, CompScreen * screen, int *count)
 
 AnimEffect AnimEffectHelix	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectBlinds     = &(AnimEffectInfo) {};
+AnimEffect AnimEffectShatter    = &(AnimEffectInfo) {};
 
 static void
 initEffectProperties (AnimPlusDisplay *ad)
@@ -277,11 +279,26 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .refreshFunc			= polygonsRefresh}},
 	  sizeof (AnimEffectInfo));
 
+    memcpy ((AnimEffectInfo *)AnimEffectHelix, &(AnimEffectInfo)
+	{"animationplus:Shatter",
+	 {TRUE, TRUE, TRUE, FALSE, FALSE},
+	 {.prePaintWindowFunc		= polygonsPrePaintWindow,
+	  .postPaintWindowFunc		= polygonsPostPaintWindow,
+	  .animStepFunc			= polygonsAnimStep,
+	  .initFunc			= fxShatterInit,
+	  .addCustomGeometryFunc	= polygonsStoreClips,
+	  .drawCustomGeometryFunc	= polygonsDrawCustomGeometry,
+	  .updateBBFunc			= ad->animBaseFunctions->updateBBScreen,
+	  .prePrepPaintScreenFunc	= polygonsPrePreparePaintScreen,
+	  .cleanupFunc			= polygonsCleanup,
+	  .refreshFunc			= polygonsRefresh}},
+	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
     {
         AnimEffectBlinds,
-	AnimEffectHelix
+	AnimEffectHelix,
+        AnimEffectShatter
     };
     memcpy (animEffects,
 	    animEffectsTmp,

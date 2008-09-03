@@ -29,17 +29,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "animation-internal.h"
+#include "animationplus.h"
 
-void fxShatterInit(CompScreen * s, CompWindow * w)
+Bool fxShatterInit(CompWindow * w)
 {
-    ANIM_WINDOW(w);
-    ANIM_SCREEN(s);
+    if (!polygonsAnimInit (w))
+        return FALSE;
 
+    CompScreen *s = w->screen;
+    ANIMPLUS_WINDOW(w);
+    
     int screen_height = s->outputDev[outputDeviceForWindow(w)].height;
 
-    int spoke_num = animGetI(as, aw, ANIM_SCREEN_OPTION_SHATTER_NUM_SPOKES);
-    int tier_num = animGetI(as, aw, ANIM_SCREEN_OPTION_SHATTER_NUM_TIERS);
+    int spoke_num = animGetI( w, ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_SPOKES);
+    int tier_num = animGetI( w, ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_TIERS);
 
     spoke_num = spoke_num + (int)(3*(rand()/(float)RAND_MAX)) ;
     tier_num = tier_num + (int) (rand()/(float)RAND_MAX);
@@ -47,9 +50,9 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
     if (!tessellateIntoGlass(w, 
                     spoke_num,
                     tier_num,
-                    animGetF(as, aw, ANIM_SCREEN_OPTION_EXPLODE3D_THICKNESS)));
+                    1.0f      ));
 
-    PolygonSet *pset = aw->polygonSet;
+    PolygonSet *pset = aw->eng.polygonSet;
     PolygonObject *p = pset->polygons;
     int i, static_polygon;
 
@@ -79,6 +82,8 @@ void fxShatterInit(CompScreen * s, CompWindow * w)
     pset->correctPerspective = CorrectPerspectivePolygon;
     pset->backAndSidesFadeDur = 0.2f;
 
-    aw->animTotalTime /= EXPLODE_PERCEIVED_T;
-    aw->animRemainingTime = aw->animTotalTime;
+    aw->com->animTotalTime /= EXPLODE_PERCEIVED_T;
+    aw->com->animRemainingTime = aw->com->animTotalTime;
+
+    return TRUE;
 }
