@@ -162,6 +162,11 @@ particlesPrePrepPaintScreen (CompWindow * w,
 
 /* polygon.c */
 
+Bool 
+tessellateIntoGlass(CompWindow * w, 
+                int spoke_num, int tier_num, float thickness);
+
+
 Bool
 tessellateIntoRectangles (CompWindow * w,
 			  int gridSizeX,

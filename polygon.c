@@ -375,6 +375,492 @@ tessellateIntoRectangles(CompWindow * w,
     return TRUE;
 }
 
+#define RANDOM 1
+#define PI 3.1415
+#define DEG_TO_RAD 2*PI/360
+#define RAD_TO_DEG 360/(2*PI)
+
+typedef struct
+{
+    float dist;
+    Bool connected_to_next;
+    float x, y; //relative from center
+    
+} spoke_vertex_t;
+
+typedef struct
+{
+    float direction;
+    float length;
+    spoke_vertex_t * spoke_vertex;
+
+} spoke_t;
+
+typedef struct
+{
+    Bool is_triangle;       //false if 4 sided, true if 3 sided
+    float centerX, centerY;
+    float   pt0X, pt0Y, 
+            pt1X, pt1Y,
+            pt2X, pt2Y,
+            pt3X, pt3Y;     //if is_triangle is true, these are unused
+    
+    
+} shard_t;
+
+/*        90        //degree orientation
+ *         |
+ *    180--+--0
+ *         |
+ *        270
+ * This function tessellates the window into radial shards, with
+ * each shard split into the number of "tiers". This forms a broken
+ * glass or spiderweb appearance.
+ */
+Bool 
+tessellateIntoGlass(CompWindow * w, 
+                int spoke_num, int tier_num, float thickness)
+{
+    ANIMPLUS_WINDOW(w);
+    
+    PolygonSet *pset = aw->eng.polygonSet;
+    
+    int winLimitsX, winLimitsY, winLimitsW, winLimitsH;
+    float centerX, centerY;
+    int  spoke_range;
+    int i,j; 
+    float top_bottom_length, left_right_length;
+    spoke_t spoke[spoke_num];
+    memset(spoke, 0, sizeof(spoke_t) * spoke_num);
+
+    for (i = 0; i < spoke_num; i++)
+    {
+        spoke[i].spoke_vertex = malloc(sizeof(spoke_vertex_t)* tier_num);
+        
+    }
+    spoke_range = 360 / spoke_num;
+    
+    if (pset->includeShadows)
+    {
+        winLimitsX = WIN_X(w);
+        winLimitsY = WIN_Y(w);
+        winLimitsW = WIN_W(w) - 1; // avoid artifact on right edge
+        winLimitsH = WIN_H(w);
+    }
+    else
+    {
+        winLimitsX = BORDER_X(w);
+        winLimitsY = BORDER_Y(w);
+        winLimitsW = BORDER_W(w);
+        winLimitsH = BORDER_H(w);
+    }
+    
+    //tessellation looks horrible if its too small, its better
+    //just to skip it :P
+    if (winLimitsW < 100 || winLimitsH < 100)
+        return FALSE;
+    
+#if 0   //random numbers
+    centerX = (( rand()/(float)RAND_MAX ) * winLimitsW ) + winLimitsX;
+    centerY = (( rand()/(float)RAND_MAX ) * winLimitsH ) + winLimitsY;
+    
+#else   //kevin generated numbers, for testing
+    centerX = ( 1.0/2.0 * winLimitsW ) + winLimitsX;
+    centerY = ( 2.0/4.0 * winLimitsH ) + winLimitsY;
+
+#endif
+
+//calculate the vertex positions
+    for (i = 0; i < spoke_num ; i++) 
+    {
+#if RANDOM        
+        spoke[i].direction = (i * spoke_range) + (( rand()/(float)RAND_MAX ) * spoke_range);
+#else
+        spoke[i].direction = i * spoke_range;
+#endif
+
+        if ( (int)spoke[i].direction % 90 == 0) //deal with divide by zeros
+            spoke[i].direction++;
+
+        //calculate the length of the spoke
+        //calculate top/bottom lenght
+        if ((spoke[i].direction < 180))
+            top_bottom_length = (centerY-winLimitsY);
+        else
+            top_bottom_length = ((winLimitsY + winLimitsH)- centerY);
+
+        top_bottom_length /= sin( abs( spoke[i].direction) * DEG_TO_RAD);
+        if ((spoke[i].direction == 0) || (spoke[i].direction == 180 ))
+            spoke[i].direction--;
+        top_bottom_length = abs(top_bottom_length);
+        
+        //calculate left right length
+        if ((spoke[i].direction < 90 ) || (spoke[i].direction >270))
+            left_right_length = (winLimitsX + winLimitsW) - centerX;
+        else
+            left_right_length = centerX - winLimitsX;
+
+        left_right_length /= cos (spoke[i].direction * DEG_TO_RAD); 
+        if ((spoke[i].direction == 270) || (spoke[i].direction == 90 ))
+            spoke[i].direction--;
+        left_right_length = abs( left_right_length);
+        
+        
+        //take the smaller of the two
+        if (left_right_length < top_bottom_length) 
+            spoke[i].length = left_right_length;
+        else 
+            spoke[i].length = top_bottom_length;
+
+
+        float percent;
+        //calculate spoke vertexes
+        for ( j = 0 ; j < tier_num ; j++)
+        {
+            //effect looks better if first two tiers are small
+            if (j < 2)
+                percent = 0.1;
+            else
+                percent = 0.8/( tier_num -2 );
+            spoke[i].spoke_vertex[j].dist = percent * (j +1) * spoke[i].length;
+            
+            spoke[i].spoke_vertex[j].x = 
+                centerX + (spoke[i].spoke_vertex[j].dist * cos(spoke[i].direction * DEG_TO_RAD) );
+            spoke[i].spoke_vertex[j].y = 
+                centerY + (spoke[i].spoke_vertex[j].dist * sin(spoke[i].direction * DEG_TO_RAD) );
+
+            spoke[i].spoke_vertex[j].connected_to_next = TRUE; 
+       }
+
+    }
+    
+    
+    shard_t shards[spoke_num][tier_num];
+    float x,y,z,gamma, beta, theta, midlength, halftheta;
+    
+    //calculate the center and bounds of each polygon
+    for ( i = 0; i < spoke_num ; i++ )
+    {
+        for ( j = 0; j < tier_num   ; j++)
+        {
+            switch (j)
+            {
+            case 0:
+            //the first tier is triangles
+            shards[i][j].is_triangle = TRUE;
+            shards[i][j].pt0X = centerX;
+            shards[i][j].pt0Y = centerY;
+            
+            shards[i][j].pt1X = spoke[i].spoke_vertex[j].x;
+            shards[i][j].pt1Y = spoke[i].spoke_vertex[j].y;
+            
+            if ( i != spoke_num -1)
+            {
+                shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j].x;
+                shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j].y;
+            }
+            else
+            {
+                shards[i][j].pt2X = spoke[0].spoke_vertex[j].x;
+                shards[i][j].pt2Y = spoke[0].spoke_vertex[j].y;
+            }
+            
+            shards[i][j].pt3X = shards[i][j].pt0X;          //fourth point is not used
+            shards[i][j].pt3Y = shards[i][j].pt0Y;
+            
+            
+            //find lengths
+            if (i != spoke_num -1)
+            {
+            y = pow((spoke[i].spoke_vertex[j].x - spoke[i+1].spoke_vertex[j].x),2) +
+                pow((spoke[i].spoke_vertex[j].y - spoke[i+1].spoke_vertex[j].y),2);
+            x = spoke[i + 1].spoke_vertex[j].dist;
+            } else
+            {
+                y = pow((spoke[i].spoke_vertex[j].x - spoke[0].spoke_vertex[j].x),2) +
+                pow((spoke[i].spoke_vertex[j].y - spoke[0].spoke_vertex[j].y),2);
+                x = spoke[0].spoke_vertex[j].dist;
+                
+            }
+            
+            y = pow(y, 0.5);
+            z = spoke[i].spoke_vertex[j].dist;
+            
+            //find degrees
+            if (i != spoke_num -1)
+                theta = spoke[i + 1].direction - spoke[i].direction;
+            else
+                theta = 360 - spoke[i].direction;
+            
+            halftheta = theta/2;
+            gamma = RAD_TO_DEG * asin( x / y * sin( theta * DEG_TO_RAD ) );
+            
+            beta = 180 - halftheta - gamma;
+            
+            midlength =  sin( DEG_TO_RAD * gamma ) / sin (DEG_TO_RAD * beta) * z;
+            midlength *= 0.66;
+            shards[i][j].centerX =
+                centerX + (cos( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
+            shards[i][j].centerY =
+                centerY + (sin( DEG_TO_RAD * (spoke[i].direction + halftheta)) * midlength);
+            
+            break;
+            
+            
+            
+            default:
+            //the other tiers are 4 sided polygons
+            shards[i][j].is_triangle = FALSE;
+            shards[i][j].pt0X = spoke[i].spoke_vertex[j-1].x;
+            shards[i][j].pt0Y = spoke[i].spoke_vertex[j -1].y;
+            
+            shards[i][j].pt1X = spoke[i].spoke_vertex[j].x;
+            shards[i][j].pt1Y = spoke[i].spoke_vertex[j].y;
+            
+            
+            if (i != spoke_num -1 )
+            {
+                shards[i][j].pt2X = spoke[i + 1].spoke_vertex[j ].x;
+                shards[i][j].pt2Y = spoke[i + 1].spoke_vertex[j ].y;
+            
+                shards[i][j].pt3X = spoke[i + 1].spoke_vertex[j-1].x;
+                shards[i][j].pt3Y = spoke[i + 1].spoke_vertex[j-1].y;
+            }
+            else
+            {
+                shards[i][j].pt2X = spoke[0].spoke_vertex[j ].x;
+                shards[i][j].pt2Y = spoke[0].spoke_vertex[j ].y;
+            
+                shards[i][j].pt3X = spoke[0].spoke_vertex[j-1].x;
+                shards[i][j].pt3Y = spoke[0].spoke_vertex[j-1].y;
+            }
+            
+            
+            //calculate the center of the polygon
+            shards[i][j].centerX = 
+                (shards[i][j].pt0X + shards[i][j].pt1X + shards[i][j].pt2X + shards[i][j].pt3X)/4;
+            shards[i][j].centerY = 
+                (shards[i][j].pt0Y + shards[i][j].pt1Y + shards[i][j].pt2Y + shards[i][j].pt3Y)/4;
+                 
+            break;
+            }
+            
+        }
+        
+    }
+
+    
+    //set up polygons
+    if (pset->nPolygons != spoke_num * tier_num)
+    {
+    if (pset->nPolygons > 0)
+        freePolygonObjects(pset);
+
+    pset->nPolygons = spoke_num * (tier_num + 1);
+
+    pset->polygons = calloc(pset->nPolygons, sizeof(PolygonObject));
+    if (!pset->polygons)
+    {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        pset->nPolygons = 0;
+        return FALSE;
+    }
+    }
+
+    thickness /= w->screen->width;
+    pset->thickness = thickness;
+    pset->nTotalFrontVertices = 0;
+    
+    float halfThick = pset->thickness / 2;
+    PolygonObject *p = pset->polygons;
+    int xc, yc;
+    
+    for (yc = 0; yc <  spoke_num; yc++, p++) //spokes
+    {
+    
+    for (xc = 0; xc < tier_num; xc++, p++) //tiers
+    {
+        p->centerPos.y = p->centerPosStart.y =
+            shards[yc][xc].centerY; 
+
+         p->centerPos.x = p->centerPosStart.x = 
+            shards[yc][xc].centerX;
+
+        p->centerPos.z = p->centerPosStart.z = -halfThick;
+        p->centerRelPos.x = (shards[yc][xc].centerX - winLimitsX)/ winLimitsW;
+        p->centerRelPos.y = (shards[yc][xc].centerY - winLimitsY) /winLimitsH;
+
+        p->rotAngle = p->rotAngleStart = 0;
+
+        p->nSides = 4;
+        p->nVertices = 2 * 4;
+        pset->nTotalFrontVertices += 4;
+
+        // 4 front, 4 back vertices
+        if (!p->vertices)
+        {
+        p->vertices = calloc(8 * 3, sizeof(GLfloat));
+        }
+
+        if (!p->vertices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        // Vertex normals
+        if (!p->normals)
+        {
+        p->normals = calloc(8 * 3, sizeof(GLfloat));
+        }
+        if (!p->normals)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError,
+                "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLfloat *pv = p->vertices;
+
+        // Determine 4 front vertices in ccw direction
+        pv[0] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
+        pv[1] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
+        pv[2] = halfThick;
+
+        pv[3] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
+        pv[4] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
+        pv[5] = halfThick;
+
+        pv[6] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
+        pv[7] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
+        pv[8] = halfThick;
+
+        pv[9] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
+        pv[10] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
+        pv[11] = halfThick;
+
+        // Determine 4 back vertices in cw direction
+        pv[12] = -shards[yc][xc].centerX + shards[yc][xc].pt0X;
+        pv[13] = -shards[yc][xc].centerY + shards[yc][xc].pt0Y;
+        pv[14] = -halfThick;
+
+        pv[15] = -shards[yc][xc].centerX + shards[yc][xc].pt1X;
+        pv[16] = -shards[yc][xc].centerY + shards[yc][xc].pt1Y;
+        pv[17] = -halfThick;
+
+        pv[18] = -shards[yc][xc].centerX + shards[yc][xc].pt2X;
+        pv[19] = -shards[yc][xc].centerY + shards[yc][xc].pt2Y;
+        pv[20] = -halfThick;
+
+        pv[21] = -shards[yc][xc].centerX + shards[yc][xc].pt3X;
+        pv[22] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
+        pv[23] = -halfThick;
+
+        // 16 indices for 4 sides (for quads)
+        if (!p->sideIndices)
+        {
+        p->sideIndices = calloc(4 * 4, sizeof(GLushort));
+        }
+        if (!p->sideIndices)
+        {
+        compLogMessage (w->screen->display, "animation",
+                CompLogLevelError, "Not enough memory");
+        freePolygonObjects(pset);
+        return FALSE;
+        }
+
+        GLushort *ind = p->sideIndices;
+        GLfloat *nor = p->normals;
+
+        int id = 0;
+        
+        // Left face
+        ind[id++] = 6; // First vertex
+        ind[id++] = 1;
+        ind[id++] = 0;
+        ind[id++] = 7;
+        nor[6 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
+        nor[6 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
+        nor[6 * 3 + 2] = 0;
+
+        // Bottom face
+        ind[id++] = 1;
+        ind[id++] = 6;
+        ind[id++] = 5;
+        ind[id++] = 2;
+        nor[1 * 3 + 0] = 0;
+        nor[1 * 3 + 1] = 1;
+        nor[1 * 3 + 2] = 0;
+
+        // Right face
+        ind[id++] = 2;
+        ind[id++] = 5;
+        ind[id++] = 4;
+        ind[id++] = 3;
+        nor[2 * 3 + 0] = 1;
+        nor[2 * 3 + 1] = 0;
+        nor[2 * 3 + 2] = 0;
+
+        // Top face
+        ind[id++] = 7;
+        ind[id++] = 0;
+        ind[id++] = 3;
+        ind[id++] = 4;
+        nor[7 * 3 + 0] = 0;
+        nor[7 * 3 + 1] = -1;
+        nor[7 * 3 + 2] = 0;
+
+        // Front face normal
+        nor[0] = 0;
+        nor[1] = 0;
+        nor[2] = 1;
+
+        // Back face normal
+        nor[4 * 3 + 0] = 0;
+        nor[4 * 3 + 1] = 0;
+        nor[4 * 3 + 2] = -1;
+
+        // Determine bounding box (to test intersection with clips)
+        p->boundingBox.x1 = p->centerPos.x - shards[xc][yc].pt3X ;
+        p->boundingBox.y1 = p->centerPos.y - shards[xc][yc].pt3Y ;
+        p->boundingBox.x2 = ceil(shards[xc][yc].pt1X + p->centerPos.x);
+        p->boundingBox.y2 = ceil(shards[xc][yc].pt1X + p->centerPos.y);
+
+        float dist[4] = {0}, longest_dist = 0;
+        dist[0] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt0X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt0Y), 2));
+        dist[1] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt1X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt1Y), 2));
+        dist[2] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt2X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt2Y), 2));
+        dist[3] = sqrt(powf((shards[xc][yc].centerX - shards[xc][yc].pt3X), 2) +
+                powf((shards[xc][yc].centerY - shards[xc][yc].pt3Y), 2));
+        
+        int k;
+        for (k = 0; k < 4; k++)
+        {
+            if ( dist[k] > longest_dist )
+            longest_dist = dist[k];
+        }
+        
+        longest_dist++; //good measure
+        p->boundSphereRadius = longest_dist;
+    }
+    }
+
+
+
+    return TRUE;
+    
+
+}
+
+
 // Tessellates window into extruded hexagon objects
 Bool
 tessellateIntoHexagons(CompWindow * w,
