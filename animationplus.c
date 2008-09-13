@@ -100,7 +100,7 @@ initEffectProperties (AnimPlusDisplay *ad)
 {
     AnimAddonFunctions *addonFunc = ad->animAddonFunc;
 
-    memcpy ((AnimEffectInfo *)AnimEffectBlinds, &(AnimEffectInfo)
+    memcpy ((AnimEffectInfo *)AnimEffectBlinds, (&(AnimEffectInfo)
 	{"animationplus:Blinds",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
 	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
@@ -112,10 +112,10 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
 	  .prePrepPaintScreenFunc	= addonFunc->polygonsPrePreparePaintScreen,
 	  .cleanupFunc			= addonFunc->polygonsCleanup,
-	  .refreshFunc			= addonFunc->polygonsRefresh}},
+	  .refreshFunc			= addonFunc->polygonsRefresh}}),
 	  sizeof (AnimEffectInfo));
 
-    memcpy ((AnimEffectInfo *)AnimEffectHelix, &(AnimEffectInfo)
+    memcpy ((AnimEffectInfo *)AnimEffectHelix, (&(AnimEffectInfo)
 	{"animationplus:Helix",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
 	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
@@ -127,7 +127,7 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
 	  .prePrepPaintScreenFunc	= addonFunc->polygonsPrePreparePaintScreen,
 	  .cleanupFunc			= addonFunc->polygonsCleanup,
-	  .refreshFunc			= addonFunc->polygonsRefresh}},
+	  .refreshFunc			= addonFunc->polygonsRefresh}}),
 	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
