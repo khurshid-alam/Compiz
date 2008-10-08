@@ -91,23 +91,24 @@
 
       </group>
 
-      <extension plugin="animation">
-	<option>open_effects</option>
-	<option>open_random_effects</option>
-	<option>close_effects</option>
-	<option>close_random_effects</option>
-	<option>minimize_effects</option>
-	<option>minimize_random_effects</option>
-	<restriction>
-	  <value>animationplus:Blinds</value>
-	  <_name>Blinds</_name>
-	</restriction>
-	<restriction>
-	  <value>animationplus:Helix</value>
-	  <_name>Helix</_name>
-	</restriction>
-      </extension>
-      
     </screen>
+
+    <extension base_plugin="animation">
+      <base_option>open_effects</base_option>
+      <base_option>open_random_effects</base_option>
+      <base_option>close_effects</base_option>
+      <base_option>close_random_effects</base_option>
+      <base_option>minimize_effects</base_option>
+      <base_option>minimize_random_effects</base_option>
+      <restriction>
+	<value>animationplus:Blinds</value>
+	<_name>Blinds</_name>
+      </restriction>
+      <restriction>
+	<value>animationplus:Helix</value>
+	<_name>Helix</_name>
+      </restriction>
+    </extension>
+
   </plugin>
 </compiz>
