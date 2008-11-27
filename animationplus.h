@@ -20,8 +20,9 @@ extern CompMetadata animMetadata;
 
 extern AnimEffect AnimEffectBlinds;
 extern AnimEffect AnimEffectHelix;
+extern AnimEffect AnimEffectShatter;
 
-#define NUM_EFFECTS 2
+#define NUM_EFFECTS 3
 
 typedef enum
 {
@@ -34,7 +35,9 @@ typedef enum
     ANIMPLUS_SCREEN_OPTION_HELIX_THICKNESS,
     ANIMPLUS_SCREEN_OPTION_HELIX_DIRECTION,
     ANIMPLUS_SCREEN_OPTION_HELIX_SPIN_DIRECTION,
-
+    ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_SPOKES,
+    ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_TIERS,
+    
     ANIMPLUS_SCREEN_OPTION_NUM
 } AnimPlusScreenOptions;
 
@@ -116,4 +119,6 @@ fxBlindsInit( CompWindow *w );
 Bool
 fxHelixInit( CompWindow *w );
 
-
+/* shatter.c */
+Bool
+fxShatterInit (CompWindow *w );
