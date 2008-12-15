@@ -1,0 +1,2 @@
+PLUGIN = animationeg
+LDFLAGS_ADD = -lGLU
