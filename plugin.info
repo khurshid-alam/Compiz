@@ -1,2 +1,2 @@
-PLUGIN = animationeg
+PLUGIN = animationsim
 LDFLAGS_ADD = -lGLU
