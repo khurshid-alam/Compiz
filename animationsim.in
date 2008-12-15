@@ -1,0 +1,92 @@
+<compiz>
+  <!-- animationeg metadata -->
+  <plugin name="animationsim">
+    <_short>Simple Animations</_short>
+    <_long>Animations that are simple on the eye</_long>
+    <category>Effects</category>
+    <deps>
+      <requirement>
+	<plugin>animationaddon</plugin>
+      </requirement>
+      <relation type="after">
+	<plugin>animationaddon</plugin>
+      </relation>
+    </deps>
+
+    <screen>
+
+      <group>
+	<_short>Effect Settings</_short>
+
+	<subgroup>
+	  <_short>Example Effect</_short>
+	  <option name="explode_gridx" type="int">
+	    <_short>Window Grid Width</_short>
+	    <_long>The exploding window will be split into pieces along a grid. Specify the number of grid cells along the width of the window.</_long>
+	    <default>4</default>
+	    <min>1</min>
+	    <max>200</max>
+	  </option>
+	  <option name="explode_gridy" type="int">
+	    <_short>Window Grid Height</_short>
+	    <_long>The exploding window will be split into pieces along a grid. Specify the number of grid cells along the height of the window.</_long>
+	    <default>3</default>
+	    <min>1</min>
+	    <max>200</max>
+	  </option>
+	  <option name="explode_thickness" type="float">
+	    <_short>Thickness of Exploding Polygons</_short>
+	    <_long>Thickness of exploding window pieces (in pixels).</_long>
+	    <default>40</default>
+	    <min>0</min>
+	    <max>100</max>
+	    <precision>1</precision>
+	  </option>
+	  <option name="explode_tessellation" type="int">
+	    <_short>Tessellation Type</_short>
+	    <_long>Tessellation type for exploding window pieces.</_long>
+	    <default>1</default>
+	    <min>0</min>
+	    <max>1</max>
+	    <desc>
+	      <value>0</value>
+	      <_name>Rectangular</_name>
+	    </desc>
+	    <desc>
+	      <value>1</value>
+	      <_name>Hexagonal</_name>
+	    </desc>
+	  </option>
+	</subgroup>
+
+      </group>
+
+    </screen>
+
+    <extension base_plugin="animation">
+      <base_option>open_effects</base_option>
+      <base_option>open_random_effects</base_option>
+      <base_option>close_effects</base_option>
+      <base_option>close_random_effects</base_option>
+      <base_option>minimize_effects</base_option>
+      <base_option>minimize_random_effects</base_option>
+      <restriction>
+	<value>animationeg:Fly In</value>
+	<_name>Fly In</_name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Bounce</value>
+	<_name>Bounce</_name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Rotate In</value>
+	<_name>Rotate In</_name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Sheet</value>
+	<_name>Sheet</_name>
+      </restriction>
+    </extension>
+      
+  </plugin>
+</compiz>
