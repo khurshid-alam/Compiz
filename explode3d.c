@@ -34,9 +34,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "animationeg.h"
+#include "animationsim.h"
 
-Bool
+/*Bool
 fxExplodeInit (CompWindow * w)
 {
     CompScreen *s = w->screen;
@@ -112,5 +112,5 @@ fxExplodeInit (CompWindow * w)
     aw->com->animRemainingTime = aw->com->animTotalTime;
 
     return TRUE;
-}
+}*/
 

@@ -28,10 +28,10 @@ ExtensionPluginInfo animExtensionPluginInfo = {
     .nEffects		= NUM_EFFECTS,
     .effects		= animEffects,
 
-    .nEffectOptions	= ANIMEG_SCREEN_OPTION_NUM,
+    .nEffectOptions	= ANIMSIM_SCREEN_OPTION_NUM,
 };
 
-OPTION_GETTERS (GET_ANIMEG_DISPLAY (w->screen->display)->animBaseFunc,
+OPTION_GETTERS (GET_ANIMSIM_DISPLAY (w->screen->display)->animBaseFunc,
 		&animExtensionPluginInfo, NUM_NONEFFECT_OPTIONS)
 
 static Bool
@@ -43,7 +43,7 @@ animSetScreenOptions (CompPlugin *plugin,
     CompOption *o;
     int index;
 
-    ANIMEG_SCREEN (screen);
+    ANIMSIM_SCREEN (screen);
 
     o = compFindOption (as->opt, NUM_OPTIONS (as), name, &index);
     if (!o)
@@ -60,22 +60,21 @@ animSetScreenOptions (CompPlugin *plugin,
 }
 
 static const CompMetadataOptionInfo animEgScreenOptionInfo[] = {
-    { "bounce_max_size", "float", "<min>0</min>", 0, 0 },
-    { "bounce_min_size", "float", 0, "<max>0</max>", 0 0 },
+    { "bounce_max_size", "float", "<min>1.0</min>", 0, 0 },
+    { "bounce_min_size", "float", "<max>1.0</max>", 0, 0 },
     { "bounce_number", "int", 0, 0, 0			},
     { "flyin_direction", "int", 0, 0, 0			},
     { "flyin_fade", "bool", 0, 0, 0			},
     { "flyin_distance", "float", 0, 0, 0		},
     { "rotatein_angle", "float", 0, 0, 0		},
     { "rotatein_direction", "int", 0, 0, 0		},
-    { "sheet_start_percent", "float", 0, 0, 0		},
-    { "explode_thickness", "float", "<min>0</min>", 0, 0 }
+    { "sheet_start_percent", "float", 0, 0, 0		}
 };
 
 static CompOption *
 animGetScreenOptions (CompPlugin *plugin, CompScreen * screen, int *count)
 {
-    ANIMEG_SCREEN (screen);
+    ANIMSIM_SCREEN (screen);
 
     *count = NUM_OPTIONS (as);
     return as->opt;
@@ -93,7 +92,7 @@ AnimEffect AnimEffectRotateIn	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectSheet	= &(AnimEffectInfo) {};
 
 static void
-initEffectProperties (AnimEgDisplay *ad)
+initEffectProperties (AnimSimDisplay *ad)
 {
     AnimAddonFunctions *addonFunc = ad->animAddonFunc;
 
@@ -169,7 +168,7 @@ initEffectProperties (AnimEgDisplay *ad)
 
 static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
 {
-    AnimEgDisplay *ad;
+    AnimSimDisplay *ad;
     int animBaseFunctionsIndex;
     int animAddonFunctionsIndex;
 
@@ -182,7 +181,7 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
 	!getPluginDisplayIndex (d, "animationaddon", &animAddonFunctionsIndex))
 	return FALSE;
 
-    ad = calloc (1, sizeof (AnimEgDisplay));
+    ad = calloc (1, sizeof (AnimSimDisplay));
     if (!ad)
 	return FALSE;
 
@@ -205,7 +204,7 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
 
 static void animFiniDisplay (CompPlugin * p, CompDisplay * d)
 {
-    ANIMEG_DISPLAY (d);
+    ANIMSIM_DISPLAY (d);
 
     freeScreenPrivateIndex (d, ad->screenPrivateIndex);
 
@@ -214,11 +213,11 @@ static void animFiniDisplay (CompPlugin * p, CompDisplay * d)
 
 static Bool animInitScreen (CompPlugin * p, CompScreen * s)
 {
-    AnimEgScreen *as;
+    AnimSimScreen *as;
 
-    ANIMEG_DISPLAY (s->display);
+    ANIMSIM_DISPLAY (s->display);
 
-    as = calloc (1, sizeof (AnimEgScreen));
+    as = calloc (1, sizeof (AnimSimScreen));
     if (!as)
 	return FALSE;
 
@@ -226,7 +225,7 @@ static Bool animInitScreen (CompPlugin * p, CompScreen * s)
 					    &animMetadata,
 					    animEgScreenOptionInfo,
 					    as->opt,
-					    ANIMEG_SCREEN_OPTION_NUM))
+					    ANIMSIM_SCREEN_OPTION_NUM))
     {
 	free (as);
 	return FALSE;
@@ -235,7 +234,7 @@ static Bool animInitScreen (CompPlugin * p, CompScreen * s)
     as->windowPrivateIndex = allocateWindowPrivateIndex (s);
     if (as->windowPrivateIndex < 0)
     {
-	compFiniScreenOptions (s, as->opt, ANIMEG_SCREEN_OPTION_NUM);
+	compFiniScreenOptions (s, as->opt, ANIMSIM_SCREEN_OPTION_NUM);
 	free (as);
 	return FALSE;
     }
@@ -253,14 +252,14 @@ static Bool animInitScreen (CompPlugin * p, CompScreen * s)
 
 static void animFiniScreen (CompPlugin * p, CompScreen * s)
 {
-    ANIMEG_SCREEN (s);
-    ANIMEG_DISPLAY (s->display);
+    ANIMSIM_SCREEN (s);
+    ANIMSIM_DISPLAY (s->display);
 
     ad->animBaseFunc->removeExtension (s, &animExtensionPluginInfo);
 
     freeWindowPrivateIndex (s, as->windowPrivateIndex);
 
-    compFiniScreenOptions (s, as->opt, ANIMEG_SCREEN_OPTION_NUM);
+    compFiniScreenOptions (s, as->opt, ANIMSIM_SCREEN_OPTION_NUM);
 
     free (as);
 }
@@ -268,12 +267,12 @@ static void animFiniScreen (CompPlugin * p, CompScreen * s)
 static Bool animInitWindow (CompPlugin * p, CompWindow * w)
 {
     CompScreen *s = w->screen;
-    AnimEgWindow *aw;
+    AnimSimWindow *aw;
 
-    ANIMEG_DISPLAY (s->display);
-    ANIMEG_SCREEN (s);
+    ANIMSIM_DISPLAY (s->display);
+    ANIMSIM_SCREEN (s);
 
-    aw = calloc (1, sizeof (AnimEgWindow));
+    aw = calloc (1, sizeof (AnimSimWindow));
     if (!aw)
 	return FALSE;
 
@@ -287,7 +286,7 @@ static Bool animInitWindow (CompPlugin * p, CompWindow * w)
 
 static void animFiniWindow (CompPlugin * p, CompWindow * w)
 {
-    ANIMEG_WINDOW (w);
+    ANIMSIM_WINDOW (w);
 
     free (aw);
 }
@@ -357,7 +356,7 @@ static Bool animInit (CompPlugin * p)
 					 p->vTable->name,
 					 0, 0,
 					 animEgScreenOptionInfo,
-					 ANIMEG_SCREEN_OPTION_NUM))
+					 ANIMSIM_SCREEN_OPTION_NUM))
 	return FALSE;
 
     animDisplayPrivateIndex = allocateDisplayPrivateIndex ();
