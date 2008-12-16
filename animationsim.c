@@ -60,10 +60,16 @@ animSetScreenOptions (CompPlugin *plugin,
 }
 
 static const CompMetadataOptionInfo animEgScreenOptionInfo[] = {
-    { "explode_thickness", "float", "<min>0</min>", 0, 0 },
-    { "explode_gridx", "int", "<min>1</min>", 0, 0 },
-    { "explode_gridy", "int", "<min>1</min>", 0, 0 },
-    { "explode_tessellation", "int", RESTOSTRING (0, LAST_POLYGON_TESS), 0, 0 },
+    { "bounce_max_size", "float", "<min>0</min>", 0, 0 },
+    { "bounce_min_size", "float", 0, "<max>0</max>", 0 0 },
+    { "bounce_number", "int", 0, 0, 0			},
+    { "flyin_direction", "int", 0, 0, 0			},
+    { "flyin_fade", "bool", 0, 0, 0			},
+    { "flyin_distance", "float", 0, 0, 0		},
+    { "rotatein_angle", "float", 0, 0, 0		},
+    { "rotatein_direction", "int", 0, 0, 0		},
+    { "sheet_start_percent", "float", 0, 0, 0		},
+    { "explode_thickness", "float", "<min>0</min>", 0, 0 }
 };
 
 static CompOption *

@@ -19,43 +19,107 @@
 	<_short>Effect Settings</_short>
 
 	<subgroup>
-	  <_short>Example Effect</_short>
-	  <option name="explode_gridx" type="int">
-	    <_short>Window Grid Width</_short>
-	    <_long>The exploding window will be split into pieces along a grid. Specify the number of grid cells along the width of the window.</_long>
-	    <default>4</default>
-	    <min>1</min>
-	    <max>200</max>
-	  </option>
-	  <option name="explode_gridy" type="int">
-	    <_short>Window Grid Height</_short>
-	    <_long>The exploding window will be split into pieces along a grid. Specify the number of grid cells along the height of the window.</_long>
-	    <default>3</default>
-	    <min>1</min>
-	    <max>200</max>
-	  </option>
-	  <option name="explode_thickness" type="float">
-	    <_short>Thickness of Exploding Polygons</_short>
-	    <_long>Thickness of exploding window pieces (in pixels).</_long>
-	    <default>40</default>
-	    <min>0</min>
-	    <max>100</max>
-	    <precision>1</precision>
-	  </option>
-	  <option name="explode_tessellation" type="int">
-	    <_short>Tessellation Type</_short>
-	    <_long>Tessellation type for exploding window pieces.</_long>
+	  <_short>Fly In</_short>
+	  <option name="flyin_direction" type="int">
+	    <_short>Fly In Direction</_short>
+	    <_long>The direction in which the fly in should take place</_long>
 	    <default>1</default>
+	    <desc>
+		<value>1</value>
+		<name>Up</name>
+	    </desc>
+	    <desc>
+		<value>2</value>
+		<name>Left</name>
+	    </desc>
+	    <desc>
+		<value>3</value>
+		<name>Down</name>
+	    </desc>
+	    <desc>
+		<value>4</value>
+		<name>Right</name>
+	    </desc>
+	    <min>1</min>
+	    <max>4</max>
+	  </option>
+	  <option name="flyin_fade" type="bool">
+	    <_short>Fade</_short>
+	    <_long>Fade when flying in</_long>
+	    <default>True</default>
+	  </option>
+	  <option name="flyin_distance" type="float">
+	    <_short>Distance</_short>
+	    <_long>Distance to fly in</_long>
+	    <default>20</default>
+	    <min>5</min>
+	    <max>1000</max>
+	  </option>
+	</subgroup>
+	<subgroup>
+	  <_short>Rotate In</_short>
+	  <option name="rotatein_direction" type="int">
+	    <_short>Rotate In Direction</_short>
+	    <_long>The direction in which the window rotates</_long>
+	    <default>3</default>
+	    <desc>
+		<value>1</value>
+		<name>Up</name>
+	    </desc>
+	    <desc>
+		<value>2</value>
+		<name>Left</name>
+	    </desc>
+	    <desc>
+		<value>3</value>
+		<name>Down</name>
+	    </desc>
+	    <desc>
+		<value>4</value>
+		<name>Right</name>
+	    </desc>
+	    <min>1</min>
+	    <max>4</max>
+	  </option>
+	  <option name="rotatein_angle" type="float">
+	    <_short>Angle</_short>
+	    <_long>Angle to start from</_long>
+	    <default>90</default>
+	    <min>5</min>
+	    <max>720</max>
+	  </option>
+	</subgroup>
+	<subgroup>
+	  <_short>Bounce</_short>
+	  <option name="bounce_max_size" type="float">
+	    <_short>Maximum Size</_short>
+	    <_long>Maximum scale factor of window when bouncing</_long>
+	    <default>1.2</default>
+	    <min>1.0</min>
+	    <max>3.0</max>
+	  </option>
+	  <option name="bounce_min_size" type="float">
+	    <_short>Minimum Size</_short>
+	    <_long>Minimum scale factor of window when bouncing</_long>
+	    <default>0.6</default>
+	    <min>0.1</min>
+	    <max>1.0</max>
+	  </option>
+	  <option name="bounce_number" type="int">
+	    <_short>Number of Bounces</_short>
+	    <_long>How many bounces during the animation</_long>
+	    <default>3</default>
 	    <min>0</min>
-	    <max>1</max>
-	    <desc>
-	      <value>0</value>
-	      <_name>Rectangular</_name>
-	    </desc>
-	    <desc>
-	      <value>1</value>
-	      <_name>Hexagonal</_name>
-	    </desc>
+	    <max>10</max>
+	</subgroup>
+	<subgroup>
+	  <_short>Sheet</_short>
+	  <option name="sheet_start_percent" type="float">
+	    <_short>Starting Percent</float>
+	    <_long>How wide the begginning of the sheet animation should be compared to the end</_long>
+	    <default>80.0</default>
+	    <min>1.0</min>
+	    <max>150.0</max>
 	  </option>
 	</subgroup>
 
