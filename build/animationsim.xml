@@ -1,0 +1,155 @@
+<compiz>
+  <!-- animationeg metadata -->
+  <plugin name="animationsim">
+    <short>Simple Animations</short>
+    <long>Animations that are simple on the eye</long>
+    <category>Effects</category>
+    <deps>
+      <requirement>
+	<plugin>animationaddon</plugin>
+      </requirement>
+      <relation type="after">
+	<plugin>animationaddon</plugin>
+      </relation>
+    </deps>
+
+    <screen>
+
+      <group>
+	<short>Effect Settings</short>
+
+	<subgroup>
+	  <short>Fly In</short>
+	  <option name="flyin_direction" type="int">
+	    <short>Fly In Direction</short>
+	    <long>The direction in which the fly in should take place</long>
+	    <default>1</default>
+	    <desc>
+		<value>1</value>
+		<name>Up</name>
+	    </desc>
+	    <desc>
+		<value>2</value>
+		<name>Left</name>
+	    </desc>
+	    <desc>
+		<value>3</value>
+		<name>Down</name>
+	    </desc>
+	    <desc>
+		<value>4</value>
+		<name>Right</name>
+	    </desc>
+	    <min>1</min>
+	    <max>4</max>
+	  </option>
+	  <option name="flyin_fade" type="bool">
+	    <short>Fade</short>
+	    <long>Fade when flying in</long>
+	    <default>True</default>
+	  </option>
+	  <option name="flyin_distance" type="float">
+	    <short>Distance</short>
+	    <long>Distance to fly in</long>
+	    <default>20</default>
+	    <min>5</min>
+	    <max>1000</max>
+	  </option>
+	</subgroup>
+	<subgroup>
+	  <short>Rotate In</short>
+	  <option name="rotatein_direction" type="int">
+	    <short>Rotate In Direction</short>
+	    <long>The direction in which the window rotates</long>
+	    <default>3</default>
+	    <desc>
+		<value>1</value>
+		<name>Up</name>
+	    </desc>
+	    <desc>
+		<value>2</value>
+		<name>Left</name>
+	    </desc>
+	    <desc>
+		<value>3</value>
+		<name>Down</name>
+	    </desc>
+	    <desc>
+		<value>4</value>
+		<name>Right</name>
+	    </desc>
+	    <min>1</min>
+	    <max>4</max>
+	  </option>
+	  <option name="rotatein_angle" type="float">
+	    <short>Angle</short>
+	    <long>Angle to start from</long>
+	    <default>90</default>
+	    <min>5</min>
+	    <max>720</max>
+	  </option>
+	</subgroup>
+	<subgroup>
+	  <short>Bounce</short>
+	  <option name="bounce_max_size" type="float">
+	    <short>Maximum Size</short>
+	    <long>Maximum scale factor of window when bouncing</long>
+	    <default>1.2</default>
+	    <min>1.0</min>
+	    <max>3.0</max>
+	  </option>
+	  <option name="bounce_min_size" type="float">
+	    <short>Minimum Size</short>
+	    <long>Minimum scale factor of window when bouncing</long>
+	    <default>0.6</default>
+	    <min>0.1</min>
+	    <max>1.0</max>
+	  </option>
+	  <option name="bounce_number" type="int">
+	    <short>Number of Bounces</short>
+	    <long>How many bounces during the animation</long>
+	    <default>3</default>
+	    <min>0</min>
+	    <max>10</max>
+	  </option>
+	</subgroup>
+	<subgroup>
+	  <short>Sheet</short>
+	  <option name="sheet_start_percent" type="float">
+	    <short>Starting Percent</short>
+	    <long>How wide the begginning of the sheet animation should be compared to the end</long>
+	    <default>80.0</default>
+	    <min>1.0</min>
+	    <max>150.0</max>
+	  </option>
+	</subgroup>
+
+      </group>
+
+    </screen>
+
+    <extension base_plugin="animation">
+      <base_option>open_effects</base_option>
+      <base_option>open_random_effects</base_option>
+      <base_option>close_effects</base_option>
+      <base_option>close_random_effects</base_option>
+      <restriction>
+	<value>animationeg:Fly In</value>
+	<name>Fly In</name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Bounce</value>
+	<name>Bounce</name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Rotate In</value>
+	<name>Rotate In</name>
+      </restriction>
+      <restriction>
+	<value>animationeg:Sheet</value>
+	<name>Sheet</name>
+      </restriction>
+    </extension>
+      
+  </plugin>
+</compiz>

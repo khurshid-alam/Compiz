@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<gconfschemafile>
+  <schemalist>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/flyin_direction</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/flyin_direction</applyto>
+      <owner>compiz</owner>
+      <type>int</type>
+      <default>1</default>
+      <locale name="C">
+        <short>Fly In Direction</short>
+        <long>The direction in which the fly in should take place (1 = Up, 2 = Left, 3 = Down, 4 = Right)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/flyin_fade</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/flyin_fade</applyto>
+      <owner>compiz</owner>
+      <type>bool</type>
+      <default>True</default>
+      <locale name="C">
+        <short>Fade</short>
+        <long>Fade when flying in</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/flyin_distance</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/flyin_distance</applyto>
+      <owner>compiz</owner>
+      <type>float</type>
+      <default>20</default>
+      <locale name="C">
+        <short>Distance</short>
+        <long>Distance to fly in (5 - 1000)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/rotatein_direction</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/rotatein_direction</applyto>
+      <owner>compiz</owner>
+      <type>int</type>
+      <default>3</default>
+      <locale name="C">
+        <short>Rotate In Direction</short>
+        <long>The direction in which the window rotates (1 = Up, 2 = Left, 3 = Down, 4 = Right)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/rotatein_angle</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/rotatein_angle</applyto>
+      <owner>compiz</owner>
+      <type>float</type>
+      <default>90</default>
+      <locale name="C">
+        <short>Angle</short>
+        <long>Angle to start from (5 - 720)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/bounce_max_size</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/bounce_max_size</applyto>
+      <owner>compiz</owner>
+      <type>float</type>
+      <default>1.2</default>
+      <locale name="C">
+        <short>Maximum Size</short>
+        <long>Maximum scale factor of window when bouncing (1.0 - 3.0)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/bounce_min_size</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/bounce_min_size</applyto>
+      <owner>compiz</owner>
+      <type>float</type>
+      <default>0.6</default>
+      <locale name="C">
+        <short>Minimum Size</short>
+        <long>Minimum scale factor of window when bouncing (0.1 - 1.0)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/bounce_number</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/bounce_number</applyto>
+      <owner>compiz</owner>
+      <type>int</type>
+      <default>3</default>
+      <locale name="C">
+        <short>Number of Bounces</short>
+        <long>How many bounces during the animation (0 - 10)</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/compiz/plugins/animationsim/screen0/options/sheet_start_percent</key>
+      <applyto>/apps/compiz/plugins/animationsim/screen0/options/sheet_start_percent</applyto>
+      <owner>compiz</owner>
+      <type>float</type>
+      <default>80.0</default>
+      <locale name="C">
+        <short>Starting Percent</short>
+        <long>How wide the begginning of the sheet animation should be compared to the end (1.0 - 150.0)</long>
+      </locale>
+    </schema>
+  </schemalist>
+</gconfschemafile>
