@@ -1,5 +1,4 @@
 <compiz>
-  <!-- animationeg metadata -->
   <plugin name="animationsim">
     <_short>Simple Animations</_short>
     <_long>Animations that are simple on the eye</_long>
@@ -134,19 +133,19 @@
       <base_option>close_effects</base_option>
       <base_option>close_random_effects</base_option>
       <restriction>
-	<value>animationeg:Fly In</value>
+	<value>animationsim:Fly In</value>
 	<_name>Fly In</_name>
       </restriction>
       <restriction>
-	<value>animationeg:Bounce</value>
+	<value>animationsim:Bounce</value>
 	<_name>Bounce</_name>
       </restriction>
       <restriction>
-	<value>animationeg:Rotate In</value>
+	<value>animationsim:Rotate In</value>
 	<_name>Rotate In</_name>
       </restriction>
       <restriction>
-	<value>animationeg:Sheet</value>
+	<value>animationsim:Sheet</value>
 	<_name>Sheet</_name>
       </restriction>
     </extension>

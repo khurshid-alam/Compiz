@@ -101,8 +101,32 @@ typedef struct _AnimSimWindow
 
 OPTION_GETTERS_HDR
 
-/* explode3d.c */
+/* flyin.c */
 
 Bool
-fxExplodeInit (CompWindow *w);
+fxFlyinInit (CompWindow *w);
+
+void
+fxFlyinUpdateWindowAttrib (CompWindow * w,
+			   WindowPaintAttrib *wAttrib);
+
+void
+fxFlyinAnimStep (CompWindow *w,
+		 float time);
+
+float
+fxFlyinAnimProgress (CompWindow *w);
+
+void
+fxFlyinUpdateWindowTransform (CompWindow *w,
+			      CompTransform *wTransform);
+
+void
+fxFlyinPrePaintWindow (CompWindow * w);
+
+void
+fxFlyinPostPaintWindow (CompWindow * w);
+
+Bool
+fxFlyinZoomToIcon (CompWindow *w);
 

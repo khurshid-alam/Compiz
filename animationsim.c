@@ -95,20 +95,20 @@ static void
 initEffectProperties (AnimSimDisplay *ad)
 {
     AnimAddonFunctions *addonFunc = ad->animAddonFunc;
+    AnimBaseFunctions  *baseFunc  = ad->animBaseFunc;
 
     memcpy ((AnimEffectInfo *)AnimEffectFlyIn, (&(AnimEffectInfo)
 	{"animationsim:Fly In",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
-	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
-	  .postPaintWindowFunc		= addonFunc->polygonsPostPaintWindow,
-	  .animStepFunc			= addonFunc->polygonsAnimStep,
-	  .initFunc			= fxExplodeInit,
-	  .addCustomGeometryFunc	= addonFunc->polygonsStoreClips,
-	  .drawCustomGeometryFunc	= addonFunc->polygonsDrawCustomGeometry,
-	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
-	  .prePrepPaintScreenFunc	= addonFunc->polygonsPrePreparePaintScreen,
-	  .cleanupFunc			= addonFunc->polygonsCleanup,
-	  .refreshFunc			= addonFunc->polygonsRefresh}}),
+         {.updateWindowAttribFunc	= fxFlyinUpdateWindowAttrib,
+          .prePaintWindowFunc	= fxFlyinPrePaintWindow,
+          .postPaintWindowFunc	= fxFlyinPostPaintWindow,
+          .animStepFunc		= fxFlyinAnimStep,
+          .initFunc			= fxFlyinInit,
+          .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
+          .updateWinTransformFunc	= fxFlyinUpdateWindowTransform,
+          .updateBBFunc		= baseFunc->compTransformUpdateBB,
+          .zoomToIconFunc		= fxFlyinZoomToIcon}}),
 	  sizeof (AnimEffectInfo));
 
     memcpy ((AnimEffectInfo *)AnimEffectBounce, (&(AnimEffectInfo)
@@ -117,7 +117,7 @@ initEffectProperties (AnimSimDisplay *ad)
 	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
 	  .postPaintWindowFunc		= addonFunc->polygonsPostPaintWindow,
 	  .animStepFunc			= addonFunc->polygonsAnimStep,
-	  .initFunc			= fxExplodeInit,
+	  .initFunc			= fxFlyinInit,
 	  .addCustomGeometryFunc	= addonFunc->polygonsStoreClips,
 	  .drawCustomGeometryFunc	= addonFunc->polygonsDrawCustomGeometry,
 	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
@@ -131,7 +131,7 @@ initEffectProperties (AnimSimDisplay *ad)
 	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
 	  .postPaintWindowFunc		= addonFunc->polygonsPostPaintWindow,
 	  .animStepFunc			= addonFunc->polygonsAnimStep,
-	  .initFunc			= fxExplodeInit,
+	  .initFunc			= fxFlyinInit,
 	  .addCustomGeometryFunc	= addonFunc->polygonsStoreClips,
 	  .drawCustomGeometryFunc	= addonFunc->polygonsDrawCustomGeometry,
 	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
@@ -145,7 +145,7 @@ initEffectProperties (AnimSimDisplay *ad)
 	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
 	  .postPaintWindowFunc		= addonFunc->polygonsPostPaintWindow,
 	  .animStepFunc			= addonFunc->polygonsAnimStep,
-	  .initFunc			= fxExplodeInit,
+	  .initFunc			= fxFlyinInit,
 	  .addCustomGeometryFunc	= addonFunc->polygonsStoreClips,
 	  .drawCustomGeometryFunc	= addonFunc->polygonsDrawCustomGeometry,
 	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
@@ -175,11 +175,17 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
     if (!checkPluginABI ("core", CORE_ABIVERSION) ||
         !checkPluginABI ("animation", ANIMATION_ABIVERSION) ||
         !checkPluginABI ("animationaddon", ANIMATIONADDON_ABIVERSION))
+    {
+	fprintf(stderr, "abi not in sync\n");
 	return FALSE;
+    }
 
     if (!getPluginDisplayIndex (d, "animation", &animBaseFunctionsIndex) ||
 	!getPluginDisplayIndex (d, "animationaddon", &animAddonFunctionsIndex))
+    {
+	fprintf(stderr, "display indexes not avaliabe\n");
 	return FALSE;
+    }
 
     ad = calloc (1, sizeof (AnimSimDisplay));
     if (!ad)
@@ -228,6 +234,7 @@ static Bool animInitScreen (CompPlugin * p, CompScreen * s)
 					    ANIMSIM_SCREEN_OPTION_NUM))
     {
 	free (as);
+	fprintf(stderr, "unable metadata\n");
 	return FALSE;
     }
 
@@ -357,7 +364,10 @@ static Bool animInit (CompPlugin * p)
 					 0, 0,
 					 animEgScreenOptionInfo,
 					 ANIMSIM_SCREEN_OPTION_NUM))
+     {
+	fprintf(stderr, "init no metadata\n");
 	return FALSE;
+     }
 
     animDisplayPrivateIndex = allocateDisplayPrivateIndex ();
     if (animDisplayPrivateIndex < 0)
