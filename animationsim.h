@@ -130,3 +130,33 @@ fxFlyinPostPaintWindow (CompWindow * w);
 Bool
 fxFlyinZoomToIcon (CompWindow *w);
 
+/* rotatein.c */
+
+Bool
+fxRotateinInit (CompWindow *w);
+
+void
+fxRotateinUpdateWindowAttrib (CompWindow * w,
+			   WindowPaintAttrib *wAttrib);
+
+void
+fxRotateinAnimStep (CompWindow *w,
+		 float time);
+
+float
+fxRotateinAnimProgress (CompWindow *w);
+
+void
+fxRotateinUpdateWindowTransform (CompWindow *w,
+			      CompTransform *wTransform);
+
+void
+fxRotateinPrePaintWindow (CompWindow * w);
+
+void
+fxRotateinPostPaintWindow (CompWindow * w);
+
+Bool
+fxRotateinZoomToIcon (CompWindow *w);
+
+

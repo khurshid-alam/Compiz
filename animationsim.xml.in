@@ -84,7 +84,7 @@
 	    <_short>Angle</_short>
 	    <_long>Angle to start from</_long>
 	    <default>90</default>
-	    <min>5</min>
+	    <min>-720</min>
 	    <max>720</max>
 	  </option>
 	</subgroup>
