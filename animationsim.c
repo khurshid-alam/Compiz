@@ -63,6 +63,7 @@ static const CompMetadataOptionInfo animEgScreenOptionInfo[] = {
     { "bounce_max_size", "float", "<min>1.0</min>", 0, 0 },
     { "bounce_min_size", "float", "<max>1.0</max>", 0, 0 },
     { "bounce_number", "int", 0, 0, 0			},
+    { "bounce_fade", "bool", 0, 0, 0			},
     { "flyin_direction", "int", 0, 0, 0			},
     { "flyin_fade", "bool", 0, 0, 0			},
     { "flyin_distance", "float", 0, 0, 0		},
@@ -140,16 +141,11 @@ initEffectProperties (AnimSimDisplay *ad)
     memcpy ((AnimEffectInfo *)AnimEffectSheet, (&(AnimEffectInfo)
 	{"animationsim:Sheet",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
-	 {.prePaintWindowFunc		= addonFunc->polygonsPrePaintWindow,
-	  .postPaintWindowFunc		= addonFunc->polygonsPostPaintWindow,
-	  .animStepFunc			= addonFunc->polygonsAnimStep,
-	  .initFunc			= fxFlyinInit,
-	  .addCustomGeometryFunc	= addonFunc->polygonsStoreClips,
-	  .drawCustomGeometryFunc	= addonFunc->polygonsDrawCustomGeometry,
-	  .updateBBFunc			= addonFunc->polygonsUpdateBB,
-	  .prePrepPaintScreenFunc	= addonFunc->polygonsPrePreparePaintScreen,
-	  .cleanupFunc			= addonFunc->polygonsCleanup,
-	  .refreshFunc			= addonFunc->polygonsRefresh}}),
+         {.animStepFunc		= fxSheetsModelStep,
+          .initFunc		= fxSheetsInit,
+          .initGridFunc		= fxSheetsInitGrid,
+          .updateBBFunc		= baseFunc->modelUpdateBB,
+          .useQTexCoord		= TRUE}}),
 	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
@@ -157,7 +153,7 @@ initEffectProperties (AnimSimDisplay *ad)
 	AnimEffectFlyIn,
 	AnimEffectBounce,
 	AnimEffectRotateIn,
-	AnimEffectSheet
+	AnimEffectSheets
     };
     memcpy (animEffects,
 	    animEffectsTmp,

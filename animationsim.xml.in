@@ -111,7 +111,7 @@
 	    <min>0</min>
 	    <max>10</max>
 	  </option>
-	  <option name="flyin_fade" type="bool">
+	  <option name="bounce_fade" type="bool">
 	    <_short>Fade</_short>
 	    <_long>Fade when flying in</_long>
 	    <default>True</default>

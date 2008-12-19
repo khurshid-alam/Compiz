@@ -13,7 +13,7 @@ extern CompMetadata animMetadata;
 extern AnimEffect AnimEffectFlyIn;
 extern AnimEffect AnimEffectBounce;
 extern AnimEffect AnimEffectRotateIn;
-extern AnimEffect AnimEffectSheet;
+extern AnimEffect AnimEffectSheets;
 
 #define NUM_EFFECTS 4
 
@@ -200,5 +200,17 @@ fxBouncePostPaintWindow (CompWindow * w);
 Bool
 fxBounceZoomToIcon (CompWindow *w);
 
+/* sheets.c */
 
+void
+fxSheetsInitGrid (CompWindow *w,
+		     int *gridWidth, 
+		     int *gridHeight);
+
+Bool
+fxSheetsInit (CompWindow * w);
+
+void
+fxSheetsModelStep (CompWindow * w,
+		      float time);
 
