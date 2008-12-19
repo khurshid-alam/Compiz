@@ -107,6 +107,48 @@
 	  </option>
 	</subgroup>
 
+	<subgroup>
+	  <_short>Bonanza</_short>
+	  <option name="bonanza_particles" type="int">
+	    <_short>Number Of Fire Particles</_short>
+	    <_long>Number of fire particles.</_long>
+	    <default>1000</default>
+	    <min>100</min>
+	    <max>10000</max>
+	  </option>
+	  <option name="bonanza_size" type="float">
+	    <_short>Fire Particle Size</_short>
+	    <_long>Fire particle size.</_long>
+	    <default>5</default>
+	    <min>0.1</min>
+	    <max>20</max>
+	    <precision>0.1</precision>
+	  </option>
+	  <option name="bonanza_life" type="float">
+	    <_short>Fire Particle Life</_short>
+	    <_long>Fire particle life.</_long>
+	    <default>0.7</default>
+	    <min>0.1</min>
+	    <max>1</max>
+	    <precision>0.1</precision>
+	  </option>
+	  <option name="bonanza_color" type="color">
+	    <_short>Fire Particle Color</_short>
+	    <_long>Fire particle color.</_long>
+	    <default>
+	      <red>0xffff</red>
+	      <green>0x3333</green>
+	      <blue>0x0555</blue>
+	      <alpha>0xffff</alpha>
+	    </default>
+	  </option>
+	  <option name="bonanza_mystical" type="bool">
+	    <_short>Randomly Colored Fire</_short>
+	    <_long>Have random colors for the fire effect, also known as Mystical Fire.</_long>
+	    <default>false</default>
+	  </option>
+	</subgroup>
+
       </group>
 
     </screen>
@@ -125,6 +167,10 @@
       <restriction>
 	<value>animationplus:Helix</value>
 	<_name>Helix</_name>
+      </restriction>
+      <restriction>
+	<value>animationplus:Bonanza</value>
+	<_name>Bonanza</_name>
       </restriction>
       <restriction>
 	<value>animationplus:Shatter</value>

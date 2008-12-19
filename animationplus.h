@@ -20,6 +20,7 @@ extern CompMetadata animMetadata;
 
 extern AnimEffect AnimEffectBlinds;
 extern AnimEffect AnimEffectHelix;
+extern AnimEffect AnimEffectBonanza;
 extern AnimEffect AnimEffectShatter;
 
 #define NUM_EFFECTS 3
@@ -35,6 +36,11 @@ typedef enum
     ANIMPLUS_SCREEN_OPTION_HELIX_THICKNESS,
     ANIMPLUS_SCREEN_OPTION_HELIX_DIRECTION,
     ANIMPLUS_SCREEN_OPTION_HELIX_SPIN_DIRECTION,
+    ANIMPLUS_SCREEN_OPTION_BONANZA_PARTICLES,
+    ANIMPLUS_SCREEN_OPTION_BONANZA_SIZE,
+    ANIMPLUS_SCREEN_OPTION_BONANZA_LIFE,
+    ANIMPLUS_SCREEN_OPTION_BONANZA_COLOR,
+    ANIMPLUS_SCREEN_OPTION_BONANZA_MYSTICAL,
     ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_SPOKES,
     ANIMPLUS_SCREEN_OPTION_SHATTER_NUM_TIERS,
     
@@ -74,6 +80,8 @@ typedef struct _AnimPlusWindow
 {
     AnimWindowCommon *com;
     AnimWindowEngineData *eng;
+
+    int animFireDirection; 
 
 } AnimPlusWindow;
 
@@ -118,6 +126,15 @@ fxBlindsInit( CompWindow *w );
 
 Bool
 fxHelixInit( CompWindow *w );
+
+/* bonanza.c */
+
+Bool
+fxBonanzaInit (CompWindow * w);
+
+void
+fxBonanzaAnimStep (CompWindow *w, float time);
+
 
 /* shatter.c */
 Bool
