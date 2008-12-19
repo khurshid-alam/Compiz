@@ -96,7 +96,7 @@ fxBounceUpdateWindowAttrib (CompWindow * w,
 
     float forwardProgress = fxBounceAnimProgress (w);
 
-    if (animGetB (w, ANIMSIM_SCREEN_OPTION_FLYIN_FADE))
+    if (animGetB (w, ANIMSIM_SCREEN_OPTION_BOUNCE_FADE))
 	wAttrib->opacity = aw->com->storedOpacity * (1 - forwardProgress);
 }
 
