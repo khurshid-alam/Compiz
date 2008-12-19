@@ -46,7 +46,8 @@ fxBounceAnimProgress (CompWindow *w)
     float forwardProgress = (*ad->animBaseFunc->defaultAnimProgress) (w);
     float forwardProgressInc = 1.0f / aw->bounceCount;
 
-    aw->currBounceProgress = ((1 - forwardProgress) - aw->lastProgressMax) * forwardProgressInc * 10;
+    /* last bounce, enure we are going for 0.0 */
+    aw->currBounceProgress = (((1 - forwardProgress) - aw->lastProgressMax) / forwardProgressInc);
 
     if (aw->currBounceProgress > 1.0f)
     {
@@ -54,9 +55,8 @@ fxBounceAnimProgress (CompWindow *w)
 	aw->targetScale = -aw->targetScale + aw->targetScale / 2.0f;
 	aw->lastProgressMax = 1.0f - forwardProgress;
 	aw->currBounceProgress = 0.0f;
+	aw->nBounce++;
     }
-
-    fprintf(stderr, "aw->currentBounceProgress is %f %f %f\n", aw->currBounceProgress, 1.0f - aw->targetScale, 1.0f - aw->currentScale);
 
     return forwardProgress;
 }
@@ -66,8 +66,6 @@ applyBounceTransform (CompWindow *w)
 {
     ANIMSIM_WINDOW (w);
     float scale = 1.0f - (aw->targetScale * (aw->currBounceProgress) + aw->currentScale * (1.0f - aw->currBounceProgress));
-
-    fprintf(stderr, "scale is %f\n", scale);
 
     CompTransform *transform = &aw->com->transform;
 
@@ -118,7 +116,7 @@ fxBounceInit (CompWindow * w)
     ANIMSIM_WINDOW (w);
 
     aw->bounceCount = animGetI (w, ANIMSIM_SCREEN_OPTION_BOUNCE_NUMBER);
-    aw->nBounce     = 0;
+    aw->nBounce     = 1;
     aw->targetScale = animGetF (w, ANIMSIM_SCREEN_OPTION_BOUNCE_MIN_SIZE);
     aw->currentScale = animGetF (w, ANIMSIM_SCREEN_OPTION_BOUNCE_MAX_SIZE);
     aw->bounceNeg   = FALSE;
