@@ -45,36 +45,36 @@ fxBounceAnimProgress (CompWindow *w)
     ANIMSIM_WINDOW  (w);
     float forwardProgress = (*ad->animBaseFunc->defaultAnimProgress) (w);
     float forwardProgressInc = 1.0f / aw->bounceCount;
-    int nBounce = aw->nBounce;
-    aw->nBounce = floor ((1 - forwardProgress) / forwardProgressInc);
-    if (nBounce < aw->nBounce)
-    {
-	aw->currentScale = aw->targetScale;
-	aw->targetScale = -aw->targetScale + aw->targetScale / 2.0f;
-	aw->lastProgressMax = 1.0f - forwardProgress;
-    }
 
     aw->currBounceProgress = ((1 - forwardProgress) - aw->lastProgressMax) * forwardProgressInc * 10;
 
     if (aw->currBounceProgress > 1.0f)
-	aw->currBounceProgress = 1.0f;
+    {
+	aw->currentScale = aw->targetScale;
+	aw->targetScale = -aw->targetScale + aw->targetScale / 2.0f;
+	aw->lastProgressMax = 1.0f - forwardProgress;
+	aw->currBounceProgress = 0.0f;
+    }
 
-    fprintf(stderr, "aw->currentBounceProgress is %f %f %f\n", aw->currBounceProgress, aw->targetScale, aw->currentScale);
+    fprintf(stderr, "aw->currentBounceProgress is %f %f %f\n", aw->currBounceProgress, 1.0f - aw->targetScale, 1.0f - aw->currentScale);
 
-    return (*ad->animBaseFunc->decelerateProgress) (forwardProgress);
+    return forwardProgress;
 }
 
 static void
 applyBounceTransform (CompWindow *w)
 {
     ANIMSIM_WINDOW (w);
+    float scale = 1.0f - (aw->targetScale * (aw->currBounceProgress) + aw->currentScale * (1.0f - aw->currBounceProgress));
+
+    fprintf(stderr, "scale is %f\n", scale);
 
     CompTransform *transform = &aw->com->transform;
 
     matrixTranslate (transform, WIN_X (w) + WIN_W (w) / 2.0f,
 				WIN_Y (w) + WIN_H (w) / 2.0f, 0.0f);
 
-    matrixScale (transform, 1.0f + (aw->currentScale - (aw->targetScale - aw->currentScale) * (aw->currBounceProgress)),  1.0f + (aw->currentScale - (aw->targetScale - aw->currentScale) * (aw->currBounceProgress)), 1.0f);
+    matrixScale (transform, scale, scale, 1.0f);
 
     matrixTranslate (transform, -(WIN_X (w) + WIN_W (w) / 2.0f),
 				-(WIN_Y (w) + WIN_H (w) / 2.0f), 0.0f);
