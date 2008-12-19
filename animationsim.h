@@ -65,6 +65,17 @@ typedef struct _AnimSimScreen
 typedef struct _AnimSimWindow
 {
     AnimWindowCommon *com;
+    /* bounce props */
+    int bounceCount;
+    int nBounce;
+    float currBounceProgress;
+    float targetScale;
+    float currentScale;
+    float lastProgressMax;
+    Bool bounceNeg;
+    /* rotatein props */
+    int rotatinModAngle;
+    int currentCull;
     AnimWindowEngineData *eng;
 
 } AnimSimWindow;
@@ -158,5 +169,35 @@ fxRotateinPostPaintWindow (CompWindow * w);
 
 Bool
 fxRotateinZoomToIcon (CompWindow *w);
+
+/* bounce.c */
+
+Bool
+fxBounceInit (CompWindow *w);
+
+void
+fxBounceUpdateWindowAttrib (CompWindow * w,
+			   WindowPaintAttrib *wAttrib);
+
+void
+fxBounceAnimStep (CompWindow *w,
+		 float time);
+
+float
+fxBounceAnimProgress (CompWindow *w);
+
+void
+fxBounceUpdateWindowTransform (CompWindow *w,
+			      CompTransform *wTransform);
+
+void
+fxBouncePrePaintWindow (CompWindow * w);
+
+void
+fxBouncePostPaintWindow (CompWindow * w);
+
+Bool
+fxBounceZoomToIcon (CompWindow *w);
+
 
 
