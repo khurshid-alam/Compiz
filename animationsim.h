@@ -14,8 +14,9 @@ extern AnimEffect AnimEffectFlyIn;
 extern AnimEffect AnimEffectBounce;
 extern AnimEffect AnimEffectRotateIn;
 extern AnimEffect AnimEffectSheets;
+extern AnimEffect AnimEffectExpand;
 
-#define NUM_EFFECTS 4
+#define NUM_EFFECTS 5
 
 typedef enum
 {
@@ -225,4 +226,33 @@ fxSheetsInit (CompWindow * w);
 void
 fxSheetsModelStep (CompWindow * w,
 		      float time);
+
+/* expand.c */
+
+Bool
+fxExpandInit (CompWindow *w);
+
+void
+fxExpandUpdateWindowAttrib (CompWindow * w,
+			   WindowPaintAttrib *wAttrib);
+
+void
+fxExpandAnimStep (CompWindow *w,
+		 float time);
+
+float
+fxExpandAnimProgress (CompWindow *w);
+
+void
+fxExpandUpdateWindowTransform (CompWindow *w,
+			      CompTransform *wTransform);
+
+void
+fxExpandPrePaintWindow (CompWindow * w);
+
+void
+fxExpandPostPaintWindow (CompWindow * w);
+
+Bool
+fxExpandZoomToIcon (CompWindow *w);
 

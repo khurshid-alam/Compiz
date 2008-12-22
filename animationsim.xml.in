@@ -153,6 +153,10 @@
 	<value>animationsim:Sheet</value>
 	<_name>Sheet</_name>
       </restriction>
+      <restriction>
+	<value>animationsim:Expand</value>
+	<_name>Expand</_name>
+      </restriction>
     </extension>
       
   </plugin>

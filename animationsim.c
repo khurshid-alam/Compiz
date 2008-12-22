@@ -91,6 +91,7 @@ AnimEffect AnimEffectFlyIn	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectBounce	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectRotateIn	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectSheets	= &(AnimEffectInfo) {};
+AnimEffect AnimEffectExpand	= &(AnimEffectInfo) {};
 
 static void
 initEffectProperties (AnimSimDisplay *ad)
@@ -147,13 +148,27 @@ initEffectProperties (AnimSimDisplay *ad)
           .updateBBFunc		= baseFunc->modelUpdateBB,
           .useQTexCoord		= TRUE}}),
 	  sizeof (AnimEffectInfo));
+    memcpy ((AnimEffectInfo *)AnimEffectExpand, (&(AnimEffectInfo)
+	{"animationsim:Expand",
+	 {TRUE, TRUE, TRUE, FALSE, FALSE},
+	 {.updateWindowAttribFunc	= fxExpandUpdateWindowAttrib,
+          .prePaintWindowFunc	= fxExpandPrePaintWindow,
+          .postPaintWindowFunc	= fxExpandPostPaintWindow,
+          .animStepFunc		= fxExpandAnimStep,
+          .initFunc			= fxExpandInit,
+          .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
+          .updateWinTransformFunc	= fxExpandUpdateWindowTransform,
+          .updateBBFunc		= baseFunc->compTransformUpdateBB,
+          .zoomToIconFunc		= fxExpandZoomToIcon}}),
+	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
     {
 	AnimEffectFlyIn,
 	AnimEffectBounce,
 	AnimEffectRotateIn,
-	AnimEffectSheets
+	AnimEffectSheets,
+	AnimEffectExpand
     };
     memcpy (animEffects,
 	    animEffectsTmp,
