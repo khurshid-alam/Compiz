@@ -120,6 +120,8 @@ fxBounceInit (CompWindow * w)
     aw->targetScale = animGetF (w, ANIMSIM_SCREEN_OPTION_BOUNCE_MIN_SIZE);
     aw->currentScale = animGetF (w, ANIMSIM_SCREEN_OPTION_BOUNCE_MAX_SIZE);
     aw->bounceNeg   = FALSE;
+    aw->currBounceProgress = 0.0f;
+    aw->lastProgressMax = 0.0f;
 
     return (*ad->animBaseFunc->defaultAnimInit) (w);
 }
