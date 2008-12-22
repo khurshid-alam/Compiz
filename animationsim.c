@@ -90,7 +90,7 @@ AnimExtEffectProperties fxAirplaneExtraProp = {
 AnimEffect AnimEffectFlyIn	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectBounce	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectRotateIn	= &(AnimEffectInfo) {};
-AnimEffect AnimEffectSheet	= &(AnimEffectInfo) {};
+AnimEffect AnimEffectSheets	= &(AnimEffectInfo) {};
 
 static void
 initEffectProperties (AnimSimDisplay *ad)
@@ -138,7 +138,7 @@ initEffectProperties (AnimSimDisplay *ad)
           .updateBBFunc		= baseFunc->compTransformUpdateBB,
           .zoomToIconFunc		= fxRotateinZoomToIcon}}),
 	  sizeof (AnimEffectInfo));
-    memcpy ((AnimEffectInfo *)AnimEffectSheet, (&(AnimEffectInfo)
+    memcpy ((AnimEffectInfo *)AnimEffectSheets, (&(AnimEffectInfo)
 	{"animationsim:Sheet",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
          {.animStepFunc		= fxSheetsModelStep,

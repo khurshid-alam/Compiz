@@ -45,6 +45,13 @@ typedef enum _AnimSimDisplayOptions
     ANIMSIM_DISPLAY_OPTION_NUM
 } AnimSimDisplayOptions;
 
+typedef struct _WaveParam
+{
+    float halfWidth;
+    float amp;
+    float pos;
+} WaveParam;
+
 typedef struct _AnimSimDisplay
 {
     int screenPrivateIndex;
@@ -77,6 +84,11 @@ typedef struct _AnimSimWindow
     /* rotatein props */
     int rotatinModAngle;
     int currentCull;
+    /* sheets props */
+    int sheetsWaveCount;
+    WaveParam *sheetsWaves;
+    Model     *model;
+    
     AnimWindowEngineData *eng;
 
 } AnimSimWindow;
