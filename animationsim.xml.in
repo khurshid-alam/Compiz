@@ -3,6 +3,14 @@
     <_short>Simple Animations</_short>
     <_long>Animations that are simple on the eye</_long>
     <category>Effects</category>
+    <deps>
+	<requirement>
+	    <plugin>animation</plugin>
+	</requirement>
+	<relation type="after">
+	    <plugin>animation</plugin>
+	</relation>
+    </deps>
     <screen>
 
       <group>
