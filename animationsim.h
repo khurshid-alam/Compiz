@@ -141,15 +141,6 @@ void
 fxFlyinUpdateWindowTransform (CompWindow *w,
 			      CompTransform *wTransform);
 
-void
-fxFlyinPrePaintWindow (CompWindow * w);
-
-void
-fxFlyinPostPaintWindow (CompWindow * w);
-
-Bool
-fxFlyinZoomToIcon (CompWindow *w);
-
 /* rotatein.c */
 
 Bool
@@ -199,15 +190,6 @@ void
 fxBounceUpdateWindowTransform (CompWindow *w,
 			      CompTransform *wTransform);
 
-void
-fxBouncePrePaintWindow (CompWindow * w);
-
-void
-fxBouncePostPaintWindow (CompWindow * w);
-
-Bool
-fxBounceZoomToIcon (CompWindow *w);
-
 /* sheets.c */
 
 void
@@ -241,13 +223,3 @@ fxExpandAnimProgress (CompWindow *w);
 void
 fxExpandUpdateWindowTransform (CompWindow *w,
 			      CompTransform *wTransform);
-
-void
-fxExpandPrePaintWindow (CompWindow * w);
-
-void
-fxExpandPostPaintWindow (CompWindow * w);
-
-Bool
-fxExpandZoomToIcon (CompWindow *w);
-

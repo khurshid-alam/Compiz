@@ -102,28 +102,22 @@ initEffectProperties (AnimSimDisplay *ad)
 	{"animationsim:Fly In",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
          {.updateWindowAttribFunc	= fxFlyinUpdateWindowAttrib,
-          .prePaintWindowFunc	= fxFlyinPrePaintWindow,
-          .postPaintWindowFunc	= fxFlyinPostPaintWindow,
           .animStepFunc		= fxFlyinAnimStep,
           .initFunc			= fxFlyinInit,
           .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
           .updateWinTransformFunc	= fxFlyinUpdateWindowTransform,
-          .updateBBFunc		= baseFunc->compTransformUpdateBB,
-          .zoomToIconFunc		= fxFlyinZoomToIcon}}),
+          .updateBBFunc		= baseFunc->compTransformUpdateBB}}),
 	  sizeof (AnimEffectInfo));
 
     memcpy ((AnimEffectInfo *)AnimEffectBounce, (&(AnimEffectInfo)
 	{"animationsim:Bounce",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
          {.updateWindowAttribFunc	= fxBounceUpdateWindowAttrib,
-          .prePaintWindowFunc	= fxBouncePrePaintWindow,
-          .postPaintWindowFunc	= fxBouncePostPaintWindow,
           .animStepFunc		= fxBounceAnimStep,
           .initFunc			= fxBounceInit,
           .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
           .updateWinTransformFunc	= fxBounceUpdateWindowTransform,
-          .updateBBFunc		= baseFunc->compTransformUpdateBB,
-          .zoomToIconFunc		= fxBounceZoomToIcon}}),
+          .updateBBFunc		= baseFunc->compTransformUpdateBB}}),
 	  sizeof (AnimEffectInfo));
     memcpy ((AnimEffectInfo *)AnimEffectRotateIn, (&(AnimEffectInfo)
 	{"animationsim:Rotate In",
@@ -151,14 +145,11 @@ initEffectProperties (AnimSimDisplay *ad)
 	{"animationsim:Expand",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
 	 {.updateWindowAttribFunc	= fxExpandUpdateWindowAttrib,
-          .prePaintWindowFunc	= fxExpandPrePaintWindow,
-          .postPaintWindowFunc	= fxExpandPostPaintWindow,
           .animStepFunc		= fxExpandAnimStep,
           .initFunc			= fxExpandInit,
           .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
           .updateWinTransformFunc	= fxExpandUpdateWindowTransform,
-          .updateBBFunc		= baseFunc->compTransformUpdateBB,
-          .zoomToIconFunc		= fxExpandZoomToIcon}}),
+          .updateBBFunc		= baseFunc->compTransformUpdateBB}}),
 	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =

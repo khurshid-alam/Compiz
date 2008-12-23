@@ -127,17 +127,3 @@ fxFlyinInit (CompWindow * w)
     return (*ad->animBaseFunc->defaultAnimInit) (w);
 }
 
-void fxFlyinPrePaintWindow (CompWindow *w)
-{
-}
-
-void fxFlyinPostPaintWindow (CompWindow * w)
-{
-}
-
-Bool
-fxFlyinZoomToIcon (CompWindow *w)
-{
-    return FALSE;
-}
-
