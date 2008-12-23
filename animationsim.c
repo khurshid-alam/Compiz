@@ -185,14 +185,13 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
         !checkPluginABI ("animation", ANIMATION_ABIVERSION) ||
         !checkPluginABI ("animationaddon", ANIMATIONADDON_ABIVERSION))
     {
-	fprintf(stderr, "abi not in sync\n");
+	compLogMessage ("animationsim", CompLogLevelError, "ABI Versions between CORE, ANIMATION and ANIMATIONSIM are not in sync. Please recompile animationsim\n");
 	return FALSE;
     }
 
     if (!getPluginDisplayIndex (d, "animation", &animBaseFunctionsIndex) ||
 	!getPluginDisplayIndex (d, "animationaddon", &animAddonFunctionsIndex))
     {
-	fprintf(stderr, "display indexes not avaliabe\n");
 	return FALSE;
     }
 
