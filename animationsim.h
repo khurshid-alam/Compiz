@@ -5,7 +5,6 @@
 
 #include <compiz-core.h>
 #include <compiz-animation.h>
-#include <compiz-animationaddon.h>
 
 extern int animDisplayPrivateIndex;
 extern CompMetadata animMetadata;
@@ -57,7 +56,6 @@ typedef struct _AnimSimDisplay
 {
     int screenPrivateIndex;
     AnimBaseFunctions *animBaseFunc;
-    AnimAddonFunctions *animAddonFunc;
 
     CompOption opt[ANIMSIM_DISPLAY_OPTION_NUM];
 } AnimSimDisplay;
@@ -89,8 +87,6 @@ typedef struct _AnimSimWindow
     int sheetsWaveCount;
     WaveParam *sheetsWaves;
     Model     *model;
-    
-    AnimWindowEngineData *eng;
 
 } AnimSimWindow;
 

@@ -96,7 +96,6 @@ AnimEffect AnimEffectExpand	= &(AnimEffectInfo) {};
 static void
 initEffectProperties (AnimSimDisplay *ad)
 {
-    AnimAddonFunctions *addonFunc = ad->animAddonFunc;
     AnimBaseFunctions  *baseFunc  = ad->animBaseFunc;
 
     memcpy ((AnimEffectInfo *)AnimEffectFlyIn, (&(AnimEffectInfo)
@@ -179,18 +178,15 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
 {
     AnimSimDisplay *ad;
     int animBaseFunctionsIndex;
-    int animAddonFunctionsIndex;
 
     if (!checkPluginABI ("core", CORE_ABIVERSION) ||
-        !checkPluginABI ("animation", ANIMATION_ABIVERSION) ||
-        !checkPluginABI ("animationaddon", ANIMATIONADDON_ABIVERSION))
+        !checkPluginABI ("animation", ANIMATION_ABIVERSION))
     {
 	compLogMessage ("animationsim", CompLogLevelError, "ABI Versions between CORE, ANIMATION and ANIMATIONSIM are not in sync. Please recompile animationsim\n");
 	return FALSE;
     }
 
-    if (!getPluginDisplayIndex (d, "animation", &animBaseFunctionsIndex) ||
-	!getPluginDisplayIndex (d, "animationaddon", &animAddonFunctionsIndex))
+    if (!getPluginDisplayIndex (d, "animation", &animBaseFunctionsIndex))
     {
 	return FALSE;
     }
@@ -207,7 +203,6 @@ static Bool animInitDisplay (CompPlugin * p, CompDisplay * d)
     }
 
     ad->animBaseFunc = d->base.privates[animBaseFunctionsIndex].ptr;
-    ad->animAddonFunc = d->base.privates[animAddonFunctionsIndex].ptr;
 
     initEffectProperties (ad);
 
@@ -294,7 +289,6 @@ static Bool animInitWindow (CompPlugin * p, CompWindow * w)
     w->base.privates[as->windowPrivateIndex].ptr = aw;
 
     aw->com = ad->animBaseFunc->getAnimWindowCommon (w);
-    aw->eng = ad->animAddonFunc->getAnimWindowEngineData (w);
 
     return TRUE;
 }
