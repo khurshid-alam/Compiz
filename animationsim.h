@@ -86,7 +86,6 @@ typedef struct _AnimSimWindow
     /* sheets props */
     int sheetsWaveCount;
     WaveParam *sheetsWaves;
-    Model     *model;
 
 } AnimSimWindow;
 
