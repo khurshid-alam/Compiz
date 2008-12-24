@@ -111,7 +111,7 @@ fxBonanzaGenFire( CompWindow *w,
     float rVal;
 
     Particle *part = ps->particles;
-    int i, tmpx, tmpy;
+    int i;
 
     float deg = 0;
     float inc = 2.0 * 3.1415 /ps->numParticles;

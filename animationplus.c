@@ -70,16 +70,16 @@ static const CompMetadataOptionInfo animPlusScreenOptionInfo[] = {
     { "blinds_num_halftwists", "int", "<min>1</min>", 0, 0 },
     { "blinds_gridx", "int", "<min>1</min>", 0, 0 },
     { "blinds_thickness", "float", 0, 0, 0 },
-    { "helix_num_twists", "int", "<min>1</min>", 0, 0 },
-    { "helix_gridy", "int", "<min>5</min>", 0, 0 },
-    { "helix_thickness", "float", 0, 0, 0 },
-    { "helix_direction", "bool", 0, 0, 0 },
-    { "helix_spin_direction", "int", "<min>0</min>", 0, 0 },
     { "bonanza_particles", "int", "<min>0</min>", 0, 0 },
     { "bonanza_size", "float", "<min>0.1</min>", 0, 0 },
     { "bonanza_life", "float", "<min>0.1</min>", 0, 0 },
     { "bonanza_color", "color", 0, 0, 0 },
     { "bonanza_mystical", "bool", 0, 0, 0 },
+    { "helix_num_twists", "int", "<min>1</min>", 0, 0 },
+    { "helix_gridy", "int", "<min>5</min>", 0, 0 },
+    { "helix_thickness", "float", 0, 0, 0 },
+    { "helix_direction", "bool", 0, 0, 0 },
+    { "helix_spin_direction", "int", "<min>0</min>", 0, 0 },
     { "shatter_num_spokes", "int", "<min>0</min>", 0, 0},
     { "shatter_num_tiers", "int", "<min>0</min>", 0, 0}
 };
@@ -124,6 +124,17 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .refreshFunc			= addonFunc->polygonsRefresh}}),
 	  sizeof (AnimEffectInfo));
 
+    memcpy ((AnimEffectInfo *)AnimEffectBonanza, (&(AnimEffectInfo)
+	{"animationplus:Bonanza",
+	 {TRUE, TRUE, TRUE, FALSE, FALSE},
+	 {.postPaintWindowFunc	= addonFunc->drawParticleSystems,
+	  .animStepFunc			= fxBonanzaAnimStep,
+	  .initFunc			    = fxBonanzaInit,
+	  .updateBBFunc			= addonFunc->particlesUpdateBB,
+	  .prePrepPaintScreenFunc	= addonFunc->particlesPrePrepPaintScreen,
+	  .cleanupFunc			= addonFunc->particlesCleanup}}),
+	  sizeof (AnimEffectInfo));
+
     memcpy ((AnimEffectInfo *)AnimEffectHelix, (&(AnimEffectInfo)
 	{"animationplus:Helix",
 	 {TRUE, TRUE, TRUE, FALSE, FALSE},
@@ -154,23 +165,13 @@ initEffectProperties (AnimPlusDisplay *ad)
 	  .refreshFunc			= addonFunc->polygonsRefresh}}),
 	  sizeof (AnimEffectInfo));
 
-    memcpy ((AnimEffectInfo *)AnimEffectHelix, (&(AnimEffectInfo)
-	{"animationplus:Bonanza",
-	 {TRUE, TRUE, TRUE, FALSE, FALSE},
-	 {.postPaintWindowFunc	= addonFunc->drawParticleSystems,
-	  .animStepFunc			= fxBonanzaAnimStep,
-	  .initFunc			    = fxBonanzaInit,
-	  .updateBBFunc			= addonFunc->particlesUpdateBB,
-	  .prePrepPaintScreenFunc	= addonFunc->particlesPrePrepPaintScreen,
-	  .cleanupFunc			= addonFunc->particlesCleanup}}),
-	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
     {
-	AnimEffectBlinds,
-	AnimEffectHelix,
-    AnimEffectBonanza,
-    AnimEffectShatter
+	    AnimEffectBlinds,
+        AnimEffectBonanza,
+	    AnimEffectHelix,
+        AnimEffectShatter
     };
     memcpy (animEffects,
 	    animEffectsTmp,

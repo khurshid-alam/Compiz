@@ -33,6 +33,7 @@
 
 Bool fxHelixInit(CompWindow * w)
 {
+    fprintf(stderr, "helix\n");
     CompScreen *s = w->screen;
     ANIMPLUS_DISPLAY (s->display);
     ANIMPLUS_WINDOW (w);
