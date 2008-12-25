@@ -69,7 +69,11 @@ static const CompMetadataOptionInfo animEgScreenOptionInfo[] = {
     { "flyin_distance", "float", 0, 0, 0		},
     { "rotatein_angle", "float", 0, 0, 0		},
     { "rotatein_direction", "int", 0, 0, 0		},
-    { "sheet_start_percent", "float", 0, 0, 0		}
+    { "sheet_start_percent", "float", 0, 0, 0   	},
+    { "expandpw_horiz_first", "bool", 0, 0, 0   	},
+    { "expandpw_initial_horiz", "int", 0, 0, 0   	},
+    { "expandpw_initial_vert", "int", 0, 0, 0   	},
+    { "expandpw_delay", "float", 0, 0, 0   		}
 };
 
 static CompOption *
@@ -92,6 +96,7 @@ AnimEffect AnimEffectBounce	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectRotateIn	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectSheets	= &(AnimEffectInfo) {};
 AnimEffect AnimEffectExpand	= &(AnimEffectInfo) {};
+AnimEffect AnimEffectExpandPW	= &(AnimEffectInfo) {};
 
 static void
 initEffectProperties (AnimSimDisplay *ad)
@@ -151,6 +156,16 @@ initEffectProperties (AnimSimDisplay *ad)
           .updateWinTransformFunc	= fxExpandUpdateWindowTransform,
           .updateBBFunc		= baseFunc->compTransformUpdateBB}}),
 	  sizeof (AnimEffectInfo));
+    memcpy ((AnimEffectInfo *)AnimEffectExpandPW, (&(AnimEffectInfo)
+	{"animationsim:Expand Piecewise",
+	 {TRUE, TRUE, TRUE, FALSE, FALSE},
+	 {.updateWindowAttribFunc	= fxExpandPWUpdateWindowAttrib,
+          .animStepFunc		= fxExpandPWAnimStep,
+          .initFunc			= fxExpandPWInit,
+          .letOthersDrawGeomsFunc	= baseFunc->returnTrue,
+          .updateWinTransformFunc	= fxExpandPWUpdateWindowTransform,
+          .updateBBFunc		= baseFunc->compTransformUpdateBB}}),
+	  sizeof (AnimEffectInfo));
 
     AnimEffect animEffectsTmp[NUM_EFFECTS] =
     {
@@ -158,7 +173,8 @@ initEffectProperties (AnimSimDisplay *ad)
 	AnimEffectBounce,
 	AnimEffectRotateIn,
 	AnimEffectSheets,
-	AnimEffectExpand
+	AnimEffectExpand,
+	AnimEffectExpandPW
     };
     memcpy (animEffects,
 	    animEffectsTmp,

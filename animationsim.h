@@ -14,8 +14,9 @@ extern AnimEffect AnimEffectBounce;
 extern AnimEffect AnimEffectRotateIn;
 extern AnimEffect AnimEffectSheets;
 extern AnimEffect AnimEffectExpand;
+extern AnimEffect AnimEffectExpandPW;
 
-#define NUM_EFFECTS 5
+#define NUM_EFFECTS 6
 
 typedef enum
 {
@@ -30,6 +31,10 @@ typedef enum
     ANIMSIM_SCREEN_OPTION_ROTATEIN_ANGLE,
     ANIMSIM_SCREEN_OPTION_ROTATEIN_DIRECTION,
     ANIMSIM_SCREEN_OPTION_SHEET_START_PERCENT,
+    ANIMSIM_SCREEN_OPTION_EXPANDPW_HORIZ_FIRST,
+    ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_HORIZ,
+    ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_VERT,
+    ANIMSIM_SCREEN_OPTION_EXPANDPW_DELAY,
 
     ANIMSIM_SCREEN_OPTION_NUM
 } AnimSimScreenOptions;
@@ -222,4 +227,24 @@ fxExpandAnimProgress (CompWindow *w);
 
 void
 fxExpandUpdateWindowTransform (CompWindow *w,
+			      CompTransform *wTransform);
+			      
+/* expandPW.c */
+
+Bool
+fxExpandPWInit (CompWindow *w);
+
+void
+fxExpandPWUpdateWindowAttrib (CompWindow * w,
+			   WindowPaintAttrib *wAttrib);
+
+void
+fxExpandPWAnimStep (CompWindow *w,
+		 float time);
+
+float
+fxExpandPWAnimProgress (CompWindow *w);
+
+void
+fxExpandPWUpdateWindowTransform (CompWindow *w,
 			      CompTransform *wTransform);

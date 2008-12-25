@@ -126,6 +126,35 @@
 	    <max>150.0</max>
 	  </option>
 	</subgroup>
+	<subgroup>
+	  <_short>Expand Piecewise</_short>
+	  <option name="expandpw_horiz_first" type="bool">
+	    <_short>First expand horizontally</_short>
+	    <_long>If checked, initially expand horizontally, then vertically</_long>
+	    <default>True</default>
+	  </option>
+	  <option name="expandpw_initial_horiz" type="int">
+	    <_short>Initial horizontal size</_short>
+	    <_long>Number of pixels initially in horizontal direction</_long>
+	    <default>20</default>
+	    <min>0</min>
+	    <max>50</max>
+	  </option>
+	  <option name="expandpw_initial_vert" type="int">
+	    <_short>Initial vertical size</_short>
+	    <_long>Number of pixels initially in vertical direction</_long>
+	    <default>20</default>
+	    <min>0</min>
+	    <max>50</max>
+	  </option>
+	  <option name="expandpw_delay" type="float">
+	    <_short>Delay</_short>
+	    <_long>Delay between expanding horizontally and vertically (expressed as a fraction)</_long>
+	    <default>0.25</default>
+	    <min>0.0</min>
+	    <max>1.0</max>
+	  </option>
+	</subgroup>
 
       </group>
 
@@ -155,6 +184,10 @@
       <restriction>
 	<value>animationsim:Expand</value>
 	<_name>Expand</_name>
+      </restriction>
+      <restriction>
+	<value>animationsim:Expand Piecewise</value>
+	<_name>Expand Piecewise</_name>
       </restriction>
     </extension>
       
