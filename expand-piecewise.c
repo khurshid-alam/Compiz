@@ -35,6 +35,7 @@
  */
 
 #include "animationsim.h"
+#define DELTA 0.0001f
 
 // =====================  Effect: ExpandPW  =========================
 
@@ -63,23 +64,30 @@ applyExpandPWTransform (CompWindow *w)
     matrixTranslate (transform, WIN_X (w) + WIN_W (w) / 2.0f,
 				WIN_Y (w) + WIN_H (w) / 2.0f,
 				0.0f);
-	
-    float switchPoint;
+
     float xScale;
     float yScale;
+    float switchPointP;
+    float switchPointN;
     float delay = animGetF (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_DELAY);
     
     if(animGetB (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_HORIZ_FIRST))
     {
-        switchPoint = w->width / (float) (w->width + w->height);
-        xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress < (switchPoint-delay/2) ? 1.0f - (switchPoint-delay/2 - forwardProgress)/(switchPoint-delay/2) : 1.0f);
-        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress > (switchPoint+delay/2) ? (forwardProgress - (switchPoint+delay/2))/(1.0f-switchPoint-delay/2) : 0.0f);
+        switchPointP = w->width / (float) (w->width + w->height) + delay/2;
+        switchPointN = w->width / (float) (w->width + w->height) - delay/2;
+        if(switchPointP > 1.0f) switchPointP = 1.0f - DELTA;
+        if(switchPointN < 0.0f) switchPointP = 0.0f + DELTA;
+        xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);
+        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
     }
     else
     {
-        switchPoint = w->height / (float) (w->width + w->height);
-        xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress > switchPoint ? (forwardProgress - switchPoint)/(1.0f-switchPoint) : 0.0f);
-        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPoint ? 1.0f - (switchPoint - forwardProgress)/switchPoint : 1.0f);    
+        switchPointP = w->height / (float) (w->width + w->height) + delay/2;
+        switchPointN = w->height / (float) (w->width + w->height) - delay/2;
+        if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
+        if(switchPointN <= 0.0f) switchPointP = 0.0f + DELTA;
+        xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
+        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);    
     }
 
     matrixScale (transform, xScale, yScale, 0.0f);
