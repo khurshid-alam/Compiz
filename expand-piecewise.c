@@ -45,7 +45,7 @@ fxExpandPWAnimProgress (CompWindow *w)
     ANIMSIM_DISPLAY (w->screen->display);
     float forwardProgress = (*ad->animBaseFunc->defaultAnimProgress) (w);
 
-    return (*ad->animBaseFunc->decelerateProgress) (forwardProgress);
+    return forwardProgress;
 }
 
 static void
