@@ -73,19 +73,19 @@ applyExpandPWTransform (CompWindow *w)
     
     if(animGetB (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_HORIZ_FIRST))
     {
-        switchPointP = w->width / (float) (w->width + w->height) + delay/2;
-        switchPointN = w->width / (float) (w->width + w->height) - delay/2;
-        if(switchPointP > 1.0f) switchPointP = 1.0f - DELTA;
-        if(switchPointN < 0.0f) switchPointP = 0.0f + DELTA;
+        switchPointP = w->width / (float) (w->width + w->height) + w->height / (float) (w->width + w->height) * delay;
+        switchPointN = w->width / (float) (w->width + w->height) - w->width / (float) (w->width + w->height) * delay;
+        if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
+        if(switchPointN <= 0.0f) switchPointN = 0.0f + DELTA;
         xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);
         yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
     }
     else
     {
-        switchPointP = w->height / (float) (w->width + w->height) + delay/2;
-        switchPointN = w->height / (float) (w->width + w->height) - delay/2;
+        switchPointP = w->height / (float) (w->width + w->height) + w->width / (float) (w->width + w->height) * delay;
+        switchPointN = w->height / (float) (w->width + w->height) - w->height / (float) (w->width + w->height) * delay;
         if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
-        if(switchPointN <= 0.0f) switchPointP = 0.0f + DELTA;
+        if(switchPointN <= 0.0f) switchPointN = 0.0f + DELTA;
         xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
         yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);    
     }
