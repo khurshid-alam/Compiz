@@ -65,6 +65,8 @@ static const CompMetadataOptionInfo animEgScreenOptionInfo[] = {
     { "bounce_number", "int", 0, 0, 0			},
     { "bounce_fade", "bool", 0, 0, 0			},
     { "flyin_direction", "int", 0, 0, 0			},
+    { "flyin_direction_x", "float", 0, 0, 0		},
+    { "flyin_direction_y", "float", 0, 0, 0		},
     { "flyin_fade", "bool", 0, 0, 0			},
     { "flyin_distance", "float", 0, 0, 0		},
     { "rotatein_angle", "float", 0, 0, 0		},

@@ -61,21 +61,25 @@ applyFlyinTransform (CompWindow *w)
 
     switch (direction)
     {
-	case 1:
-	    offsetX = 0;
-	    offsetY = -animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
-	    break;
-	case 2:
-	    offsetX = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
-	    offsetY = 0;
-	    break;
-	case 3:
+	case 0:
 	    offsetX = 0;
 	    offsetY = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
 	    break;
-	case 4:
-	    offsetX = -animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
+	case 1:
+	    offsetX = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
 	    offsetY = 0;
+	    break;
+	case 2:
+	    offsetX = 0;
+	    offsetY = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
+	    break;
+	case 3:
+	    offsetX = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DISTANCE);
+	    offsetY = 0;
+	    break;
+	case 4:
+	    offsetX = -animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DIRECTION_X);
+	    offsetY = animGetF (w, ANIMSIM_SCREEN_OPTION_FLYIN_DIRECTION_Y);
 	    break;
     }
 
