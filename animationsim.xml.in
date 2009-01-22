@@ -51,6 +51,7 @@
 	    <default>0</default>
 	    <min>-1000</min>
 	    <max>1000</max>
+		<precision>0.01</precision>
 	  </option>
 	  <option name="flyin_direction_y" type="float">
 	    <_short>UD Direction Y</_short>
@@ -58,6 +59,7 @@
 	    <default>0</default>
 	    <min>-1000</min>
 	    <max>1000</max>
+		<precision>0.01</precision>
 	  </option>
 	  <option name="flyin_fade" type="bool">
 	    <_short>Fade</_short>
@@ -70,6 +72,7 @@
 	    <default>20</default>
 	    <min>5</min>
 	    <max>1000</max>
+		<precision>0.01</precision>
 	  </option>
 	</subgroup>
 	<subgroup>
