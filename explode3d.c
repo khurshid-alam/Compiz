@@ -50,7 +50,7 @@ fxExplodeInit (CompWindow * w)
     {
     case PolygonTessRect:
 	if (!ad->animAddonFunc->tessellateIntoRectangles
-	    (w, 
+	    (w,
 	     animGetI (w, ANIMEG_SCREEN_OPTION_EXPLODE_GRIDSIZE_X),
 	     animGetI (w, ANIMEG_SCREEN_OPTION_EXPLODE_GRIDSIZE_Y),
 	     animGetF (w, ANIMEG_SCREEN_OPTION_EXPLODE_THICKNESS)))
@@ -58,7 +58,7 @@ fxExplodeInit (CompWindow * w)
 	break;
     case PolygonTessHex:
 	if (!ad->animAddonFunc->tessellateIntoHexagons
-	    (w, 
+	    (w,
 	     animGetI (w, ANIMEG_SCREEN_OPTION_EXPLODE_GRIDSIZE_X),
 	     animGetI (w, ANIMEG_SCREEN_OPTION_EXPLODE_GRIDSIZE_Y),
 	     animGetF (w, ANIMEG_SCREEN_OPTION_EXPLODE_THICKNESS)))

@@ -282,7 +282,7 @@ fxSheetsModelStep (CompWindow *w, float time)
 	if (forwardProgress < preShapePhaseEnd)
 	    object->position.x =
 		(1 - preShapeProgress) * origx + preShapeProgress * targetx;
-	else	    
+	else
 	    object->position.x = targetx;
 
 	if (object->position.y < iconFarEndY)

@@ -19,7 +19,7 @@
 ##
 
 # plugin.info file contents
-# 
+#
 # PLUGIN = foo
 # PKG_DEP = pango
 # LDFLAGS_ADD = -lGLU
@@ -128,7 +128,7 @@ h-files    := $(shell find -name '*.h' 2> /dev/null | grep -v "$(BUILDDIR)/" | s
 h-files    += $(bcop-target-hdr)
 h-files    += $(foreach file,$(COMPIZ_HEADERS) $(CHK_HEADERS),$(shell $(ECHO) -n "$(COMPIZ_INC)$(file)"))
 
-all-c-objs := $(addprefix $(BUILDDIR)/,$(c-objs)) 
+all-c-objs := $(addprefix $(BUILDDIR)/,$(c-objs))
 all-c-objs += $(bcop-target-src:.c=.lo)
 
 # additional files
@@ -238,7 +238,7 @@ $(BUILDDIR)/%_options.c: $(BUILDDIR)/%.xml
 	else \
 		$(ECHO) "bcop'ing  $<  ->  $@"; \
 	fi
-	@$(BCOP) --source=$@ $< 
+	@$(BCOP) --source=$@ $<
 	@if [ '$(color)' != 'no' ]; then \
 		$(ECHO) -e "\r\033[0mbcop'ing  : \033[34m$< -> $@\033[0m"; \
 	fi
@@ -352,7 +352,7 @@ clean:
 	@if [ '$(color)' != 'no' ]; then \
 		$(ECHO) -e "\r\033[0mremoving  : \033[34m./$(BUILDDIR)\033[0m"; \
 	fi
-	
+
 
 install: $(DESTDIR) all
 	@if [ '$(color)' != 'no' ]; then \
@@ -448,7 +448,7 @@ install: $(DESTDIR) all
 	    done \
 	fi
 
-uninstall:	
+uninstall:
 	@if [ -e $(DESTDIR)/lib$(PLUGIN).so ]; then \
 	    if [ '$(color)' != 'no' ]; then \
 		$(ECHO) -n -e "\033[0;1;5muninstall \033[0m: \033[0;31m$(DESTDIR)/lib$(PLUGIN).so\033[0m"; \

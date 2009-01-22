@@ -201,7 +201,7 @@ fxBounceUpdateWindowTransform (CompWindow *w,
 
 void
 fxSheetsInitGrid (CompWindow *w,
-		     int *gridWidth, 
+		     int *gridWidth,
 		     int *gridHeight);
 
 Bool
@@ -230,7 +230,7 @@ fxExpandAnimProgress (CompWindow *w);
 void
 fxExpandUpdateWindowTransform (CompWindow *w,
 			      CompTransform *wTransform);
-			      
+
 /* expandPW.c */
 
 Bool

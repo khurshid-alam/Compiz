@@ -59,7 +59,7 @@ applyExpandPWTransform (CompWindow *w)
 
     float initialXScale = animGetI (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_HORIZ) / (float) w->width;
     float initialYScale = animGetI (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_VERT)  / (float) w->height;
-    
+
     // animation movement
     matrixTranslate (transform, WIN_X (w) + WIN_W (w) / 2.0f,
 				WIN_Y (w) + WIN_H (w) / 2.0f,
@@ -70,7 +70,7 @@ applyExpandPWTransform (CompWindow *w)
     float switchPointP;
     float switchPointN;
     float delay = animGetF (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_DELAY);
-    
+
     if(animGetB (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_HORIZ_FIRST))
     {
         switchPointP = w->width / (float) (w->width + w->height) + w->height / (float) (w->width + w->height) * delay;
@@ -87,7 +87,7 @@ applyExpandPWTransform (CompWindow *w)
         if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
         if(switchPointN <= 0.0f) switchPointN = 0.0f + DELTA;
         xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
-        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);    
+        yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);
     }
 
     matrixScale (transform, xScale, yScale, 0.0f);
