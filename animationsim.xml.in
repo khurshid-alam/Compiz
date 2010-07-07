@@ -1,5 +1,5 @@
 <compiz>
-  <plugin name="animationsim">
+  <plugin name="animationsim" useBcop="true">
     <_short>Simple Animations</_short>
     <_long>Animations that are simple on the eye</_long>
     <category>Effects</category>
@@ -11,7 +11,7 @@
 	    <plugin>animation</plugin>
 	</relation>
     </deps>
-    <screen>
+    <options>
 
       <group>
 	<_short>Effect Settings</_short>
@@ -179,7 +179,7 @@
 
       </group>
 
-    </screen>
+    </options>
 
     <extension base_plugin="animation">
       <base_option>open_effects</base_option>

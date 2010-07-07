@@ -39,42 +39,33 @@
 
 // =====================  Effect: ExpandPW  =========================
 
-float
-fxExpandPWAnimProgress (CompWindow *w)
+void
+ExpandPWAnim::applyTransform ()
 {
-    ANIMSIM_DISPLAY (w->screen->display);
-    float forwardProgress = (*ad->animBaseFunc->defaultAnimProgress) (w);
+    ANIMSIM_SCREEN (screen);
 
-    return forwardProgress;
-}
+    GLMatrix *transform = &mTransform;
 
-static void
-applyExpandPWTransform (CompWindow *w)
-{
-    ANIMSIM_WINDOW (w);
+    float forwardProgress = 1.0f - getProgress ();
 
-    CompTransform *transform = &aw->com->transform;
-
-    float forwardProgress = 1.0f - fxExpandPWAnimProgress (w);
-
-    float initialXScale = animGetI (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_HORIZ) / (float) w->width;
-    float initialYScale = animGetI (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_INITIAL_VERT)  / (float) w->height;
+    float initialXScale = ass->optionGetExpandpwInitialHoriz () / (float) mWindow->width ();
+    float initialYScale = ass->optionGetExpandpwInitialVert ()  / (float) mWindow->height ();
 
     // animation movement
-    matrixTranslate (transform, WIN_X (w) + WIN_W (w) / 2.0f,
-				WIN_Y (w) + WIN_H (w) / 2.0f,
-				0.0f);
+    transform->translate (WIN_X (mWindow) + WIN_W (mWindow) / 2.0f,
+			  WIN_Y (mWindow) + WIN_H (mWindow) / 2.0f,
+			  0.0f);
 
     float xScale;
     float yScale;
     float switchPointP;
     float switchPointN;
-    float delay = animGetF (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_DELAY);
+    float delay = ass->optionGetExpandpwDelay ();
 
-    if(animGetB (w, ANIMSIM_SCREEN_OPTION_EXPANDPW_HORIZ_FIRST))
+    if (ass->optionGetExpandpwHorizFirst ())
     {
-        switchPointP = w->width / (float) (w->width + w->height) + w->height / (float) (w->width + w->height) * delay;
-        switchPointN = w->width / (float) (w->width + w->height) - w->width / (float) (w->width + w->height) * delay;
+        switchPointP = mWindow->width () / (float) (mWindow->width () + mWindow->height ()) + mWindow->height () / (float) (mWindow->width () + mWindow->height ()) * delay;
+        switchPointN = mWindow->width () / (float) (mWindow->width () + mWindow->height ()) - mWindow->width () / (float) (mWindow->width () + mWindow->height ()) * delay;
         if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
         if(switchPointN <= 0.0f) switchPointN = 0.0f + DELTA;
         xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);
@@ -82,50 +73,18 @@ applyExpandPWTransform (CompWindow *w)
     }
     else
     {
-        switchPointP = w->height / (float) (w->width + w->height) + w->width / (float) (w->width + w->height) * delay;
-        switchPointN = w->height / (float) (w->width + w->height) - w->height / (float) (w->width + w->height) * delay;
+        switchPointP = mWindow->height () / (float) (mWindow->width () + mWindow->height ()) + mWindow->width () / (float) (mWindow->width () + mWindow->height ()) * delay;
+        switchPointN = mWindow->height () / (float) (mWindow->width () + mWindow->height ()) - mWindow->height () / (float) (mWindow->width () + mWindow->height ()) * delay;
         if(switchPointP >= 1.0f) switchPointP = 1.0f - DELTA;
         if(switchPointN <= 0.0f) switchPointN = 0.0f + DELTA;
         xScale = initialXScale + (1.0f - initialXScale) * (forwardProgress > switchPointP ? (forwardProgress - switchPointP)/(1.0f-switchPointP) : 0.0f);
         yScale = initialYScale + (1.0f - initialYScale) * (forwardProgress < switchPointN ? 1.0f - (switchPointN - forwardProgress)/switchPointN : 1.0f);
     }
 
-    matrixScale (transform, xScale, yScale, 0.0f);
+    transform->scale (xScale, yScale, 0.0f);
 
-    matrixTranslate (transform, -(WIN_X (w) + WIN_W (w) / 2.0f),
-				-(WIN_Y (w) + WIN_H (w) / 2.0f),
-				0.0f);
+    transform->translate (-(WIN_X (mWindow) + WIN_W (mWindow) / 2.0f),
+			  -(WIN_Y (mWindow) + WIN_H (mWindow) / 2.0f),
+			  0.0f);
 
-}
-
-void
-fxExpandPWAnimStep (CompWindow *w, float time)
-{
-    ANIMSIM_DISPLAY (w->screen->display);
-    (*ad->animBaseFunc->defaultAnimStep) (w, time);
-
-    applyExpandPWTransform (w);
-}
-
-void
-fxExpandPWUpdateWindowAttrib (CompWindow * w,
-			   WindowPaintAttrib * wAttrib)
-{
-}
-
-void
-fxExpandPWUpdateWindowTransform (CompWindow *w,
-			      CompTransform *wTransform)
-{
-    ANIMSIM_WINDOW(w);
-
-    matrixMultiply (wTransform, wTransform, &aw->com->transform);
-}
-
-Bool
-fxExpandPWInit (CompWindow * w)
-{
-    ANIMSIM_DISPLAY (w->screen->display);
-
-    return (*ad->animBaseFunc->defaultAnimInit) (w);
 }

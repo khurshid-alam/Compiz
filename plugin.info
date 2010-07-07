@@ -1,2 +1,0 @@
-PLUGIN = animationsim
-LDFLAGS_ADD = -lGLU

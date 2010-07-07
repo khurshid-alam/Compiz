@@ -38,27 +38,16 @@
 
 // =====================  Effect: Expand  =========================
 
-float
-fxExpandAnimProgress (CompWindow *w)
+void
+ExpandAnim::applyTransform ()
 {
-    ANIMSIM_DISPLAY (w->screen->display);
-    float forwardProgress = (*ad->animBaseFunc->defaultAnimProgress) (w);
-
-    return (*ad->animBaseFunc->decelerateProgress) (forwardProgress);
-}
-
-static void
-applyExpandTransform (CompWindow *w)
-{
-    ANIMSIM_WINDOW (w);
-
-    CompTransform *transform = &aw->com->transform;
+    GLMatrix *transform = &mTransform;
     float defaultXScale = 0.3f;
     float forwardProgress;
     float expandProgress;
-    float expandPhaseEnd = 0.5f;
+    const float expandPhaseEnd = 0.5f;
 
-    forwardProgress = fxExpandAnimProgress (w);
+    forwardProgress = getProgress ();
 
     if ((1 - forwardProgress) < expandPhaseEnd)
 	expandProgress = (1 - forwardProgress) / expandPhaseEnd;
@@ -66,48 +55,17 @@ applyExpandTransform (CompWindow *w)
 	expandProgress = 1.0f;
 
     // animation movement
-    matrixTranslate (transform, WIN_X (w) + WIN_W (w) / 2.0f,
-				WIN_Y (w) + WIN_H (w) / 2.0f,
-				0.0f);
+    transform->translate (WIN_X (mWindow) + WIN_W (mWindow) / 2.0f,
+			  WIN_Y (mWindow) + WIN_H (mWindow) / 2.0f,
+			  0.0f); 
 
-    matrixScale (transform, defaultXScale + (1.0f - defaultXScale) * expandProgress,
-			    (1 - forwardProgress), 0.0f);
+    transform->scale (defaultXScale + (1.0f - defaultXScale) *
+		      expandProgress,
+		      (1 - forwardProgress), 0.0f);
 
-    matrixTranslate (transform, -(WIN_X (w) + WIN_W (w) / 2.0f),
-				-(WIN_Y (w) + WIN_H (w) / 2.0f),
-				0.0f);
+    transform->translate (-(WIN_X (mWindow) + WIN_W (mWindow) / 2.0f),
+		      	  -(WIN_Y (mWindow) + WIN_H (mWindow) / 2.0f),
+		      	  0.0f);
 
-}
-
-void
-fxExpandAnimStep (CompWindow *w, float time)
-{
-    ANIMSIM_DISPLAY (w->screen->display);
-    (*ad->animBaseFunc->defaultAnimStep) (w, time);
-
-    applyExpandTransform (w);
-}
-
-void
-fxExpandUpdateWindowAttrib (CompWindow * w,
-			   WindowPaintAttrib * wAttrib)
-{
-}
-
-void
-fxExpandUpdateWindowTransform (CompWindow *w,
-			      CompTransform *wTransform)
-{
-    ANIMSIM_WINDOW(w);
-
-    matrixMultiply (wTransform, wTransform, &aw->com->transform);
-}
-
-Bool
-fxExpandInit (CompWindow * w)
-{
-    ANIMSIM_DISPLAY (w->screen->display);
-
-    return (*ad->animBaseFunc->defaultAnimInit) (w);
 }
 
