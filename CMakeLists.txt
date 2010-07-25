@@ -1,6 +1,8 @@
+find_package (Compiz REQUIRED)
+
 include (FindOpenGL)
-include (CompizFusion)
+include (CompizPlugin)
 
 if (OPENGL_GLU_FOUND)
-    compiz_fusion_plugin (animationplus LIBRARIES ${OPENGL_glu_LIBRARY} INCDIRS ${OPENGL_INCLUDE_DIR})
+    compiz_plugin (animationplus PLUGINDEPS animation animationaddon composite opengl LIBRARIES ${OPENGL_glu_LIBRARY} INCDIRS ${OPENGL_INCLUDE_DIR})
 endif (OPENGL_GLU_FOUND)

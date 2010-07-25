@@ -1,19 +1,22 @@
 <compiz>
   <!-- animationplus metadata -->
-  <plugin name="animationplus">
+  <plugin name="animationplus" useBcop="true">
     <_short>Animations Plus</_short>
     <_long>More window animations</_long>
     <category>Effects</category>
     <deps>
       <requirement>
+	<plugin>animation</plugin>
 	<plugin>animationaddon</plugin>
       </requirement>
       <relation type="after">
 	<plugin>animationaddon</plugin>
+	<plugin>opengl</plugin>
+	<plugin>composite</plugin>
       </relation>
     </deps>
 
-    <screen>
+    <options>
 
       <group>
 	<_short>Effect Settings</_short>
@@ -151,7 +154,7 @@
 
       </group>
 
-    </screen>
+    </options>
 
     <extension base_plugin="animation">
       <base_option>open_effects</base_option>
