@@ -17,7 +17,7 @@ extern AnimEffect AnimEffectExpand;
 extern AnimEffect AnimEffectExpandPW;
 
 // TODO Update this for each added animation effect! (total: 10)
-#define NUM_EFFECTS 6
+#define NUM_EFFECTS 7
 
 // This must have the value of the first "effect setting" above
 // in AnimAddonScreenOptions
@@ -305,7 +305,47 @@ class SheetAnim : public GridAnim,
 
 	int sheetsWaveCount;
 	std::vector <WaveParam> sheetsWaves;
-};	
+};
+
+class PulseSingleAnim : public TransformAnim,
+			virtual public FadeAnim,
+			virtual public BaseSimAnim
+{
+    public:
+      
+	PulseSingleAnim (CompWindow *w,
+			 WindowEvent curWindowEvent,
+			 float	  duration,
+			 const      AnimEffect info,
+			 const	  CompRect   &icon) :
+	    Animation::Animation (w, curWindowEvent, duration, info, icon),
+	    FadeAnim::FadeAnim (w, curWindowEvent, duration, info, icon),
+	    BaseSimAnim::BaseSimAnim (w, curWindowEvent, duration, info, icon),
+	    TransformAnim::TransformAnim (w, curWindowEvent, duration, info, icon) {}
+
+	void step () { TransformAnim::step (); }
+	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
+	bool updateBBUsed () { return true; }
+	
+	float getProgress () { return progressLinear (); }
+	float getFadeProgress ();
+	
+	void applyTransform ();
+};
+
+class PulseAnim : public MultiAnim <PulseSingleAnim, 2>
+{
+    public:
+      
+	PulseAnim (CompWindow *w,
+		   WindowEvent curWindowEvent,
+		   float       duration,
+		   const       AnimEffect info,
+		   const       CompRect &icon) :
+	    MultiAnim <PulseSingleAnim, 2>::MultiAnim
+		  (w, curWindowEvent, duration, info, icon) {}
+		  
+};     
 
 class AnimSimPluginVTable:
     public CompPlugin::VTableForScreenAndWindow <AnimSimScreen, AnimSimWindow>

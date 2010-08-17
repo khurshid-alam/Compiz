@@ -50,6 +50,7 @@ AnimEffect AnimEffectExpand;
 AnimEffect AnimEffectExpandPW;
 AnimEffect AnimEffectBounce;
 AnimEffect AnimEffectSheet;
+AnimEffect AnimEffectPulse;
 
 void
 AnimSimScreen::initAnimationList ()
@@ -85,6 +86,11 @@ AnimSimScreen::initAnimationList ()
 	new AnimEffectInfo ("animationsim:Sheet",
 			    true, true, true, false, false,
 			    &createAnimation<SheetAnim>);
+
+    animEffects[i++] = AnimEffectPulse =
+	new AnimEffectInfo ("animationsim:Pulse",
+			    true, true, true, false, false,
+			    &createAnimation<PulseAnim>);
 
     animSimExtPluginInfo.effectOptions = &getOptions ();
 

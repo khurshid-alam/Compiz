@@ -210,6 +210,10 @@
 	<value>animationsim:Expand Piecewise</value>
 	<_name>Expand Piecewise</_name>
       </restriction>
+      <restriction>
+	<value>animationsim:Pulse</value>
+	<_name>Pulse</_name>
+      </restriction>
     </extension>
 
   </plugin>
