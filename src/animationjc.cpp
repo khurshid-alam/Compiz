@@ -5,7 +5,6 @@ class AnimJCPluginVTable :
 {
 public:
     bool init ();
-    void fini ();
 };
 
 COMPIZ_PLUGIN_20090315 (animationjc, AnimJCPluginVTable);
@@ -13,8 +12,8 @@ COMPIZ_PLUGIN_20090315 (animationjc, AnimJCPluginVTable);
 AnimEffect animEffects[NUM_EFFECTS];
 
 ExtensionPluginAnimJC animJCExtPluginInfo (CompString ("animationjc"),
-						 NUM_EFFECTS, animEffects, NULL,
-                                                 NUM_NONEFFECT_OPTIONS);
+					   NUM_EFFECTS, animEffects, NULL,
+                                           NUM_NONEFFECT_OPTIONS);
 
 AnimEffect AnimEffectBlackHole;
 AnimEffect AnimEffectRaindrop;
@@ -39,7 +38,7 @@ BaseAddonAnim::BaseAddonAnim (CompWindow *w,
 }
 
 void
-PrivateAnimJCScreen::initAnimationList ()
+AnimJCScreen::initAnimationList ()
 {
     int i = 0;
 
@@ -61,12 +60,8 @@ PrivateAnimJCScreen::initAnimationList ()
 }
 
 PrivateAnimJCScreen::PrivateAnimJCScreen (CompScreen *s) :
-    //cScreen (CompositeScreen::get (s)),
-    //gScreen (GLScreen::get (s)),
-    //aScreen (as),
     mOutput (s->fullscreenOutput ())
 {
-    initAnimationList ();
 }
 
 PrivateAnimJCScreen::~PrivateAnimJCScreen ()
@@ -86,24 +81,12 @@ AnimJCScreen::AnimJCScreen (CompScreen *s) :
     PluginClassHandler<AnimJCScreen, CompScreen, ANIMATIONADDON_ABI> (s),
     priv (new PrivateAnimJCScreen (s))
 {
+    initAnimationList ();
 }
 
 AnimJCScreen::~AnimJCScreen ()
 {
     delete priv;
-}
-
-CompOption::Vector &
-AnimJCScreen::getOptions ()
-{
-    return priv->getOptions ();
-}
-
-bool
-AnimJCScreen::setOption (const CompString  &name,
-                            CompOption::Value &value)
-{
-    return priv->setOption (name, value);
 }
 
 AnimJCWindow::AnimJCWindow (CompWindow *w) :
@@ -139,15 +122,5 @@ AnimJCPluginVTable::init ()
         !CompPlugin::checkPluginABI ("animation", ANIMATION_ABI))
 	 return false;
 
-    CompPrivate p;
-    p.uval = ANIMATIONADDON_ABI;
-    ::screen->storeValue ("animationaddon_ABI", p);
-
     return true;
-}
-
-void
-AnimJCPluginVTable::fini ()
-{
-    ::screen->eraseValue ("animationaddon_ABI");
 }

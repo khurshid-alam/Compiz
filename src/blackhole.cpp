@@ -17,8 +17,8 @@ BlackHoleAnim::BlackHoleAnim (CompWindow *w,
 void
 BlackHoleAnim::initGrid ()
 {
-    mGridWidth = 10;
-    mGridHeight = 10;
+    mGridWidth = 20;
+    mGridHeight = 20;
 }
 
 void
@@ -59,7 +59,7 @@ BlackHoleAnim::step ()
 
 	// use that and t to find r
 	//float r = exp (-getBlackHoleProgress () / tau);
-	float cutoff = gridDistance/2;
+	float cutoff = gridDistance * AnimJCScreen::get (screen)->optionGetBlackholeDelay ();
 	float r = 1;
 	if (getBlackHoleProgress () > cutoff)
 	{

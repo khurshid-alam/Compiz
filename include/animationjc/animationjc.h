@@ -12,6 +12,7 @@ using namespace::std;
 
 class PrivateAnimJCScreen;
 
+/*
 class AnimJCScreen :
     public PluginClassHandler<AnimJCScreen, CompScreen, ANIMATIONADDON_ABI>,
     public CompOption::Class
@@ -28,6 +29,7 @@ public:
 private:
     PrivateAnimJCScreen *priv;
 };
+*/
 
 /// Base class for all polygon- and particle-based animations
 class BaseAddonAnim :

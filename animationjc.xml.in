@@ -18,6 +18,22 @@
       </relation>
     </deps>
 
+    <options>
+    <group>
+      <_short>Effect Settings</_short>
+
+      <subgroup>
+        <_short>Black Hole</_short>
+	<option name="blackhole_delay" type="float">
+	  <default>0.75</default>
+	  <min>0.0</min>
+	  <max>1.0</max>
+	  <precision>0.01</precision>
+	</option>
+      </subgroup>
+    </group>
+    </options>
+
     <extension base_plugin="animation">
       <base_option>open_effects</base_option>
       <base_option>open_random_effects</base_option>

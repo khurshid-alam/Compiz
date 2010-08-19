@@ -35,15 +35,29 @@ public:
 			     firstEffectOptionIndex) {}
     ~ExtensionPluginAnimJC () {}
 
-    //void prePaintOutput (CompOutput *output);
     const CompOutput *output () { return mOutput; }
 
 private:
     const CompOutput *mOutput;
 };
 
-class PrivateAnimJCScreen :
+class AnimJCScreen :
+    public PluginClassHandler<AnimJCScreen, CompScreen, ANIMATIONADDON_ABI>,
     public AnimationjcOptions
+{
+public:
+    AnimJCScreen (CompScreen *);
+    ~AnimJCScreen ();
+
+    int getIntenseTimeStep ();
+
+    void initAnimationList ();
+
+private:
+    PrivateAnimJCScreen *priv;
+};
+
+class PrivateAnimJCScreen
 {
     friend class AnimJCScreen;
 
@@ -52,8 +66,6 @@ public:
     ~PrivateAnimJCScreen ();
 
 protected:
-    void initAnimationList ();
-
     CompOutput &mOutput;
 };
 
