@@ -59,7 +59,8 @@ BlackHoleAnim::step ()
 
 	// use that and t to find r
 	//float r = exp (-getBlackHoleProgress () / tau);
-	float cutoff = gridDistance * AnimJCScreen::get (screen)->optionGetBlackholeDelay ();
+	float cutoff = gridDistance *
+		AnimJCScreen::get (screen)->optionGetBlackholeDelay ();
 	float r = 1;
 	if (getBlackHoleProgress () > cutoff)
 	{

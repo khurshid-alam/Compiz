@@ -47,10 +47,14 @@ RaindropAnim::step ()
 	    (oheight * 0.5 - outExtents.top);
     */
 
-    float waveHalfWidth = 0.1; // in grid terms
-    float waveAmp = (pow ((float)oheight / ::screen->height (), 0.4) * 0.08);
-    float wavePosition = -waveHalfWidth +
-	    (1. + 2.*waveHalfWidth) * getRaindropProgress ();
+    AnimJCScreen *ajs = AnimJCScreen::get (screen);
+
+    float waveLength = ajs->optionGetRaindropWavelength ();
+    int numWaves = ajs->optionGetRaindropNumWaves ();
+    float waveAmp = (pow ((float)oheight / ::screen->height (), 0.4) * 0.08) *
+	    ajs->optionGetRaindropAmplitude ();
+    float wavePosition = -waveLength * numWaves +
+	    (1. + waveLength * numWaves) * getRaindropProgress ();
 
     GridModel::GridObject *object = mModel->objects ();
     unsigned int n = mModel->numObjects ();
@@ -73,10 +77,11 @@ RaindropAnim::step ()
 			           pow (object->gridPosition ().y ()-0.5, 2)) *
 			     sqrt (2);
 
-	float distFromWaveCenter = fabs (gridDistance - wavePosition);
-	if (distFromWaveCenter < waveHalfWidth)
-	    objPos.setZ (waveAmp * (cos (distFromWaveCenter *
-				         3.14159265 / waveHalfWidth) + 1) / 2);
+	float distFromWave = gridDistance - wavePosition;
+	if (distFromWave < waveLength*numWaves && distFromWave > 0)
+	    objPos.setZ (waveAmp *
+		    sin (3.14159265 * distFromWave / waveLength / numWaves) *
+		    pow (sin (3.14159265 * distFromWave / waveLength), 2));
 	else
 	    objPos.setZ (0);
     }

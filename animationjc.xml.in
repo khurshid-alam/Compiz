@@ -25,10 +25,38 @@
       <subgroup>
         <_short>Black Hole</_short>
 	<option name="blackhole_delay" type="float">
+	  <_short>Delay</_short>
 	  <default>0.75</default>
 	  <min>0.0</min>
 	  <max>1.0</max>
 	  <precision>0.01</precision>
+	</option>
+      </subgroup>
+
+      <subgroup>
+        <_short>Raindrop</_short>
+
+	<option name="raindrop_amplitude" type="float">
+	  <_short>Amplitude</_short>
+	  <default>1.0</default>
+	  <min>-5.0</min>
+	  <max>5.0</max>
+	  <precision>0.1</precision>
+	</option>
+
+	<option name="raindrop_wavelength" type="float">
+	  <_short>Wavelength</_short>
+	  <default>0.2</default>
+	  <min>0.0</min>
+	  <max>1.0</max>
+	  <precision>0.05</precision>
+	</option>
+
+	<option name="raindrop_num_waves" type="int">
+	  <_short>Number of Waves</_short>
+	  <default>3</default>
+	  <min>1</min>
+	  <max>5</max>
 	</option>
       </subgroup>
     </group>
