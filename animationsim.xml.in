@@ -148,6 +148,17 @@
 	  </option>
 	</subgroup>
 	<subgroup>
+	  <_short>Fan</_short>
+	  <option name="fan_angle" type="float">
+	    <_short>Fan Angle</_short>
+	    <_long>Angle of windows away from the main window</_long>
+	    <default>35</default>
+	    <min>0</min>
+	    <max>90</max>
+	    <precision>0.1</precision>
+	  </option>
+	</subgroup>
+	<subgroup>
 	  <_short>Expand Piecewise</_short>
 	  <option name="expandpw_horiz_first" type="bool">
 	    <_short>First expand horizontally</_short>
@@ -213,6 +224,10 @@
       <restriction>
 	<value>animationsim:Pulse</value>
 	<_name>Pulse</_name>
+      </restriction>
+      <restriction>
+	<value>animationsim:Fan</value>
+	<_name>Fan</_name>
       </restriction>
     </extension>
 

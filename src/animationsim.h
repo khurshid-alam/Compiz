@@ -15,9 +15,10 @@ extern AnimEffect AnimEffectRotateIn;
 extern AnimEffect AnimEffectSheet;
 extern AnimEffect AnimEffectExpand;
 extern AnimEffect AnimEffectExpandPW;
+extern AnimEffect AnimEffectFan;
 
-// TODO Update this for each added animation effect! (total: 10)
-#define NUM_EFFECTS 7
+// TODO Update this for each added animation effect! (total: 8)
+#define NUM_EFFECTS 8
 
 // This must have the value of the first "effect setting" above
 // in AnimAddonScreenOptions
@@ -345,7 +346,46 @@ class PulseAnim : public MultiAnim <PulseSingleAnim, 2>
 	    MultiAnim <PulseSingleAnim, 2>::MultiAnim
 		  (w, curWindowEvent, duration, info, icon) {}
 		  
-};     
+};
+
+class FanSingleAnim : public TransformAnim,
+		      virtual public FadeAnim,
+		      virtual public BaseSimAnim
+{
+    public:
+      
+	FanSingleAnim (CompWindow  *w,
+		       WindowEvent curWindowEvent,
+		       float	   duration,
+		       const	   AnimEffect info,
+		       const	   CompRect   &icon) :
+	    Animation::Animation (w, curWindowEvent, duration, info, icon),
+	    FadeAnim::FadeAnim (w, curWindowEvent, duration, info, icon),
+	    BaseSimAnim::BaseSimAnim (w, curWindowEvent, duration, info, icon),
+	    TransformAnim::TransformAnim (w, curWindowEvent, duration, info, icon) {}
+
+	void step () { TransformAnim::step (); }
+	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
+	bool updateBBUsed () { return true; }
+	
+	float getProgress () { return progressLinear (); }
+	float getFadeProgress ();
+	
+	void applyTransform ();
+};
+
+class FanAnim : public MultiAnim <FanSingleAnim, 6>
+{
+    public:
+      
+	FanAnim (CompWindow *w,
+		 WindowEvent curWindowEvent,
+		 float       duration,
+		 const       AnimEffect info,
+		 const       CompRect &icon) :
+	    MultiAnim <FanSingleAnim, 6>::MultiAnim
+		  (w, curWindowEvent, duration, info, icon) {}
+};
 
 class AnimSimPluginVTable:
     public CompPlugin::VTableForScreenAndWindow <AnimSimScreen, AnimSimWindow>
