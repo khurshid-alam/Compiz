@@ -24,6 +24,10 @@ RaindropAnim::initGrid ()
 void
 RaindropAnim::step ()
 {
+    float t = 1. - progressLinear ();
+    if (mCurWindowEvent == WindowEventClose)
+	t = 1. - t;
+
     CompRect winRect (mAWindow->savedRectsValid () ?
                       mAWindow->saveWinRect () :
                       mWindow->geometry ());
@@ -40,13 +44,6 @@ RaindropAnim::step ()
     int owidth = outRect.width ();
     int oheight = outRect.height ();
 
-    /*
-    float centerx = wx + mModel->scale ().x () *
-	    (owidth * 0.5 - outExtents.left);
-    float centery = wy + mModel->scale ().y () *
-	    (oheight * 0.5 - outExtents.top);
-    */
-
     AnimJCScreen *ajs = AnimJCScreen::get (screen);
 
     float waveLength = ajs->optionGetRaindropWavelength ();
@@ -54,7 +51,7 @@ RaindropAnim::step ()
     float waveAmp = (pow ((float)oheight / ::screen->height (), 0.4) * 0.08) *
 	    ajs->optionGetRaindropAmplitude ();
     float wavePosition = -waveLength * numWaves +
-	    (1. + waveLength * numWaves) * getRaindropProgress ();
+	    (1. + waveLength * numWaves) * t;
 
     GridModel::GridObject *object = mModel->objects ();
     unsigned int n = mModel->numObjects ();

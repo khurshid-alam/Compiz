@@ -112,8 +112,6 @@ public:
                   const AnimEffect info,
                   const CompRect &icon);
 
-    float getRaindropProgress () { return progressLinear (); }
-
     void initGrid ();
 
     inline bool using3D () { return true; }
