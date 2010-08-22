@@ -46,7 +46,7 @@
 
 	<option name="raindrop_wavelength" type="float">
 	  <_short>Wavelength</_short>
-	  <default>0.2</default>
+	  <default>0.4</default>
 	  <min>0.0</min>
 	  <max>1.0</max>
 	  <precision>0.05</precision>
@@ -54,7 +54,7 @@
 
 	<option name="raindrop_num_waves" type="int">
 	  <_short>Number of Waves</_short>
-	  <default>3</default>
+	  <default>1</default>
 	  <min>1</min>
 	  <max>5</max>
 	</option>
