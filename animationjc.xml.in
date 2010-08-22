@@ -28,7 +28,7 @@
 	  <_short>Delay</_short>
 	  <default>0.75</default>
 	  <min>0.0</min>
-	  <max>1.0</max>
+	  <max>0.99</max>
 	  <precision>0.01</precision>
 	</option>
       </subgroup>

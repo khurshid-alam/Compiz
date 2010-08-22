@@ -46,6 +46,7 @@ AnimJCScreen::initAnimationList ()
         new AnimEffectInfo ("animationjc:Black Hole",
                             true, true, true, false, false,
                             &createAnimation<BlackHoleAnim>);
+
     animEffects[i++] = AnimEffectRaindrop =
         new AnimEffectInfo ("animationjc:Raindrop",
                             true, true, true, false, true,

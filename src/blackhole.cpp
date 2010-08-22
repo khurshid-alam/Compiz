@@ -45,6 +45,9 @@ BlackHoleAnim::step ()
     float centery = wy + mModel->scale ().y () *
 	    (oheight * 0.5 - outExtents.top);
 
+    float delay = AnimJCScreen::get (screen)->optionGetBlackholeDelay ();
+    float tau = (1. - delay) / 8.;
+
     GridModel::GridObject *object = mModel->objects ();
     unsigned int n = mModel->numObjects ();
     for (unsigned int i = 0; i < n; i++, object++)
@@ -53,19 +56,11 @@ BlackHoleAnim::step ()
 	float gridDistance = 2 * max (fabs (object->gridPosition ().x ()-0.5),
 				      fabs (object->gridPosition ().y ()-0.5));
 
-	// use that to find tau
-	//float tau = pow (gridDistance, 2) / 4.;
-	float tau = 1./8;
-
-	// use that and t to find r
-	//float r = exp (-getBlackHoleProgress () / tau);
-	float cutoff = gridDistance *
-		AnimJCScreen::get (screen)->optionGetBlackholeDelay ();
+	// use that and tau to find r
+	float cutoff = gridDistance * delay;
 	float r = 1;
 	if (getBlackHoleProgress () > cutoff)
-	{
 	    r = exp (-(getBlackHoleProgress () - cutoff) / tau);
-	}
 
 	// find real original coordinates
 	float origx = wx + mModel->scale ().x () *
@@ -75,12 +70,10 @@ BlackHoleAnim::step ()
                 (oheight * object->gridPosition ().y () -
                 outExtents.top);
 
-	// normalize, multiply by r
+	// shrink toward center by r
 	Point3d &objPos = object->position ();
 	objPos.setX ((origx-centerx) * r + centerx);
 	objPos.setY ((origy-centery) * r + centery);
-	//objPos.setX (origx);
-	//objPos.setY (origy);
 	objPos.setZ (0);
     }
 }

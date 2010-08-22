@@ -81,6 +81,8 @@ protected:
     AnimWindow *aWindow;
 };
 
+/*** BLACK HOLE **************************************************************/
+
 class BlackHoleAnim :
     public GridTransformAnim
 {
@@ -97,6 +99,8 @@ public:
     inline bool using3D () { return false; }
     void step ();
 };
+
+/*** RAINDROP ****************************************************************/
 
 class RaindropAnim :
     public GridTransformAnim
@@ -116,4 +120,3 @@ public:
 
     void step ();
 };
-
