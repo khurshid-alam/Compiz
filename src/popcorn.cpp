@@ -1,4 +1,3 @@
-#include <iostream>
 #include <private.h>
 
 #define WIN_X(w) ((w)->x () - (w)->input ().left)
