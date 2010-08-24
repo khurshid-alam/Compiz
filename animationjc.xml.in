@@ -39,7 +39,7 @@
 	  <_short>Kernel Height</_short>
 	  <default>1.0</default>
 	  <min>0.0</min>
-	  <max>10.0</max>
+	  <max>5.0</max>
 	  <precision>0.1</precision>
 	</option>
       </subgroup>

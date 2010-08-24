@@ -50,7 +50,7 @@ PopcornSingleAnim::applyTransform ()
     float dy = -v * sin (theta) * p;
 
     mTransform.translate (dx, dy,
-	    0.08*p*AnimJCScreen::get (screen)->optionGetPopcornKernelHeight ());
+	    0.16*p*AnimJCScreen::get (screen)->optionGetPopcornKernelHeight ());
 }
 
 void
