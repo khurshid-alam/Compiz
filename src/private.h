@@ -15,9 +15,10 @@
 #include "animationjc_options.h"
 
 extern AnimEffect AnimEffectBlackHole;
+extern AnimEffect AnimEffectPopcorn;
 extern AnimEffect AnimEffectRaindrop;
 
-#define NUM_EFFECTS 2
+#define NUM_EFFECTS 3
 
 // This must have the value of the first "effect setting" above
 // in AnimJCScreenOptions
@@ -117,4 +118,49 @@ public:
     inline bool using3D () { return true; }
 
     void step ();
+};
+
+/*** POPCORN *****************************************************************/
+
+class PopcornSingleAnim :
+    public TransformAnim
+{
+public:
+    PopcornSingleAnim (CompWindow *w,
+                       WindowEvent curWindowEvent,
+                       float duration,
+                       const AnimEffect info,
+                       const CompRect &icon) :
+	    Animation::Animation
+		    (w, curWindowEvent, duration, info, icon),
+	    TransformAnim::TransformAnim
+		    (w, curWindowEvent, duration, info, icon)
+    {
+    }
+
+    float layerProgress (int);
+
+    void applyTransform ();
+
+    void updateAttrib (GLWindowPaintAttrib &);
+
+    void updateBB (CompOutput &output);
+    bool updateBBUsed () { return true; }
+
+    GLMatrix mTransform2;
+};
+
+class PopcornAnim :
+    public MultiAnim <PopcornSingleAnim, 6>
+{
+public:
+    PopcornAnim (CompWindow *w,
+                 WindowEvent curWindowEvent,
+                 float duration,
+                 const AnimEffect info,
+                 const CompRect &icon) :
+	    MultiAnim <PopcornSingleAnim, 6>::MultiAnim
+		    (w, curWindowEvent, duration, info, icon)
+    {
+    }
 };

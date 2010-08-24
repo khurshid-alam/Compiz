@@ -34,6 +34,17 @@
       </subgroup>
 
       <subgroup>
+        <_short>Popcorn</_short>
+	<option name="popcorn_kernel_height" type="float">
+	  <_short>Kernel Height</_short>
+	  <default>1.0</default>
+	  <min>0.0</min>
+	  <max>10.0</max>
+	  <precision>0.1</precision>
+	</option>
+      </subgroup>
+
+      <subgroup>
         <_short>Raindrop</_short>
 
 	<option name="raindrop_amplitude" type="float">
@@ -72,6 +83,10 @@
       <restriction>
         <value>animationjc:Black Hole</value>
         <_name>Black Hole</_name>
+      </restriction>
+      <restriction>
+        <value>animationjc:Popcorn</value>
+        <_name>Popcorn</_name>
       </restriction>
     </extension>
 
