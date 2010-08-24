@@ -15,11 +15,12 @@
 #include "animationjc_options.h"
 
 extern AnimEffect AnimEffectBlackHole;
+extern AnimEffect AnimEffectFlicker;
 extern AnimEffect AnimEffectGhost;
 extern AnimEffect AnimEffectPopcorn;
 extern AnimEffect AnimEffectRaindrop;
 
-#define NUM_EFFECTS 4
+#define NUM_EFFECTS 5
 
 // This must have the value of the first "effect setting" above
 // in AnimJCScreenOptions
@@ -147,8 +148,6 @@ public:
 
     void updateBB (CompOutput &output);
     bool updateBBUsed () { return true; }
-
-    GLMatrix mTransform2;
 };
 
 class PopcornAnim :
@@ -187,4 +186,47 @@ public:
     void updateAttrib (GLWindowPaintAttrib &);
 };
 
+/*** FLICKER *****************************************************************/
 
+class FlickerSingleAnim :
+    public GridTransformAnim
+{
+public:
+    FlickerSingleAnim (CompWindow *w,
+                       WindowEvent curWindowEvent,
+                       float duration,
+                       const AnimEffect info,
+                       const CompRect &icon) :
+	    Animation::Animation
+		    (w, curWindowEvent, duration, info, icon),
+	    TransformAnim::TransformAnim
+		    (w, curWindowEvent, duration, info, icon),
+	    GridTransformAnim::GridTransformAnim
+		    (w, curWindowEvent, duration, info, icon)
+    {
+    }
+
+    void updateAttrib (GLWindowPaintAttrib &);
+
+    void initGrid ();
+
+    void step ();
+
+    bool updateBBUsed () { return true; }
+    void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
+};
+
+class FlickerAnim :
+    public MultiAnim <FlickerSingleAnim, 5>
+{
+public:
+    FlickerAnim (CompWindow *w,
+                 WindowEvent curWindowEvent,
+                 float duration,
+                 const AnimEffect info,
+                 const CompRect &icon) :
+	    MultiAnim <FlickerSingleAnim, 5>::MultiAnim
+		    (w, curWindowEvent, duration, info, icon)
+    {
+    }
+};

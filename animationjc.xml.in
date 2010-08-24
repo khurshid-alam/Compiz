@@ -34,6 +34,16 @@
       </subgroup>
 
       <subgroup>
+        <_short>Flicker</_short>
+	<option name="flicker_amplitude" type="int">
+	  <_short>Amplitude</_short>
+	  <default>3</default>
+	  <min>1</min>
+	  <max>10</max>
+	</option>
+      </subgroup>
+
+      <subgroup>
         <_short>Ghost</_short>
 	<option name="ghost_grid" type="int">
 	  <_short>Grid</_short>
@@ -132,6 +142,10 @@
       <base_option>close_effects</base_option>
       <base_option>close_random_effects</base_option>
       <base_option>focus_effects</base_option>
+      <restriction>
+        <value>animationjc:Flicker</value>
+        <_name>Flicker</_name>
+      </restriction>
       <restriction>
         <value>animationjc:Raindrop</value>
         <_name>Raindrop</_name>
