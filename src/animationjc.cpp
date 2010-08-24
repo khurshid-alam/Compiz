@@ -16,6 +16,7 @@ ExtensionPluginAnimJC animJCExtPluginInfo (CompString ("animationjc"),
                                            NUM_NONEFFECT_OPTIONS);
 
 AnimEffect AnimEffectBlackHole;
+AnimEffect AnimEffectGhost;
 AnimEffect AnimEffectPopcorn;
 AnimEffect AnimEffectRaindrop;
 
@@ -47,6 +48,11 @@ AnimJCScreen::initAnimationList ()
         new AnimEffectInfo ("animationjc:Black Hole",
                             true, true, true, false, false,
                             &createAnimation<BlackHoleAnim>);
+
+    animEffects[i++] = AnimEffectGhost =
+        new AnimEffectInfo ("animationjc:Ghost",
+                            true, true, true, false, false,
+                            &createAnimation<GhostAnim>);
 
     animEffects[i++] = AnimEffectPopcorn =
         new AnimEffectInfo ("animationjc:Popcorn",

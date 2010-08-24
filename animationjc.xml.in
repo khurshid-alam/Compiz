@@ -34,6 +34,38 @@
       </subgroup>
 
       <subgroup>
+        <_short>Ghost</_short>
+	<option name="ghost_grid" type="int">
+	  <_short>Grid</_short>
+	  <default>20</default>
+	  <min>2</min>
+	  <max>20</max>
+	</option>
+
+	<option name="ghost_saturation" type="float">
+	  <_short>Saturation</_short>
+	  <default>0.0</default>
+	  <min>0.0</min>
+	  <max>1.0</max>
+	  <precision>0.1</precision>
+	</option>
+
+	<option name="ghost_amplitude" type="float">
+	  <_short>Amplitude</_short>
+	  <default>1.0</default>
+	  <min>0.0</min>
+	  <max>5.0</max>
+	</option>
+
+	<option name="ghost_wave_speed" type="float">
+	  <_short>Wave Speed</_short>
+	  <default>1.0</default>
+	  <min>0.0</min>
+	  <max>5.0</max>
+	</option>
+      </subgroup>
+
+      <subgroup>
         <_short>Popcorn</_short>
 	<option name="popcorn_kernel_height" type="float">
 	  <_short>Kernel Height</_short>
@@ -83,6 +115,10 @@
       <restriction>
         <value>animationjc:Black Hole</value>
         <_name>Black Hole</_name>
+      </restriction>
+      <restriction>
+        <value>animationjc:Ghost</value>
+        <_name>Ghost</_name>
       </restriction>
       <restriction>
         <value>animationjc:Popcorn</value>

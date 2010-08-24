@@ -15,10 +15,11 @@
 #include "animationjc_options.h"
 
 extern AnimEffect AnimEffectBlackHole;
+extern AnimEffect AnimEffectGhost;
 extern AnimEffect AnimEffectPopcorn;
 extern AnimEffect AnimEffectRaindrop;
 
-#define NUM_EFFECTS 3
+#define NUM_EFFECTS 4
 
 // This must have the value of the first "effect setting" above
 // in AnimJCScreenOptions
@@ -164,3 +165,26 @@ public:
     {
     }
 };
+
+/*** GHOST *******************************************************************/
+
+class GhostAnim :
+    public GridTransformAnim
+{
+public:
+    GhostAnim (CompWindow *w,
+               WindowEvent curWindowEvent,
+               float duration,
+               const AnimEffect info,
+               const CompRect &icon);
+
+    void initGrid ();
+
+    inline bool using3D () { return true; }
+
+    void step ();
+
+    void updateAttrib (GLWindowPaintAttrib &);
+};
+
+
