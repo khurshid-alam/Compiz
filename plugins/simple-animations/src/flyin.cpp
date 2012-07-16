@@ -42,7 +42,7 @@ void
 FlyInAnim::applyTransform ()
 {
     GLMatrix *transform = &mTransform;
-    float offsetX, offsetY;
+    float offsetX = 0, offsetY = 0;
     float xTrans, yTrans;
     float forwardProgress;
 

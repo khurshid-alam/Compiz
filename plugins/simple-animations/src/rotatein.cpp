@@ -45,8 +45,8 @@ RotateInAnim::applyTransform ()
 
     GLMatrix *transform = &mTransform;
     float xRot, yRot;
-    float angleX, angleY;
-    float originX, originY;
+    float angleX = 0, angleY = 0;
+    float originX = 0, originY = 0;
     float forwardProgress;
 
     int direction = ass->optionGetRotateinDirection ();
@@ -108,7 +108,7 @@ RotateInAnim::prePaintWindow ()
 {
     float forwardProgress = getProgress ();
     float xRot, yRot;
-    float angleX, angleY;
+    float angleX = 0, angleY = 0;
     float originX, originY;
     Bool  xInvert = FALSE, yInvert = FALSE;
     int currentCull, invertCull;
@@ -168,7 +168,7 @@ RotateInAnim::postPaintWindow ()
 {
     float forwardProgress = getProgress ();
     float xRot, yRot;
-    float angleX, angleY;
+    float angleX = 0, angleY = 0;
     float originX, originY;
     Bool  xInvert = FALSE, yInvert = FALSE;
     int currentCull, invertCull;
