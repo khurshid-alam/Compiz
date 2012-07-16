@@ -113,7 +113,7 @@ typedef struct _WaveParam
 
 class FlyInAnim : public FadeAnim,
 		  virtual public BaseSimAnim,
-		  virtual public TransformAnim 
+          virtual public TransformAnim
 {
     public:
 	
@@ -121,7 +121,7 @@ class FlyInAnim : public FadeAnim,
 		   WindowEvent curWindowEvent,
 		   float       duration,
 		   const AnimEffect info,
-		   const CompRect   &icon) :
+           const CompRect   &icon) :
 	    Animation::Animation (w, curWindowEvent, duration, info, icon),
 	    BaseSimAnim::BaseSimAnim (w, curWindowEvent, duration, info, icon),
 	    TransformAnim::TransformAnim (w, curWindowEvent, duration, info, icon),
@@ -129,9 +129,10 @@ class FlyInAnim : public FadeAnim,
 
     protected:
 	void step () { TransformAnim::step (); }
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
 	void updateBB (CompOutput &output) {  TransformAnim::updateBB (output); }
 	void applyTransform ();
+    bool requiresTransformedWindow () const { return true; }
 
 	float getFadeProgress () 
 	{ 
@@ -156,7 +157,7 @@ class RotateInAnim: public TransformAnim,
     protected:
 
 	void step () { TransformAnim::step (); }
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
 	void applyTransform ();
 	void prePaintWindow ();
@@ -190,7 +191,7 @@ class ExpandAnim: public TransformAnim,
 	}
 
 	void applyTransform ();
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
 };
 
@@ -253,7 +254,8 @@ class BounceAnim: public FadeAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
+    bool requiresTransformedWindow () const { return true; }
 
 	void applyTransform ();
 
@@ -326,12 +328,16 @@ class PulseSingleAnim : public TransformAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
 	
 	float getProgress () { return progressLinear (); }
 	float getFadeProgress ();
 	
 	void applyTransform ();
+
+    protected:
+
+    bool requiresTransformedWindow () const { return true; }
 };
 
 class PulseAnim : public MultiAnim <PulseSingleAnim, 2>
@@ -366,12 +372,16 @@ class FanSingleAnim : public TransformAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-	bool updateBBUsed () { return true; }
+    bool updateBBUsed () { return true; }
 	
 	float getProgress () { return progressLinear (); }
 	float getFadeProgress ();
 	
 	void applyTransform ();
+
+    protected:
+
+    bool requiresTransformedWindow () const { return true; }
 };
 
 class FanAnim : public MultiAnim <FanSingleAnim, 6>
