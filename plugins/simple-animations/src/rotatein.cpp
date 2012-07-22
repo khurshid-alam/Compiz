@@ -109,7 +109,6 @@ RotateInAnim::prePaintWindow ()
     float forwardProgress = getProgress ();
     float xRot, yRot;
     float angleX = 0, angleY = 0;
-    float originX, originY;
     Bool  xInvert = FALSE, yInvert = FALSE;
     int currentCull, invertCull;
 
@@ -125,26 +124,18 @@ RotateInAnim::prePaintWindow ()
 	case 1:
 	    angleX = 0;
 	    angleY = -ass->optionGetRotateinAngle ();
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow) + WIN_H (mWindow);
 	    break;
 	case 2:
 	    angleX = ass->optionGetRotateinAngle ();
 	    angleY = 0;
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
 	case 3:
 	    angleX = 0;
 	    angleY = ass->optionGetRotateinAngle ();
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
 	case 4:
 	    angleX = -ass->optionGetRotateinAngle ();
 	    angleY = 0;
-	    originX = WIN_X (mWindow) + WIN_W (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
     }
 
@@ -169,7 +160,6 @@ RotateInAnim::postPaintWindow ()
     float forwardProgress = getProgress ();
     float xRot, yRot;
     float angleX = 0, angleY = 0;
-    float originX, originY;
     Bool  xInvert = FALSE, yInvert = FALSE;
     int currentCull, invertCull;
 
@@ -185,26 +175,18 @@ RotateInAnim::postPaintWindow ()
 	case 1:
 	    angleX = 0;
 	    angleY = -ass->optionGetRotateinAngle ();
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow) + WIN_H (mWindow);
 	    break;
 	case 2:
 	    angleX = ass->optionGetRotateinAngle ();
 	    angleY = 0;
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
 	case 3:
 	    angleX = 0;
 	    angleY = ass->optionGetRotateinAngle ();
-	    originX = WIN_X (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
 	case 4:
 	    angleX = -ass->optionGetRotateinAngle ();
 	    angleY = 0;
-	    originX = WIN_X (mWindow) + WIN_W (mWindow);
-	    originY = WIN_Y (mWindow);
 	    break;
     }
 

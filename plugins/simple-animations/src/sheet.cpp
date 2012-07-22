@@ -48,7 +48,7 @@ SheetAnim::SheetAnim (CompWindow *w,
     int maxWaves;
     float waveAmpMin, waveAmpMax;
     float distance;
-    CompWindow *parent;
+    CompWindow *parent = 0;
     CompRect   icon = minIcon;
 
     foreach (parent, screen->windows ())
@@ -138,7 +138,7 @@ SheetAnim::step ()
 {
     GridModel *model = mModel;
     CompRect &icon = mIcon;
-    CompWindow *parent;
+    CompWindow *parent = 0;
 
     foreach (parent, screen->windows ())
     {
