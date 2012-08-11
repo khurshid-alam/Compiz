@@ -129,13 +129,13 @@ class FlyInAnim : public FadeAnim,
 
     protected:
 	void step () { TransformAnim::step (); }
-    bool updateBBUsed () { return true; }
+	bool updateBBUsed () { return true; }
 	void updateBB (CompOutput &output) {  TransformAnim::updateBB (output); }
 	void applyTransform ();
-    bool requiresTransformedWindow () const { return true; }
+	bool requiresTransformedWindow () const { return true; }
 
-	float getFadeProgress () 
-	{ 
+	float getFadeProgress ()
+	{
 	    return progressDecelerate (progressLinear ());
 	}
 };
@@ -157,7 +157,7 @@ class RotateInAnim: public TransformAnim,
     protected:
 
 	void step () { TransformAnim::step (); }
-    bool updateBBUsed () { return true; }
+	bool updateBBUsed () { return true; }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
 	void applyTransform ();
 	void prePaintWindow ();
@@ -254,8 +254,8 @@ class BounceAnim: public FadeAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-    bool updateBBUsed () { return true; }
-    bool requiresTransformedWindow () const { return true; }
+	bool updateBBUsed () { return true; }
+	bool requiresTransformedWindow () const { return true; }
 
 	void applyTransform ();
 
@@ -315,7 +315,7 @@ class PulseSingleAnim : public TransformAnim,
 			virtual public BaseSimAnim
 {
     public:
-      
+
 	PulseSingleAnim (CompWindow *w,
 			 WindowEvent curWindowEvent,
 			 float	  duration,
@@ -328,7 +328,7 @@ class PulseSingleAnim : public TransformAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-    bool updateBBUsed () { return true; }
+	bool updateBBUsed () { return true; }
 	
 	float getProgress () { return progressLinear (); }
 	float getFadeProgress ();
@@ -337,7 +337,7 @@ class PulseSingleAnim : public TransformAnim,
 
     protected:
 
-    bool requiresTransformedWindow () const { return true; }
+	bool requiresTransformedWindow () const { return true; }
 };
 
 class PulseAnim : public MultiAnim <PulseSingleAnim, 2>
@@ -359,7 +359,7 @@ class FanSingleAnim : public TransformAnim,
 		      virtual public BaseSimAnim
 {
     public:
-      
+
 	FanSingleAnim (CompWindow  *w,
 		       WindowEvent curWindowEvent,
 		       float	   duration,
@@ -372,7 +372,7 @@ class FanSingleAnim : public TransformAnim,
 
 	void step () { TransformAnim::step (); }
 	void updateBB (CompOutput &output) { TransformAnim::updateBB (output); }
-    bool updateBBUsed () { return true; }
+	bool updateBBUsed () { return true; }
 	
 	float getProgress () { return progressLinear (); }
 	float getFadeProgress ();
@@ -381,24 +381,24 @@ class FanSingleAnim : public TransformAnim,
 
     protected:
 
-    bool requiresTransformedWindow () const { return true; }
+	bool requiresTransformedWindow () const { return true; }
 };
 
 class FanAnim : public MultiAnim <FanSingleAnim, 6>
 {
     public:
-      
+
 	FanAnim (CompWindow *w,
 		 WindowEvent curWindowEvent,
 		 float       duration,
 		 const       AnimEffect info,
 		 const       CompRect &icon) :
 	    MultiAnim <FanSingleAnim, 6>::MultiAnim
-		  (w, curWindowEvent, duration, info, icon) {}
+	    (w, curWindowEvent, duration, info, icon) {}
 };
 
 class AnimSimPluginVTable:
-    public CompPlugin::VTableForScreenAndWindow <AnimSimScreen, AnimSimWindow>
+	public CompPlugin::VTableForScreenAndWindow <AnimSimScreen, AnimSimWindow>
 {
     public:
 	bool init ();
