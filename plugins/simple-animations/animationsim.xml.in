@@ -141,7 +141,7 @@
 	  <_short>Sheet</_short>
 	  <option name="sheet_start_percent" type="float">
 	    <_short>Starting Percent</_short>
-	    <_long>How wide the begginning of the sheet animation should be compared to the end</_long>
+            <_long>How wide the beginning of the sheet animation should be compared to the end</_long>
 	    <default>80.0</default>
 	    <min>1.0</min>
 	    <max>150.0</max>
