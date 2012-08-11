@@ -47,7 +47,6 @@ SheetAnim::SheetAnim (CompWindow *w,
 {
     int maxWaves;
     float waveAmpMin, waveAmpMax;
-    float distance;
     CompWindow *parent = 0;
     CompRect   icon = minIcon;
 
@@ -82,7 +81,7 @@ SheetAnim::SheetAnim (CompWindow *w,
     {
 	// Initialize waves
 
-	distance = WIN_Y(w) + WIN_H(w) - icon.y ();
+	float distance = WIN_Y(w) + WIN_H(w) - icon.y ();
 
 	sheetsWaveCount =
 	1 + (float)maxWaves *distance;
