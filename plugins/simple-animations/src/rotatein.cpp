@@ -144,10 +144,10 @@ RotateInAnim::prePaintWindow ()
     xRot = fabs(fmodf(forwardProgress * angleX, 360.0f));
     yRot = fabs(fmodf(forwardProgress * angleY, 360.0f));
 
-    if (xRot > 90.0f && xRot > 270.0f)
+    if (xRot > 270.0f)
 	xInvert = TRUE;
 
-    if (yRot > 90.0f && yRot > 270.0f)
+    if (yRot > 270.0f)
 	yInvert = TRUE;
 
     if ((xInvert || yInvert) && !(xInvert && yInvert))
@@ -195,10 +195,10 @@ RotateInAnim::postPaintWindow ()
     xRot = fabs(fmodf(forwardProgress * angleX, 360.0f));
     yRot = fabs(fmodf(forwardProgress * angleY, 360.0f));
 
-    if (xRot > 90.0f && xRot > 270.0f)
+    if (xRot > 270.0f)
 	xInvert = TRUE;
 
-    if (yRot > 90.0f && yRot > 270.0f)
+    if (yRot > 270.0f)
 	yInvert = TRUE;
 
     /* We have to assume that invertCull will be
