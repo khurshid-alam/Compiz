@@ -68,4 +68,3 @@ ExpandAnim::applyTransform ()
 		      	  0.0f);
 
 }
-

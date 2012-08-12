@@ -48,7 +48,6 @@ FlyInAnim::applyTransform ()
 
     ANIMSIM_SCREEN (screen);
 
-
     int direction = ass->optionGetFlyinDirection ();
     float distance = ass->optionGetFlyinDistance ();
 

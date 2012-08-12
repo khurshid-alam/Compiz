@@ -273,4 +273,3 @@ SheetAnim::step ()
 	// due to modelAnimIs3D being FALSE for magic lamp.
     }
 }
-
