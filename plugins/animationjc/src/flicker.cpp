@@ -43,7 +43,7 @@ FlickerSingleAnim::step ()
     float waveLength = 0.4;
     float wavePosition = -waveLength + (1. + waveLength) * t;
 
-    float displacement;
+    float displacement = 0;
 
     GridModel::GridObject *object = mModel->objects ();
     unsigned int n = mModel->numObjects ();
