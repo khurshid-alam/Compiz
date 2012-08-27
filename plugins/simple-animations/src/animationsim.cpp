@@ -57,43 +57,39 @@ void
 AnimSimScreen::initAnimationList ()
 {
     int i = 0;
+    AnimEffectUsedFor usedFor = AnimEffectUsedFor::all()
+				.exclude(AnimEventFocus)
+				.exclude(AnimEventShade);
 
     animEffects[i++] = AnimEffectFlyIn =
-	new AnimEffectInfo ("animationsim:Fly In",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Fly In", usedFor,
 			    &createAnimation<FlyInAnim>);
 
     animEffects[i++] = AnimEffectRotateIn =
-	new AnimEffectInfo ("animationsim:Rotate In",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Rotate In", usedFor,
 			    &createAnimation<RotateInAnim>);
 
     animEffects[i++] = AnimEffectExpand =
-	new AnimEffectInfo ("animationsim:Expand",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Expand", usedFor,
 			    &createAnimation<ExpandAnim>);
 
     animEffects[i++] = AnimEffectExpandPW =
-	new AnimEffectInfo ("animationsim:Expand Piecewise",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Expand Piecewise", usedFor,
 			    &createAnimation<ExpandPWAnim>);
 
     animEffects[i++] = AnimEffectBounce =
-	new AnimEffectInfo ("animationsim:Bounce",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Bounce", usedFor,
 			    &createAnimation<BounceAnim>);
 
     animEffects[i++] = AnimEffectSheet =
-	new AnimEffectInfo ("animationsim:Sheet",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Sheet", usedFor,
 			    &createAnimation<SheetAnim>);
     animEffects[i++] = AnimEffectPulse =
-	new AnimEffectInfo ("animationsim:Pulse",
+	new AnimEffectInfo ("animationsim:Pulse", usedFor,
 			    true, true, true, false, false,
 			    &createAnimation<PulseAnim>);
     animEffects[i++] = AnimEffectFan =
-	new AnimEffectInfo ("animationsim:Fan",
-			    true, true, true, false, false,
+	new AnimEffectInfo ("animationsim:Fan", usedFor,
 			    &createAnimation<FanAnim>);
 
     animSimExtPluginInfo.effectOptions = &getOptions ();
