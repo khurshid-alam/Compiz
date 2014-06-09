@@ -188,8 +188,10 @@ Depends: compiz-core (= ${binary:Version}),
 Replaces: compiz-plugins-main (<< 1:0.9.8),
           compiz-plugins-extra (<< 1:0.9.8),
           compiz-plugins-main-default (<< 1:0.9.8),
+          compiz-core (<< 1:0.9.11+14.10.20140606),
 Breaks: compiz-plugins-main (<< 1:0.9.8),
         compiz-plugins-extra (<< 1:0.9.8),
+        compiz-core (<< 1:0.9.11+14.10.20140606),
 Description: OpenGL window and compositing manager - plugins
  Compiz brings to life a variety of visual effects that make the Linux desktop
  easier to use, more powerful and intuitive, and more accessible for users
