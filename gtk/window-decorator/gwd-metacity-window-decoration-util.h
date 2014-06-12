@@ -21,7 +21,7 @@
 #define _GWD_METACITY_WINDOW_DECORATION_UTIL_H
 
 #include <glib.h>
-#include <metacity-1/metacity-private/theme.h>
+#include <metacity-private/theme.h>
 
 G_BEGIN_DECLS
 
