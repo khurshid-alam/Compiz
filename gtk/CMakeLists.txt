@@ -21,12 +21,8 @@ if (USE_GTK)
           list (REMOVE_AT CMAKE_REQUIRED_FLAGS REENTRANT_INDEX)
           list (APPEND CMAKE_REQUIRED_FLAGS "-D_REENTRANT=1")
         endif (REENTRANT_INDEX)
-        check_function_exists (wnck_window_has_name HAVE_WNCK_WINDOW_HAS_NAME)
         set (CMAKE_REQUIRED_FLAGS "")
         set (CMAKE_REQUIRED_LIBRARIES "")
-
-        compiz_pkg_check_modules (HAVE_LIBWNCK_2_18_1 libwnck-1.0>=2.18.1)
-        compiz_pkg_check_modules (HAVE_LIBWNCK_2_19_4 libwnck-1.0>=2.19.4)
 
         if (USE_METACITY)
             pkg_check_modules (METACITY libmetacity-private)

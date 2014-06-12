@@ -4,13 +4,4 @@
 /* Define to 1 if Gconf support is enabled */
 #cmakedefine USE_GCONF 1
 
-/* Define to 1 if you have the `wnck_window_has_name' function. */
-#cmakedefine HAVE_WNCK_WINDOW_HAS_NAME 1
-
-/* Define to 1 if libwnck version >= 2_18_1 */
-#cmakedefine HAVE_LIBWNCK_2_18_1 1
-
-/* Define to 1 if libwnck version >= 2_19_4 */
-#cmakedefine HAVE_LIBWNCK_2_19_4 1
-
 #define GETTEXT_PACKAGE "${GETTEXT_PACKAGE}"

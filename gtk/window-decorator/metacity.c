@@ -1016,8 +1016,6 @@ meta_get_button_position (decor_t	 *d,
 
 	space = &fgeom.close_rect;
 	break;
-
-#ifdef HAVE_LIBWNCK_2_18_1
     case BUTTON_SHADE:
 	if (!meta_button_present (&button_layout, META_BUTTON_FUNCTION_SHADE))
 	    return FALSE;
@@ -1054,8 +1052,6 @@ meta_get_button_position (decor_t	 *d,
 
 	space = &fgeom.unstick_rect;
 	break;
-#endif
-
     default:
 	return FALSE;
     }

@@ -297,9 +297,7 @@ above_button_event (WnckWindow *win,
     case GButtonRelease:
 	if (gtkwd_event->button == 1)
 	    if (state == BUTTON_EVENT_ACTION_STATE)
-#ifdef HAVE_LIBWNCK_2_18_1
 		wnck_window_make_above (win);
-#endif
 	break;
     default:
 	break;
@@ -365,9 +363,7 @@ unabove_button_event (WnckWindow *win,
     case GButtonRelease:
 	if (gtkwd_event->button == 1)
 	    if (state == BUTTON_EVENT_ACTION_STATE)
-#ifdef HAVE_LIBWNCK_2_18_1
 		wnck_window_unmake_above (win);
-#endif
 	break;
     default:
 	break;
