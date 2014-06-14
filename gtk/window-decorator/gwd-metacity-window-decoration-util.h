@@ -21,10 +21,13 @@
 #define _GWD_METACITY_WINDOW_DECORATION_UTIL_H
 
 #include <glib.h>
+#ifdef USE_METACITY
 #include <metacity-private/theme.h>
+#endif
 
 G_BEGIN_DECLS
 
+#ifdef USE_METACITY
 typedef MetaTheme * (*GWDMetaThemeGetCurrentProc) ();
 typedef void (*GWDMetaThemeSetProc) (const gchar *theme,
 				     gboolean    force_update);
@@ -33,6 +36,7 @@ gboolean
 gwd_metacity_window_decoration_update_meta_theme (const gchar		     *theme,
 						  GWDMetaThemeGetCurrentProc get_current,
 						  GWDMetaThemeSetProc	     set_current);
+#endif
 
 G_END_DECLS;
 
