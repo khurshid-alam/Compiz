@@ -20,7 +20,12 @@
 #ifndef _GWD_METACITY_WINDOW_DECORATION_UTIL_H
 #define _GWD_METACITY_WINDOW_DECORATION_UTIL_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib.h>
+
 #ifdef USE_METACITY
 #include <metacity-private/theme.h>
 #endif
