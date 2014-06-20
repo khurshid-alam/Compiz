@@ -130,14 +130,15 @@ tooltip_start_delay (const char *text)
 }
 
 static gint
-tooltip_paint_window (GtkWidget *tooltip)
+tooltip_paint_window (GtkWidget *tooltip,
+                      cairo_t   *cr)
 {
     GtkRequisition req;
 
     gtk_widget_size_request (tip_window, &req);
-    gtk_paint_flat_box (tip_window->style, tip_window->window,
+    gtk_paint_flat_box (gtk_widget_get_style (tip_window), cr,
 			GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-			NULL, GTK_WIDGET (tip_window), "tooltip",
+			GTK_WIDGET (tip_window), "tooltip",
 			0, 0, req.width, req.height);
 
     return FALSE;
@@ -153,14 +154,11 @@ create_tooltip_window (void)
     gtk_widget_set_name (tip_window, "gtk-tooltips");
     gtk_container_set_border_width (GTK_CONTAINER (tip_window), 4);
 
-#if GTK_CHECK_VERSION (2, 10, 0)
-    if (!gtk_check_version (2, 10, 0))
-	gtk_window_set_type_hint (GTK_WINDOW (tip_window),
-				  GDK_WINDOW_TYPE_HINT_TOOLTIP);
-#endif
+    gtk_window_set_type_hint (GTK_WINDOW (tip_window),
+                              GDK_WINDOW_TYPE_HINT_TOOLTIP);
 
     g_signal_connect_swapped (tip_window,
-			      "expose_event",
+			      "draw",
 			      G_CALLBACK (tooltip_paint_window),
 			      0);
 
