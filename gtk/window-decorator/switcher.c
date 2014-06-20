@@ -261,7 +261,7 @@ draw_switcher_background (decor_t *d)
     XClearWindow (xdisplay, d->prop_xid);
 
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 
     d->prop_xid = 0;
 }

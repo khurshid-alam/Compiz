@@ -138,7 +138,7 @@ decor_update_meta_window_property (decor_t	  *d,
 		     32, PropModeReplace, (guchar *) data,
 		     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 
     free (data);
 

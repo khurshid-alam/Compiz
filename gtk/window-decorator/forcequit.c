@@ -44,7 +44,7 @@ get_client_machine (Window xwindow)
 				 FALSE, XA_STRING, &type, &format, &nitems,
 				 &bytes_after, &str);
 
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 
     if (result != Success)
 	return NULL;
@@ -92,7 +92,7 @@ kill_window (WnckWindow *win)
     gdk_error_trap_push ();
     XKillClient (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), wnck_window_get_xid (win));
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 }
 
 static void
@@ -106,7 +106,7 @@ force_quit_dialog_realize (GtkWidget *dialog,
 			  GDK_WINDOW_XID (dialog->window),
 			  wnck_window_get_xid (win));
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 }
 
 static void

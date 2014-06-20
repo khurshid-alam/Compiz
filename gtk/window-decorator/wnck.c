@@ -56,7 +56,7 @@ get_frame_type (WnckWindow *win)
 					 0L, 1024L, FALSE, XA_ATOM, &actual, &format,
 					 &n, &left, &data);
 	    gdk_flush ();
-	    gdk_error_trap_pop ();
+	    gdk_error_trap_pop_ignored ();
 
 	    if (result == Success && data)
 	    {
@@ -578,7 +578,7 @@ remove_frame_window (WnckWindow *win)
     gdk_error_trap_push ();
     XDeleteProperty (xdisplay, wnck_window_get_xid (win), win_decor_atom);
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 
     d->width  = 0;
     d->height = 0;
