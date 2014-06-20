@@ -9,8 +9,8 @@ compiz_set (USE_GNOME ${BUILD_GNOME})
 if (USE_GTK)
     pkg_check_modules (GTK_WINDOW_DECORATOR
 	xrender>=0.8.4
-	gtk+-2.0>=2.18.0
-	libwnck-1.0
+	gtk+-3.0
+	libwnck-3.0
 	pangocairo
     )
     if (GTK_WINDOW_DECORATOR_FOUND)
