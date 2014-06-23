@@ -1474,8 +1474,6 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 			 ExpoScreen::ExpoAnimationZoom;
 	bool  hide     = eScreen->optionGetHideDocks () &&
 			 (window->wmType () & CompWindowTypeDockMask);
-	CompPoint vp;
-	screen->viewportForGeometry (window->geometry (), vp);
 
 	if (!zoomAnim)
 	    opacity = attrib.opacity * eScreen->expoCam;
@@ -1506,9 +1504,6 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	    wTransform.translate (-(window->x () + window->width ()),
 				  -(window->y () + window->height ()),
 				  0.0f);
-
-	    if (eScreen->paintingVp != vp)
-		mask |= PAINT_WINDOW_NO_CORE_INSTANCE_MASK;
 
 	    mask |= PAINT_WINDOW_TRANSFORMED_MASK;
 	}
