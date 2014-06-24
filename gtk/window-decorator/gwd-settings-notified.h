@@ -21,7 +21,7 @@
 #define _COMPIZ_GWD_SETTINGS_NOTIFIED_H
 
 #include <glib-object.h>
-#include <libwnck/screen.h>
+#include <libwnck/libwnck.h>
 #include <gwd-fwd.h>
 
 G_BEGIN_DECLS
