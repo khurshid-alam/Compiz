@@ -382,8 +382,8 @@ typedef struct _decor {
     Box		      *last_pos_entered;
     guint	      button_states[BUTTON_NUM];
     Pixmap            x11Pixmap;
-    GdkPixmap	      *pixmap;
-    GdkPixmap	      *buffer_pixmap;
+    cairo_surface_t   *surface;
+    cairo_surface_t   *buffer_surface;
     GdkWindow	      *frame_window;
     GtkWidget         *decor_window;
     GtkWidget	      *decor_event_box;
@@ -403,7 +403,7 @@ typedef struct _decor {
     PangoLayout	      *layout;
     gchar	      *name;
     cairo_pattern_t   *icon;
-    GdkPixmap	      *icon_pixmap;
+    cairo_surface_t   *icon_surface;
     GdkPixbuf	      *icon_pixbuf;
     WnckWindowState   state;
     WnckWindowActions actions;
@@ -778,20 +778,20 @@ GdkWindow *
 create_gdk_window (Window xframe);
 
 XRenderPictFormat *
-get_format_for_drawable (decor_t *d, GdkDrawable *drawable);
+get_format_for_surface (decor_t *d, cairo_surface_t *surface);
 
-GdkPixmap *
-create_pixmap (int	 w,
+cairo_surface_t *
+create_surface (int	 w,
 	       int	 h,
 	       GtkWidget *parent_style_window);
 
-GdkPixmap *
-create_native_pixmap_and_wrap (int	  w,
+cairo_surface_t *
+create_native_surface_and_wrap (int	  w,
 			       int	  h,
 			       GtkWidget *parent_style_window);
 
-GdkPixmap *
-pixmap_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
+cairo_surface_t *
+surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 /* metacity.c */
 #ifdef USE_METACITY
