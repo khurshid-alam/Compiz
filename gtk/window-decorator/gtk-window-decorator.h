@@ -77,7 +77,6 @@
 
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
-#include <libwnck/window-action-menu.h>
 
 #include <cairo.h>
 #include <cairo-xlib.h>
