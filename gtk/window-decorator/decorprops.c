@@ -66,7 +66,7 @@ decor_update_window_property (decor_t *d)
     else
     {
         data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
-        decor_quads_to_property (data, nOffset - 1, GDK_PIXMAP_XID (d->pixmap),
+        decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
 			     &extents, &extents,
 			     &extents, &extents,
 			     ICON_SPACE + d->button_width,
@@ -148,7 +148,7 @@ decor_update_switcher_property (decor_t *d)
 						     32);
     
     data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
-    decor_quads_to_property (data, nOffset - 1, GDK_PIXMAP_XID (d->pixmap),
+    decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     0, 0, quads, nQuad, frame_type, frame_state, frame_actions);
