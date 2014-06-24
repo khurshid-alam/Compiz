@@ -1462,7 +1462,6 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 		     unsigned int              mask)
 {
     GLMatrix            wTransform (transform);
-    GLWindowPaintAttrib wAttrib (attrib);
 
     if (eScreen->expoActive)
     {
@@ -1492,7 +1491,8 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 
 	/* Stretch maximized windows a little so that you don't
 	 * have an awkward gap */
-	if ((window->state () & MAXIMIZE_STATE) == MAXIMIZE_STATE)
+	if (((window->state () & MAXIMIZE_STATE) == MAXIMIZE_STATE) &&
+	    (eScreen->dndWindow != window))
 	{
 	    CompOutput *o = &screen->outputDevs ()[screen->outputDeviceForGeometry(window->geometry())];
 	    float yS = 1.0 + ((o->height () / (float) window->height ()) - 1.0f) * sigmoidProgress (eScreen->expoCam);
@@ -1504,12 +1504,10 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	    wTransform.translate (-(window->x () + window->width ()),
 				  -(window->y () + window->height ()),
 				  0.0f);
-
-	    mask |= PAINT_WINDOW_TRANSFORMED_MASK;
 	}
     }
 
-    return gWindow->glPaint (wAttrib, wTransform, region, mask);
+    return gWindow->glPaint (attrib, wTransform, region, mask);
 }
 
 bool
