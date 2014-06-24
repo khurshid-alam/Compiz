@@ -30,7 +30,7 @@ update_style (GtkWidget *widget)
     style = gtk_widget_get_style (widget);
     g_object_ref (G_OBJECT (style));
     
-    style = gtk_style_attach (style, widget->window);
+    style = gtk_style_attach (style, gtk_widget_get_window (widget));
     
     spot_color.r = style->bg[GTK_STATE_SELECTED].red   / 65535.0;
     spot_color.g = style->bg[GTK_STATE_SELECTED].green / 65535.0;
