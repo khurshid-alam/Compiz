@@ -998,7 +998,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 		 xevent->xproperty.atom == compiz_shadow_color_atom)
 	{
 	    GdkScreen  *g_screen = gdk_display_get_default_screen (gdkdisplay);
-	    Window     root = GDK_WINDOW_XWINDOW (gdk_screen_get_root_window (g_screen));
+	    Window     root = GDK_WINDOW_XID (gdk_screen_get_root_window (g_screen));
 	    WnckScreen *screen;
 
 	    screen = wnck_screen_get_for_root (root);
