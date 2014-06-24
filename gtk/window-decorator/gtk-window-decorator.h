@@ -777,9 +777,6 @@ gdk_cairo_set_source_color_alpha (cairo_t  *cr,
 GdkWindow *
 create_gdk_window (Window xframe);
 
-GdkColormap *
-get_colormap_for_drawable (GdkDrawable *d);
-
 XRenderPictFormat *
 get_format_for_drawable (decor_t *d, GdkDrawable *drawable);
 

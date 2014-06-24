@@ -773,11 +773,7 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (d->frame_window)
 	{
-	    GdkColormap *cmap;
-
-	    cmap   = get_colormap_for_drawable (GDK_DRAWABLE (d->pixmap));
 	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgb);
-	    gdk_drawable_set_colormap (GDK_DRAWABLE (pixmap), cmap);
 	}
 	else
 	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgba);

@@ -321,19 +321,11 @@ add_frame_window (WnckWindow *win,
 
     if (mode)
     {
-	GdkColormap *colormap;
-
 	d->frame_window = create_gdk_window (frame);
 	d->decor_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-	colormap = get_colormap_for_drawable (GDK_DRAWABLE (d->frame_window));
-
 	d->decor_image = gtk_image_new ();
-
-	gtk_widget_set_colormap (d->decor_window, colormap);
-	gtk_widget_set_colormap (d->decor_image, colormap);
-
 	d->decor_event_box = gtk_event_box_new ();
+
 	gtk_event_box_set_visible_window (GTK_EVENT_BOX (d->decor_event_box),
 					  FALSE);
 	gtk_widget_set_events (d->decor_event_box, GDK_BUTTON_PRESS_MASK |

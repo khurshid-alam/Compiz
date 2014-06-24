@@ -70,18 +70,6 @@ create_gdk_window (Window xframe)
     return window;
 }
 
-GdkColormap *
-get_colormap_for_drawable (GdkDrawable *d)
-{
-    GdkDisplay *display = gdk_display_get_default ();
-    GdkScreen  *screen  = gdk_display_get_default_screen (display);
-
-    if (gdk_drawable_get_depth (d) == 32)
-	return gdk_screen_get_rgba_colormap (screen);
-
-    return gdk_screen_get_rgb_colormap (screen);
-}
-
 XRenderPictFormat *
 get_format_for_drawable (decor_t *d, GdkDrawable *drawable)
 {
@@ -106,8 +94,7 @@ create_native_pixmap_and_wrap (int	  w,
 	   gdk_pixmap_foreign_new (XCreatePixmap (gdk_x11_display_get_xdisplay (gdk_display_get_default ()),
 						  GDK_WINDOW_XID (window), w, h,
 						  gdk_drawable_get_depth (window)));
-    GdkColormap *cmap = get_colormap_for_drawable (GDK_DRAWABLE (pixmap));
-    gdk_drawable_set_colormap (GDK_DRAWABLE (pixmap), cmap);
+
     return pixmap;
 }
 
@@ -124,7 +111,5 @@ create_pixmap (int	  w,
     window = gtk_widget_get_window (parent_style_window);
     GdkPixmap *pixmap = gdk_pixmap_new (GDK_DRAWABLE (window), w, h, -1 /* CopyFromParent */);
 
-    GdkColormap *cmap = get_colormap_for_drawable (GDK_DRAWABLE (pixmap));
-    gdk_drawable_set_colormap (GDK_DRAWABLE (pixmap), cmap);
     return pixmap;
 }

@@ -725,7 +725,6 @@ draw_border_shape (Display	   *xdisplay,
 		   void		   *closure)
 {
     static XRenderColor white = { 0xffff, 0xffff, 0xffff, 0xffff };
-    GdkColormap		*colormap;
     decor_t		d;
     decor_shadow_info_t *info = (decor_shadow_info_t *) closure;
     double		save_decoration_alpha;
@@ -763,9 +762,6 @@ draw_border_shape (Display	   *xdisplay,
 	d.state = 0;
 
     decor_get_default_layout (c, 1, 1, &d.border_layout);
-
-    colormap = get_colormap_for_drawable (GDK_DRAWABLE (d.pixmap));
-    gdk_drawable_set_colormap (d.pixmap, colormap);
 
     /* create shadow from opaque decoration
      * FIXME: Should not modify settings value
