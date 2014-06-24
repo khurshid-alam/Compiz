@@ -61,9 +61,6 @@ const float META_ACTIVE_OPACITY       = 1.0f;
 
 guint cmdline_options = 0;
 
-GdkPixmap *decor_normal_pixmap = NULL;
-GdkPixmap *decor_active_pixmap = NULL;
-
 Atom frame_input_window_atom;
 Atom frame_output_window_atom;
 Atom win_decor_atom;
