@@ -43,13 +43,7 @@
 #define GDK_DISABLE_DEPRECATED
 #endif
 
-#define create_foreign_window(xid)						       \
-    gdk_x11_window_foreign_new_for_display (gdk_display_get_default (),	       \
-					    xid)
 #else
-
-#define create_foreign_window(xid)						       \
-    gdk_window_foreign_new (xid)
 
 #ifdef GDK_DISABLE_DEPRECATED
 #undef GDK_DISABLE_DEPRECATED
