@@ -37,18 +37,8 @@
 #include <X11/extensions/Xrender.h>
 #include <X11/Xregion.h>
 
-#ifdef HAVE_GTK_2_24
-
 #ifndef GDK_DISABLE_DEPRECATED
 #define GDK_DISABLE_DEPRECATED
-#endif
-
-#else
-
-#ifdef GDK_DISABLE_DEPRECATED
-#undef GDK_DISABLE_DEPRECATED
-#endif
-
 #endif
 
 #ifndef GTK_DISABLE_DEPRECATED
