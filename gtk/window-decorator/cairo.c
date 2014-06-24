@@ -295,7 +295,7 @@ draw_window_decoration (decor_t *d)
 {
     cairo_t       *cr;
     GtkStyle	  *style;
-    GdkDrawable   *drawable;
+    cairo_surface_t *surface;
     decor_color_t color;
     double        alpha;
     double        x1, y1, x2, y2, x, y, h;
@@ -303,9 +303,8 @@ draw_window_decoration (decor_t *d)
     int		  top;
     int		  button_x;
 
-    if (!d->pixmap)
+    if (!d->surface)
 	return;
-
 
     style = gtk_widget_get_style (d->frame->style_window_rgba);
 
@@ -317,12 +316,12 @@ draw_window_decoration (decor_t *d)
     color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
     color.b = style->bg[GTK_STATE_NORMAL].blue  / 65535.0;
 
-    if (d->buffer_pixmap)
-	drawable = d->buffer_pixmap;
+    if (d->buffer_surface)
+	surface = d->buffer_surface;
     else
-	drawable = d->pixmap;
+	surface = d->surface;
 
-    cr = gdk_cairo_create (GDK_DRAWABLE (drawable));
+    cr = cairo_create (surface);
     if (!cr)
 	return;
 
@@ -691,8 +690,9 @@ draw_window_decoration (decor_t *d)
     if (d->frame_window)
     {
 	GdkWindow *gdk_frame_window = gtk_widget_get_window (d->decor_window);
+	GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface (d->surface, 0, 0, d->width, d->height);
 
-	gtk_image_set_from_pixmap (GTK_IMAGE (d->decor_image), d->pixmap, NULL);
+	gtk_image_set_from_pixbuf (GTK_IMAGE (d->decor_image), pixbuf);
 	gtk_window_resize (GTK_WINDOW (d->decor_window), d->width, d->height);
 	gdk_window_move (gdk_frame_window, 0, 0);
 	gdk_window_lower (gdk_frame_window);
