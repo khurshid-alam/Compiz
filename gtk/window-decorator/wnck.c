@@ -457,6 +457,8 @@ remove_frame_window (WnckWindow *win)
     {
 	int i, j;
 
+	gdk_error_trap_push ();
+
 	for (i = 0; i < 3; ++i)
 	{
 	    for (j = 0; j < 3; ++j)
@@ -473,6 +475,8 @@ remove_frame_window (WnckWindow *win)
 
 	    d->button_states[i] = 0;
 	}
+
+	gdk_error_trap_pop_ignored ();
     }
 
     if (d->surface)
