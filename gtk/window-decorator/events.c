@@ -44,7 +44,7 @@ move_resize_window (WnckWindow *win,
 
     if (action_menu_mapped)
     {
-	gtk_object_destroy (GTK_OBJECT (action_menu));
+	gtk_widget_destroy (action_menu);
 	return;
     }
 
@@ -134,7 +134,7 @@ close_button_event (WnckWindow *win,
 
     if (action_menu_mapped && gtkwd_type == GButtonPress)
     {
-	gtk_object_destroy (GTK_OBJECT (action_menu));
+	gtk_widget_destroy (action_menu);
     }
 
     common_button_event (win, gtkwd_event, gtkwd_type,
@@ -161,7 +161,7 @@ max_button_event (WnckWindow *win,
 
     if (action_menu_mapped && gtkwd_type == GButtonPress)
     {
-	gtk_object_destroy (GTK_OBJECT (action_menu));
+	gtk_widget_destroy (action_menu);
     }
 
     if (wnck_window_is_maximized (win))
@@ -220,7 +220,7 @@ min_button_event (WnckWindow *win,
 
     if (action_menu_mapped && gtkwd_type == GButtonPress)
     {
-	gtk_object_destroy (GTK_OBJECT (action_menu));
+	gtk_widget_destroy (action_menu);
     }
 
     common_button_event (win, gtkwd_event, gtkwd_type,
@@ -297,9 +297,7 @@ above_button_event (WnckWindow *win,
     case GButtonRelease:
 	if (gtkwd_event->button == 1)
 	    if (state == BUTTON_EVENT_ACTION_STATE)
-#ifdef HAVE_LIBWNCK_2_18_1
 		wnck_window_make_above (win);
-#endif
 	break;
     default:
 	break;
@@ -365,9 +363,7 @@ unabove_button_event (WnckWindow *win,
     case GButtonRelease:
 	if (gtkwd_event->button == 1)
 	    if (state == BUTTON_EVENT_ACTION_STATE)
-#ifdef HAVE_LIBWNCK_2_18_1
 		wnck_window_unmake_above (win);
-#endif
 	break;
     default:
 	break;

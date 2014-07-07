@@ -324,21 +324,11 @@ update_event_windows (WnckWindow *win)
 	    WNCK_WINDOW_ACTION_MINIMIZE,
 	    0,
 	    WNCK_WINDOW_ACTION_SHADE,
-
-#ifdef HAVE_LIBWNCK_2_18_1
 	    WNCK_WINDOW_ACTION_ABOVE,
 	    WNCK_WINDOW_ACTION_STICK,
 	    WNCK_WINDOW_ACTION_UNSHADE,
 	    WNCK_WINDOW_ACTION_ABOVE,
 	    WNCK_WINDOW_ACTION_UNSTICK
-#else
-	    0,
-	    0,
-	    0,
-	    0,
-	    0
-#endif
-
 	};
 
 	/* Reparenting mode - if a box was set and we no longer need it reset its geometry */
@@ -393,15 +383,12 @@ update_event_windows (WnckWindow *win)
  * Description: Wrapper function to either get the name of the window or
  * return NULL
  */
-
-#ifdef HAVE_WNCK_WINDOW_HAS_NAME
 static const char *
 wnck_window_get_real_name (WnckWindow *win)
 {
     return wnck_window_has_name (win) ? wnck_window_get_name (win) : NULL;
 }
 #define wnck_window_get_name wnck_window_get_real_name
-#endif
 
 /*
  * max_window_name_width
