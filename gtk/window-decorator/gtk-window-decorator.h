@@ -75,10 +75,6 @@
 #include <libwnck/libwnck.h>
 #include <libwnck/window-action-menu.h>
 
-#ifndef HAVE_LIBWNCK_2_19_4
-#define wnck_window_get_client_window_geometry wnck_window_get_geometry
-#endif
-
 #include <cairo.h>
 #include <cairo-xlib.h>
 
