@@ -25,12 +25,7 @@ if (USE_GTK)
         set (CMAKE_REQUIRED_LIBRARIES "")
 
         if (USE_METACITY)
-            pkg_check_modules (METACITY libmetacity-private)
-            if (METACITY_FOUND)
 		compiz_set (USE_METACITY 0)
-            else (METACITY_FOUND)
-		compiz_set (USE_METACITY 0)
-            endif (METACITY_FOUND)
         endif (USE_METACITY)
 
 	if (USE_GNOME)
