@@ -1,3 +1,9 @@
+compiz (1:0.9.12-0ubuntu1) utopic; urgency=medium
+
+  * Bump changelog version to match upstream. 
+
+ -- Chris Townsend <christopher.townsend@canonical.com>  Fri, 25 Jul 2014 10:10:31 -0400
+
 compiz (1:0.9.11+14.10.20140707-0ubuntu1) utopic; urgency=low
 
   [ Chris Townsend ]
