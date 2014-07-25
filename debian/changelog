@@ -1,3 +1,24 @@
+compiz (1:0.9.11+14.10.20140707-0ubuntu1) utopic; urgency=low
+
+  [ Chris Townsend ]
+  * Release version 0.9.11
+  * Bump VERSION to 0.9.12
+  * Add more button ungrab keymasks, so unfocused Gtk window scrolling
+    will work when NumLock is off and CapsLock is on and any combination
+    thereof. (LP: #1330198)
+  * Remove the need to check the viewport we are painting the maximized
+    window in while in Expo mode and only scale maximized windows that
+    are not being dragged. Fixes a regression caused in r3868. (LP:
+    #1333277)
+
+  [ Alberts Muktupāvels ]
+  * This is some preparation work to port gtk-window-decorator to gtk+-
+    3.0. Changed gtk_object_destroy to gtk_widget_destory. Removed
+    support for old metacity versions. Removed support for old wnck
+    versions. .
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 07 Jul 2014 11:42:19 +0000
+
 compiz (1:0.9.11+14.10.20140606-0ubuntu2) utopic; urgency=medium
 
   * Apply correct Breaks/Replaces to deal with file moves from compiz-core

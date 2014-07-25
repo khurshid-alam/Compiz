@@ -693,6 +693,8 @@ draw_window_decoration (decor_t *d)
 	GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface (d->surface, 0, 0, d->width, d->height);
 
 	gtk_image_set_from_pixbuf (GTK_IMAGE (d->decor_image), pixbuf);
+	g_object_unref (pixbuf);
+
 	gtk_window_resize (GTK_WINDOW (d->decor_window), d->width, d->height);
 	gdk_window_move (gdk_frame_window, 0, 0);
 	gdk_window_lower (gdk_frame_window);

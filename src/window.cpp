@@ -5652,7 +5652,12 @@ PrivateWindow::updatePassiveButtonGrabs ()
 	{
 	    /* Ungrab Buttons 4 & 5 for vertical scrolling if the window is not the desktop window */
 	    for (int i = Button4; i <= Button5; ++i)
+	    {
+		XUngrabButton (screen->dpy (), i, 0, frame);
+		XUngrabButton (screen->dpy (), i, LockMask, frame);
 		XUngrabButton (screen->dpy (), i, Mod2Mask, frame);
+		XUngrabButton (screen->dpy (), i, LockMask | Mod2Mask, frame);
+	    }
 	}
     }
 }

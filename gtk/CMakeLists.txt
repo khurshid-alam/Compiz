@@ -27,7 +27,7 @@ if (USE_GTK)
         if (USE_METACITY)
             pkg_check_modules (METACITY libmetacity-private>=3.12.0)
             if (NOT METACITY_FOUND)
-		compiz_set (USE_METACITY 0)
+                compiz_set (USE_METACITY 0)
             endif (NOT METACITY_FOUND)
         endif (USE_METACITY)
 
