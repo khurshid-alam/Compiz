@@ -1,4 +1,4 @@
-compiz (1:0.9.12-0ubuntu1) utopic; urgency=medium
+compiz (1:0.9.12-0ubuntu1) UNRELEASED; urgency=medium
 
   * Bump changelog version to match upstream. 
 
