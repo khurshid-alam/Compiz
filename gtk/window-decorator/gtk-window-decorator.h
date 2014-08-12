@@ -65,10 +65,6 @@
 #include <gdk/gdkx.h>
 #include <gdk/gdk.h>
 
-#ifdef USE_GCONF
-#include <gconf/gconf-client.h>
-#endif
-
 #ifdef USE_DBUS_GLIB
 #define DBUS_API_SUBJECT_TO_CHANGE
 #include <dbus/dbus.h>
@@ -106,62 +102,6 @@
 #endif
 
 #include <gwd-fwd.h>
-
-#define METACITY_GCONF_DIR "/apps/metacity/general"
-#define MUTTER_GCONF_DIR "/apps/mutter/general"
-
-#define COMPIZ_USE_SYSTEM_FONT_KEY		    \
-METACITY_GCONF_DIR "/titlebar_uses_system_font"
-		    
-#define COMPIZ_TITLEBAR_FONT_KEY	\
-METACITY_GCONF_DIR "/titlebar_font"
-
-#define COMPIZ_DOUBLE_CLICK_TITLEBAR_KEY	       \
-METACITY_GCONF_DIR "/action_double_click_titlebar"
-
-#define COMPIZ_MIDDLE_CLICK_TITLEBAR_KEY	       \
-METACITY_GCONF_DIR "/action_middle_click_titlebar"
-
-#define COMPIZ_RIGHT_CLICK_TITLEBAR_KEY	       \
-METACITY_GCONF_DIR "/action_right_click_titlebar"
-
-#define MUTTER_DRAGGABLE_BORDER_WIDTH_KEY \
-MUTTER_GCONF_DIR "/draggable_border_width"
-
-#define MUTTER_ATTACH_MODAL_DIALOGS_KEY \
-MUTTER_GCONF_DIR "/attach_modal_dialogs"
-
-#define META_THEME_KEY		\
-METACITY_GCONF_DIR "/theme"
-
-#define META_BUTTON_LAYOUT_KEY		\
-METACITY_GCONF_DIR "/button_layout"
-
-#define GCONF_DIR "/apps/gwd"
-
-#define USE_META_THEME_KEY	    \
-GCONF_DIR "/use_metacity_theme"
-
-#define META_THEME_OPACITY_KEY	        \
-GCONF_DIR "/metacity_theme_opacity"
-
-#define META_THEME_SHADE_OPACITY_KEY	      \
-GCONF_DIR "/metacity_theme_shade_opacity"
-
-#define META_THEME_ACTIVE_OPACITY_KEY	       \
-GCONF_DIR "/metacity_theme_active_opacity"
-
-#define META_THEME_ACTIVE_SHADE_OPACITY_KEY          \
-GCONF_DIR "/metacity_theme_active_shade_opacity"
-
-#define BLUR_TYPE_KEY	   \
-GCONF_DIR "/blur_type"
-
-#define WHEEL_ACTION_KEY   \
-GCONF_DIR "/mouse_wheel_action"
-
-#define USE_TOOLTIPS_KEY \
-GCONF_DIR "/use_tooltips"
 
 #define DBUS_DEST       "org.freedesktop.compiz"
 #define DBUS_PATH       "/org/freedesktop/compiz/decor/screen0"
