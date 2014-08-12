@@ -1,8 +1,18 @@
-compiz (1:0.9.12-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.12+14.10.20140812-0ubuntu1) utopic; urgency=medium
 
+  [ Chris Townsend ]
   * Bump changelog version to match upstream. 
 
- -- Chris Townsend <christopher.townsend@canonical.com>  Fri, 25 Jul 2014 10:10:31 -0400
+  [ Stephen M. Webb ]
+  * po/POTFILES.in: remove gtk/window-decorator/gwd.schemas.in The gconf
+    schema file has been removed from the sources, it also needs to be
+    removed from translations.
+
+  [ Alberts Muktupāvels ]
+  * Remove gconf from gtk-window-decorator.
+  * Calculate correct button position in cairo theme.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 12 Aug 2014 14:21:25 +0000
 
 compiz (1:0.9.11+14.10.20140707-0ubuntu1b1) utopic; urgency=medium
 
