@@ -817,6 +817,38 @@ calc_decoration_size (decor_t *d,
     return FALSE;
 }
 
+static gboolean
+button_present (decor_t *d,
+                gint     i)
+{
+    switch (i) {
+        case BUTTON_MIN:
+            if (d->actions & WNCK_WINDOW_ACTION_MINIMIZE)
+                return TRUE;
+            break;
+        case BUTTON_MAX:
+            if (d->actions & WNCK_WINDOW_ACTION_MAXIMIZE)
+                return TRUE;
+            break;
+        case BUTTON_CLOSE:
+            if (d->actions & WNCK_WINDOW_ACTION_CLOSE)
+                return TRUE;
+            break;
+        case BUTTON_MENU:
+        case BUTTON_SHADE:
+        case BUTTON_ABOVE:
+        case BUTTON_STICK:
+        case BUTTON_UNSHADE:
+        case BUTTON_UNABOVE:
+        case BUTTON_UNSTICK:
+            break;
+        default:
+            break;
+    }
+
+    return FALSE;
+}
+
 gboolean
 get_button_position (decor_t *d,
 		     gint    i,
@@ -848,8 +880,16 @@ get_button_position (decor_t *d,
 	(d->frame->titlebar_height - 17);
 
     /* hack to position multiple buttons on the right */
-    if (i != BUTTON_MENU)
-	*x -= 10 + 16 * i;
+    if (i != BUTTON_MENU) {
+        gint position = 0;
+        gint button = 0;
+        while (button != i) {
+            if (button_present (d, button))
+                position++;
+            button++;
+        }
+        *x -= 10 + 16 * position;
+    }
 
     return TRUE;
 }
