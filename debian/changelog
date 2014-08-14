@@ -1,3 +1,25 @@
+compiz (1:0.9.12+14.10.20140812-0ubuntu1) utopic; urgency=medium
+
+  [ Chris Townsend ]
+  * Bump changelog version to match upstream. 
+
+  [ Stephen M. Webb ]
+  * po/POTFILES.in: remove gtk/window-decorator/gwd.schemas.in The gconf
+    schema file has been removed from the sources, it also needs to be
+    removed from translations.
+
+  [ Alberts Muktupāvels ]
+  * Remove gconf from gtk-window-decorator.
+  * Calculate correct button position in cairo theme.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 12 Aug 2014 14:21:25 +0000
+
+compiz (1:0.9.11+14.10.20140707-0ubuntu1b1) utopic; urgency=medium
+
+  * No-change rebuild against libmetacity-private1.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 04 Aug 2014 06:57:32 +0200
+
 compiz (1:0.9.11+14.10.20140707-0ubuntu1) utopic; urgency=low
 
   [ Chris Townsend ]
