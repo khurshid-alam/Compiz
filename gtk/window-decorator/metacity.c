@@ -573,8 +573,8 @@ meta_draw_window_decoration (decor_t *d)
     MetaTheme	      *theme;
     GtkStyle	      *style;
     cairo_t	      *cr;
-    gint	      size, i;
-    GdkRectangle      clip, rect;
+    gint	      i;
+    GdkRectangle      clip;
     Region	      top_region = NULL;
     Region	      bottom_region = NULL;
     Region	      left_region = NULL;
@@ -661,51 +661,35 @@ meta_draw_window_decoration (decor_t *d)
 
     cairo_destroy (cr);
 
-    rect.x     = 0;
-    rect.y     = 0;
-    rect.width = clip.width;
-
-    size = MAX (fgeom.top_height, fgeom.bottom_height);
-
-    if (rect.width && size)
-    {
-	XRenderPictFormat *format;
-
 	if (d->frame_window)
-	    surface = create_surface (rect.width, size, d->frame->style_window_rgb);
+	    surface = create_surface (clip.width, clip.height, d->frame->style_window_rgb);
 	else
-	    surface = create_surface (rect.width, size, d->frame->style_window_rgba);
+	    surface = create_surface (clip.width, clip.height, d->frame->style_window_rgba);
 
 	cr = cairo_create (surface);
 	gdk_cairo_set_source_color_alpha (cr, &bg_color, bg_alpha);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-	format = get_format_for_surface (d, surface);
 	src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
-				    format, 0, NULL);
+                                get_format_for_surface (d, surface), 0, NULL);
 
-	if (fgeom.top_height)
+    cairo_paint (cr);
+    meta_theme_draw_frame (theme,
+                           style_window,
+                           cr,
+                           frame_type,
+                           flags,
+                           clip.width - fgeom.left_width - fgeom.right_width,
+                           clip.height - fgeom.top_height - fgeom.bottom_height,
+                           d->layout,
+                           d->frame->text_height,
+                           &button_layout,
+                           button_states,
+                           d->icon_pixbuf,
+                           NULL);
+
+    if (fgeom.top_height)
 	{
-	    rect.height = fgeom.top_height;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   cr,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    top_region = meta_get_top_border_region (&fgeom, clip.width);
 
 	    decor_blend_border_picture (xdisplay,
@@ -723,32 +707,12 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (fgeom.bottom_height)
 	{
-	    rect.height = fgeom.bottom_height;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   cr,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    bottom_region = meta_get_bottom_border_region (&fgeom, clip.width);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					0, clip.height - fgeom.bottom_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_BOTTOM,
@@ -759,62 +723,14 @@ meta_draw_window_decoration (decor_t *d)
 
 	}
 
-	cairo_destroy (cr);
-
-	cairo_surface_destroy (surface);
-
-	XRenderFreePicture (xdisplay, src);
-    }
-
-    rect.height = clip.height - fgeom.top_height - fgeom.bottom_height;
-
-    size = MAX (fgeom.left_width, fgeom.right_width);
-
-    if (size && rect.height)
-    {
-	XRenderPictFormat *format;
-
-	if (d->frame_window)
-	    surface = create_surface (size, rect.height, d->frame->style_window_rgb);
-	else
-	    surface = create_surface (size, rect.height, d->frame->style_window_rgba);
-
-	cr = cairo_create (surface);
-	gdk_cairo_set_source_color_alpha (cr, &bg_color, bg_alpha);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-
-	format = get_format_for_surface (d, surface);
-	src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
-				    format, 0, NULL);
-
 	if (fgeom.left_width)
 	{
-	    rect.width = fgeom.left_width;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   cr,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    left_region = meta_get_left_border_region (&fgeom, clip.height);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					0, fgeom.top_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_LEFT,
@@ -826,32 +742,12 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (fgeom.right_width)
 	{
-	    rect.width = fgeom.right_width;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   cr,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    right_region = meta_get_right_border_region (&fgeom, clip.height);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					clip.width - fgeom.right_width, fgeom.top_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_RIGHT,
@@ -862,11 +758,8 @@ meta_draw_window_decoration (decor_t *d)
 	}
 
 	cairo_destroy (cr);
-
 	cairo_surface_destroy (surface);
-
 	XRenderFreePicture (xdisplay, src);
-    }
 
     copy_to_front_buffer (d);
 
