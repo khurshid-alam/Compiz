@@ -488,7 +488,7 @@ update_switcher_window (Window     popup,
 
     if (d->x11Pixmap)
 	decor_post_delete_pixmap (xdisplay,
-				  wnck_window_get_xid (d->win),
+				  0,
 				  d->x11Pixmap);
 
     if (d->buffer_surface)
