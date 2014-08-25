@@ -653,6 +653,12 @@ meta_draw_window_decoration (decor_t *d)
 	bg_alpha = frame_style->window_background_alpha / 255.0;
     }
 
+    /* ------------ */
+    cairo_set_source_rgba (cr, 0, 0, 0, 0.01);
+    cairo_rectangle (cr, 0, 0, 1, 1);
+    cairo_fill (cr);
+    /* ------------ */
+
     cairo_destroy (cr);
 
     rect.x     = 0;
