@@ -96,7 +96,7 @@ common_button_event (WnckWindow *win,
 	GdkCursor* cursor;
 	cursor = gdk_cursor_new (GDK_LEFT_PTR);
 	gdk_window_set_cursor (d->frame_window, cursor);
-	gdk_cursor_unref (cursor);
+	g_object_unref (cursor);
     }
 
     switch (gtkwd_type) {
@@ -467,7 +467,7 @@ title_event (WnckWindow       *win,
     {
 	GdkCursor* cursor = gdk_cursor_new (GDK_LEFT_PTR);
 	gdk_window_set_cursor (d->frame_window, cursor);
-	gdk_cursor_unref (cursor);
+	g_object_unref (cursor);
     }
 
     if (gtkwd_type != GButtonPress)
@@ -572,7 +572,7 @@ frame_common_event (WnckWindow       *win,
 	if (cursor)
 	{
 	    gdk_window_set_cursor (d->frame_window, cursor);
-	    gdk_cursor_unref (cursor);
+	    g_object_unref (cursor);
 	}
     }
 
