@@ -34,14 +34,13 @@
 static void
 show_tooltip (const char *text)
 {
-    GdkDisplay     *gdkdisplay;
+    GdkDeviceManager *device_manager;
+    GdkDevice *pointer;
     GtkRequisition requisition;
     gint	   x, y, w, h;
     GdkScreen	   *screen;
     gint	   monitor_num;
     GdkRectangle   monitor;
-
-    gdkdisplay = gdk_display_get_default ();
 
     gtk_label_set_text (GTK_LABEL (tip_label), text);
 
@@ -50,7 +49,10 @@ show_tooltip (const char *text)
     w = requisition.width;
     h = requisition.height;
 
-    gdk_display_get_pointer (gdkdisplay, &screen, &x, &y, NULL);
+    device_manager = gdk_display_get_device_manager (gdk_display_get_default ());
+    pointer = gdk_device_manager_get_client_pointer (device_manager);
+
+    gdk_device_get_position (pointer, &screen, &x, &y);
 
     x -= (w / 2 + 4);
 
