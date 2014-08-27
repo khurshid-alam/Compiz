@@ -1029,15 +1029,6 @@ get_window_prop (Window xwindow,
 unsigned int
 get_mwm_prop (Window xwindow);
 
-
-/* style.c */
-
-void
-update_style (GtkWidget *widget);
-
-void
-style_changed (GtkWidget *widget, void *user_data /* PangoContext */);
-
 /* settings.c */
 
 void
