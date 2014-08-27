@@ -136,10 +136,8 @@ tooltip_paint_window (GtkWidget *tooltip,
     GtkRequisition req;
 
     gtk_widget_get_preferred_size (tip_window, &req, NULL);
-    gtk_paint_flat_box (gtk_widget_get_style (tip_window), cr,
-			GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-			GTK_WIDGET (tip_window), "tooltip",
-			0, 0, req.width, req.height);
+    gtk_render_background (gtk_widget_get_style_context (tip_window),
+                           cr, 0, 0, req.width, req.height);
 
     return FALSE;
 }
