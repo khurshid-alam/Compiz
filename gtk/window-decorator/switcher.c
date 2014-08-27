@@ -74,7 +74,8 @@ draw_switcher_background (decor_t *d)
 {
     Display	  *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     cairo_t	  *cr;
-    GtkStyle	  *style;
+    GtkStyleContext *context;
+    GdkRGBA bg, fg;
     decor_color_t color;
     double	  alpha = SWITCHER_ALPHA / 65535.0;
     double	  x1, y1, x2, y2, h;
@@ -85,11 +86,13 @@ draw_switcher_background (decor_t *d)
     if (!d->buffer_surface)
 	return;
 
-    style = gtk_widget_get_style (d->frame->style_window_rgba);
+    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg);
+    gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
 
-    color.r = style->bg[GTK_STATE_NORMAL].red   / 65535.0;
-    color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
-    color.b = style->bg[GTK_STATE_NORMAL].blue  / 65535.0;
+    color.r = bg.red;
+    color.g = bg.green;
+    color.b = bg.blue;
 
     cr = cairo_create (d->buffer_surface);
 
@@ -188,9 +191,8 @@ draw_switcher_background (decor_t *d)
 		     y1 + top,
 		     x2 - x1 - d->frame->win_extents.left - d->frame->win_extents.right,
 		     h);
-    gdk_cairo_set_source_color_alpha (cr,
-				      &style->bg[GTK_STATE_NORMAL],
-				      alpha);
+    bg.alpha = alpha;
+    gdk_cairo_set_source_rgba (cr, &bg);
     cairo_fill (cr);
 
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
@@ -239,9 +241,8 @@ draw_switcher_background (decor_t *d)
 		       CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
 		       CORNER_BOTTOMRIGHT);
 
-    gdk_cairo_set_source_color_alpha (cr,
-				      &style->fg[GTK_STATE_NORMAL],
-				      alpha);
+    fg.alpha = alpha;
+    gdk_cairo_set_source_rgba (cr, &fg);
 
     cairo_stroke (cr);
 
@@ -249,10 +250,10 @@ draw_switcher_background (decor_t *d)
 
     copy_to_front_buffer (d);
 
-    pixel = ((((a * style->bg[GTK_STATE_NORMAL].blue ) >> 24) & 0x0000ff) |
-	     (((a * style->bg[GTK_STATE_NORMAL].green) >> 16) & 0x00ff00) |
-	     (((a * style->bg[GTK_STATE_NORMAL].red  ) >>  8) & 0xff0000) |
-	     (((a & 0xff00) << 16)));
+    pixel  = (((a * (int) (bg.blue * 65535.0)) >> 24) & 0x0000ff);
+    pixel |= (((a * (int) (bg.green * 65535.0)) >> 16) & 0x00ff00);
+    pixel |= (((a * (int) (bg.red * 65535.0)) >> 8) & 0xff0000);
+    pixel |= ((a & 0xff00) << 16);
 
     decor_update_switcher_property (d);
 
@@ -270,13 +271,16 @@ static void
 draw_switcher_foreground (decor_t *d)
 {
     cairo_t	  *cr;
-    GtkStyle	  *style;
+    GtkStyleContext *context;
+    GdkRGBA bg, fg;
     double	  alpha = SWITCHER_ALPHA / 65535.0;
 
     if (!d->surface || !d->buffer_surface)
 	return;
 
-    style = gtk_widget_get_style (d->frame->style_window_rgba);
+    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg);
+    gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
 
     cr = cairo_create (d->buffer_surface);
 
@@ -288,9 +292,8 @@ draw_switcher_foreground (decor_t *d)
 		     d->frame->window_context_active.right_space,
 		     SWITCHER_SPACE);
 
-    gdk_cairo_set_source_color_alpha (cr,
-				      &style->bg[GTK_STATE_NORMAL],
-				      alpha);
+    bg.alpha = alpha;
+    gdk_cairo_set_source_rgba (cr, &bg);
     cairo_fill (cr);
 
     if (d->layout)
@@ -299,9 +302,8 @@ draw_switcher_foreground (decor_t *d)
 
 	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-	gdk_cairo_set_source_color_alpha (cr,
-					  &style->fg[GTK_STATE_NORMAL],
-					  1.0);
+	fg.alpha = 1.0;
+	gdk_cairo_set_source_rgba (cr, &fg);
 
 	pango_layout_get_pixel_size (d->layout, &w, NULL);
 
