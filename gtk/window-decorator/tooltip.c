@@ -45,7 +45,7 @@ show_tooltip (const char *text)
 
     gtk_label_set_text (GTK_LABEL (tip_label), text);
 
-    gtk_widget_size_request (tip_window, &requisition);
+    gtk_widget_get_preferred_size (tip_window, &requisition, NULL);
 
     w = requisition.width;
     h = requisition.height;
@@ -135,7 +135,7 @@ tooltip_paint_window (GtkWidget *tooltip,
 {
     GtkRequisition req;
 
-    gtk_widget_size_request (tip_window, &req);
+    gtk_widget_get_preferred_size (tip_window, &req, NULL);
     gtk_paint_flat_box (gtk_widget_get_style (tip_window), cr,
 			GTK_STATE_NORMAL, GTK_SHADOW_OUT,
 			GTK_WIDGET (tip_window), "tooltip",
