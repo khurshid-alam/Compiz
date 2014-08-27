@@ -167,8 +167,6 @@ create_tooltip_window (void)
 
     gtk_container_add (GTK_CONTAINER (tip_window), tip_label);
 
-    gtk_widget_ensure_style (tip_window);
-
     return TRUE;
 }
 
