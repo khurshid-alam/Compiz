@@ -920,6 +920,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 	{
 	    if (!wnck_window_get (xevent->xcreatewindow.window))
 	    {
+		gdk_error_trap_push ();
 		GdkWindow *toplevel = gdk_x11_window_foreign_new_for_display (gdkdisplay, xevent->xcreatewindow.window);
 
 		if (toplevel)
@@ -933,6 +934,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 		    if (get_window_prop (xevent->xcreatewindow.window, select_window_atom, &select))
 			update_switcher_window (xevent->xcreatewindow.window, select);
 		}
+	    gdk_error_trap_pop_ignored ();
 	    }
 	}
 	break;
