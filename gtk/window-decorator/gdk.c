@@ -77,20 +77,6 @@ get_format_for_surface (decor_t         *d,
     return xformat_rgb;
 }
 
-static cairo_user_data_key_t PIXMAP_KEY;
-
-static void
-pixmap_destroy_cb (void *data)
-{
-    Display *display;
-    Pixmap   pixmap;
-
-    display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    pixmap = GPOINTER_TO_UINT (data);
-
-    XFreePixmap (display, pixmap);
-}
-
 cairo_surface_t *
 create_native_surface_and_wrap (int        w,
                                 int        h,
@@ -110,8 +96,6 @@ create_native_surface_and_wrap (int        w,
     visual = gdk_window_get_visual (window);
     pixmap = XCreatePixmap (display, GDK_WINDOW_XID (window), w, h, gdk_visual_get_depth (visual));
     surface = cairo_xlib_surface_create (display, pixmap, GDK_VISUAL_XVISUAL (visual), w, h);
-
-    cairo_surface_set_user_data (surface, &PIXMAP_KEY, GUINT_TO_POINTER (pixmap), pixmap_destroy_cb);
 
     return surface;
 }
