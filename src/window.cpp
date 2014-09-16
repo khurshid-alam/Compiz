@@ -467,8 +467,10 @@ PrivateWindow::setFullscreenMonitors (CompFullscreenMonitorSet *monitors)
     {
 	CompRect fsRect (screen->outputDevs ()[monitors->left].x1 (),
 			 screen->outputDevs ()[monitors->top].y1 (),
-			 screen->outputDevs ()[monitors->right].x2 (),
-			 screen->outputDevs ()[monitors->bottom].y2 ());
+			 screen->outputDevs ()[monitors->right].x2 () -
+				screen->outputDevs ()[monitors->left].x1 (),
+			 screen->outputDevs ()[monitors->bottom].y2 () -
+				screen->outputDevs ()[monitors->top].y1 ());
 
 	if (fsRect.x1 () < fsRect.x2 () && fsRect.y1 () < fsRect.y2 ())
 	{
