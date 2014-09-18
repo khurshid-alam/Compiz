@@ -920,7 +920,8 @@ event_filter_func (GdkXEvent *gdkxevent,
 	{
 	    if (!wnck_window_get (xevent->xcreatewindow.window))
 	    {
-		GdkWindow *toplevel = create_foreign_window (xevent->xcreatewindow.window);
+		gdk_error_trap_push ();
+		GdkWindow *toplevel = gdk_x11_window_foreign_new_for_display (gdkdisplay, xevent->xcreatewindow.window);
 
 		if (toplevel)
 		{
@@ -933,6 +934,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 		    if (get_window_prop (xevent->xcreatewindow.window, select_window_atom, &select))
 			update_switcher_window (xevent->xcreatewindow.window, select);
 		}
+	    gdk_error_trap_pop_ignored ();
 	    }
 	}
 	break;
@@ -998,7 +1000,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 		 xevent->xproperty.atom == compiz_shadow_color_atom)
 	{
 	    GdkScreen  *g_screen = gdk_display_get_default_screen (gdkdisplay);
-	    Window     root = GDK_WINDOW_XWINDOW (gdk_screen_get_root_window (g_screen));
+	    Window     root = GDK_WINDOW_XID (gdk_screen_get_root_window (g_screen));
 	    WnckScreen *screen;
 
 	    screen = wnck_screen_get_for_root (root);

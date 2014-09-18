@@ -201,7 +201,7 @@ decor_frame_t *
 decor_frame_new (const gchar *type)
 {
     GdkScreen     *gdkscreen = gdk_screen_get_default ();
-    GdkColormap   *colormap;
+    GdkVisual     *visual;
     decor_frame_t *frame = malloc (sizeof (decor_frame_t));
 
     if (!frame)
@@ -224,9 +224,9 @@ decor_frame_new (const gchar *type)
 
     frame->style_window_rgba = gtk_window_new (GTK_WINDOW_POPUP);
 
-    colormap = gdk_screen_get_rgba_colormap (gdkscreen);
-    if (colormap)
-	gtk_widget_set_colormap (frame->style_window_rgba, colormap);
+    visual = gdk_screen_get_rgba_visual (gdkscreen);
+    if (visual)
+	gtk_widget_set_visual (frame->style_window_rgba, visual);
 
     gtk_widget_realize (frame->style_window_rgba);
 
@@ -241,9 +241,9 @@ decor_frame_new (const gchar *type)
 
     frame->style_window_rgb = gtk_window_new (GTK_WINDOW_POPUP);
 
-    colormap = gdk_screen_get_rgb_colormap (gdkscreen);
-    if (colormap)
-	gtk_widget_set_colormap (frame->style_window_rgb, colormap);
+    visual = gdk_screen_get_system_visual (gdkscreen);
+    if (visual)
+	gtk_widget_set_visual (frame->style_window_rgb, visual);
 
     gtk_widget_realize (frame->style_window_rgb);
 

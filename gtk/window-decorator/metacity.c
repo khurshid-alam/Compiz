@@ -138,7 +138,7 @@ decor_update_meta_window_property (decor_t	  *d,
 		     32, PropModeReplace, (guchar *) data,
 		     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
     gdk_display_sync (gdk_display_get_default ());
-    gdk_error_trap_pop ();
+    gdk_error_trap_pop_ignored ();
 
     free (data);
 
@@ -773,11 +773,7 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (d->frame_window)
 	{
-	    GdkColormap *cmap;
-
-	    cmap   = get_colormap_for_drawable (GDK_DRAWABLE (d->pixmap));
 	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgb);
-	    gdk_drawable_set_colormap (GDK_DRAWABLE (pixmap), cmap);
 	}
 	else
 	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgba);

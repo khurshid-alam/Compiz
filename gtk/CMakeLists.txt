@@ -9,8 +9,8 @@ compiz_set (USE_GNOME ${BUILD_GNOME})
 if (USE_GTK)
     pkg_check_modules (GTK_WINDOW_DECORATOR
 	xrender>=0.8.4
-	gtk+-2.0>=2.18.0
-	libwnck-1.0
+	gtk+-3.0
+	libwnck-3.0
 	pangocairo
     )
     if (GTK_WINDOW_DECORATOR_FOUND)
@@ -25,15 +25,7 @@ if (USE_GTK)
         set (CMAKE_REQUIRED_LIBRARIES "")
 
         if (USE_METACITY)
-            pkg_check_modules (METACITY libmetacity-private)
-            if (METACITY_FOUND)
-		pkg_check_modules (METACITY_3_12_0 libmetacity-private>=3.12.0)
-		if (METACITY_3_12_0_FOUND)
-			compiz_set (USE_METACITY 0)
-		endif (METACITY_3_12_0_FOUND)
-            else (METACITY_FOUND)
 		compiz_set (USE_METACITY 0)
-            endif (METACITY_FOUND)
         endif (USE_METACITY)
 
 	if (USE_GNOME)

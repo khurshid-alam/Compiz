@@ -37,30 +37,6 @@
 #include <X11/extensions/Xrender.h>
 #include <X11/Xregion.h>
 
-#ifdef HAVE_GTK_2_24
-
-#ifndef GDK_DISABLE_DEPRECATED
-#define GDK_DISABLE_DEPRECATED
-#endif
-
-#define create_foreign_window(xid)						       \
-    gdk_x11_window_foreign_new_for_display (gdk_display_get_default (),	       \
-					    xid)
-#else
-
-#define create_foreign_window(xid)						       \
-    gdk_window_foreign_new (xid)
-
-#ifdef GDK_DISABLE_DEPRECATED
-#undef GDK_DISABLE_DEPRECATED
-#endif
-
-#endif
-
-#ifndef GTK_DISABLE_DEPRECATED
-#define GTK_DISABLE_DEPRECATED
-#endif
-
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <gdk/gdk.h>
@@ -73,7 +49,6 @@
 
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
-#include <libwnck/window-action-menu.h>
 
 #include <cairo.h>
 #include <cairo-xlib.h>
@@ -329,8 +304,8 @@ typedef struct _decor {
     Box		      *last_pos_entered;
     guint	      button_states[BUTTON_NUM];
     Pixmap            x11Pixmap;
-    GdkPixmap	      *pixmap;
-    GdkPixmap	      *buffer_pixmap;
+    cairo_surface_t   *surface;
+    cairo_surface_t   *buffer_surface;
     GdkWindow	      *frame_window;
     GtkWidget         *decor_window;
     GtkWidget	      *decor_event_box;
@@ -350,7 +325,7 @@ typedef struct _decor {
     PangoLayout	      *layout;
     gchar	      *name;
     cairo_pattern_t   *icon;
-    GdkPixmap	      *icon_pixmap;
+    cairo_surface_t   *icon_surface;
     GdkPixbuf	      *icon_pixbuf;
     WnckWindowState   state;
     WnckWindowActions actions;
@@ -724,24 +699,21 @@ gdk_cairo_set_source_color_alpha (cairo_t  *cr,
 GdkWindow *
 create_gdk_window (Window xframe);
 
-GdkColormap *
-get_colormap_for_drawable (GdkDrawable *d);
-
 XRenderPictFormat *
-get_format_for_drawable (decor_t *d, GdkDrawable *drawable);
+get_format_for_surface (decor_t *d, cairo_surface_t *surface);
 
-GdkPixmap *
-create_pixmap (int	 w,
+cairo_surface_t *
+create_surface (int	 w,
 	       int	 h,
 	       GtkWidget *parent_style_window);
 
-GdkPixmap *
-create_native_pixmap_and_wrap (int	  w,
+cairo_surface_t *
+create_native_surface_and_wrap (int	  w,
 			       int	  h,
 			       GtkWidget *parent_style_window);
 
-GdkPixmap *
-pixmap_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
+cairo_surface_t *
+surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 /* metacity.c */
 #ifdef USE_METACITY

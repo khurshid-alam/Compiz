@@ -78,8 +78,10 @@ action_menu_map (WnckWindow *win,
 {
     GdkDisplay *gdkdisplay;
     GdkScreen  *screen;
+    Display    *display;
 
     gdkdisplay = gdk_display_get_default ();
+    display    = gdk_x11_display_get_xdisplay (gdkdisplay);
     screen     = gdk_display_get_default_screen (gdkdisplay);
 
     if (action_menu)
@@ -119,6 +121,9 @@ action_menu_map (WnckWindow *win,
 		      G_CALLBACK (action_menu_unmap), NULL);
 
     gtk_widget_show (action_menu);
+
+    XUngrabPointer (display, time);
+    XUngrabKeyboard (display, time);
 
     if (!button || button == 1)
     {
