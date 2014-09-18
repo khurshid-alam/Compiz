@@ -1,3 +1,16 @@
+compiz (1:0.9.12+14.10.20140918-0ubuntu1) utopic; urgency=low
+
+  [ Michael Thayer ]
+  * Fix for LP #1353675: _NET_WM_FULLSCREEN_MONITORS not handled
+    correctly. An (x, y, w, h) (LP: #1353675)
+
+  [ Alberts Muktupāvels ]
+  * Port gtk-window-decorator to GTK+ 3.
+  * Re-enable metacity theme support (LP: #1356981)
+  * Remove/replace deprecated functions. (LP: #1356981)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 18 Sep 2014 11:01:08 +0000
+
 compiz (1:0.9.12+14.10.20140812-0ubuntu1) utopic; urgency=medium
 
   [ Chris Townsend ]
