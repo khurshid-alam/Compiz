@@ -441,18 +441,10 @@ static inline GSettings *
 get_settings_no_abort (const gchar *schema)
 {
     GSettings *settings = NULL;
-    gchar **schemas = NULL;
-    guint i = 0;
 
-    g_settings_schema_source_list_schemas (g_settings_schema_source_get_default(), TRUE, &schemas, NULL);
-
-    for (; schemas[i]; ++i)
-        if (g_strcmp0 (schema, schemas[i]) == 0) {
-            settings = g_settings_new (schema);
-            break;
-        }
-
-    g_strfreev (schemas);
+    if (g_settings_schema_source_lookup (g_settings_schema_source_get_default(), schema, TRUE)) {
+    	settings = g_settings_new (schema);
+    }
 
     return settings;
 }
