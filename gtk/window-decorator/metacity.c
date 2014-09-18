@@ -122,7 +122,7 @@ decor_update_meta_window_property (decor_t	  *d,
     else
     {
 	data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
-	decor_quads_to_property (data, nOffset - 1, GDK_PIXMAP_XID (d->pixmap),
+	decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
 				 &frame_win_extents, &win_extents,
 				 &frame_max_win_extents, &max_win_extents,
 				 ICON_SPACE + d->button_width,
@@ -563,7 +563,7 @@ meta_draw_window_decoration (decor_t *d)
 {
     Display	      *xdisplay =
 	GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    GdkPixmap	      *pixmap;
+    cairo_surface_t *surface;
     Picture	      src;
     MetaButtonState   button_states [META_BUTTON_TYPE_LAST];
     MetaButtonLayout  button_layout;
@@ -573,9 +573,8 @@ meta_draw_window_decoration (decor_t *d)
     MetaTheme	      *theme;
     GtkStyle	      *style;
     cairo_t	      *cr;
-    gint	      size, i;
-    GdkRectangle      clip, rect;
-    GdkDrawable       *drawable;
+    gint	      i;
+    GdkRectangle      clip;
     Region	      top_region = NULL;
     Region	      bottom_region = NULL;
     Region	      left_region = NULL;
@@ -593,16 +592,17 @@ meta_draw_window_decoration (decor_t *d)
 						  meta_inactive_shade_opacity;
     MetaFrameStyle    *frame_style;
     GtkWidget	      *style_window;
+    GdkRGBA           bg_rgba;
     GdkColor	      bg_color;
     double	      bg_alpha;
 
-    if (!d->pixmap || !d->picture)
+    if (!d->surface || !d->picture)
 	return;
 
     if (decoration_alpha == 1.0)
 	alpha = 1.0;
 
-    if (gdk_drawable_get_depth (GDK_DRAWABLE (d->pixmap)) == 32)
+    if (cairo_xlib_surface_get_depth (d->surface) == 32)
     {
 	style = gtk_widget_get_style (d->frame->style_window_rgba);
 	style_window = d->frame->style_window_rgba;
@@ -613,9 +613,7 @@ meta_draw_window_decoration (decor_t *d)
 	style_window = d->frame->style_window_rgb;
     }
 
-    drawable = d->buffer_pixmap ? d->buffer_pixmap : d->pixmap;
-
-    cr = gdk_cairo_create (GDK_DRAWABLE (drawable));
+    cr = cairo_create (d->buffer_surface ? d->buffer_surface : d->surface);
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
@@ -629,7 +627,7 @@ meta_draw_window_decoration (decor_t *d)
     meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
 				  frame_type, &clip);
 
-    if ((d->prop_xid || !d->buffer_pixmap) && !d->frame_window)
+    if ((d->prop_xid || !d->buffer_surface) && !d->frame_window)
 	draw_shadow_background (d, cr, d->shadow, d->context);
 
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
@@ -645,61 +643,54 @@ meta_draw_window_decoration (decor_t *d)
     if (frame_style->window_background_color)
     {
 	meta_color_spec_render (frame_style->window_background_color,
-				GTK_WIDGET (style_window),
-				&bg_color);
+				gtk_widget_get_style_context (style_window),
+				&bg_rgba);
+
+	bg_color.red = bg_rgba.red * 65535.0;
+	bg_color.green = bg_rgba.green * 65535.0;
+	bg_color.blue = bg_rgba.blue * 65535.0;
 
 	bg_alpha = frame_style->window_background_alpha / 255.0;
     }
 
+    /* Draw something that will be almost invisible to user. This is hacky way
+     * to fix invisible decorations. */
+    cairo_set_source_rgba (cr, 0, 0, 0, 0.01);
+    cairo_rectangle (cr, 0, 0, 1, 1);
+    cairo_fill (cr);
+    /* ------------ */
+
     cairo_destroy (cr);
 
-    rect.x     = 0;
-    rect.y     = 0;
-    rect.width = clip.width;
-
-    size = MAX (fgeom.top_height, fgeom.bottom_height);
-
-    if (rect.width && size)
-    {
-	XRenderPictFormat *format;
-
 	if (d->frame_window)
-	    pixmap = create_pixmap (rect.width, size, d->frame->style_window_rgb);
+	    surface = create_surface (clip.width, clip.height, d->frame->style_window_rgb);
 	else
-	    pixmap = create_pixmap (rect.width, size, d->frame->style_window_rgba);
+	    surface = create_surface (clip.width, clip.height, d->frame->style_window_rgba);
 
-	cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+	cr = cairo_create (surface);
 	gdk_cairo_set_source_color_alpha (cr, &bg_color, bg_alpha);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-	format = get_format_for_drawable (d, GDK_DRAWABLE (pixmap));
-	src = XRenderCreatePicture (xdisplay, GDK_PIXMAP_XID (pixmap),
-				    format, 0, NULL);
+	src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
+                                get_format_for_surface (d, surface), 0, NULL);
 
-	if (fgeom.top_height)
+    cairo_paint (cr);
+    meta_theme_draw_frame (theme,
+                           style_window,
+                           cr,
+                           frame_type,
+                           flags,
+                           clip.width - fgeom.left_width - fgeom.right_width,
+                           clip.height - fgeom.top_height - fgeom.bottom_height,
+                           d->layout,
+                           d->frame->text_height,
+                           &button_layout,
+                           button_states,
+                           d->icon_pixbuf,
+                           NULL);
+
+    if (fgeom.top_height)
 	{
-	    rect.height = fgeom.top_height;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   pixmap,
-				   &rect,
-				   0, 0,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    top_region = meta_get_top_border_region (&fgeom, clip.width);
 
 	    decor_blend_border_picture (xdisplay,
@@ -717,35 +708,12 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (fgeom.bottom_height)
 	{
-	    rect.height = fgeom.bottom_height;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   pixmap,
-				   &rect,
-				   0,
-				   -(clip.height - fgeom.bottom_height),
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    bottom_region = meta_get_bottom_border_region (&fgeom, clip.width);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					0, clip.height - fgeom.bottom_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_BOTTOM,
@@ -756,67 +724,14 @@ meta_draw_window_decoration (decor_t *d)
 
 	}
 
-	cairo_destroy (cr);
-
-	g_object_unref (G_OBJECT (pixmap));
-
-	XRenderFreePicture (xdisplay, src);
-    }
-
-    rect.height = clip.height - fgeom.top_height - fgeom.bottom_height;
-
-    size = MAX (fgeom.left_width, fgeom.right_width);
-
-    if (size && rect.height)
-    {
-	XRenderPictFormat *format;
-
-	if (d->frame_window)
-	{
-	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgb);
-	}
-	else
-	    pixmap = create_pixmap (size, rect.height, d->frame->style_window_rgba);
-
-	cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
-	gdk_cairo_set_source_color_alpha (cr, &bg_color, bg_alpha);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-
-	format = get_format_for_drawable (d, GDK_DRAWABLE (pixmap));
-	src = XRenderCreatePicture (xdisplay, GDK_PIXMAP_XID (pixmap),
-				    format, 0, NULL);
-
 	if (fgeom.left_width)
 	{
-	    rect.width = fgeom.left_width;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   pixmap,
-				   &rect,
-				   0,
-				   -fgeom.top_height,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    left_region = meta_get_left_border_region (&fgeom, clip.height);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					0, fgeom.top_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_LEFT,
@@ -828,35 +743,12 @@ meta_draw_window_decoration (decor_t *d)
 
 	if (fgeom.right_width)
 	{
-	    rect.width = fgeom.right_width;
-
-	    cairo_paint (cr);
-
-	    meta_theme_draw_frame (theme,
-				   style_window,
-				   pixmap,
-				   &rect,
-				   -(clip.width - fgeom.right_width),
-				   -fgeom.top_height,
-				   frame_type,
-				   flags,
-				   clip.width - fgeom.left_width -
-				   fgeom.right_width,
-				   clip.height - fgeom.top_height -
-				   fgeom.bottom_height,
-				   d->layout,
-				   d->frame->text_height,
-				   &button_layout,
-				   button_states,
-				   d->icon_pixbuf,
-				   NULL);
-
 	    right_region = meta_get_right_border_region (&fgeom, clip.height);
 
 	    decor_blend_border_picture (xdisplay,
 					d->context,
 					src,
-					0, 0,
+					clip.width - fgeom.right_width, fgeom.top_height,
 					d->picture,
 					&d->border_layout,
 					BORDER_RIGHT,
@@ -867,23 +759,19 @@ meta_draw_window_decoration (decor_t *d)
 	}
 
 	cairo_destroy (cr);
-
-	g_object_unref (G_OBJECT (pixmap));
-
+	cairo_surface_destroy (surface);
 	XRenderFreePicture (xdisplay, src);
-    }
 
     copy_to_front_buffer (d);
 
     if (d->frame_window)
     {
 	GdkWindow *gdk_frame_window = gtk_widget_get_window (d->decor_window);
+	GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface (d->surface, 0, 0, d->width, d->height);
 
-	/*
-	 * FIXME: What is '4' supposed to be for here...
-	 */
+	gtk_image_set_from_pixbuf (GTK_IMAGE (d->decor_image), pixbuf);
+	g_object_unref (pixbuf);
 
-	gtk_image_set_from_pixmap (GTK_IMAGE (d->decor_image), d->pixmap, NULL);
 	gtk_window_resize (GTK_WINDOW (d->decor_window), d->width, d->height);
 	gdk_window_move (gdk_frame_window,
 			 d->context->left_corner_space - 1,
