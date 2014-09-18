@@ -136,7 +136,8 @@ decor_update_switcher_property (decor_t *d)
     unsigned int   frame_type = populate_frame_type (d);
     unsigned int   frame_state = populate_frame_state (d);
     unsigned int   frame_actions = populate_frame_actions (d);
-    GtkStyle     *style;
+    GtkStyleContext *context;
+    GdkRGBA fg;
     long         fgColor[4];
     
     nQuad = decor_set_lSrStSbX_window_quads (quads, &d->frame->window_context_active,
@@ -152,12 +153,13 @@ decor_update_switcher_property (decor_t *d)
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     0, 0, quads, nQuad, frame_type, frame_state, frame_actions);
-    
-    style = gtk_widget_get_style (d->frame->style_window_rgba);
-    
-    fgColor[0] = style->fg[GTK_STATE_NORMAL].red;
-    fgColor[1] = style->fg[GTK_STATE_NORMAL].green;
-    fgColor[2] = style->fg[GTK_STATE_NORMAL].blue;
+
+    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+    gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+
+    fgColor[0] = fg.red;
+    fgColor[1] = fg.green;
+    fgColor[2] = fg.blue;
     fgColor[3] = SWITCHER_ALPHA;
     
     gdk_error_trap_push ();

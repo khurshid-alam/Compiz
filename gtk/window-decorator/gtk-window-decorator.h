@@ -691,11 +691,6 @@ cairo_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active
 
 /* gdk.c */
 
-void
-gdk_cairo_set_source_color_alpha (cairo_t  *cr,
-				  GdkColor *color,
-				  double   alpha);
-
 GdkWindow *
 create_gdk_window (Window xframe);
 
@@ -1028,15 +1023,6 @@ get_window_prop (Window xwindow,
 
 unsigned int
 get_mwm_prop (Window xwindow);
-
-
-/* style.c */
-
-void
-update_style (GtkWidget *widget);
-
-void
-style_changed (GtkWidget *widget, void *user_data /* PangoContext */);
 
 /* settings.c */
 

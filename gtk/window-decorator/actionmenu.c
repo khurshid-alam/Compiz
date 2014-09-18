@@ -64,7 +64,7 @@ position_action_menu (GtkMenu  *menu,
     {
 	GtkRequisition req;
 
-	gtk_widget_size_request (GTK_WIDGET (menu), &req);
+	gtk_widget_get_preferred_size (GTK_WIDGET (menu), &req, NULL);
 	*x = MAX (0, *x - req.width + width);
     }
 

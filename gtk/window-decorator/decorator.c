@@ -139,18 +139,23 @@ void
 frame_update_titlebar_font (decor_frame_t *frame)
 {
     const PangoFontDescription *font_desc;
-    PangoFontMetrics	       *metrics;
-    PangoLanguage	       *lang;
+    PangoFontDescription *free_font_desc;
+    PangoFontMetrics *metrics;
+    PangoLanguage *lang;
 
+    free_font_desc = NULL;
     frame = gwd_decor_frame_ref (frame);
 
     font_desc = get_titlebar_font (frame);
     if (!font_desc)
     {
-	GtkStyle *default_style;
+        GtkCssProvider *provider = gtk_css_provider_get_default ();
+        GtkStyleContext *context = gtk_style_context_new ();
 
-	default_style = gtk_widget_get_default_style ();
-	font_desc = default_style->font_desc;
+        gtk_style_context_add_provider (context, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_FALLBACK);
+
+        gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL, "font", &free_font_desc, NULL);
+        font_desc = (const PangoFontDescription *) free_font_desc;
     }
 
     pango_context_set_font_description (frame->pango_context, font_desc);
@@ -164,6 +169,9 @@ frame_update_titlebar_font (decor_frame_t *frame)
     gwd_decor_frame_unref (frame);
 
     pango_font_metrics_unref (metrics);
+
+    if (free_font_desc)
+        pango_font_description_free (free_font_desc);
 }
 
 void

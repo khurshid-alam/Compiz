@@ -34,23 +34,25 @@
 static void
 show_tooltip (const char *text)
 {
-    GdkDisplay     *gdkdisplay;
+    GdkDeviceManager *device_manager;
+    GdkDevice *pointer;
     GtkRequisition requisition;
     gint	   x, y, w, h;
     GdkScreen	   *screen;
     gint	   monitor_num;
     GdkRectangle   monitor;
 
-    gdkdisplay = gdk_display_get_default ();
-
     gtk_label_set_text (GTK_LABEL (tip_label), text);
 
-    gtk_widget_size_request (tip_window, &requisition);
+    gtk_widget_get_preferred_size (tip_window, &requisition, NULL);
 
     w = requisition.width;
     h = requisition.height;
 
-    gdk_display_get_pointer (gdkdisplay, &screen, &x, &y, NULL);
+    device_manager = gdk_display_get_device_manager (gdk_display_get_default ());
+    pointer = gdk_device_manager_get_client_pointer (device_manager);
+
+    gdk_device_get_position (pointer, &screen, &x, &y);
 
     x -= (w / 2 + 4);
 
@@ -135,11 +137,9 @@ tooltip_paint_window (GtkWidget *tooltip,
 {
     GtkRequisition req;
 
-    gtk_widget_size_request (tip_window, &req);
-    gtk_paint_flat_box (gtk_widget_get_style (tip_window), cr,
-			GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-			GTK_WIDGET (tip_window), "tooltip",
-			0, 0, req.width, req.height);
+    gtk_widget_get_preferred_size (tip_window, &req, NULL);
+    gtk_render_background (gtk_widget_get_style_context (tip_window),
+                           cr, 0, 0, req.width, req.height);
 
     return FALSE;
 }
@@ -168,8 +168,6 @@ create_tooltip_window (void)
     gtk_widget_show (tip_label);
 
     gtk_container_add (GTK_CONTAINER (tip_window), tip_label);
-
-    gtk_widget_ensure_style (tip_window);
 
     return TRUE;
 }

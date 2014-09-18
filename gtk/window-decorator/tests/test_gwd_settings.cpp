@@ -243,7 +243,6 @@ class GWDSettingsTestCommon :
 	virtual void SetUp ()
 	{
 	    env.SetUpEnv ();
-	    g_type_init ();
 	}
 	virtual void TearDown ()
 	{

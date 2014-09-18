@@ -156,7 +156,7 @@ show_force_quit_dialog (WnckWindow *win,
     gtk_window_set_icon_name (GTK_WINDOW (dialog), "force-quit");
 
     gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-			    GTK_STOCK_CANCEL,
+			    _("_Cancel"),
 			    GTK_RESPONSE_REJECT,
 			    _("_Force Quit"),
 			    GTK_RESPONSE_ACCEPT,

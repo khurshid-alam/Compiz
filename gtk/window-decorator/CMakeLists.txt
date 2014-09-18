@@ -105,7 +105,6 @@ if (USE_GTK)
 		    actionmenu.c
 		    settings.c
 		    util.c
-		    style.c
 		    wnck.c
 		    decorator.c
 		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-xproperty-storage.c

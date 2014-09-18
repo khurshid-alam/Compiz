@@ -46,18 +46,6 @@ surface_new_from_pixbuf (GdkPixbuf *pixbuf,
     return surface;
 }
 
-void
-gdk_cairo_set_source_color_alpha (cairo_t  *cr,
-				  GdkColor *color,
-				  double   alpha)
-{
-    cairo_set_source_rgba (cr,
-			   color->red   / 65535.0,
-			   color->green / 65535.0,
-			   color->blue  / 65535.0,
-			   alpha);
-}
-
 GdkWindow *
 create_gdk_window (Window xframe)
 {

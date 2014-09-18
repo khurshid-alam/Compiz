@@ -571,7 +571,7 @@ meta_draw_window_decoration (decor_t *d)
     MetaFrameFlags    flags;
     MetaFrameType     frame_type;
     MetaTheme	      *theme;
-    GtkStyle	      *style;
+    GtkStyleContext *context;
     cairo_t	      *cr;
     gint	      i;
     GdkRectangle      clip;
@@ -593,8 +593,6 @@ meta_draw_window_decoration (decor_t *d)
     MetaFrameStyle    *frame_style;
     GtkWidget	      *style_window;
     GdkRGBA           bg_rgba;
-    GdkColor	      bg_color;
-    double	      bg_alpha;
 
     if (!d->surface || !d->picture)
 	return;
@@ -604,12 +602,12 @@ meta_draw_window_decoration (decor_t *d)
 
     if (cairo_xlib_surface_get_depth (d->surface) == 32)
     {
-	style = gtk_widget_get_style (d->frame->style_window_rgba);
+	context = gtk_widget_get_style_context (d->frame->style_window_rgba);
 	style_window = d->frame->style_window_rgba;
     }
     else
     {
-	style = gtk_widget_get_style (d->frame->style_window_rgb);
+	context = gtk_widget_get_style_context (d->frame->style_window_rgb);
 	style_window = d->frame->style_window_rgb;
     }
 
@@ -637,8 +635,8 @@ meta_draw_window_decoration (decor_t *d)
 					      frame_type,
 					      flags);
 
-    bg_color = style->bg[GTK_STATE_NORMAL];
-    bg_alpha = 1.0;
+    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg_rgba);
+    bg_rgba.alpha = 1.0;
 
     if (frame_style->window_background_color)
     {
@@ -646,11 +644,7 @@ meta_draw_window_decoration (decor_t *d)
 				gtk_widget_get_style_context (style_window),
 				&bg_rgba);
 
-	bg_color.red = bg_rgba.red * 65535.0;
-	bg_color.green = bg_rgba.green * 65535.0;
-	bg_color.blue = bg_rgba.blue * 65535.0;
-
-	bg_alpha = frame_style->window_background_alpha / 255.0;
+	bg_rgba.alpha = frame_style->window_background_alpha / 255.0;
     }
 
     /* Draw something that will be almost invisible to user. This is hacky way
@@ -668,7 +662,7 @@ meta_draw_window_decoration (decor_t *d)
 	    surface = create_surface (clip.width, clip.height, d->frame->style_window_rgba);
 
 	cr = cairo_create (surface);
-	gdk_cairo_set_source_color_alpha (cr, &bg_color, bg_alpha);
+	gdk_cairo_set_source_rgba (cr, &bg_rgba);
 	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
 	src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
