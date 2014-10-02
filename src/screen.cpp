@@ -2691,7 +2691,7 @@ CompScreenImpl::focusDefaultWindow ()
     else
     {
 	// check if there was a focused window stored
-	focus = findFocusCandidate ();
+	focus = findViewportFocusCandidate ();
     }
 
     if (!focus)
@@ -3789,7 +3789,7 @@ CompScreenImpl::moveViewport (int tx, int ty, bool sync)
     if (!tx && !ty)
 	return;
 
-    saveFocus ();
+    saveViewportFocus ();
 
     privateScreen.viewPort.vp.setX (privateScreen.viewPort.vp.x () + tx);
     privateScreen.viewPort.vp.setY (privateScreen.viewPort.vp.y () + ty);
@@ -5163,34 +5163,34 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
 }
 
 void
-CompScreenImpl::saveFocus ()
+CompScreenImpl::saveViewportFocus ()
 {
     if ((privateScreen.optionGetHsize () > 1 || privateScreen.optionGetVsize () > 1) &&
-	privateScreen.optionGetRememberFocus ())
+	privateScreen.optionGetRememberVpFocus ())
     {
 	Window id = activeWindow ();
 	if (id != None)
 	{
-	    savedFocus[privateScreen.viewPort.vp] = id;
+	    savedViewportFocus[privateScreen.viewPort.vp] = id;
 	}
     }
 }
 
 CompWindow *
-CompScreenImpl::findFocusCandidate ()
+CompScreenImpl::findViewportFocusCandidate ()
 {
     if ((privateScreen.optionGetHsize () > 1 || privateScreen.optionGetVsize () > 1) &&
-	privateScreen.optionGetRememberFocus ())
+	privateScreen.optionGetRememberVpFocus ())
     {
-	FocusMap::iterator it = savedFocus.find (privateScreen.viewPort.vp);
-	if (it != savedFocus.end ())
+	FocusMap::iterator it = savedViewportFocus.find (privateScreen.viewPort.vp);
+	if (it != savedViewportFocus.end ())
 	{
 	    Window id = it->second;
 	    CompWindow *w = findWindow (id);
 	    if (w)
 	    {
-	        savedFocus.erase (it);
-	        return w;
+		savedViewportFocus.erase (it);
+		return w;
 	    }
 	}
     }

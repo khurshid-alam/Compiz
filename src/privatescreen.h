@@ -93,11 +93,11 @@ struct CompStartupSequence {
 // to allow using CompPoint as std::map keys
 struct PointCompare
 {
-    bool operator() (const CompPoint& p1, const CompPoint& p2)
+    bool operator () (const CompPoint& p1, const CompPoint& p2)
     {
-        if (p1.x () == p2.x ())
-            return p1.y () < p2.y ();
-        return p1.x () < p2.x ();
+	if (p1.x () == p2.x ())
+	    return p1.y () < p2.y ();
+	return p1.x () < p2.x ();
     }
 };
 
@@ -1177,8 +1177,8 @@ class CompScreenImpl : public CompScreen,
 
         bool handlePingTimeout();
 
-	void saveFocus ();
-	CompWindow * findFocusCandidate ();
+	void saveViewportFocus ();
+	CompWindow * findViewportFocusCandidate ();
 
         Window below;
 	CompTimer autoRaiseTimer_;
@@ -1191,7 +1191,7 @@ class CompScreenImpl : public CompScreen,
         compiz::private_screen::WindowManager windowManager;
         unsigned int showingDesktopMask_;
 	typedef std::map<CompPoint, Window, PointCompare> FocusMap;
-	FocusMap savedFocus;
+	FocusMap savedViewportFocus;
 };
 
 #endif
