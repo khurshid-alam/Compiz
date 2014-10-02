@@ -5183,7 +5183,7 @@ CompScreenImpl::findFocusCandidate ()
 	privateScreen.optionGetRememberFocus ())
     {
 	FocusMap::iterator it = savedFocus.find (privateScreen.viewPort.vp);
-	if (it != savedFocus.end())
+	if (it != savedFocus.end ())
 	{
 	    Window id = it->second;
 	    CompWindow *w = findWindow (id);
