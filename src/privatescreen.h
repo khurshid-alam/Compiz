@@ -1177,8 +1177,8 @@ class CompScreenImpl : public CompScreen,
 
         bool handlePingTimeout();
 
-        void saveFocus();
-        CompWindow * findFocusCandidate();
+	void saveFocus ();
+	CompWindow * findFocusCandidate ();
 
         Window below;
 	CompTimer autoRaiseTimer_;
@@ -1190,8 +1190,8 @@ class CompScreenImpl : public CompScreen,
         PrivateScreen privateScreen;
         compiz::private_screen::WindowManager windowManager;
         unsigned int showingDesktopMask_;
-        typedef std::map<CompPoint, Window, PointCompare> FocusMap;
-        FocusMap savedFocus;
+	typedef std::map<CompPoint, Window, PointCompare> FocusMap;
+	FocusMap savedFocus;
 };
 
 #endif

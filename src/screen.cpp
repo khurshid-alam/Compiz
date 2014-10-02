@@ -2690,8 +2690,8 @@ CompScreenImpl::focusDefaultWindow ()
     }
     else
     {
-        // check if there was focused stored
-        focus = findFocusCandidate();
+	// check if there was a focused window stored
+	focus = findFocusCandidate ();
     }
 
     if (!focus)
@@ -3789,7 +3789,7 @@ CompScreenImpl::moveViewport (int tx, int ty, bool sync)
     if (!tx && !ty)
 	return;
 
-    saveFocus();
+    saveFocus ();
 
     privateScreen.viewPort.vp.setX (privateScreen.viewPort.vp.x () + tx);
     privateScreen.viewPort.vp.setY (privateScreen.viewPort.vp.y () + ty);
@@ -5163,36 +5163,36 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
 }
 
 void
-CompScreenImpl::saveFocus()
+CompScreenImpl::saveFocus ()
 {
-    if (privateScreen.optionGetRememberFocus())
+    if ((privateScreen.optionGetHsize () > 1 || privateScreen.optionGetVsize () > 1) &&
+	privateScreen.optionGetRememberFocus ())
     {
-        Window id = activeWindow();
-        if (id != None)
-        {
-            CompPoint p(privateScreen.viewPort.vp.x(), privateScreen.viewPort.vp.y());
-            savedFocus[p] = id;
-        }
+	Window id = activeWindow ();
+	if (id != None)
+	{
+	    savedFocus[privateScreen.viewPort.vp] = id;
+	}
     }
 }
 
 CompWindow *
-CompScreenImpl::findFocusCandidate()
+CompScreenImpl::findFocusCandidate ()
 {
-    if (privateScreen.optionGetRememberFocus())
+    if ((privateScreen.optionGetHsize () > 1 || privateScreen.optionGetVsize () > 1) &&
+	privateScreen.optionGetRememberFocus ())
     {
-        CompPoint p(privateScreen.viewPort.vp.x(), privateScreen.viewPort.vp.y());
-        FocusMap::iterator it = savedFocus.find(p);
-        if (it != savedFocus.end())
-        {
-            Window id = it->second;
-            CompWindow *w = findWindow(id);
-            if (w)
-            {
-                savedFocus.erase(it);
-                return w;
-            }
-        }
+	FocusMap::iterator it = savedFocus.find (privateScreen.viewPort.vp);
+	if (it != savedFocus.end())
+	{
+	    Window id = it->second;
+	    CompWindow *w = findWindow (id);
+	    if (w)
+	    {
+	        savedFocus.erase (it);
+	        return w;
+	    }
+	}
     }
     return NULL;
 }
