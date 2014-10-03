@@ -5187,11 +5187,9 @@ CompScreenImpl::findViewportFocusCandidate ()
 	{
 	    Window id = it->second;
 	    CompWindow *w = findWindow (id);
+	    savedViewportFocus.erase (it);
 	    if (w)
-	    {
-		savedViewportFocus.erase (it);
 		return w;
-	    }
 	}
     }
     return NULL;
