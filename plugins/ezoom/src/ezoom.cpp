@@ -1164,6 +1164,7 @@ EZoomScreen::drawCursor (CompOutput    *output,
 	GLfloat        textureData[8];
 	GLfloat        vertexData[12];
 	GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
+	const GLWindowPaintAttrib attrib = { OPAQUE, BRIGHT, COLOR, 0, 0, 0, 0 };
 
 	sTransform.toScreenSpace (output, -DEFAULT_Z_CAMERA);
 	convertToZoomed (out, mouse.x (), mouse.y (), &ax, &ay);
@@ -1186,6 +1187,7 @@ EZoomScreen::drawCursor (CompOutput    *output,
 	glBindTexture (GL_TEXTURE_2D, cursor.texture);
 
 	streamingBuffer->begin (GL_TRIANGLE_STRIP);
+	streamingBuffer->colorDefault ();
 
 	vertexData[0]  = x;
 	vertexData[1]  = y;
@@ -1214,7 +1216,7 @@ EZoomScreen::drawCursor (CompOutput    *output,
 	streamingBuffer->addTexCoords (0, 4, textureData);
 
 	streamingBuffer->end ();
-	streamingBuffer->render (sTransform);
+	streamingBuffer->render (sTransform, attrib);
 
 	glBindTexture (GL_TEXTURE_2D, 0);
 	glDisable (GL_BLEND);
