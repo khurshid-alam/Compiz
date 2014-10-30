@@ -40,6 +40,16 @@ public:
 
 };
 
+GLShaderData::GLShaderData(const std::string &name,
+                           const std::string &vertexShader,
+                           const std::string &fragmentShader) :
+    name(name),
+    vertexShader(vertexShader),
+    fragmentShader(fragmentShader),
+    isCached(false)
+{
+}
+
 typedef std::map<GLShaderParameters, GLShaderData, GLShaderParametersComparer> ShaderMapType;
 
 /** 
@@ -125,11 +135,10 @@ GLShaderCache::getShaderData (const GLShaderParameters &params)
 ShaderMapType::const_iterator
 PrivateShaderCache::addShaderData (const GLShaderParameters &params)
 {
-    GLShaderData shaderData;
-
-    shaderData.name = params.id ();
-    shaderData.fragmentShader = createFragmentShader (params);
-    shaderData.vertexShader = createVertexShader (params);
+    GLShaderData shaderData (params.id (),
+                             createVertexShader (params),
+                             createFragmentShader (params));
+    shaderData.isCached = true;
 
     std::pair<ShaderMapType::iterator, bool> ret =
         shaderMap.insert(std::pair<GLShaderParameters, GLShaderData>(params,shaderData));
