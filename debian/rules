@@ -68,6 +68,9 @@ endif
 	mkdir -p debian/tmp/usr/share/gnome-control-center/keybindings
 	find */gtk/gnome -name *.xml | xargs cp -at debian/tmp/usr/share/gnome-control-center/keybindings/
 
+	# work around having a file with a conflicted special name (#1156294)
+	cp debian/compizconfig debian/tmp/config
+
 	dh_install --fail-missing
 
 	# remove the compizconfig dev file from compiz-dev
