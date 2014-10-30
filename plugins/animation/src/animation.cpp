@@ -2905,7 +2905,8 @@ PrivateAnimWindow::PrivateAnimWindow (CompWindow *w,
     mDestroyCnt (0),
     mIgnoreDamage (false),
     mFinishingAnim (false),
-    mCurAnimSelectionRow (-1)
+    mCurAnimSelectionRow (-1),
+    mPrevAnimSelectionRow (-1)
 {
     mBB.x1 = mBB.y1 = MAXSHORT;
     mBB.x2 = mBB.y2 = MINSHORT;
