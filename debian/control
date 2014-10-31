@@ -56,7 +56,7 @@ Build-Depends: cmake (>= 2.6),
                gnome-control-center-dev,
                gsettings-desktop-schemas-dev,
                xserver-xorg-dev (>= 0.7.0),
-Standards-Version: 3.9.3
+Standards-Version: 3.9.6
 # If you aren't a member of ~compiz-team but need to upload packaging changes,
 # just go ahead.  ~compiz-team will notice and sync up the code again.
 Vcs-Bzr: https://code.launchpad.net/~compiz-team/compiz/0.9.10
