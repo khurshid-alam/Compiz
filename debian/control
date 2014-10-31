@@ -140,6 +140,7 @@ Package: compiz-gnome
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
+         ${python:Depends},
          compiz-plugins-default (= ${binary:Version}),
          gsettings-desktop-schemas,
          gnome-settings-daemon-schemas (>= 3.4.2-0ubuntu9),
