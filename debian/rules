@@ -1,11 +1,13 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
 export COMPIZ_DEB_BUILD=1
+
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 gles2_architectures := armel armhf
+
+# currently, segfault if CMAKE_BUILD_TYPE=Release
+export DEB_LDFLAGS_MAINT_STRIP=-Wl,-Bsymbolic-functions
 
 CORE_ABIVERSION := $(shell sed -rn 's/^\#define[[:space:]]+CORE_ABIVERSION[[:space:]]+//p' include/core/abiversion.h )
 
@@ -29,9 +31,6 @@ override_dh_quilt_unpatch:
 	dh_quilt_unpatch
 
 override_dh_auto_configure:
-	# currently, segfault if CMAKE_BUILD_TYPE=Release
-	LDFLAGS=$(shell echo $$LDFLAGS | sed -e 's/\-Wl,-Bsymbolic-functions //')
-
         # right now, xorg-gtest won't compile on arm.
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
 	dh_auto_configure -- -DCOMPIZ_BUILD_WITH_RPATH=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPIZ_PACKAGING_ENABLED=TRUE -DUSE_GSETTINGS=ON -DCOMPIZ_DISABLE_GS_SCHEMAS_INSTALL=OFF -DCOMPIZ_DISABLE_PLUGIN_KDE=ON -DCOMPIZ_BUILD_TESTING=OFF -DUSE_KDE4=OFF -DUSE_GCONF=OFF -DBUILD_GLES=ON -DBUILD_XORG_GTEST=OFF
