@@ -362,11 +362,9 @@ GLWindow::addShaders (std::string name,
                       std::string vertex_shader,
                       std::string fragment_shader)
 {
-    GLShaderData *data = new GLShaderData;
-    data->name = name;
-    data->vertexShader = vertex_shader;
-    data->fragmentShader = fragment_shader;
-
+    GLShaderData *data = new GLShaderData (name,
+                                           vertex_shader,
+                                           fragment_shader);
     priv->shaders.push_back(data);
 }
 

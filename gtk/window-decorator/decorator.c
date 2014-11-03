@@ -370,9 +370,9 @@ update_event_windows (WnckWindow *win)
 		 (*theme_get_button_position) (d, i, width, height,
 					       &x, &y, &w, &h))
 	{
-	    Window win = d->button_windows[i].window;
-	    XMapWindow (xdisplay, win);
-	    XMoveResizeWindow (xdisplay, win, x, y, w, h);
+	    Window x11_win = d->button_windows[i].window;
+	    XMapWindow (xdisplay, x11_win);
+	    XMoveResizeWindow (xdisplay, x11_win, x, y, w, h);
 	}
 	else if (!d->frame_window)
 	{

@@ -1298,6 +1298,15 @@ GLWindow::glDrawTexture (GLTexture          *texture,
 	priv->vertexBuffer->render (transform, attrib);
     #endif
 
+    for (std::list<const GLShaderData*>::const_iterator it = priv->shaders.begin();
+         it != priv->shaders.end();
+         ++it)
+    {
+	if ((*it)->isCached != true)
+	{
+	    delete *it;
+	}
+    }
     priv->shaders.clear ();
     texture->disable ();
 

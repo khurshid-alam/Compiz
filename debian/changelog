@@ -1,3 +1,33 @@
+compiz (1:0.9.12+15.04.20141031-0ubuntu1) vivid; urgency=low
+
+  [ Stephen M. Webb ]
+  * filter debian/ from upstream dist tarball (LP: #1075995)
+  * removed distro-patch for #873384 because it's now upstream (LP:
+    #873384)
+  * removed inappropriate executable permissions from some source and
+    data files (LP: #1086165)
+  * window_decorator: renamed a local to unhide a parameter (LP:
+    #957600)
+  * opengl plugin: free shaders and uniforms (LP: #1227449)
+  * debian/compizconfig: renamed from debian/config to avoid debconf
+    clashes (LP: #1156294)
+  * animation plugin: initialize mPrevAnimSelectionRow (LP: #1101630)
+
+  [ Klaus Knopper ]
+  * Forces non-opaque pointer in the ezoom plugin. (LP: #1362005)
+
+  [ Henry Hu ]
+  * place plugin: correct min and default placement modes in
+    configuration
+
+  [ Matija Skala ]
+  * remove 'extern "C"' hack (LP: #1286562)
+
+  [ Dariusz Gadomski ]
+  * CompScreen: Save focused window id before changing viewport.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 31 Oct 2014 17:03:50 +0000
+
 compiz (1:0.9.12+14.10.20140918-0ubuntu2) UNRELEASED; urgency=medium
 
   * debian/control: update Standards-Version to 3.9.6 (no changes)
