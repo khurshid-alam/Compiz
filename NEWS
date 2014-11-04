@@ -1,3 +1,32 @@
+Release 0.9.12.0 (2014-11-04 Stephen M. Webb <stephen.webb@canonical.com>)
+========================================================================
+
+     1101630 - animation plugin: initialized mPrevAnimSelectionRow
+     1227449 - opengl plugin: freed shaders and uniforms
+     957600  - window_decorator: renamed a local to unhide a parameter
+     1086165 - removed inappropriate executable permissions from some source
+               and data files
+     1362005 - Forced non-opaque pointer in the ezoom plugin.
+     873384  - upstreamed distro-patch for #873384
+               place plugin: correct min and default placement modes in
+               configuration 
+     1075995 - filtered debian/ from upstream dist tarball
+     1125442 - CompScreen: Save focused window id before changing viewport.
+     1286562 - remove 'extern "C"' hack
+     1356981 - gtk-window-decorator: removed/replaced deprecated functions.
+     1353675 - _NET_WM_FULLSCREEN_MONITORS not handled correctly.
+     1356981 - Re-enabled metacity theme support
+             - gtk-window-decorator: removed gconf
+             - gtk-window-decorator: port to GTK+ 3. 
+             - po/POTFILES.in: remove gtk/window-decorator/gwd.schemas.in
+             - Calculated correct button position in cairo theme. 
+     1333277 - Remove the need to check the viewport we are painting the
+               maximized window in while in Expo mode and only scale maximized
+               windows that are not being dragged.
+     1330198 - Add more button ungrab keymasks, so unfocused Gtk window
+               scrolling will work when NumLock is off and CapsLock is on and
+               any combination thereof.
+
 Release 0.9.11 (2014-6-10 Chris Townsend <christopher.townsend@canonical.com>)
 =============================================================================
 
