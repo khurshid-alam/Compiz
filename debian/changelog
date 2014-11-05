@@ -1,3 +1,19 @@
+compiz (1:0.9.12.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * debian/compiz-core.lintian-overrides: updated libcompiz-coreABI soname
+  * debian/control: updated Standards-Version to 3.9.6 (no changes)
+    - added Homepage field
+    - added python dependency to compiz-gnome package for upgrade scripts
+    - fixed capitalization of "Python" in descriptions
+    - turned package short descriptions into sentence fragments
+  * debian/copyright: fixed formatting, updated dates
+  * debian/patches/99_valid_ccsm_desktop_file.patch: merged changes upstream
+    compizconfig/ccsm/ccsm_desktop.in: to here
+  * debian/rules: used recommended way of stripping LDFLAGS
+  * debian/source/format: new file (forces v1 instead of assuming default)
+
+ -- Stephen M. Webb <stephen.webb@canonical.com>  Mon, 03 Nov 2014 21:56:22 -0400
+
 compiz (1:0.9.12+15.04.20141031-0ubuntu1) vivid; urgency=low
 
   [ Stephen M. Webb ]
