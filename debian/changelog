@@ -1,5 +1,6 @@
-compiz (1:0.9.12.0-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.12.0+15.04.20141105-0ubuntu1) vivid; urgency=medium
 
+  [ Stephen M. Webb ]
   * upstream release 0.9.12.0
   * debian/compiz-core.lintian-overrides: updated libcompiz-coreABI soname
   * debian/control: updated Standards-Version to 3.9.6 (no changes)
@@ -13,7 +14,10 @@ compiz (1:0.9.12.0-0ubuntu1) UNRELEASED; urgency=medium
   * debian/rules: used recommended way of stripping LDFLAGS
   * debian/source/format: new file (forces v1 instead of assuming default)
 
- -- Stephen M. Webb <stephen.webb@canonical.com>  Mon, 05 Nov 2014 21:56:22 -0400
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Nov 2014 13:31:09 +0000
 
 compiz (1:0.9.12+15.04.20141031-0ubuntu1) vivid; urgency=low
 
