@@ -4,6 +4,8 @@
 export COMPIZ_DEB_BUILD=1
 
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+python2_version := $(shell pyversions --requested --version debian/control)
 gles2_architectures := armel armhf
 
 # currently, segfault if CMAKE_BUILD_TYPE=Release
@@ -69,6 +71,11 @@ endif
 
 	# work around having a file with a conflicted special name (#1156294)
 	cp debian/compizconfig debian/tmp/config
+
+	# accommodate Python's just-gotta-be-different approach to multi-arch
+	python2_dir=debian/tmp/usr/lib/python$(python2_version)/dist-packages; \
+	mv $${python2_dir}/compizconfig.so \
+	   $${python2_dir}/compizconfig.$(DEB_HOST_MULTIARCH).so
 
 	dh_install --fail-missing
 
