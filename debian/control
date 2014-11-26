@@ -290,7 +290,7 @@ Description: Compizconfig bindings for Python
 
 Package: compizconfig-settings-manager
 Architecture: all
-Multi-Arch: same
+Multi-Arch: allowed
 XB-Python-Version: ${python:Versions}
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
