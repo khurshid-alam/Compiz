@@ -83,7 +83,7 @@ Description: OpenGL window and compositing manager
 Package: compiz-core
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
 Recommends: compiz-plugins-default,
@@ -104,7 +104,7 @@ Description: OpenGL window and compositing manager
 Package: compiz-dev
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          libdecoration0-dev (= ${binary:Version}),
          ${misc:Depends},
@@ -145,7 +145,7 @@ Description: OpenGL window and compositing manager - development files
 Package: compiz-gnome
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
@@ -173,7 +173,7 @@ Description: OpenGL window and compositing manager - GNOME window decorator
 Package: compiz-plugins-default
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          libdecoration0 (= ${binary:Version}),
          ${shlibs:Depends},
@@ -192,7 +192,7 @@ Description: OpenGL window and compositing manager - default plugins
 Package: compiz-plugins
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          compiz-plugins-default (= ${binary:Version}),
          ${shlibs:Depends},
@@ -215,7 +215,7 @@ Description: OpenGL window and compositing manager - plugins
 Package: libdecoration0
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
 Description: Compiz window decoration library
@@ -227,7 +227,7 @@ Package: libdecoration0-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: libdecoration0 (= ${binary:Version}),
          ${misc:Depends},
          libx11-dev,
@@ -243,7 +243,7 @@ Description: Compiz window decoration library - development files
 Package: libcompizconfig0
 Architecture: any
 Multi-Arch: same
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          compiz-core (= ${binary:Version}),
@@ -259,7 +259,7 @@ Package: libcompizconfig0-dev
 Architecture: any
 Multi-Arch: same
 Section: libdevel
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends},
          libcompizconfig0 (= ${binary:Version}),
          compiz-dev,
@@ -276,7 +276,7 @@ Package: python-compizconfig
 Architecture: any
 Multi-Arch: same
 Section: python
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
 Provides: ${python:Provides}
 Description: Compizconfig bindings for Python
@@ -292,7 +292,7 @@ Package: compizconfig-settings-manager
 Architecture: all
 Multi-Arch: same
 XB-Python-Version: ${python:Versions}
-Pre-Depends: $(misc:Pre-Depends}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
