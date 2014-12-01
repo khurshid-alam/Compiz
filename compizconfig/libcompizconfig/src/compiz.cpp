@@ -2904,10 +2904,19 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
     Bool xmlLoaded = FALSE;
 #endif
 
-    if (fp)
+    if (!fp)
+    {
+	ccsError("error %d opening %s: %s",
+	         errno, xmlFilePath, strerror(errno));
+    }
+    else
     {
 	xmlDoc *doc = xmlReadFd (fileno (fp), xmlFilePath, NULL, 0);
-	if (doc)
+	if (!doc)
+	{
+	    ccsError("error parsing %s", xmlFilePath);
+	}
+	else
 	{
 #ifdef USE_PROTOBUF
 	    xmlLoaded =
@@ -3163,32 +3172,40 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
 {
     CCSPluginPrivate *pPrivate = GET_PRIVATE (CCSPluginPrivate, plugin);
 
-    xmlDoc *doc = NULL;
-    xmlNode **nodes;
-    int num;
-
     FILE *fp = fopen (pPrivate->xmlFile, "r");
     if (!fp)
+    {
+	ccsError("error %d opening %s: %s",
+	         errno, pPrivate->xmlFile, strerror(errno));
 	return;
+    }
 
     if (!fstat (fileno (fp), xmlStat))
     {
+	ccsError("error %d statting %s: %s",
+	         errno, pPrivate->xmlFile, strerror(errno));
 	fclose (fp);
 	return;
     }
 
-    doc = xmlReadFd (fileno (fp), pPrivate->xmlFile, NULL, 0);
-
-    nodes = getNodesFromXPath (doc, NULL, pPrivate->xmlPath, &num);
-    if (num)
+    xmlDoc *doc = xmlReadFd (fileno (fp), pPrivate->xmlFile, NULL, 0);
+    if (!doc)
     {
-	initOptionsFromRootNode (plugin, nodes[0], pluginPBv);
-	if (!basicMetadata)
-	    initStringExtensionsFromRootNode (plugin, nodes[0], pluginPBv);
-	free (nodes);
+	ccsError("error parsing %s", pPrivate->xmlFile);
     }
-    if (doc)
+    else
+    {
+	int num = 0;
+	xmlNode **nodes = getNodesFromXPath (doc, NULL, pPrivate->xmlPath, &num);
+	if (num)
+	{
+	    initOptionsFromRootNode (plugin, nodes[0], pluginPBv);
+	    if (!basicMetadata)
+		initStringExtensionsFromRootNode (plugin, nodes[0], pluginPBv);
+	    free (nodes);
+	}
 	xmlFreeDoc (doc);
+    }
     fclose (fp);
 }
 
