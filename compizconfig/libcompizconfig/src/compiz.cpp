@@ -2906,8 +2906,7 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
 
     if (fp)
     {
-	fclose (fp);
-	xmlDoc *doc = xmlReadFile (xmlFilePath, NULL, 0);
+	xmlDoc *doc = xmlReadFd (fileno (fp), xmlFilePath, NULL, 0);
 	if (doc)
 	{
 #ifdef USE_PROTOBUF
@@ -2917,6 +2916,7 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
 					   pluginInfoPBv);
 	    xmlFreeDoc (doc);
 	}
+	fclose (fp);
     }
     free (xmlFilePath);
 
@@ -3167,15 +3167,17 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
     xmlNode **nodes;
     int num;
 
-    if (stat (pPrivate->xmlFile, xmlStat))
-	return;
-
     FILE *fp = fopen (pPrivate->xmlFile, "r");
     if (!fp)
 	return;
 
-    fclose (fp);
-    doc = xmlReadFile (pPrivate->xmlFile, NULL, 0);
+    if (!fstat (fileno (fp), xmlStat))
+    {
+	fclose (fp);
+	return;
+    }
+
+    doc = xmlReadFd (fileno (fp), pPrivate->xmlFile, NULL, 0);
 
     nodes = getNodesFromXPath (doc, NULL, pPrivate->xmlPath, &num);
     if (num)
@@ -3187,6 +3189,7 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
     }
     if (doc)
 	xmlFreeDoc (doc);
+    fclose (fp);
 }
 
 void
