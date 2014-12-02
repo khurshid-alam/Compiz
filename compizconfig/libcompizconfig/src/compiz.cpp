@@ -1975,7 +1975,7 @@ createProtoBufCacheDir ()
 	Bool success = ccsCreateDirFor (metadataCacheFileDummy.c_str ());
 	if (!success)
 	    ccsError ("Error creating directory \"%s\"",
-		     metadataCacheDir.c_str ());
+		      metadataCacheDir.c_str ());
 	free (cacheBaseDir);
 
 	if (success)
@@ -2908,15 +2908,15 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
 
     if (-1 == fd)
     {
-	ccsError("error %d opening %s: %s",
-	         errno, xmlFilePath, strerror(errno));
+	ccsError ("error %d opening %s: %s",
+	          errno, xmlFilePath, strerror(errno));
     }
     else
     {
 	xmlDoc *doc = xmlReadFd (fd, xmlFilePath, NULL, 0);
 	if (!doc)
 	{
-	    ccsError("error parsing %s", xmlFilePath);
+	    ccsError ("error parsing %s", xmlFilePath);
 	}
 	else
 	{
@@ -3174,18 +3174,18 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
 {
     CCSPluginPrivate *pPrivate = GET_PRIVATE (CCSPluginPrivate, plugin);
 
-    int fd = open(pPrivate->xmlFile, O_RDONLY);
+    int fd = open (pPrivate->xmlFile, O_RDONLY);
     if (-1 == fd)
     {
-	ccsError("error %d opening %s: %s",
-	         errno, pPrivate->xmlFile, strerror(errno));
+	ccsError ("error %d opening %s: %s",
+	          errno, pPrivate->xmlFile, strerror(errno));
 	return;
     }
 
     if (-1 == fstat (fd, xmlStat))
     {
-	ccsError("error %d statting %s: %s",
-	         errno, pPrivate->xmlFile, strerror(errno));
+	ccsError ("error %d statting %s: %s",
+	          errno, pPrivate->xmlFile, strerror(errno));
 	close (fd);
 	return;
     }
@@ -3193,7 +3193,7 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
     xmlDoc *doc = xmlReadFd (fd, pPrivate->xmlFile, NULL, 0);
     if (!doc)
     {
-	ccsError("error parsing %s", pPrivate->xmlFile);
+	ccsError ("error parsing %s", pPrivate->xmlFile);
     }
     else
     {
