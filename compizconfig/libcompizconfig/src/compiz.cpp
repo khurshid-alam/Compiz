@@ -35,7 +35,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <glib.h>
+#include <unistd.h>
 
 #include <libxslt/transform.h>
 #include <libxslt/xsltutils.h>
@@ -2899,19 +2901,19 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
 #endif
 
     // Load from .xml
-    FILE *fp = fopen (xmlFilePath, "r");
+    int fd = open (xmlFilePath, O_RDONLY);
 #ifdef USE_PROTOBUF
     Bool xmlLoaded = FALSE;
 #endif
 
-    if (!fp)
+    if (-1 == fd)
     {
 	ccsError("error %d opening %s: %s",
 	         errno, xmlFilePath, strerror(errno));
     }
     else
     {
-	xmlDoc *doc = xmlReadFd (fileno (fp), xmlFilePath, NULL, 0);
+	xmlDoc *doc = xmlReadFd (fd, xmlFilePath, NULL, 0);
 	if (!doc)
 	{
 	    ccsError("error parsing %s", xmlFilePath);
@@ -2925,7 +2927,7 @@ loadPluginFromXMLFile (CCSContext * context, char *xmlName, char *xmlDirPath)
 					   pluginInfoPBv);
 	    xmlFreeDoc (doc);
 	}
-	fclose (fp);
+	close (fd);
     }
     free (xmlFilePath);
 
@@ -3172,23 +3174,23 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
 {
     CCSPluginPrivate *pPrivate = GET_PRIVATE (CCSPluginPrivate, plugin);
 
-    FILE *fp = fopen (pPrivate->xmlFile, "r");
-    if (!fp)
+    int fd = open(pPrivate->xmlFile, O_RDONLY);
+    if (-1 == fd)
     {
 	ccsError("error %d opening %s: %s",
 	         errno, pPrivate->xmlFile, strerror(errno));
 	return;
     }
 
-    if (!fstat (fileno (fp), xmlStat))
+    if (-1 == fstat (fd, xmlStat))
     {
 	ccsError("error %d statting %s: %s",
 	         errno, pPrivate->xmlFile, strerror(errno));
-	fclose (fp);
+	close (fd);
 	return;
     }
 
-    xmlDoc *doc = xmlReadFd (fileno (fp), pPrivate->xmlFile, NULL, 0);
+    xmlDoc *doc = xmlReadFd (fd, pPrivate->xmlFile, NULL, 0);
     if (!doc)
     {
 	ccsError("error parsing %s", pPrivate->xmlFile);
@@ -3206,7 +3208,7 @@ loadOptionsStringExtensionsFromXML (CCSPlugin * plugin,
 	}
 	xmlFreeDoc (doc);
     }
-    fclose (fp);
+    close (fd);
 }
 
 void
