@@ -830,7 +830,7 @@ DodgeAnim::calculateDodgeAmounts ()
 		continue;
 
 	    DodgeAnim *dodgeAnim = dynamic_cast<DodgeAnim *> (curAnim);
-	    if (!animDodger)
+	    if (!dodgeAnim)
 		continue;
 
 	    dodgeAnim->mDodgeMaxAmountX = dodgeAmountX + offsetX;
