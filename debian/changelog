@@ -1,3 +1,9 @@
+compiz (1:0.9.12.0+15.04.20141120-0ubuntu2) vivid; urgency=medium
+
+  * Rebuild against libprotobuf9.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 04 Dec 2014 17:03:31 +0000
+
 compiz (1:0.9.12.0+15.04.20141120-0ubuntu1) vivid; urgency=low
 
   [ Alberts Muktupāvels ]
