@@ -1,3 +1,10 @@
+compiz (1:0.9.12.0+15.04.20141120-0ubuntu3) vivid; urgency=medium
+
+  * Drop gnome-python dependenices, as python-gconf was only used in 2012
+    migrations and we are now post-LTS release.
+
+ -- Dimitri John Ledkov <dimitri.j.ledkov@linux.intel.com>  Sat, 06 Dec 2014 19:42:15 +0000
+
 compiz (1:0.9.12.0+15.04.20141120-0ubuntu2) vivid; urgency=medium
 
   * Rebuild against libprotobuf9.
