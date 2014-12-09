@@ -37,6 +37,7 @@
 #else
 #include <GL/gl.h>
 #include <GL/glx.h>
+#include <inttypes.h>
 
 /* Some implementations have not yet given a definition
  * to GLX_BACK_BUFFER_AGE_EXT but this is the token as defined
@@ -115,6 +116,26 @@ extern GLushort   defaultColor[4];
 #define GLX_TEXTURE_2D_EXT                 0x20DC
 #define GLX_TEXTURE_RECTANGLE_EXT          0x20DD
 #define GLX_FRONT_LEFT_EXT                 0x20DE
+#endif
+
+#ifndef GL_ARB_sync
+typedef struct __GLsync *GLsync;
+typedef int64_t GLint64;
+typedef uint64_t GLuint64;
+typedef intptr_t GLintptr;
+
+#define GL_TIMEOUT_IGNORED 0xFFFFFFFFFFFFFFFFull
+#define GL_ALREADY_SIGNALED 0x911A
+#define GL_TIMEOUT_EXPIRED 0x911B
+#define GL_CONDITION_SATISFIED 0x911C
+#define GL_WAIT_FAILED 0x911D
+#define GL_SYNC_GPU_COMMANDS_COMPLETE 0x9117
+#define GL_SYNC_STATUS 0x9114
+#define GL_SIGNALED 0x9119
+#endif
+
+#ifndef GL_EXT_x11_sync_object
+#define GL_SYNC_X11_FENCE_EXT              0x90E1
 #endif
 
 namespace GL {
@@ -320,6 +341,24 @@ namespace GL {
 					   GLsizei width,
 					   GLsizei height);
 
+    typedef GLsync (*GLFenceSyncProc) (GLenum condition, GLbitfield flags);
+    typedef void (*GLDeleteSyncProc) (GLsync sync);
+    typedef GLenum (*GLClientWaitSyncProc) (GLsync sync,
+					GLbitfield flags,
+					GLuint64 timeout);
+    typedef void (*GLWaitSyncProc) (GLsync sync,
+				GLbitfield flags,
+				GLuint64 timeout);
+    typedef void (*GLGetSyncivProc) (GLsync sync,
+				 GLenum pname,
+				 GLsizei bufSize,
+				 GLsizei *length,
+				 GLint *values);
+
+    typedef GLsync (*GLImportSyncProc) (GLenum external_sync_type,
+				    GLintptr external_sync,
+				    GLbitfield flags);
+
 
     /* GL_ARB_shader_objects */
     #ifndef USE_GLES
@@ -519,6 +558,14 @@ namespace GL {
 
 #endif
 
+    extern GLFenceSyncProc      fenceSync;
+    extern GLDeleteSyncProc     deleteSync;
+    extern GLClientWaitSyncProc clientWaitSync;
+    extern GLWaitSyncProc       waitSync;
+    extern GLGetSyncivProc      getSynciv;
+
+    extern GLImportSyncProc importSync;
+
     extern bool  textureFromPixmap;
     extern bool  textureRectangle;
     extern bool  textureNonPowerOfTwo;
@@ -537,6 +584,9 @@ namespace GL {
     extern bool  stencilBuffer;
     extern GLint maxTextureUnits;
     extern bool  bufferAge;
+
+    extern bool  sync;
+    extern bool  xToGLSync;
 
     extern bool canDoSaturated;
     extern bool canDoSlightlySaturated;

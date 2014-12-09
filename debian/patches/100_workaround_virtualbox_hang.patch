@@ -79,10 +79,10 @@ Index: compiz/plugins/opengl/src/privates.h
  	bool incorrectRefreshRate; // hack for NVIDIA specifying an incorrect
  				   // refresh rate, causing us to miss vblanks
  
-@@ -253,6 +273,10 @@
- 	bool postprocessingRequired;
- 	mutable CompString prevRegex;
- 	mutable bool       prevBlacklisted;
+@@ -266,6 +266,10 @@
+ 	std::vector<XToGLSync*>::size_type currentSyncNum;
+ 	XToGLSync *currentSync;
+ 	std::vector<XToGLSync*>::size_type warmupSyncs;
 +
 +    private:
 +
