@@ -114,7 +114,7 @@ set (COMPIZ_REQUIRES
     "libstartup-notification-1.0 >= 0.7"
 )
 
-set (DECORATION_REQUIRES xrender)
+set (DECORATION_REQUIRES xrender>=0.9.3)
 
 compiz_pkg_check_modules (COMPIZ REQUIRED ${COMPIZ_REQUIRES})
 compiz_pkg_check_modules (LIBDECORATION REQUIRED ${DECORATION_REQUIRES})
