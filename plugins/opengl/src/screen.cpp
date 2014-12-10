@@ -2095,8 +2095,6 @@ GLDoubleBuffer::GLDoubleBuffer (Display                                         
 {
 }
 
-#ifndef USE_GLES
-
 bool
 PrivateGLScreen::syncObjectsInitialized () const
 {
@@ -2191,6 +2189,8 @@ PrivateGLScreen::updateXToGLSyncs ()
 	currentSync = xToGLSyncs[currentSyncNum];
     }
 }
+
+#ifndef USE_GLES
 
 void
 GLXDoubleBuffer::copyFrontToBack() const
