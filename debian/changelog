@@ -1,4 +1,4 @@
-compiz (1:0.9.12.0+15.04.20141120-0ubuntu4) UNRELEASED; urgency=medium
+compiz (1:0.9.12.0+15.04.20141210.2-0ubuntu1) vivid; urgency=medium
 
   [ James Jones ]
   * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
@@ -19,8 +19,26 @@ compiz (1:0.9.12.0+15.04.20141120-0ubuntu4) UNRELEASED; urgency=medium
   [ Stephen M. Webb ]
   * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
     based GPUs to avoid screen refresh issues. (LP: #269904)
+  * libdecoration/CMakeLists.txt: use correct variable for link
+    directories (LP: #1392715)
+  * Switcher Plugin: renamed a local variable so it does not hide a
+    function parameter. (LP: #1101585)
+  * added support for multi-arch installations (LP: #1395105, #959282)
+  * libcompizconfig: reorder stat() and open() calls to eliminate a race
+    condition (LP: #1101608)
+  * dodge plugin: avoid potential null pointer dereferences (LP:
+    #1101554)
+  * PrivateScreen unit tests: added additional assertions to verify the
+    tests are run in an expected state (LP: #1101413)
 
- -- Chris Townsend <christopher.townsend@canonical.com>  Wed, 10 Dec 2014 08:19:58 -0500
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Brandon Schaefer ]
+  * Rev 3891 change caused 2 known regressions. (Could be more).
+    Reverting. (LP: #1398512, #1393020)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 10 Dec 2014 19:52:06 +0000
 
 compiz (1:0.9.12.0+15.04.20141120-0ubuntu3) vivid; urgency=medium
 
