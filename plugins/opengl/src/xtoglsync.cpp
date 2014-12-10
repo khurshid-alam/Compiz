@@ -25,8 +25,6 @@
 
 #include "opengl/xtoglsync.h"
 
-#include <GL/glx.h>
-
 bool XToGLSync::syncValuesInitialized = false;
 XSyncValue XToGLSync::zero;
 XSyncValue XToGLSync::one;

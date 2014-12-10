@@ -30,6 +30,8 @@
 #include <opengl/opengl.h>
 #include <X11/extensions/sync.h>
 
+#include "opengl/opengl.h"
+
 /**
  * Class that manages an XFenceSync wrapped in a GLsync object.
  *

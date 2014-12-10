@@ -2332,8 +2332,6 @@ EGLDoubleBuffer::blit (const CompRegion &region) const
 			      r.width (),
 			      r.height ());
     }
-
-    updateXToGLSyncs ();
 }
 
 bool
@@ -2521,6 +2519,8 @@ PrivateGLScreen::paintOutputs (CompOutput::ptrList &outputs,
     doubleBuffer.render (paintRegion, fullscreen);
 
     lastMask = mask;
+
+    updateXToGLSyncs ();
 }
 
 unsigned int
