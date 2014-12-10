@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: David Nusinow <dnusinow@debian.org>, Sean Finney <seanius@debian.org>, Cyril Brulebois <kibi@debian.org>
-Build-Depends: cmake (>= 2.6),
+Build-Depends: cmake (>= 2.8.5),
                debhelper (>= 9~),
                dh-migrations,
                dh-translations,
@@ -57,6 +57,7 @@ Build-Depends: cmake (>= 2.6),
                gsettings-desktop-schemas-dev,
                xserver-xorg-dev (>= 0.7.0),
 Standards-Version: 3.9.6
+X-Python-Version: >= 2.7
 # If you aren't a member of ~compiz-team but need to upload packaging changes,
 # just go ahead.  ~compiz-team will notice and sync up the code again.
 Vcs-Bzr: https://code.launchpad.net/~compiz-team/compiz/0.9.10
@@ -81,6 +82,8 @@ Description: OpenGL window and compositing manager
 
 Package: compiz-core
 Architecture: any
+Multi-Arch: no
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
 Recommends: compiz-plugins-default,
@@ -100,6 +103,8 @@ Description: OpenGL window and compositing manager
 
 Package: compiz-dev
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          libdecoration0-dev (= ${binary:Version}),
          ${misc:Depends},
@@ -139,6 +144,8 @@ Description: OpenGL window and compositing manager - development files
 
 Package: compiz-gnome
 Architecture: any
+Multi-Arch: no
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
@@ -164,6 +171,8 @@ Description: OpenGL window and compositing manager - GNOME window decorator
 
 Package: compiz-plugins-default
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          libdecoration0 (= ${binary:Version}),
          ${shlibs:Depends},
@@ -181,6 +190,8 @@ Description: OpenGL window and compositing manager - default plugins
 
 Package: compiz-plugins
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: compiz-core (= ${binary:Version}),
          compiz-plugins-default (= ${binary:Version}),
          ${shlibs:Depends},
@@ -202,6 +213,8 @@ Description: OpenGL window and compositing manager - plugins
 
 Package: libdecoration0
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
 Description: Compiz window decoration library
@@ -212,6 +225,8 @@ Description: Compiz window decoration library
 Package: libdecoration0-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: libdecoration0 (= ${binary:Version}),
          ${misc:Depends},
          libx11-dev,
@@ -226,6 +241,8 @@ Description: Compiz window decoration library - development files
 
 Package: libcompizconfig0
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          compiz-core (= ${binary:Version}),
@@ -239,7 +256,9 @@ Description: Settings library for plugins - OpenCompositing Project
 
 Package: libcompizconfig0-dev
 Architecture: any
+Multi-Arch: same
 Section: libdevel
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends},
          libcompizconfig0 (= ${binary:Version}),
          compiz-dev,
@@ -254,7 +273,9 @@ Description: Development file for plugin settings - OpenCompositing Project
 
 Package: python-compizconfig
 Architecture: any
+Multi-Arch: same
 Section: python
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
 Provides: ${python:Provides}
 Description: Compizconfig bindings for Python
@@ -268,7 +289,9 @@ Description: Compizconfig bindings for Python
 
 Package: compizconfig-settings-manager
 Architecture: all
+Multi-Arch: allowed
 XB-Python-Version: ${python:Versions}
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
