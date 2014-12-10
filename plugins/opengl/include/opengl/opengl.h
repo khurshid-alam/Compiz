@@ -36,6 +36,7 @@
 #include <EGL/eglext.h>
 #else
 #include <GL/gl.h>
+#include <GL/glext.h>
 #include <GL/glx.h>
 #include <inttypes.h>
 
@@ -119,19 +120,32 @@ extern GLushort   defaultColor[4];
 #endif
 
 #ifndef GL_ARB_sync
+# ifndef GL_ES_VERSION_2_0
 typedef struct __GLsync *GLsync;
 typedef int64_t GLint64;
 typedef uint64_t GLuint64;
 typedef intptr_t GLintptr;
+# endif
 
-#define GL_TIMEOUT_IGNORED 0xFFFFFFFFFFFFFFFFull
-#define GL_ALREADY_SIGNALED 0x911A
-#define GL_TIMEOUT_EXPIRED 0x911B
-#define GL_CONDITION_SATISFIED 0x911C
-#define GL_WAIT_FAILED 0x911D
-#define GL_SYNC_GPU_COMMANDS_COMPLETE 0x9117
-#define GL_SYNC_STATUS 0x9114
-#define GL_SIGNALED 0x9119
+# ifdef GL_APPLE_sync
+#  define GL_TIMEOUT_IGNORED               GL_TIMEOUT_IGNORED_APPLE
+#  define GL_ALREADY_SIGNALED              GL_ALREADY_SIGNALED_APPLE
+#  define GL_TIMEOUT_EXPIRED               GL_TIMEOUT_EXPIRED_APPLE
+#  define GL_CONDITION_SATISFIED           GL_CONDITION_SATISFIED_APPLE
+#  define GL_WAIT_FAILED                   GL_WAIT_FAILED_APPLE
+#  define GL_SYNC_GPU_COMMANDS_COMPLETE    GL_SYNC_GPU_COMMANDS_COMPLETE_APPLE
+#  define GL_SYNC_STATUS                   GL_SYNC_STATUS _APPLE
+#  define GL_SIGNALED                      GL_SIGNALED_APPLE
+# else
+#  define GL_TIMEOUT_IGNORED               0xFFFFFFFFFFFFFFFFull
+#  define GL_ALREADY_SIGNALED              0x911A
+#  define GL_TIMEOUT_EXPIRED               0x911B
+#  define GL_CONDITION_SATISFIED           0x911C
+#  define GL_WAIT_FAILED                   0x911D
+#  define GL_SYNC_GPU_COMMANDS_COMPLETE    0x9117
+#  define GL_SYNC_STATUS                   0x9114
+#  define GL_SIGNALED                      0x9119
+# endif
 #endif
 
 #ifndef GL_EXT_x11_sync_object
