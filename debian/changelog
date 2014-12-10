@@ -1,3 +1,27 @@
+compiz (1:0.9.12.0+15.04.20141120-0ubuntu4) UNRELEASED; urgency=medium
+
+  [ James Jones ]
+  * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
+    based GPUs to avoid screen refresh issues. (LP: #269904)
+
+  [ Kyle Brenneman ]
+  * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
+    based GPUs to avoid screen refresh issues. (LP: #269904)
+
+  [ Viktor A. Danilov ]
+  * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
+    based GPUs to avoid screen refresh issues. (LP: #269904)
+
+  [ Chris Townsend ]
+  * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
+    based GPUs to avoid screen refresh issues. (LP: #269904)
+
+  [ Stephen M. Webb ]
+  * Added support for GL_EXT_x11_sync_object OpenGL extension for Nvidia
+    based GPUs to avoid screen refresh issues. (LP: #269904)
+
+ -- Chris Townsend <christopher.townsend@canonical.com>  Wed, 10 Dec 2014 08:19:58 -0500
+
 compiz (1:0.9.12.0+15.04.20141120-0ubuntu3) vivid; urgency=medium
 
   * Drop gnome-python dependenices, as python-gconf was only used in 2012
