@@ -1,3 +1,11 @@
+compiz (1:0.9.12.0+15.04.20141219-0ubuntu1) vivid; urgency=low
+
+  [ Alberts Muktupāvels ]
+  * Fix crash with titlebar-uses-system-font enabled. LP: #1404054 (LP:
+    #1404054)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 19 Dec 2014 15:22:37 +0000
+
 compiz (1:0.9.12.0+15.04.20141210.2-0ubuntu1) vivid; urgency=medium
 
   [ James Jones ]
