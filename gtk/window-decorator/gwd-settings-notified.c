@@ -77,8 +77,8 @@ set_frame_scale (decor_frame_t *frame,
 
     if (frame->titlebar_font)
     {
-	    pango_font_description_free (frame->titlebar_font);
-	    frame->titlebar_font = NULL;
+        pango_font_description_free (frame->titlebar_font);
+        frame->titlebar_font = NULL;
     }
 
     if (font_str)
