@@ -83,7 +83,7 @@ set_frame_scale (decor_frame_t *frame,
 
     if (font_str)
     {
-    	gint size;
+        gint size;
 
         frame->titlebar_font = pango_font_description_from_string (font_str);
 
