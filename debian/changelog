@@ -1,3 +1,17 @@
+compiz (1:0.9.12.0+15.04.20150202-0ubuntu1) vivid; urgency=medium
+
+  [ Brandon Schaefer ]
+  * Add a '/' to the path of std::string(home) + '/' HOME_PLUGINDIR (LP:
+    #1410436)
+
+  [ Eleni Maria Stea ]
+  * Fixes the bugs: #1413966 and #1199316. (LP: #1199316, #1413966)
+
+  [ Charles Bos ]
+  * libdecoration.pc: fix formatting
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 02 Feb 2015 14:21:10 +0000
+
 compiz (1:0.9.12.0+15.04.20141219-0ubuntu1) vivid; urgency=low
 
   [ Alberts Muktupāvels ]
