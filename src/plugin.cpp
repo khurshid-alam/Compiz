@@ -436,7 +436,7 @@ create_plugin_search_path ()
     }
     if (char* home = getenv ("HOME"))
     {
-	plugin_search_path.push_back (std::string (home) + HOME_PLUGINDIR);
+	plugin_search_path.push_back (std::string (home) + "/" HOME_PLUGINDIR);
     }
     plugin_search_path.push_back (PLUGINDIR);
     plugin_search_path.push_back (COMPIZ_LIBDIR);
