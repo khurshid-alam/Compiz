@@ -53,33 +53,6 @@ if (USE_GSETTINGS)
 			       compizconfig
 			       ${COMPIZCONFIG_MATE_GSETTINGS_INTEGRATION_LIBRARIES})
 
-	find_program (GLIB_COMPILE_SCHEMAS glib-compile-schemas)
-
-	if (GLIB_COMPILE_SCHEMAS)
-
-	    set (_integrated_gschema      org.compiz.integrated)
-	    set (_integrated_gschema_file ${_integrated_gschema}.gschema.xml)
-	    set (_integrated_gschema_src  ${CMAKE_CURRENT_SOURCE_DIR}/${_integrated_gschema_file})
-	    set (_integrated_gschema_dest ${CMAKE_BINARY_DIR}/generated/glib-2.0/schemas/${_integrated_gschema_file})
-
-	    configure_file (${_integrated_gschema_src} ${_integrated_gschema_dest})
-
-	    add_custom_command (
-		OUTPUT ${CMAKE_BINARY_DIR}/glib-2.0/schemas/gschemas.compiled
-		COMMAND ${GLIB_COMPILE_SCHEMAS} --targetdir=${CMAKE_BINARY_DIR}/glib-2.0/schemas/
-			${CMAKE_BINARY_DIR}/glib-2.0/schemas/
-	    )
-
-	    add_custom_target (compiz_gsettings_integrated_settings_schema ALL
-			       DEPENDS ${_integrated_gschema_src})
-
-	    add_gsettings_schema_to_recompilation_list (compiz_gsettings_integrated_settings_schema)
-
-	    compiz_install_gsettings_schema (${_integrated_gschema_dest}
-					     ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas)
-
-	endif (GLIB_COMPILE_SCHEMAS)
-
 	if (COMPIZ_BUILD_TESTING)
 	    add_subdirectory (tests)
 	endif (COMPIZ_BUILD_TESTING)
