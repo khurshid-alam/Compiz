@@ -1,8 +1,15 @@
-compiz (1:0.9.12.1-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.12.1+15.04.20150213-0ubuntu1) vivid; urgency=medium
 
+  [ Stephen M. Webb ]
   * Upstream 0.9.12.1 release.
 
- -- Stephen M. Webb <stephen.webb@canonical.com>  Fri, 13 Feb 2015 14:55:10 -0500
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Martin Wimpress ]
+  * add MATE integration
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 13 Feb 2015 20:25:25 +0000
 
 compiz (1:0.9.12.0+15.04.20150202-0ubuntu1) vivid; urgency=medium
 
