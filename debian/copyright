@@ -29,6 +29,10 @@ Copyright: 2010, Sam Spilsbury
            2000, Nicolas Devillard <ndevilla AT free DOT fr>
 License: LGPL-2.1+
 
+Files: compizconfig/integration/mate/*
+Copyright: 2015, Martin Wimpress <code@flexion.org>
+License: LGPL-2.1+
+
 Files: gtk/*
 Copyright: 2010-2011, Canonical Ltd.
            2009-2010, Sam Spilsbury <smspillaz@gmail.com>
@@ -98,6 +102,7 @@ Files: plugins/annotate/*
        plugins/imgpng/*
        plugins/imgsvg/*
        plugins/inotify/*
+       plugins/matecompat/*
        plugins/move/*
        plugins/obs/*
        plugins/opengl/*
@@ -112,7 +117,8 @@ Files: plugins/annotate/*
        plugins/wobbly/*
        plugins/place/src/*/tests/*
        plugins/wall/src/*/tests/*
-Copyright: 2011-2014 Canonical Ltd
+Copyright: 2011-2015 Canonical Ltd
+           2015 Martin Wimpress <code@flexion.org>
            2009, Sam Spilsbury <smspillaz@gmail.com>
            2008-2010, Kristian Lyngstøl <kristian@bohemians.org>
            2008-2009, Danny Baumanan <maniac@opencompositing.org>

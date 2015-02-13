@@ -1,0 +1,2 @@
+debian/mate.ini /etc/compizconfig/
+usr/share/applications/compiz.desktop usr/share/mate/wm-properties/
