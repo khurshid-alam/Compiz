@@ -18,10 +18,10 @@ BryanFRitt <BryanFRitt@HotMail.com>
 Bryan Nguyen <bnguyen@nvidia.com>
 Cedric <gnumdk@gmail.com>
 C-F Language team <i18n@opencompositing.org>
+Charles Bos <charlesbos1@gmail.com>
 Christopher Williams <christopherw@verizon.net>
 Christopher Williams <crdlb@compiz-fusion.org>
 Chris Townsend <christopher.townsend@canonical.com>
-compiz <compiz@opencompositing.org>
 Compiz Fusion l10n team <i18n@opencompositing.org>
 Daniel d'Andrada <daniel.dandrada@canonical.com>
 Daniel Lea <danlea@gmail.com>
@@ -42,10 +42,13 @@ David Reveman <c99drn@cs.umu.se>
 David Reveman <david@ion.(none)>
 David Reveman <davidr@novell.com>
 Dennis Kasprzyk <onestone@beryl-project.org>
+Dennis kasprzyk <onestone@compiz-fusion.org>
 Dennis Kasprzyk <onestone@compiz-fusion.org>
+Dennis kasprzyk <onestone@opencompositing.org>
 Dennis Kasprzyk <onestone@opencompositing.org>
 Didier Roche <didier.roche@canonical.com>
 Didier Roche <didrocks@ubuntu.com>
+Dimitri John Ledkov <dimitri.j.ledkov@linux.intel.com>
 Diogo Ferreira <diogo@underdev.org>
 Dominique Leuenberger <dimstar@opensuse.org>
 Dominique Leuenberger <dominique@leuenberger.net>
@@ -71,9 +74,8 @@ Jason Smith <jason.smith@canonical.com>
 Jay Catherwood <jay.catherwood@gmail.com>
 Jeremy C. Reed <reed@reedmedia.net>
 Jigish Gohil <cyberorg@opensuse.org>
-Jigish Gohil <cyberorg@opensuse.org name = Jigish Gohil>
 Jigish Gohil <cyberorg@prime.cyberorg.info>
-Joel Bosveld <joel.bosveld@gmail.com>
+Joel Bosveld <Joel.Bosveld@gmail.com>
 Julian Sikorski <lordzanon@poczta.onet.pl>
 Jürgen Kreileder <jk@blackdown.de>
 Jussi Pakkanen <jussi.pakkanen@canonical.com>
@@ -85,6 +87,7 @@ Kristian Lyngstol <kristian@beryl-project.org>
 Kristian Lyngstol <kristian@bohemians.org>
 Kristopher Ives <kris@leetbook2.(none)>
 Kristopher Ives <kristopher.ives@gmail.com>
+Kyle Brenneman <kyle.brenneman@gmail.com>, Christopher Townsend <christopher.townsend@canonical.com>, Viktor A. Danilov, James Jones <jajones@nvidia.com>, Chris Townsend <christopher.townsend@canonical.com>, Stepehn M. Webb <stephen.webb@canonical.com>
 Lubos Lunak <llunak@novell.com>
 Łukasz 'sil2100' Zemczak <lukasz.zemczak@canonical.com>
 Marco Trevisan (Treviño) <mail@3v1n0.net>
@@ -101,7 +104,6 @@ Michael Terry <michael.terry@canonical.com>
 Michael Thayer <michael.thayer@oracle.com>
 Michael Vogt <mvo@ubuntu.com>
 Michail Bitzes
-Michail Bitzes <bitzesmichail>
 Michail Bitzes <bitzesmichail@gmail.com>
 mike@blueroot.co.uk <mike@blueroot.co.uk>
 Mike Cook <mcook@novell.com>
@@ -120,19 +122,14 @@ Paul Donohue <launchpad@PaulSD.com>
 Per Wigren <per.wigren@gmail.com>
 Povilas Kanapickas <povilas@radix.lt>
 Quinn Storm <livinglatexkali@gmail.com>
-Quinn Storm <quinn@quinn-laptop.(none)>
 Randolph Chung <randolph@tausq.org>
 Renato Araujo Oliveira Filho <renato.filho@canonical.com>
 Robert Ancell <robert.ancell@canonical.com>
 Robert Carr <racarr@canonical.com>
-Robert Carr <racarr@gorbie.(none)>
-Robert Carr <robb@gorbachev.(none)>
-Robert M <osfan6313@gmail.com>
 Robert M <osfan6313@gmail.com>, Sam Spilsbury <sam.spilsbury@canonical.com>
 Robert Noland <rnoland@rnoland-ibm.acs.internap.com>
 Rob Taylor <rob.taylor@codethink.co.uk>
 Rock <rockbuntu@mailinator.com>
-Roi Cohen <racarr@gorbie.(none)>
 Roi Cohen <roico.beryl@gmail.com>
 Roland Baer <roland@Vista.(none)>
 Roland Bar <roland@verifysoft.de>
@@ -143,10 +140,10 @@ Sami Jaktholm <sampo_75@windowslive.com>
 Sami Jaktholm <sampo_75@windowslive.com>, MC Return <mc.return@gmx.net>
 Sami Jaktholm <sjakthol@outlook.com>
 Sampo555 <sampo_75@windowslive.com>
-Sampo555 <sampo_75@windowslive.com>, sampo555 <sampo_75@windowslive.com>
 Sam Spilsbury <Sam@ACER-SUSE.SUSE>, Sam <Sam@XPS-SUSE.XPS>, Sam Spillaz <smspillaz@gmail.com>, Sam Spilsbury <smspillaz@gmail.com>, Sam Spilsbury <sam.spilsbury@canonical.com>, MC Return <mc.return@gmx.net>, Sam Spilsbury <Sam@XPS-SUSE.site>, users <warlock@banana.(none)>, Scott Moreau <oreaus@gmail.com>, Danny Baumann <dannybaumann@web.de>, warlock <warlock.cc@gmail.com>, Sam Spilsbury <smspillaz@XPS-U.(none)>, warlock <warlock@opencompositing.org>, Roland Bär <roland@verifysoft.de>
 Sam Spilsbury <sam.spilsbury@canonical.com>
 Sam Spilsbury <sam.spilsbury@canonical.com>, Andrea Azzarone <azzaronea@gmail.com>
+Sam Spilsbury <sam.spilsbury@canonical.com>, Automatic PS uploader <ps-jenkins@lists.canonical.com>
 Sam Spilsbury <sam.spilsbury@canonical.com>, Brandon Schaefer <brandon.schaefer@canonical.com>
 Sam Spilsbury <sam.spilsbury@canonical.com>, Daniel van Vugt <daniel.van.vugt@canonical.com>
 Sam Spilsbury <sam.spilsbury@canonical.com>, Didier Roche <didier.roche@canonical.com>
@@ -164,9 +161,6 @@ scott <scott@box1.localdomain>
 Sebasian Billaudelle <stein@cream-project.org>
 Sebastien Bacher <seb128@ubuntu.com>
 serveralex
-smspillaz <sam.spilsbury@canonical.com>
-smspillaz <sam.spilsbury@canonical.com>, Sam Spilsbury <sam.spilsbury@canonical.com>
-smspillaz <sam.spilsbury@canonical.com>, Sam Spilsbury <sam.spilsbury@canonical.com>, Daniel van Vugt <daniel.van.vugt@canonical.com>
 Søren Sandmann <sandmann@redhat.com>
 Stephen M. Webb <stephen.webb@canonical.com>
 Steve Langasek <steve.langasek@canonical.com>
@@ -176,7 +170,6 @@ Tarmac
 Thierry Reding <thierry@gilfi.de>
 Thomas Thurman <thomas.thurman@canonical.com>
 Thomas Voß
-Thomas Voss <thomas.voss@canonical.com>
 Thomas Voß <thomas.voss@canonical.com>
 timo.jyrinki@canonical.com
 Timo Jyrinki <timo.jyrinki@canonical.com>
@@ -184,7 +177,6 @@ Tim Penhey <tim.penhey@canonical.com>
 Tomas Carnecky <tom@dbservice.com>
 Travis Watkins <amaranth@ubuntu.com>
 Ugo Riboni <ugo.riboni@canonical.com>
-Unity <unity@VB-U1010.(none)>
 Ville Syrjala <syrjala@sci.fi>
 William Hua <william.hua@canonical.com>
 Zack Rusin <zack@kde.org>
