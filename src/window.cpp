@@ -740,6 +740,7 @@ CompWindow::recalcActions ()
     if (actions != priv->actions)
     {
 	priv->actions = actions;
+	windowNotify (CompWindowNotifyActions);
 	setWindowActions (screen, actions, priv->id);
     }
 }
