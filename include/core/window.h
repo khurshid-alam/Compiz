@@ -217,7 +217,8 @@ enum CompWindowNotify {
    CompWindowNotifyUnshade,
    CompWindowNotifyEnterShowDesktopMode,
    CompWindowNotifyLeaveShowDesktopMode,
-   CompWindowNotifyBeforeMap
+   CompWindowNotifyBeforeMap,
+   CompWindowNotifyActions,
 };
 
 /**
@@ -502,6 +503,7 @@ class CompWindow :
 	const CompWindowExtents & border () const;
 	const CompWindowExtents & input () const;
 	const CompWindowExtents & output () const;
+	const CompWindowExtents & clientFrame () const;
 
 	// FIXME: This should return a const reference but grid needs fixing...
 	XSizeHints & sizeHints () const;

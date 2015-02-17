@@ -373,6 +373,38 @@ PrivateWindow::updateIconGeometry ()
     }
 }
 
+void
+PrivateWindow::updateClientFrame ()
+{
+    Atom          actual;
+    int           format;
+    unsigned long n, left;
+    unsigned char *data;
+
+    int result = XGetWindowProperty (screen->dpy (), priv->id,
+				     Atoms::frameGtkExtents,
+				     0L, 65536, False, XA_CARDINAL,
+				     &actual, &format, &n, &left, &data);
+
+    if (result == Success && actual == XA_CARDINAL && data)
+    {
+	if (n == 4)
+	{
+	    unsigned long *extents = reinterpret_cast<unsigned long *>(data);
+	    priv->clientFrame.left = extents[0];
+	    priv->clientFrame.right = extents[1];
+	    priv->clientFrame.top = extents[2];
+	    priv->clientFrame.bottom = extents[3];
+	}
+
+	XFree (data);
+    }
+    else
+    {
+	priv->clientFrame = CompWindowExtents ();
+    }
+}
+
 Window
 PrivateWindow::getClientLeaderOfAncestor ()
 {
@@ -5947,6 +5979,12 @@ CompWindow::output () const
     return priv->output;
 }
 
+const CompWindowExtents &
+CompWindow::clientFrame () const
+{
+    return priv->clientFrame;
+}
+
 XSizeHints &
 CompWindow::sizeHints () const
 {
@@ -6205,6 +6243,7 @@ CompWindow::CompWindow (Window            aboveId,
 
     recalcActions ();
     priv->updateIconGeometry ();
+    priv->updateClientFrame ();
 
     if (priv->shaded)
 	priv->updateFrameWindow ();
