@@ -110,6 +110,7 @@ namespace Atoms {
     extern Atom clientListStacking;
 
     extern Atom frameExtents;
+    extern Atom frameGtkExtents;
     extern Atom frameWindow;
 
     extern Atom wmState;
