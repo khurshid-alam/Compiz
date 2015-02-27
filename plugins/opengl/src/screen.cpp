@@ -74,6 +74,15 @@ using namespace compiz::opengl;
 static const size_t NUM_X11_SYNCS = 16;
 
 /**
+ * The GPUs to blacklist for X11 sync
+ */
+static const char* BLACKLIST_X11_SYNC_GPUS[] = { "GeForce 6150LE",
+						 "GeForce 6150SE",
+						 "GeForce 7025",
+						 "GeForce 7050 PV" };
+static const int BLACKLIST_SZ = sizeof(BLACKLIST_X11_SYNC_GPUS) / sizeof(BLACKLIST_X11_SYNC_GPUS[0]);
+
+/**
  * The maximum time to wait for a sync object, in nanoseconds.
  */
 static const GLuint64 MAX_SYNC_WAIT_TIME = 1000000000ull; // One second
@@ -564,6 +573,8 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     DetectionWorkaround workaround;
 #endif
 
+    int i;
+
     #ifdef USE_GLES
     Display             *xdpy;
     Window               overlay;
@@ -621,7 +632,7 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     visualid = XVisualIDFromVisual (attr.visual);
     config = configs[0];
 
-    for (int i = 0; i < count; ++i)
+    for (i = 0; i < count; ++i)
     {
 	eglGetConfigAttrib (dpy, configs[i], EGL_SAMPLE_BUFFERS, &val);
 	if (val > msaaBuffers)
@@ -1101,7 +1112,19 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	GL::importSync = (GL::GLImportSyncProc)
 	    getProcAddress ("glImportSyncEXT");
 
-	if (GL::importSync)
+	bool blacklist = false;
+
+	for (i = 0; i < BLACKLIST_SZ; ++i)
+	{
+	    if (strstr (glVendor, "NVIDIA") &&
+		strstr (glRenderer, BLACKLIST_X11_SYNC_GPUS[i]))
+	    {
+		blacklist = true;
+		break;
+	    }
+	}
+
+	if (GL::importSync && !blacklist)
 	    GL::xToGLSync = true;
     }
 
