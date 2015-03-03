@@ -1,3 +1,13 @@
+compiz (1:0.9.12.1+15.04.20150303-0ubuntu1) vivid; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Do not cache textures in animation.cpp. (LP: #729979, #1072206)
+
+  [ Martin Wimpress ]
+  * tweak MATE profile INI
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 03 Mar 2015 18:31:02 +0000
+
 compiz (1:0.9.12.1+15.04.20150227-0ubuntu1) vivid; urgency=medium
 
   [ Chris Townsend ]
