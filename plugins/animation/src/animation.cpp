@@ -479,16 +479,13 @@ Animation::Animation (CompWindow       *w,
 	mDecorBottomHeight = w->output ().bottom;
     }
 
-    texturesCache         = new GLTexture::List (GLWindow::get (w)->textures ());
     PrivateAnimScreen *as = mAWindow->priv->paScreen ();
 
     mTimestep = as->optionGetTimeStep ();
 }
 
 Animation::~Animation ()
-{
-    delete texturesCache;
-}
+{}
 
 CompOption::Value &
 Animation::optVal (unsigned int optionId)
