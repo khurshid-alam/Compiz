@@ -1298,10 +1298,12 @@ PrivateCubeScreen::glEnableOutputClipping (const GLMatrix   &transform,
 
 void PrivateCubeScreen::glDisableOutputClipping()
 {
+#ifndef USE_GLES
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
+#endif
 }
 
 void 
