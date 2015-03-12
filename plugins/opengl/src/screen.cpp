@@ -1735,8 +1735,7 @@ PrivateGLScreen::updateView ()
 
     #ifndef USE_GLES
     glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    glMultMatrixf (projection_array);
+    glLoadMatrixf (projection_array);
     glMatrixMode (GL_MODELVIEW);
     #endif
 
