@@ -2353,15 +2353,13 @@ static const unsigned short _NET_WM_STATE_TOGGLE = 2;
 	    {
 		bool raise;
 		int  delay;
-		int  mask;
+		int  mask = CompWindowTypeDockMask;
 
 		raise = privateScreen.optionGetAutoraise ();
 		delay = privateScreen.optionGetAutoraiseDelay ();
 
-		if (privateScreen.optionGetFocusDesktop ())
-		    mask = CompWindowTypeDockMask;
-		else
-		    mask = CompWindowTypeDockMask | CompWindowTypeDesktopMask;
+		if (!privateScreen.optionGetFocusDesktop ())
+		    mask = mask | CompWindowTypeDesktopMask;
 
 		if (autoRaiseTimer_.active () &&
 		    autoRaiseWindow_ != w->id ())
