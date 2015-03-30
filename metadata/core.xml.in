@@ -109,6 +109,11 @@
 			<min>0</min>
 			<max>10000</max>
 			</option>
+			<option name="focus_desktop" type="bool">
+			<_short>Focus Desktop</_short>
+			<_long>Focus the desktop when click to focus is disabled</_long>
+			<default>true</default>
+			</option>
 			<option name="focus_prevention_level" type="int">
 			<_short>Focus Prevention Level</_short>
 			<_long>Level of focus stealing prevention</_long>

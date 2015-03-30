@@ -2353,9 +2353,13 @@ static const unsigned short _NET_WM_STATE_TOGGLE = 2;
 	    {
 		bool raise;
 		int  delay;
+		int  mask = CompWindowTypeDockMask;
 
 		raise = privateScreen.optionGetAutoraise ();
 		delay = privateScreen.optionGetAutoraiseDelay ();
+
+		if (!privateScreen.optionGetFocusDesktop ())
+		    mask = mask | CompWindowTypeDesktopMask;
 
 		if (autoRaiseTimer_.active () &&
 		    autoRaiseWindow_ != w->id ())
@@ -2363,8 +2367,7 @@ static const unsigned short _NET_WM_STATE_TOGGLE = 2;
 		    autoRaiseTimer_.stop ();
 		}
 
-		if (w->type () & ~(CompWindowTypeDockMask |
-				   CompWindowTypeDesktopMask))
+		if (w->type () & ~mask)
 		{
 		    w->moveInputFocusTo ();
 
