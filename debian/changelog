@@ -1,3 +1,27 @@
+compiz (1:0.9.12.1+15.04.20150330-0ubuntu1) vivid; urgency=medium
+
+  [ Chris Townsend ]
+  * Change default behavior of focus-follows-mouse where the desktop
+    will get focus when the mouse is over it. Also add option to allow
+    old behavior. (LP: #1427636)
+  * Clear out the lastMask vars when using the mouse to resize. (LP:
+    #1348254)
+
+  [ Eleni Maria Stea ]
+  * Minor optimisation fix: Replaced glLoadIdentity, glMultMatrixf with
+    glLoadMatrixf to avoid the unnecessary matrix multiplication:
+    identity * some projection matrix
+
+  [ Kevin Lange ]
+  * WinRules plugin: boost arbitrary window size limits to something
+    more reasonable (LP: #1431923)
+
+  [ Stephen M. Webb ]
+  * animations plugin: fixed a potential null pointer dereference (LP:
+    #1101573)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 30 Mar 2015 15:58:21 +0000
+
 compiz (1:0.9.12.1+15.04.20150303-0ubuntu1) vivid; urgency=medium
 
   [ Andrea Azzarone ]
