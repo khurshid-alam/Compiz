@@ -50,7 +50,10 @@ class GLDisplay;
 
 class PrivateTexture {
     public:
-	PrivateTexture (GLTexture *);
+	PrivateTexture (GLTexture*               texture,
+	                GLenum                   target,
+	                GLTexture::Matrix const& matrix,
+	                bool                     mipmap);
 	~PrivateTexture ();
 
 	static GLTexture::List loadImageData (const char   *image,

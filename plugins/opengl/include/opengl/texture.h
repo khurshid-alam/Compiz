@@ -225,9 +225,12 @@ class GLTexture : public CompRect {
 	friend class PrivateTexture;
 
     protected:
+	/** Deprecated default ctor provided for ABI backwards compatibility */
 	GLTexture ();
+	GLTexture (int width, int height, GLenum target, Matrix const& m, bool mipmap);
 	virtual ~GLTexture ();
 
+	/** Deprecated initializer provided for ABI backwards compatibility */
 	void setData (GLenum target, Matrix const& m, bool mipmap);
 
     private:

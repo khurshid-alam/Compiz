@@ -49,7 +49,7 @@ std::map<Damage, EglTexture*> boundPixmapTex;
 std::map<Damage, TfpTexture*> boundPixmapTex;
 #endif
 
-static GLTexture::Matrix _identity_matrix = {
+static const GLTexture::Matrix _identity_matrix = {
     1.0f, 0.0f,
     0.0f, 1.0f,
     0.0f, 0.0f
@@ -108,7 +108,13 @@ GLTexture::List::clear ()
 
 GLTexture::GLTexture () :
     CompRect (0, 0, 0, 0),
-    priv (new PrivateTexture (this))
+    priv (new PrivateTexture (this, GL_TEXTURE_2D, _identity_matrix, true))
+{
+}
+
+GLTexture::GLTexture (int width, int height, GLenum target, Matrix const& matrix, bool mipmap) :
+    CompRect (0, 0, width, height),
+    priv (new PrivateTexture (this, target, matrix, mipmap))
 {
 }
 
@@ -118,14 +124,17 @@ GLTexture::~GLTexture ()
 	delete priv;
 }
 
-PrivateTexture::PrivateTexture (GLTexture *texture) :
+PrivateTexture::PrivateTexture (GLTexture*               texture,
+                                GLenum                   target,
+                                GLTexture::Matrix const& matrix,
+                                bool                     mipmap) :
     texture (texture),
     name (0),
-    target (GL_TEXTURE_2D),
+    target (target),
     filter (GL_NEAREST),
     wrap   (GL_CLAMP_TO_EDGE),
-    matrix (_identity_matrix),
-    mipmap  (true),
+    matrix (matrix),
+    mipmap  (mipmap),
     mipmapSupport (false),
     initial (true),
     refCount (1)
@@ -307,9 +316,6 @@ PrivateTexture::loadImageData (const char   *image,
 	return GLTexture::List ();
 
     GLTexture::List rv (1);
-    GLTexture *t = new GLTexture ();
-    rv[0] = t;
-
     GLTexture::Matrix matrix = _identity_matrix;
     GLint             internalFormat;
     GLenum            target;
@@ -342,10 +348,11 @@ PrivateTexture::loadImageData (const char   *image,
     }
     #endif
 
-    t->setData (target, matrix, mipmap);
-    t->setGeometry (0, 0, width, height);
+    GLTexture* t = new GLTexture (width, height, target, matrix, mipmap);
     t->setFilter (GL_NEAREST);
     t->setWrap (GL_CLAMP_TO_EDGE);
+    rv[0] = t;
+
 
     #ifdef USE_GLES
     // For GLES2 no format conversion is allowed, i.e., format must equal internalFormat
@@ -474,12 +481,11 @@ EglTexture::EglTexture (GLenum                   target,
                         bool                     mipmap,
                         int                      width,
                         int                      height) :
+    GLTexture (width, height, target, matrix, mipmap),
     damaged (true),
     damage (None),
     updateMipMap (true)
 {
-    setData (target, matrix, mipmap);
-    setGeometry (0, 0, width, height);
 }
 
 EglTexture::~EglTexture ()
@@ -496,11 +502,11 @@ EglTexture::~EglTexture ()
 }
 
 GLTexture::List
-EglTexture::bindPixmapToTexture (Pixmap                       pixmap,
-				 int                          width,
-				 int                          height,
-				 int                          depth,
-				 compiz::opengl::PixmapSource source)
+EglTexture::bindPixmapToTexture (Pixmap            pixmap,
+                                 int               width,
+                                 int               height,
+                                 int               depth,
+                                 cgl::PixmapSource source)
 {
     GLTexture::List   rv (1);
     EglTexture        *tex = NULL;
@@ -623,6 +629,7 @@ TfpTexture::TfpTexture (GLenum                   target,
                         int                      height,
                         Pixmap                   x11Pixmap,
                         cgl::PixmapSource        source) :
+    GLTexture (width, height, target, matrix, mipmap),
     x11Pixmap (x11Pixmap),
     pixmap (pixmap),
     damaged (true),
@@ -630,8 +637,6 @@ TfpTexture::TfpTexture (GLenum                   target,
     updateMipMap (true),
     source (source)
 {
-    setData (target, matrix, mipmap);
-    setGeometry (0, 0, width, height);
 }
 
 TfpTexture::~TfpTexture ()
