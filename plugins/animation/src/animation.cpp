@@ -1996,17 +1996,22 @@ PrivateAnimScreen::initiateCloseAnim (PrivateAnimWindow *aw)
 		getActualEffect (chosenEffect, AnimEventClose);
 
 	    // handle empty random effect list
-	    if (effectToBePlayed && effectToBePlayed == AnimEffectNone)
+	    if (effectToBePlayed)
 	    {
-		aw->mState = aw->mNewState;
-		return;
-	    }
+		if (effectToBePlayed == AnimEffectNone)
+		{
+		    aw->mState = aw->mNewState;
+		    return;
+		}
 
-	    aw->mCurAnimation =
-		effectToBePlayed->create (w, WindowEventClose, duration,
-					  effectToBePlayed, getIcon (w, true));
-	    aw->mCurAnimation->adjustPointerIconSize ();
-	    aw->enablePainting (true);
+		aw->mCurAnimation = effectToBePlayed->create (w,
+		                                              WindowEventClose,
+		                                              duration,
+		                                              effectToBePlayed,
+		                                              getIcon (w, true));
+		aw->mCurAnimation->adjustPointerIconSize ();
+		aw->enablePainting (true);
+	    }
 	}
 
 	activateEvent (true);
