@@ -205,6 +205,8 @@ ResizeLogic::handleEvent (XEvent *event)
 				    ((int) (event->xclient.data.l[3] ?
 				     event->xclient.data.l[3] : -1));
 
+				lastMaskX = lastMaskY = 0;
+
 				initiateResizeDefaultMode (
 				    &options->optionGetInitiateButton (),
 				    CompAction::StateInitButton, o);
