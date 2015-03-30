@@ -537,7 +537,7 @@ EglTexture::bindPixmapToTexture (Pixmap            pixmap,
     matrix.yy = 1.0f / height;
     matrix.y0 = 0.0f;
 
-    tex = new EglTexture (target, matrix, mipmap, width, height);
+    tex = new EglTexture (texTarget, matrix, mipmap, width, height);
 
     rv[0] = tex;
 
