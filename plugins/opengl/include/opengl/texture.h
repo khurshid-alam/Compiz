@@ -1,6 +1,7 @@
 /*
  * Copyright © 2008 Dennis Kasprzyk
  * Copyright © 2007 Novell, Inc.
+ * Copyright 2015 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -227,7 +228,7 @@ class GLTexture : public CompRect {
 	GLTexture ();
 	virtual ~GLTexture ();
 
-	void setData (GLenum target, Matrix &m, bool mipmap);
+	void setData (GLenum target, Matrix const& m, bool mipmap);
 
     private:
 	PrivateTexture *priv;
