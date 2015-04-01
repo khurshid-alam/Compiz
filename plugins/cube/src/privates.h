@@ -66,6 +66,8 @@ class PrivateCubeScreen :
 				     const CompRegion &,
 				     CompOutput       *);
 
+	void glDisableOutputClipping();
+
 	void glApplyTransform (const GLScreenPaintAttrib &,
 			       CompOutput                *,
 			       GLMatrix                  *);
