@@ -198,7 +198,6 @@ namespace testing_values
     const gushort INACTIVE_SHADOW_COLOR_VALUE[] = { 0, 0, 0 };
     const gboolean USE_TOOLTIPS_VALUE = !USE_TOOLTIPS_DEFAULT;
     const guint DRAGGABLE_BORDER_WIDTH_VALUE = 1;
-    const gboolean ATTACH_MODAL_DIALOGS_VALUE = TRUE;
     const std::string BLUR_TYPE_TITLEBAR_VALUE ("titlebar");
     const gint BLUR_TYPE_TITLEBAR_INT_VALUE = BLUR_TYPE_TITLEBAR;
     const std::string BLUR_TYPE_ALL_VALUE ("all");
@@ -330,7 +329,6 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 						       Eq (testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, useTooltipsChanged (testing_values::USE_TOOLTIPS_VALUE)).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, draggableBorderWidthChanged (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE)).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, attachModalDialogsChanged (testing_values::ATTACH_MODAL_DIALOGS_VALUE)).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, blurChanged (Eq (testing_values::BLUR_TYPE_TITLEBAR_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, metacityThemeChanged (TRUE, Eq (testing_values::METACITY_THEME_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, opacityChanged (testing_values::ACTIVE_OPACITY_VALUE,
@@ -364,7 +362,6 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 								testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (writableMock.get (), testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_draggable_border_width_changed (writableMock.get (), testing_values::DRAGGABLE_BORDER_WIDTH_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_attach_modal_dialogs_changed (writableMock.get (), testing_values::ATTACH_MODAL_DIALOGS_VALUE), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_blur_changed (writableMock.get (), testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (writableMock.get (),
 							       testing_values::USE_METACITY_THEME_VALUE,
@@ -471,14 +468,6 @@ TEST_F(GWDMockSettingsTest, TestMock)
     g_object_get_property (G_OBJECT (settingsMock.get ()),
 			   "draggable-border-width",
 			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ATTACH_MODAL_DIALOGS,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "attach-modal-dialogs",
-			   &booleanGValue);
 
     EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BLUR_CHANGED,
 					     GValueMatch <gint> (0, g_value_get_int),
@@ -781,29 +770,6 @@ TEST_F(GWDSettingsTest, TestDraggableBorderWidthChangedIsDefault)
 {
     EXPECT_THAT (gwd_settings_writable_draggable_border_width_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 								       DRAGGABLE_BORDER_WIDTH_DEFAULT), IsFalse ());
-}
-
-TEST_F(GWDSettingsTest, TestAttachModalDialogsChanged)
-{
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_attach_modal_dialogs_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-								     testing_values::ATTACH_MODAL_DIALOGS_VALUE), IsTrue ());
-
-    AutoUnsetGValue attachModalDialogsValue (G_TYPE_BOOLEAN);
-    GValue &attachModalDialogsGValue = attachModalDialogsValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "attach-modal-dialogs",
-			   &attachModalDialogsGValue);
-
-    EXPECT_THAT (&attachModalDialogsGValue, GValueMatch <gboolean> (testing_values::ATTACH_MODAL_DIALOGS_VALUE,
-								    g_value_get_boolean));
-}
-
-TEST_F(GWDSettingsTest, TestAttachModalDialogsChangedIsDefault)
-{
-    EXPECT_THAT (gwd_settings_writable_attach_modal_dialogs_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-								     ATTACH_MODAL_DIALOGS_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
@@ -1218,7 +1184,6 @@ class GWDSettingsStorageFactoryWrapperInterface
 	virtual GWDSettingsStorage * GetStorage () = 0;
 	virtual void SetUseTooltips (gboolean useTooltips) = 0;
 	virtual void SetDraggableBorderWidth (gint draggableBorderWidth) = 0;
-	virtual void SetAttachModalDialogs (gboolean attachModalDialogs) = 0;
 	virtual void SetBlur (const std::string &blurType) = 0;
 	virtual void SetOpacity (gdouble activeOpacity,
 				 gdouble inactiveOpacity,
@@ -1290,16 +1255,6 @@ TEST_P (GWDSettingsTestStorageUpdates, TestSetDraggableBorderWidth)
     EXPECT_CALL (*mSettingsMock, draggableBorderWidthChanged (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE));
 
     gwd_settings_storage_update_draggable_border_width (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetAttachModalDialogs)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetAttachModalDialogs (testing_values::ATTACH_MODAL_DIALOGS_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, attachModalDialogsChanged (testing_values::ATTACH_MODAL_DIALOGS_VALUE));
-
-    gwd_settings_storage_update_attach_modal_dialogs (storage);
 }
 
 TEST_P (GWDSettingsTestStorageUpdates, TestSetBlur)
@@ -1412,15 +1367,6 @@ class GWDMockSettingsStorageFactoryWrapper :
 			InvokeFunctor (
 			    boost::bind (
 				gwd_settings_writable_draggable_border_width_changed, mWritable, draggableBorderWidth)));
-	}
-
-	virtual void SetAttachModalDialogs (gboolean attachModalDialogs)
-	{
-	    EXPECT_CALL (*mStorageMock, updateAttachModalDialogs ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_attach_modal_dialogs_changed, mWritable, attachModalDialogs)));
 	}
 
 	virtual void SetBlur (const std::string &blurType)
@@ -1577,11 +1523,6 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	virtual void SetDraggableBorderWidth (gint draggableBorderWidth)
 	{
 	    g_settings_set_int (mMutterSettings, ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH, draggableBorderWidth);
-	}
-
-	virtual void SetAttachModalDialogs (gboolean attachModalDialogs)
-	{
-	    g_settings_set_boolean (mMutterSettings, ORG_GNOME_MUTTER_ATTACH_MODAL_DIALOGS, attachModalDialogs);
 	}
 
 	virtual void SetBlur (const std::string &blurType)

@@ -46,7 +46,6 @@ const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME = "theme";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT = "titlebar-font";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT = "button-layout";
-const gchar * ORG_GNOME_MUTTER_ATTACH_MODAL_DIALOGS = "attach-modal-dialogs";
 const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH = "draggable-border-width";
 
 #define GWD_SETTINGS_STORAGE_GSETTINGS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GWD_TYPE_SETTINGS_STORAGE_GSETTINGS, GWDSettingsStorageGSettings));
@@ -117,20 +116,6 @@ gwd_settings_storage_gsettings_update_draggable_border_width (GWDSettingsStorage
     return gwd_settings_writable_draggable_border_width_changed (priv->writable,
 								 g_settings_get_int (priv->mutter,
 										     ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH));
-}
-
-static gboolean
-gwd_settings_storage_gsettings_update_attach_modal_dialogs (GWDSettingsStorage *settings)
-{
-    GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
-    GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
-
-    if (!priv->mutter)
-	return FALSE;
-
-    return gwd_settings_writable_attach_modal_dialogs_changed (priv->writable,
-							       g_settings_get_boolean (priv->mutter,
-										       ORG_GNOME_MUTTER_ATTACH_MODAL_DIALOGS));
 }
 
 static gboolean
@@ -275,7 +260,6 @@ gwd_settings_storage_gsettings_interface_init (GWDSettingsStorageInterface *inte
 {
     interface->update_use_tooltips = gwd_settings_storage_gsettings_update_use_tooltips;
     interface->update_draggable_border_width = gwd_settings_storage_gsettings_update_draggable_border_width;
-    interface->update_attach_modal_dialogs = gwd_settings_storage_gsettings_update_attach_modal_dialogs;
     interface->update_blur = gwd_settings_storage_gsettings_update_blur;
     interface->update_metacity_theme = gwd_settings_storage_gsettings_update_metacity_theme;
     interface->update_opacity = gwd_settings_storage_gsettings_update_opacity;
@@ -496,8 +480,6 @@ org_gnome_mutter_settings_changed (GSettings   *settings,
 
     if (strcmp (key, ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH) == 0)
 	gwd_settings_storage_update_draggable_border_width (storage);
-    else if (strcmp (key, ORG_GNOME_MUTTER_ATTACH_MODAL_DIALOGS) == 0)
-	gwd_settings_storage_update_attach_modal_dialogs (storage);
 }
 
 void

@@ -70,7 +70,6 @@ init_settings (GWDSettingsWritable *writable,
     gwd_settings_storage_update_titlebar_actions (storage);
     gwd_settings_storage_update_blur (storage);
     gwd_settings_storage_update_draggable_border_width (storage);
-    gwd_settings_storage_update_attach_modal_dialogs (storage);
     gwd_settings_storage_update_use_tooltips (storage);
     gwd_process_decor_shadow_property_update ();
 #else

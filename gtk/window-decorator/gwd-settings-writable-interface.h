@@ -56,8 +56,6 @@ struct _GWDSettingsWritableInterface
 				      gboolean            new_value);
     gboolean (*draggable_border_width_changed) (GWDSettingsWritable *settings,
 						gint                new_value);
-    gboolean (*attach_modal_dialogs_changed) (GWDSettingsWritable *settings,
-					      gboolean            new_value);
     gboolean (*blur_changed) (GWDSettingsWritable *settings,
 			      const gchar         *type);
     gboolean (*metacity_theme_changed) (GWDSettingsWritable *settings,
@@ -106,10 +104,6 @@ gwd_settings_writable_use_tooltips_changed (GWDSettingsWritable *settings,
 gboolean
 gwd_settings_writable_draggable_border_width_changed (GWDSettingsWritable *settings,
 						      gint	          draggable_border_width);
-
-gboolean
-gwd_settings_writable_attach_modal_dialogs_changed (GWDSettingsWritable *settings,
-						    gboolean            attach_modal_dialogs);
 
 gboolean
 gwd_settings_writable_blur_changed (GWDSettingsWritable *settings,

@@ -85,14 +85,6 @@ gwd_settings_writable_draggable_border_width_changed (GWDSettingsWritable *setti
 }
 
 gboolean
-gwd_settings_writable_attach_modal_dialogs_changed (GWDSettingsWritable *settings,
-						    gboolean            attach_modal_dialogs)
-{
-    GWDSettingsWritableInterface *iface = GWD_SETTINGS_WRITABLE_GET_INTERFACE (settings);
-    return (*iface->attach_modal_dialogs_changed) (settings, attach_modal_dialogs);
-}
-
-gboolean
 gwd_settings_writable_blur_changed (GWDSettingsWritable *settings,
 				    const gchar         *blur_type)
 {
