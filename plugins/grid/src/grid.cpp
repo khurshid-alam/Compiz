@@ -206,11 +206,11 @@ GridScreen::initiateCommon (CompAction          *action,
 	/* slice and dice to get desired slot - including decorations */
 	desiredSlot.setY (workarea.y () + props.gravityDown *
 			  (workarea.height () / props.numCellsY));
-	desiredSlot.setHeight (workarea.height () / props.numCellsY);
+	desiredSlot.setHeight (workarea.height () / (float)props.numCellsY + 0.5);
 
 	desiredSlot.setX (workarea.x () + props.gravityRight *
 			  (workarea.width () / props.numCellsX));
-	desiredSlot.setWidth (workarea.width () / props.numCellsX);
+	desiredSlot.setWidth (workarea.width () / (float)props.numCellsX + 0.5);
 
 	if (!optionGetCycleSizes ())
 	{
