@@ -851,8 +851,11 @@ meta_calc_button_size (decor_t *d)
 
     width = d->border_layout.top.x2 - d->border_layout.top.x1 -
             d->context->left_space - d->context->right_space +
-            borders.visible.left + borders.visible.right +
-            mutter_draggable_border_width;
+            borders.visible.left + borders.visible.right;
+
+    if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE)
+        width += mutter_draggable_border_width;
+
     min_x = width;
 
     for (i = 0; i < 3; ++i)
