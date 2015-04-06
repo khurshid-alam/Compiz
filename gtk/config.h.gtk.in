@@ -4,4 +4,7 @@
 /* Define to 1 if metacity version >= 3.14.0 */
 #cmakedefine HAVE_METACITY_3_14_0 1
 
+/* Define to 1 if metacity version >= 3.16.0 */
+#cmakedefine HAVE_METACITY_3_16_0 1
+
 #define GETTEXT_PACKAGE "${GETTEXT_PACKAGE}"
