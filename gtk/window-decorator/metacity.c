@@ -819,10 +819,40 @@ meta_draw_window_decoration (decor_t *d)
 void
 meta_calc_button_size (decor_t *d)
 {
+    MetaTheme *theme;
+    MetaFrameType frame_type;
+    MetaFrameFlags flags;
+    MetaFrameGeometry fgeom;
+    MetaButtonLayout button_layout;
+    GdkRectangle clip;
+    MetaFrameBorders borders;
+    gint mutter_draggable_border_width;
     gint i, min_x, x, y, w, h, width;
 
+    if (!d->context)
+    {
+        d->button_width = 0;
+        return;
+    }
+
+    theme = meta_theme_get_current ();
+
+    frame_type = meta_frame_type_from_string (d->frame->type);
+    if (!(frame_type < META_FRAME_TYPE_LAST))
+        frame_type = META_FRAME_TYPE_NORMAL;
+
+    meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
+                                  frame_type, &clip);
+    meta_theme_get_frame_borders (theme, frame_type, d->frame->text_height,
+                                  flags, &borders);
+
+    mutter_draggable_border_width = 0;
+    g_object_get (settings, "draggable-border-width", &mutter_draggable_border_width, NULL);
+
     width = d->border_layout.top.x2 - d->border_layout.top.x1 -
-	    d->context->left_space - d->context->right_space;
+            d->context->left_space - d->context->right_space +
+            borders.visible.left + borders.visible.right +
+            mutter_draggable_border_width;
     min_x = width;
 
     for (i = 0; i < 3; ++i)
@@ -844,7 +874,7 @@ meta_calc_button_size (decor_t *d)
 	}
     }
 
-    d->button_width = width - min_x + 6;
+    d->button_width = width - min_x;
 }
 
 gboolean
