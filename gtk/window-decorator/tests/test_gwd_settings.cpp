@@ -1481,6 +1481,7 @@ TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObje
 							      boost::bind (gwd_settings_storage_unref, _1));
 
     gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
+    gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_mutter_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
 
@@ -1500,10 +1501,12 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 
 	    /* We do not need to keep a reference to these */
 	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
+	    mMetacitySettings = gwd_get_org_gnome_mutter_settings ();
 	    mMutterSettings = gwd_get_org_gnome_mutter_settings ();
 	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
 	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
+								mMetacitySettings,
 								mMutterSettings,
 								mGWDSettings,
 								writable),
@@ -1596,6 +1599,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	{
 	    mStorage.reset ();
 	    mGWDSettings = NULL;
+	    mMetacitySettings = NULL;
 	    mMutterSettings = NULL;
 	    mDesktopSettings = NULL;
 	    gsettingsEnv.TearDownEnv ();
@@ -1605,6 +1609,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
     private:
 
 	GSettings			       *mGWDSettings;
+	GSettings			       *mMetacitySettings;
 	GSettings			       *mMutterSettings;
 	GSettings			       *mDesktopSettings;
 	boost::shared_ptr <GWDSettingsStorage> mStorage;

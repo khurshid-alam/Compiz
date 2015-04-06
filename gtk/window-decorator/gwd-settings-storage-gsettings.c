@@ -17,6 +17,9 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <glib-object.h>
 
 #include <gio/gio.h>
@@ -28,6 +31,7 @@
 #include "gwd-settings-storage-gsettings.h"
 
 const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
+const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
 const gchar * ORG_GNOME_MUTTER = "org.gnome.mutter";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
 
@@ -39,6 +43,8 @@ const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY = "metacity
 const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = "metacity-theme-inactive-shade-opacity";
 const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
+const gchar * ORG_GNOME_METACITY_THEME = "theme";
+const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH = "draggable-border-width";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
@@ -46,7 +52,6 @@ const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME = "theme";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT = "titlebar-font";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT = "button-layout";
-const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH = "draggable-border-width";
 
 #define GWD_SETTINGS_STORAGE_GSETTINGS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GWD_TYPE_SETTINGS_STORAGE_GSETTINGS, GWDSettingsStorageGSettings));
 #define GWD_SETTINGS_STORAGE_GSETTINGS_CLASS(obj) (G_TYPE_CHECK_CLASS_CAST ((obj), GWD_TYPE_SETTINGS_STORAGE_GSETTINGS, GWDSettingsStorageGSettingsClass));
@@ -74,10 +79,11 @@ G_DEFINE_TYPE_WITH_CODE (GWDSettingsStorageGSettings, gwd_settings_storage_gsett
 
 enum
 {
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_DESKTOP_GSETTINGS = 1,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_MUTTER_GSETTINGS  = 2,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_GWD_GSETTINGS     = 3,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_WRITABLE_SETTINGS = 4
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_DESKTOP_GSETTINGS  = 1,
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_METACITY_GSETTINGS = 2,
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_MUTTER_GSETTINGS   = 3,
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_GWD_GSETTINGS      = 4,
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_WRITABLE_SETTINGS  = 5
 };
 
 const guint GWD_SETTINGS_STORAGE_GSETTINGS_N_CONSTRUCTION_PARAMS = 4;
@@ -85,6 +91,7 @@ const guint GWD_SETTINGS_STORAGE_GSETTINGS_N_CONSTRUCTION_PARAMS = 4;
 typedef struct _GWDSettingsStorageGSettingsPrivate
 {
     GSettings *desktop;
+    GSettings *metacity;
     GSettings *mutter;
     GSettings *gwd;
     GWDSettingsWritable *writable;
@@ -135,20 +142,34 @@ gwd_settings_storage_gsettings_update_blur (GWDSettingsStorage *settings)
 static gboolean
 gwd_settings_storage_gsettings_update_metacity_theme (GWDSettingsStorage *settings)
 {
-    GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
-    GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
+    GWDSettingsStorageGSettings *storage;
+    GWDSettingsStorageGSettingsPrivate *priv;
+    gboolean use_metacity_theme;
+    gchar *theme;
+
+    storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
+    priv = GET_PRIVATE (storage);
 
     if (!priv->gwd)
-	return FALSE;
+        return FALSE;
 
+    use_metacity_theme = g_settings_get_boolean (priv->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
+
+#ifdef HAVE_METACITY_3_16_0
+    if (!priv->metacity)
+        return FALSE;
+
+    theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
+#else
     if (!priv->desktop)
-	return FALSE;
+        return FALSE;
+
+    theme = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
+#endif
 
     return gwd_settings_writable_metacity_theme_changed (priv->writable,
-							 g_settings_get_boolean (priv->gwd,
-										 ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME),
-							 g_settings_get_string (priv->desktop,
-										ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME));
+                                                         use_metacity_theme,
+                                                         theme);
 }
 
 static gboolean
@@ -284,6 +305,12 @@ gwd_settings_storage_gsettings_set_property (GObject *object,
 
 	    priv->desktop = g_value_dup_object (value);
 	    break;
+	case GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_METACITY_GSETTINGS:
+	    if (priv->metacity)
+		g_object_unref (priv->metacity);
+
+	    priv->metacity = g_value_dup_object (value);
+	    break;
 	case GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_MUTTER_GSETTINGS:
 	    if (priv->mutter)
 		g_object_unref (priv->mutter);
@@ -314,6 +341,9 @@ gwd_settings_storage_gsettings_dispose (GObject *object)
     if (priv->desktop)
 	g_object_unref (priv->desktop);
 
+    if (priv->metacity)
+	g_object_unref (priv->metacity);
+
     if (priv->mutter)
 	g_object_unref (priv->mutter);
 
@@ -337,6 +367,11 @@ gwd_settings_storage_gsettings_class_init (GWDSettingsStorageGSettingsClass *kla
 	g_param_spec_object ("desktop-gsettings",
 			     ORG_GNOME_DESKTOP_WM_PREFERENCES,
 			     "GSettings Object for org.gnome.desktop.wm.preferences",
+			     G_TYPE_SETTINGS,
+			     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY),
+	g_param_spec_object ("metacity-gsettings",
+			     ORG_GNOME_METACITY,
+			     "GSettings Object for org.gnome.metacity",
 			     G_TYPE_SETTINGS,
 			     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY),
 	g_param_spec_object ("mutter-gsettings",
@@ -372,14 +407,16 @@ void gwd_settings_storage_gsettings_init (GWDSettingsStorageGSettings *self)
 
 GWDSettingsStorage *
 gwd_settings_storage_gsettings_new (GSettings *desktop,
+				    GSettings *metacity,
 				    GSettings *mutter,
 				    GSettings *gwd,
 				    GWDSettingsWritable *writable)
 {
-    static const guint gwd_settings_storage_gsettings_n_construction_params = 4;
+    static const guint gwd_settings_storage_gsettings_n_construction_params = 5;
     GParameter         param[gwd_settings_storage_gsettings_n_construction_params];
 
     GValue desktop_value = G_VALUE_INIT;
+    GValue metacity_value = G_VALUE_INIT;
     GValue mutter_value = G_VALUE_INIT;
     GValue gwd_value = G_VALUE_INIT;
     GValue writable_value = G_VALUE_INIT;
@@ -389,29 +426,34 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
     g_return_val_if_fail (writable != NULL, NULL);
 
     g_value_init (&desktop_value, G_TYPE_OBJECT);
+    g_value_init (&metacity_value, G_TYPE_OBJECT);
     g_value_init (&mutter_value, G_TYPE_OBJECT);
     g_value_init (&gwd_value, G_TYPE_OBJECT);
     g_value_init (&writable_value, G_TYPE_POINTER);
 
     g_value_take_object (&desktop_value, desktop);
+    g_value_take_object (&metacity_value, metacity);
     g_value_take_object (&mutter_value, mutter);
     g_value_take_object (&gwd_value, gwd);
     g_value_set_pointer (&writable_value, writable);
 
     param[0].name = "desktop-gsettings";
     param[0].value = desktop_value;
-    param[1].name = "mutter-gsettings";
-    param[1].value = mutter_value;
-    param[2].name = "gwd-gsettings";
-    param[2].value = gwd_value;
-    param[3].name = "writable-settings";
-    param[3].value = writable_value;
+    param[1].name = "metacity-gsettings";
+    param[1].value = metacity_value;
+    param[2].name = "mutter-gsettings";
+    param[2].value = mutter_value;
+    param[3].name = "gwd-gsettings";
+    param[3].value = gwd_value;
+    param[4].name = "writable-settings";
+    param[4].value = writable_value;
 
     storage = GWD_SETTINGS_STORAGE_INTERFACE (g_object_newv (GWD_TYPE_SETTINGS_STORAGE_GSETTINGS,
 							     gwd_settings_storage_gsettings_n_construction_params,
 							     param));
 
     g_value_unset (&desktop_value);
+    g_value_unset (&metacity_value);
     g_value_unset (&mutter_value);
     g_value_unset (&gwd_value);
     g_value_unset (&writable_value);
@@ -469,6 +511,35 @@ GSettings *
 gwd_get_org_compiz_gwd_settings ()
 {
     return get_settings_no_abort (ORG_COMPIZ_GWD);
+}
+
+static void
+org_gnome_metacity_settings_changed (GSettings   *settings,
+                                     const gchar *key,
+                                     gpointer     user_data)
+{
+    GWDSettingsStorage *storage;
+
+    storage = GWD_SETTINGS_STORAGE_INTERFACE (user_data);
+
+    if (strcmp (key, ORG_GNOME_METACITY_THEME) == 0)
+        gwd_settings_storage_update_metacity_theme (storage);
+}
+
+void
+gwd_connect_org_gnome_metacity_settings (GSettings          *settings,
+                                         GWDSettingsStorage *storage)
+{
+    if (!settings)
+        return;
+
+    g_signal_connect (settings, "changed", (GCallback) org_gnome_metacity_settings_changed, storage);
+}
+
+GSettings *
+gwd_get_org_gnome_metacity_settings ()
+{
+    return get_settings_no_abort (ORG_GNOME_METACITY);
 }
 
 static void
