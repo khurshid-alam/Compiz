@@ -476,13 +476,10 @@ meta_get_decoration_geometry (decor_t           *d,
                               MetaFrameFlags    *flags,
                               MetaFrameGeometry *fgeom,
                               MetaButtonLayout  *button_layout,
-                              MetaFrameType      frame_type,
-                              GdkRectangle      *clip)
+                              MetaFrameType      frame_type)
 {
-#ifdef HAVE_METACITY_3_14_0
-    MetaFrameBorders borders;
-#endif
-    gint left_width, right_width, top_height, bottom_height;
+    gint client_width;
+    gint client_height;
 
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
@@ -556,37 +553,17 @@ meta_get_decoration_geometry (decor_t           *d,
     if (d->state & WNCK_WINDOW_STATE_ABOVE)
         *flags |= (MetaFrameFlags ) META_FRAME_ABOVE;
 
-#ifdef HAVE_METACITY_3_14_0
-    meta_theme_get_frame_borders (theme, frame_type, d->frame->text_height,
-                                  *flags, &borders);
-
-    top_height = borders.visible.top;
-    bottom_height = borders.visible.bottom;
-    left_width = borders.visible.left;
-    right_width = borders.visible.right;
-#else
-    meta_theme_get_frame_borders (theme, frame_type, d->frame->text_height,
-                                  *flags, &top_height, &bottom_height,
-                                  &left_width, &right_width);
-#endif
-
-    clip->x = d->context->left_space - left_width;
-    clip->y = d->context->top_space - top_height;
-
-    clip->width = d->border_layout.top.x2 - d->border_layout.top.x1;
-    clip->width -= d->context->right_space + d->context->left_space;
+    client_width = d->border_layout.top.x2 - d->border_layout.top.x1;
+    client_width -= d->context->right_space + d->context->left_space;
 
     if (d->border_layout.rotation)
-        clip->height = d->border_layout.left.x2 - d->border_layout.left.x1;
+        client_height = d->border_layout.left.x2 - d->border_layout.left.x1;
     else
-        clip->height = d->border_layout.left.y2 - d->border_layout.left.y1;
+        client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
     meta_theme_calc_geometry (theme, frame_type, d->frame->text_height,
-                              *flags, clip->width, clip->height,
+                              *flags, client_width, client_height,
                               button_layout, fgeom);
-
-    clip->width  += left_width + right_width;
-    clip->height += top_height + bottom_height;
 }
 
 void
@@ -605,7 +582,6 @@ meta_draw_window_decoration (decor_t *d)
     GtkStyleContext *context;
     cairo_t *cr;
     gint i;
-    GdkRectangle clip;
     Region top_region;
     Region bottom_region;
     Region left_region;
@@ -661,7 +637,7 @@ meta_draw_window_decoration (decor_t *d)
       frame_type = META_FRAME_TYPE_NORMAL;
 
     meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
-                                  frame_type, &clip);
+                                  frame_type);
 
     if ((d->prop_xid || !d->buffer_surface) && !d->frame_window)
         draw_shadow_background (d, cr, d->shadow, d->context);
@@ -692,9 +668,9 @@ meta_draw_window_decoration (decor_t *d)
     cairo_destroy (cr);
 
     if (d->frame_window)
-        surface = create_surface (clip.width, clip.height, d->frame->style_window_rgb);
+        surface = create_surface (fgeom.width, fgeom.height, d->frame->style_window_rgb);
     else
-        surface = create_surface (clip.width, clip.height, d->frame->style_window_rgba);
+        surface = create_surface (fgeom.width, fgeom.height, d->frame->style_window_rgba);
 
     cr = cairo_create (surface);
     gdk_cairo_set_source_rgba (cr, &bg_rgba);
@@ -705,14 +681,14 @@ meta_draw_window_decoration (decor_t *d)
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_window, cr, frame_type, flags,
-                           clip.width - fgeom.left_width - fgeom.right_width,
-                           clip.height - fgeom.top_height - fgeom.bottom_height,
+                           fgeom.width - fgeom.left_width - fgeom.right_width,
+                           fgeom.height - fgeom.top_height - fgeom.bottom_height,
                            d->layout, d->frame->text_height, &button_layout,
                            button_states, d->icon_pixbuf, NULL);
 
     if (fgeom.top_height)
     {
-        top_region = meta_get_top_border_region (&fgeom, clip.width);
+        top_region = meta_get_top_border_region (&fgeom, fgeom.width);
 
         decor_blend_border_picture (xdisplay, d->context, src,
                                     0, 0,
@@ -723,10 +699,10 @@ meta_draw_window_decoration (decor_t *d)
 
     if (fgeom.bottom_height)
     {
-        bottom_region = meta_get_bottom_border_region (&fgeom, clip.width);
+        bottom_region = meta_get_bottom_border_region (&fgeom, fgeom.width);
 
         decor_blend_border_picture (xdisplay, d->context, src,
-                                    0, clip.height - fgeom.bottom_height,
+                                    0, fgeom.height - fgeom.bottom_height,
                                     d->picture, &d->border_layout,
                                     BORDER_BOTTOM, bottom_region,
                                     alpha * 0xffff, shade_alpha, 0);
@@ -734,7 +710,7 @@ meta_draw_window_decoration (decor_t *d)
 
     if (fgeom.left_width)
     {
-        left_region = meta_get_left_border_region (&fgeom, clip.height);
+        left_region = meta_get_left_border_region (&fgeom, fgeom.height);
 
         decor_blend_border_picture (xdisplay, d->context, src,
                                     0, fgeom.top_height,
@@ -745,10 +721,10 @@ meta_draw_window_decoration (decor_t *d)
 
     if (fgeom.right_width)
     {
-        right_region = meta_get_right_border_region (&fgeom, clip.height);
+        right_region = meta_get_right_border_region (&fgeom, fgeom.height);
 
         decor_blend_border_picture (xdisplay, d->context, src,
-                                    clip.width - fgeom.right_width, fgeom.top_height,
+                                    fgeom.width - fgeom.right_width, fgeom.top_height,
                                     d->picture, &d->border_layout,
                                     BORDER_RIGHT, right_region,
                                     alpha * 0xffff, shade_alpha, 0);
@@ -815,7 +791,6 @@ meta_calc_button_size (decor_t *d)
     MetaFrameFlags flags;
     MetaFrameGeometry fgeom;
     MetaButtonLayout button_layout;
-    GdkRectangle clip;
     MetaFrameBorders borders;
     gint mutter_draggable_border_width;
     gint i, min_x, x, y, w, h, width;
@@ -833,7 +808,7 @@ meta_calc_button_size (decor_t *d)
         frame_type = META_FRAME_TYPE_NORMAL;
 
     meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
-                                  frame_type, &clip);
+                                  frame_type);
     meta_theme_get_frame_borders (theme, frame_type, d->frame->text_height,
                                   flags, &borders);
 
@@ -917,7 +892,6 @@ meta_get_button_position (decor_t *d,
     MetaFrameFlags flags;
     MetaTheme *theme;
     MetaButtonFunction button_function;
-    GdkRectangle clip;
     MetaButtonSpace *space;
     gint mutter_draggable_border_width;
 
@@ -933,8 +907,7 @@ meta_get_button_position (decor_t *d,
     theme = meta_theme_get_current ();
 
     meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
-                                  meta_frame_type_from_string (d->frame->type),
-                                  &clip);
+                                  meta_frame_type_from_string (d->frame->type));
 
     button_function = button_to_meta_button_function (i);
     if (!meta_button_present (&button_layout, button_function))
@@ -1137,7 +1110,6 @@ meta_get_event_window_position (decor_t *d,
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaTheme *theme;
-    GdkRectangle clip;
     gint mutter_draggable_border_width;
 
     mutter_draggable_border_width = 0;
@@ -1146,8 +1118,7 @@ meta_get_event_window_position (decor_t *d,
     theme = meta_theme_get_current ();
 
     meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
-                                  meta_frame_type_from_string (d->frame->type),
-                                  &clip);
+                                  meta_frame_type_from_string (d->frame->type));
 
     width += fgeom.right_width + fgeom.left_width;
     height += fgeom.top_height + fgeom.bottom_height;
