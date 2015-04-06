@@ -99,6 +99,7 @@ if (USE_GTK)
 		    gdk.c
 		    switcher.c
 		    metacity.c
+		    metacity-3-16.c
 		    events.c
 		    forcequit.c
 		    tooltip.c
@@ -138,6 +139,3 @@ if (USE_GTK)
     endif (COMPIZ_BUILD_TESTING)
 
 endif (USE_GTK)
-
-
-

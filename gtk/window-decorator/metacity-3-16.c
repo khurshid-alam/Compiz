@@ -26,7 +26,7 @@
 #include "gtk-window-decorator.h"
 
 #ifdef USE_METACITY
-#ifndef HAVE_METACITY_3_16_0
+#ifdef HAVE_METACITY_3_16_0
 
 MetaButtonLayout meta_button_layout;
 
