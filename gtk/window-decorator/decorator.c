@@ -25,81 +25,10 @@
 
 #include "gtk-window-decorator.h"
 
-decor_frame_t *
-create_normal_frame (const gchar *type)
-{
-    decor_frame_t *frame = decor_frame_new (type);
-
-    decor_context_t _window_context = {
-	{ 0, 0, 0, 0 },
-	6, 6, 4, 6,
-	0, 0, 0, 0
-    };
-
-    decor_context_t _max_window_context = {
-	{ 0, 0, 0, 0 },
-	6, 6, 4, 6,
-	0, 0, 0, 0
-    };
-
-    decor_context_t _window_context_no_shadow = {
-	{ 0, 0, 0, 0 },
-	6, 6, 4, 6,
-	0, 0, 0, 0
-    };
-
-    decor_context_t _max_window_context_no_shadow = {
-	{ 0, 0, 0, 0 },
-	6, 6, 4, 6,
-	0, 0, 0, 0
-    };
-
-    decor_extents_t _win_extents         = { 6, 6, 6, 6 };
-    decor_extents_t _max_win_extents     = { 6, 6, 4, 6 };
-
-    frame->win_extents = _win_extents;
-    frame->max_win_extents = _max_win_extents;
-    frame->update_shadow = decor_frame_update_shadow;
-    frame->window_context_active = _window_context;
-    frame->window_context_inactive = _window_context;
-    frame->window_context_no_shadow = _window_context_no_shadow;
-    frame->max_window_context_active = _max_window_context;
-    frame->max_window_context_inactive = _max_window_context;
-    frame->max_window_context_no_shadow = _max_window_context_no_shadow;
-
-    return frame;
-}
-
 void
 destroy_normal_frame (decor_frame_t *frame)
 {
     decor_frame_destroy (frame);
-}
-
-decor_frame_t *
-create_bare_frame (const gchar *type)
-{
-    decor_frame_t *frame = decor_frame_new (type);
-    decor_context_t _shadow_context = {
-	{ 0, 0, 0, 0 },
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-    };
-
-    decor_extents_t _shadow_extents      = { 0, 0, 0, 0 };
-
-    frame->win_extents = _shadow_extents;
-    frame->max_win_extents = _shadow_extents;
-    frame->win_extents = _shadow_extents;
-    frame->window_context_active = _shadow_context;
-    frame->window_context_inactive = _shadow_context;
-    frame->window_context_no_shadow = _shadow_context;
-    frame->max_window_context_active = _shadow_context;
-    frame->max_window_context_inactive = _shadow_context;
-    frame->max_window_context_no_shadow = _shadow_context;
-    frame->update_shadow = bare_frame_update_shadow;
-
-    return frame;
 }
 
 void
@@ -411,7 +340,7 @@ wnck_window_get_real_name (WnckWindow *win)
  * the window name using pango (with 6px padding)
  * Returns zero if window has no name.
  */
-gint
+static gint
 max_window_name_width (WnckWindow *win)
 {
     decor_t     *d = g_object_get_data (G_OBJECT (win), "decor");
@@ -453,7 +382,7 @@ max_window_name_width (WnckWindow *win)
  * wnck. Also checks to see if the name has a length (slight optimization)
  * and re-creates the pango context to re-render the name
  */
-void
+static void
 update_window_decoration_name (WnckWindow *win)
 {
     decor_t	    *d = g_object_get_data (G_OBJECT (win), "decor");
@@ -823,7 +752,7 @@ draw_border_shape (Display	   *xdisplay,
  *
  * We do something similar  for the maximimzed mode as well
  */
-void
+static void
 bare_frame_update_shadow (Display		  *xdisplay,
 			   Screen		  *screen,
 			   decor_frame_t	  *frame,
@@ -894,7 +823,7 @@ switcher_frame_update_shadow (Display		  *xdisplay,
 						NULL);
 }
 
-void
+static void
 decor_frame_update_shadow (Display		  *xdisplay,
 			   Screen		  *screen,
 			   decor_frame_t	  *frame,
@@ -1506,4 +1435,75 @@ copy_to_front_buffer (decor_t *d)
     cairo_set_operator (d->cr, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_surface (d->cr, d->buffer_surface, 0, 0);
     cairo_paint (d->cr);
+}
+
+decor_frame_t *
+create_bare_frame (const gchar *type)
+{
+    decor_frame_t *frame = decor_frame_new (type);
+    decor_context_t _shadow_context = {
+        { 0, 0, 0, 0 },
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+    };
+
+    decor_extents_t _shadow_extents      = { 0, 0, 0, 0 };
+
+    frame->win_extents = _shadow_extents;
+    frame->max_win_extents = _shadow_extents;
+    frame->win_extents = _shadow_extents;
+    frame->window_context_active = _shadow_context;
+    frame->window_context_inactive = _shadow_context;
+    frame->window_context_no_shadow = _shadow_context;
+    frame->max_window_context_active = _shadow_context;
+    frame->max_window_context_inactive = _shadow_context;
+    frame->max_window_context_no_shadow = _shadow_context;
+    frame->update_shadow = bare_frame_update_shadow;
+
+    return frame;
+}
+
+decor_frame_t *
+create_normal_frame (const gchar *type)
+{
+    decor_frame_t *frame = decor_frame_new (type);
+
+    decor_context_t _window_context = {
+        { 0, 0, 0, 0 },
+        6, 6, 4, 6,
+        0, 0, 0, 0
+    };
+
+    decor_context_t _max_window_context = {
+        { 0, 0, 0, 0 },
+        6, 6, 4, 6,
+        0, 0, 0, 0
+    };
+
+    decor_context_t _window_context_no_shadow = {
+        { 0, 0, 0, 0 },
+        6, 6, 4, 6,
+        0, 0, 0, 0
+    };
+
+    decor_context_t _max_window_context_no_shadow = {
+        { 0, 0, 0, 0 },
+        6, 6, 4, 6,
+        0, 0, 0, 0
+    };
+
+    decor_extents_t _win_extents         = { 6, 6, 6, 6 };
+    decor_extents_t _max_win_extents     = { 6, 6, 4, 6 };
+
+    frame->win_extents = _win_extents;
+    frame->max_win_extents = _max_win_extents;
+    frame->update_shadow = decor_frame_update_shadow;
+    frame->window_context_active = _window_context;
+    frame->window_context_inactive = _window_context;
+    frame->window_context_no_shadow = _window_context_no_shadow;
+    frame->max_window_context_active = _max_window_context;
+    frame->max_window_context_inactive = _max_window_context;
+    frame->max_window_context_no_shadow = _max_window_context_no_shadow;
+
+    return frame;
 }

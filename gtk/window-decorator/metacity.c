@@ -27,6 +27,25 @@
 
 #ifdef USE_METACITY
 
+MetaButtonLayout meta_button_layout;
+
+static gboolean
+meta_button_present (MetaButtonLayout   *button_layout,
+                     MetaButtonFunction  function)
+{
+    int i;
+
+    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+        if (button_layout->left_buttons[i] == function)
+            return TRUE;
+
+    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+        if (button_layout->right_buttons[i] == function)
+            return TRUE;
+
+    return FALSE;
+}
+
 static void
 decor_update_meta_window_property (decor_t	  *d,
 				   MetaTheme	  *theme,
@@ -442,7 +461,7 @@ meta_button_state_for_button_type (decor_t	  *d,
     return META_BUTTON_STATE_NORMAL;
 }
 
-void
+static void
 meta_get_decoration_geometry (decor_t		*d,
 			      MetaTheme	        *theme,
 			      MetaFrameFlags    *flags,
@@ -816,7 +835,7 @@ meta_draw_window_decoration (decor_t *d)
 	XDestroyRegion (right_region);
 }
 
-void
+static void
 meta_calc_button_size (decor_t *d)
 {
     MetaTheme *theme;
@@ -1124,23 +1143,6 @@ meta_calc_decoration_size (decor_t *d,
 
 	return TRUE;
     }
-
-    return FALSE;
-}
-
-gboolean
-meta_button_present (MetaButtonLayout   *button_layout,
-		     MetaButtonFunction function)
-{
-    int i;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-	if (button_layout->left_buttons[i] == function)
-	    return TRUE;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-	if (button_layout->right_buttons[i] == function)
-	    return TRUE;
 
     return FALSE;
 }

@@ -26,7 +26,34 @@
 #include "gtk-window-decorator.h"
 #include "gwd-settings-interface.h"
 
-void
+#define DOUBLE_CLICK_DISTANCE 8.0f
+
+#define WM_MOVERESIZE_SIZE_TOPLEFT      0
+#define WM_MOVERESIZE_SIZE_TOP          1
+#define WM_MOVERESIZE_SIZE_TOPRIGHT     2
+#define WM_MOVERESIZE_SIZE_RIGHT        3
+#define WM_MOVERESIZE_SIZE_BOTTOMRIGHT  4
+#define WM_MOVERESIZE_SIZE_BOTTOM       5
+#define WM_MOVERESIZE_SIZE_BOTTOMLEFT   6
+#define WM_MOVERESIZE_SIZE_LEFT         7
+#define WM_MOVERESIZE_MOVE              8
+#define WM_MOVERESIZE_SIZE_KEYBOARD     9
+#define WM_MOVERESIZE_MOVE_KEYBOARD    10
+
+static double
+square (double x)
+{
+    return x * x;
+}
+
+static double
+dist (double x1, double y1,
+      double x2, double y2)
+{
+    return sqrt (square (x1 - x2) + square (y1 - y2));
+}
+
+static void
 move_resize_window (WnckWindow *win,
 		    int	       direction,
 		    decor_event *gtkwd_event)
@@ -74,7 +101,7 @@ move_resize_window (WnckWindow *win,
     XSync (xdisplay, FALSE);
 }
 
-void
+static void
 common_button_event (WnckWindow *win,
 		     decor_event *gtkwd_event,
 		     decor_event_type gtkwd_type,
@@ -392,7 +419,7 @@ unstick_button_event (WnckWindow *win,
     }
 }
 
-void
+static void
 handle_title_button_event (WnckWindow   *win,
 			   int          action,
 			   decor_event *gtkwd_event)
@@ -426,7 +453,7 @@ handle_title_button_event (WnckWindow   *win,
     }
 }
 
-void
+static void
 handle_mouse_wheel_title_event (WnckWindow   *win,
 				unsigned int button)
 {
@@ -526,7 +553,7 @@ title_event (WnckWindow       *win,
     }
 }
 
-void
+static void
 frame_common_event (WnckWindow       *win,
 		    int              direction,
 		    decor_event      *gtkwd_event,
@@ -684,7 +711,7 @@ frame_window_realized (GtkWidget *widget,
     }
 }
 
-event_callback
+static event_callback
 find_event_callback_for_point (decor_t *d,
 			       int     x,
 			       int     y,
@@ -739,7 +766,7 @@ find_event_callback_for_point (decor_t *d,
     return NULL;
 }
 
-event_callback
+static event_callback
 find_leave_event_callback (decor_t *d)
 {
     int i, j;
