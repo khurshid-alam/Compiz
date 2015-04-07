@@ -1577,6 +1577,9 @@ PrivateGLScreen::optionChanged(CompOption *opt, OpenglOptions::Options num)
 	case OpenglOptions::X11SyncBlacklistModel:
 	case OpenglOptions::X11SyncBlacklistVendor:
 	    GL::xToGLSync = checkX11GLSyncIsSupported ();
+
+	    if (!syncObjectsEnabled ())
+		destroyXToGLSyncs ();
 	    break;
 	default:
 	    break;
@@ -2669,10 +2672,6 @@ PrivateGLScreen::prepareDrawing ()
     if (syncObjectsEnabled () && !syncObjectsInitialized ())
     {
 	initXToGLSyncs ();
-    }
-    else if (!syncObjectsEnabled () && syncObjectsInitialized ())
-    {
-	destroyXToGLSyncs ();
     }
 
     if (currentSync)
