@@ -1101,23 +1101,14 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	GL::importSync = (GL::GLImportSyncProc)
 	    getProcAddress ("glImportSyncEXT");
 
-	bool blacklist = false;
-	size_t blacklisted_cards = priv->optionGetX11SyncBlacklistVendor ().size();
-
-	for (unsigned i = 0; i < blacklisted_cards; ++i)
+	if (GL::importSync)
 	{
-	    CompString const& vendor = priv->optionGetX11SyncBlacklistVendor ()[i].s();
-	    CompString const& model = priv->optionGetX11SyncBlacklistModel ()[i].s();
+	    priv->optionSetEnableX11SyncNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistVendorNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistModelNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
 
-	    if (glVendor == vendor && glRenderer == model)
-	    {
-		blacklist = true;
-		break;
-	    }
+	    GL::xToGLSync = priv->checkX11GLSyncIsSupported ();
 	}
-
-	if (GL::importSync && !blacklist)
-	    GL::xToGLSync = true;
     }
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
@@ -1575,6 +1566,21 @@ void
 GLScreen::setTextureFilter (GLenum filter)
 {
     priv->textureFilter = filter;
+}
+
+void
+PrivateGLScreen::optionChanged(CompOption *opt, OpenglOptions::Options num)
+{
+    switch (num)
+    {
+	case OpenglOptions::EnableX11Sync:
+	case OpenglOptions::X11SyncBlacklistModel:
+	case OpenglOptions::X11SyncBlacklistVendor:
+	    GL::xToGLSync = checkX11GLSyncIsSupported ();
+	    break;
+	default:
+	    break;
+    }
 }
 
 void
@@ -2110,6 +2116,33 @@ GLDoubleBuffer::GLDoubleBuffer (Display                                         
 }
 
 bool
+PrivateGLScreen::checkX11GLSyncIsSupported ()
+{
+    if (!GL::importSync)
+	return false;
+
+    if (!optionGetEnableX11Sync ())
+	return false;
+
+    bool blacklisted_card = false;
+    size_t blacklisted_cards = optionGetX11SyncBlacklistVendor ().size();
+
+    for (unsigned i = 0; i < blacklisted_cards; ++i)
+    {
+	CompString const& vendor = optionGetX11SyncBlacklistVendor ()[i].s();
+	CompString const& model = optionGetX11SyncBlacklistModel ()[i].s();
+
+	if (glVendor == vendor && glRenderer == model)
+	{
+	    blacklisted_card = true;
+	    break;
+	}
+    }
+
+    return !blacklisted_card;
+}
+
+bool
 PrivateGLScreen::syncObjectsInitialized () const
 {
     return !xToGLSyncs.empty ();
@@ -2118,7 +2151,7 @@ PrivateGLScreen::syncObjectsInitialized () const
 bool
 PrivateGLScreen::syncObjectsEnabled ()
 {
-    return GL::sync && GL::xToGLSync && optionGetEnableX11Sync ();
+    return GL::sync && GL::xToGLSync;
 }
 
 void

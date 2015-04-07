@@ -75,6 +75,7 @@
 
 		<subgroup>
 			<_short>Cards Blacklist</_short>
+			<_long>The list of the cards for which we should disable X11/GL syncing.</_long>
 			<option name="x11_sync_blacklist_vendor" type="list">
 			    <_short>Vendor</_short>
 			    <_long>The card vendor for which X11 sync should be disabled.</_long>
