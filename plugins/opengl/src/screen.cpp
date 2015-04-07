@@ -74,15 +74,6 @@ using namespace compiz::opengl;
 static const size_t NUM_X11_SYNCS = 16;
 
 /**
- * The GPUs to blacklist for X11 sync
- */
-static const char* BLACKLIST_X11_SYNC_GPUS[] = { "GeForce 6150LE",
-						 "GeForce 6150SE",
-						 "GeForce 7025",
-						 "GeForce 7050 PV" };
-static const int BLACKLIST_SZ = sizeof(BLACKLIST_X11_SYNC_GPUS) / sizeof(BLACKLIST_X11_SYNC_GPUS[0]);
-
-/**
  * The maximum time to wait for a sync object, in nanoseconds.
  */
 static const GLuint64 MAX_SYNC_WAIT_TIME = 1000000000ull; // One second
@@ -572,8 +563,6 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 #ifndef USE_GLES
     DetectionWorkaround workaround;
 #endif
-
-    int i;
 
     #ifdef USE_GLES
     Display             *xdpy;
@@ -1113,11 +1102,14 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	    getProcAddress ("glImportSyncEXT");
 
 	bool blacklist = false;
+	size_t blacklisted_cards = priv->optionGetX11SyncBlacklistVendor ().size();
 
-	for (i = 0; i < BLACKLIST_SZ; ++i)
+	for (unsigned i = 0; i < blacklisted_cards; ++i)
 	{
-	    if (strstr (glVendor, "NVIDIA") &&
-		strstr (glRenderer, BLACKLIST_X11_SYNC_GPUS[i]))
+	    CompString const& vendor = priv->optionGetX11SyncBlacklistVendor ()[i].s();
+	    CompString const& model = priv->optionGetX11SyncBlacklistModel ()[i].s();
+
+	    if (glVendor == vendor && glRenderer == model)
 	    {
 		blacklist = true;
 		break;
