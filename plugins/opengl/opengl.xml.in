@@ -83,8 +83,6 @@
 			    <default>
 				<value>NVIDIA</value>
 				<value>NVIDIA</value>
-				<value>NVIDIA</value>
-				<value>NVIDIA</value>
 			    </default>
 			</option>
 			<option name="x11_sync_blacklist_model" type="list">
@@ -92,10 +90,8 @@
 			    <_long>The card vendor for which X11 sync should be disabled.</_long>
 			    <type>string</type>
 			    <default>
-				<value>GeForce 6150LE</value>
-				<value>GeForce 6150SE</value>
-				<value>GeForce 7025</value>
-				<value>GeForce 7050 PV</value>
+				<value>GeForce 6150(LE|SE)</value>
+				<value>GeForce (7025|7050 PV)</value>
 			    </default>
 		   	</option>
 		</subgroup>

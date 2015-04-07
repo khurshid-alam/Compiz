@@ -2133,12 +2133,14 @@ PrivateGLScreen::checkX11GLSyncIsSupported ()
     for (unsigned i = 0; i < blacklisted_cards; ++i)
     {
 	CompString const& vendor = optionGetX11SyncBlacklistVendor ()[i].s();
-	CompString const& model = optionGetX11SyncBlacklistModel ()[i].s();
 
-	if (glVendor == vendor && glRenderer == model)
+	if (glVendor && strstr (glVendor, vendor.c_str()))
 	{
-	    blacklisted_card = true;
-	    break;
+	    CompString const& model = optionGetX11SyncBlacklistModel ()[i].s();
+	    blacklisted_card = blacklisted (model.c_str(), NULL, glRenderer, glVersion);
+
+	    if (blacklisted_card)
+		break;
 	}
     }
 
