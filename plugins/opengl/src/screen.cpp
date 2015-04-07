@@ -621,7 +621,7 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     visualid = XVisualIDFromVisual (attr.visual);
     config = configs[0];
 
-    for (i = 0; i < count; ++i)
+    for (int i = 0; i < count; ++i)
     {
 	eglGetConfigAttrib (dpy, configs[i], EGL_SAMPLE_BUFFERS, &val);
 	if (val > msaaBuffers)
