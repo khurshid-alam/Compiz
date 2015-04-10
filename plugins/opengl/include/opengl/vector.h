@@ -40,7 +40,7 @@ class GLVector {
 	} VectorCoordsEnum;
 
 	GLVector ();
-	GLVector (float x, float y, float z, float w = 0.0f);
+	GLVector (float x, float y, float z, float w = 1.0f);
 
 	/**
 	 * Returns a reference to the x, y, z or w value by using

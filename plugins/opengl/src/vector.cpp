@@ -52,7 +52,8 @@
 
 GLVector::GLVector ()
 {
-    memset (v, 0, sizeof (v));
+    v[0] = v[1] = v[2] = 0.0;
+    v[3] = 1.0;
 }
 
 GLVector::GLVector (float x,
@@ -63,7 +64,7 @@ GLVector::GLVector (float x,
     v[0] = x;
     v[1] = y;
     v[2] = z;
-    v[3] = w;
+    v[3] = 1.0;
 }
 
 float&
@@ -95,7 +96,7 @@ GLVector::operator[] (VectorCoordsEnum coord) const
 GLVector&
 GLVector::operator+= (const GLVector& rhs)
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	v[i] += rhs[i];
 
     return *this;
@@ -107,7 +108,7 @@ operator+ (const GLVector& lhs,
 {
     GLVector result;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result[i] = lhs[i] + rhs[i];
 
     return result;
@@ -116,7 +117,7 @@ operator+ (const GLVector& lhs,
 GLVector&
 GLVector::operator-= (const GLVector& rhs)
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	v[i] -= rhs[i];
 
     return *this;
@@ -128,7 +129,7 @@ operator- (const GLVector& lhs,
 {
     GLVector result;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result[i] = lhs[i] - rhs[i];
 
     return result;
@@ -139,7 +140,7 @@ operator- (const GLVector& vector)
 {
     GLVector result;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result[i] = -vector[i];
 
     return result;
@@ -148,7 +149,7 @@ operator- (const GLVector& vector)
 GLVector&
 GLVector::operator*= (const float k)
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	v[i] *= k;
 
     return *this;
@@ -160,7 +161,7 @@ operator* (const GLVector& lhs,
 {
     float result = 0;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result += lhs[i] * rhs[i];
 
     return result;
@@ -172,7 +173,7 @@ operator* (const float       k,
 {
     GLVector result;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result[i] = k * vector[i];
 
     return result;
@@ -188,7 +189,7 @@ operator* (const GLVector& vector,
 GLVector&
 GLVector::operator/= (const float k)
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	v[i] /= k;
 
     return *this;
@@ -200,7 +201,7 @@ operator/ (const GLVector& vector,
 {
     GLVector result;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
 	result[i] = vector[i] / k;
 
     return result;
@@ -222,7 +223,7 @@ operator^ (const GLVector& lhs,
     result[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
     result[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
     result[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
-    result[3] = 0.0f;
+    result[3] = 1.0f;
 
     return result;
 }
@@ -230,22 +231,20 @@ operator^ (const GLVector& lhs,
 float
 GLVector::norm ()
 {
-    if (v[3] != 0.0)
-	return 1.0;
     return sqrt ((v[0] * v[0]) + (v[1] * v[1]) + (v[2] * v[2]));
 }
 
 GLVector &
 GLVector::normalize ()
 {
-    float normal = norm ();
+    float mag = norm ();
 
-    /* Vector is not homogenous */
-    if (normal == 1.0)
+    /* avoid division by 0 */
+    if (mag == 0.0)
 	return *this;
 
     for (unsigned int i = 0; i < 3; i++)
-	v[i] /= normal;
+	v[i] /= mag;
     return *this;
 }
 

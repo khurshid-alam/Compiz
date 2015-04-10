@@ -778,10 +778,10 @@ ExpoScreen::paintWall (const GLScreenPaintAttrib &attrib,
 
     /* Zoom animation stuff */
     /* camera position for the selected viewport */
-    GLVector vpCamPos (0, 0, 0, 0);
+    GLVector vpCamPos (0, 0, 0, 1);
 
     /* camera position during expo mode */
-    GLVector expoCamPos (0, 0, 0, 0);
+    GLVector expoCamPos (0, 0, 0, 1);
 
     float sx = screen->width ()  / static_cast <float> (output->width ());
     float sy = screen->height () / static_cast <float> (output->height ());
