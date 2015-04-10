@@ -1,3 +1,42 @@
+compiz (1:0.9.12.1+15.04.20150410.1-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Chris Townsend ]
+  * Expo plugin: Make sure the Expo animation is completed before
+    allowing clicks to be handled. (LP: #1026553)
+  * Grid plugin: Float to int division truncating caused a 1 px gap on
+    the right side of right semi-maximized window when the workspace has
+    an odd width. Fix is to add 0.5 to the float division first to
+    account for any truncation error. (LP: #1294864)
+
+  [ Eleni Maria Stea ]
+  * Change in GLVector implementation
+  * Minor change: when the skydome was working (in the c version of
+    compiz) it was rendered on top of the background so, there was no
+    need to clear the screen before drawing (the skydome was rendered on
+    top of the garbage from previous renderings, hiding it). In the c++
+    plugin, the skydome is buggy and the background is visible (as well
+    as some garbage from previous renderings). A temporary
+    glClear(GL_COLOR_BUFFER_BIT) was added until we fix the skydome and
+    the other cube bugs.
+  * glDisableOutputClipping was not implemented in 3d.cpp => a parent
+    class glDisableOutputClipping was called, causing 2d clipping
+    artifacts (the 3d cube was clipped and you couldn't see the windows
+    move)
+
+  [ Marco Trevisan (Treviño) ]
+  * OpenGL: don't hardcode X11 sync blacklisted models, but use settings
+    instead (LP: #1441190)
+
+  [ Stephen M. Webb ]
+  * (Ubuntu packaging) migrate migration scripts to Python3. (LP:
+    #1440548)
+  * exclude Wine applications from window close animations (LP: #957879)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 10 Apr 2015 21:55:34 +0000
+
 compiz (1:0.9.12.1+15.04.20150330-0ubuntu1) vivid; urgency=medium
 
   [ Chris Townsend ]
