@@ -48,7 +48,7 @@ ExpoScreen::dndInit (CompAction         *action,
 		     CompAction::State  state,
 		     CompOption::Vector &options)
 {
-    if (expoMode)
+    if (expoMode && expoCam == 1.0f)
     {
 	dndState = DnDStart;
 	action->setState (action->state () | CompAction::StateTermButton);
@@ -65,7 +65,7 @@ ExpoScreen::dndFini (CompAction         *action,
 		     CompAction::State  state,
 		     CompOption::Vector &options)
 {
-    if (dndState == DnDDuring || dndState == DnDStart)
+    if (expoCam == 1.0f && (dndState == DnDDuring || dndState == DnDStart))
     {
 	if (dndWindow)
 	    finishWindowMovement ();
@@ -141,10 +141,13 @@ ExpoScreen::termExpo (CompAction         *action,
     if (dndState != DnDNone)
 	dndFini (action, state, options);
 
-    if (state & CompAction::StateCancel)
-	vpUpdateMode = VPUpdatePrevious;
-    else
-	vpUpdateMode = VPUpdateMouseOver;
+    if (expoCam == 1.0f)
+    {
+	if (state & CompAction::StateCancel)
+	    vpUpdateMode = VPUpdatePrevious;
+	else
+	    vpUpdateMode = VPUpdateMouseOver;
+    }
 
     dndState  = DnDNone;
     dndWindow = NULL;
@@ -324,6 +327,7 @@ ExpoScreen::handleEvent (XEvent *event)
 
 	case ButtonPress:
 	    if (expoMode			    &&
+		expoCam == 1.0f			    &&
 		event->xbutton.button == Button1    &&
 		event->xbutton.root   == screen->root ())
 	    {
@@ -354,6 +358,7 @@ ExpoScreen::handleEvent (XEvent *event)
 
 	case ButtonRelease:
 	    if (expoMode			    &&
+		expoCam == 1.0f			    &&
 		event->xbutton.button == Button1    &&
 		event->xbutton.root   == screen->root ())
 	    {
