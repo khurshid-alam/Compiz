@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014 Canonical
+# Copyright (C) 2014-2015 Canonical
 #
 # Authors:
 #  Marco Trevisan <marco.trevisan@canonical.com>
@@ -44,4 +44,4 @@ except ValueError:
 # gsettings.set_strv("active-plugins", active_plugins)
 from subprocess import Popen, PIPE, STDOUT
 p = Popen(("dconf load "+COMPIZ_CORE_PATH).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-p.communicate(input="[/]\nactive-plugins={}".format(active_plugins).encode('utf-8'))
+p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
