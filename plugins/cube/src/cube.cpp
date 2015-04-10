@@ -1090,6 +1090,7 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 	else
 	    glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
 
+	glClear(GL_COLOR_BUFFER_BIT);
 	glCallList (priv->mSkyListId);
 	glPopMatrix ();
 #endif
