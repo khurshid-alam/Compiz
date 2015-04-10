@@ -262,7 +262,7 @@ PrivateGLScreen::paintOutputRegion (const GLMatrix   &transform,
 	getOption ("unredirect_match")->value ().match ();
 
     const CompString &blacklist =
-	getOption ("unredirect_driver_blacklist")->value ().s ();
+	optionGetUnredirectDriverBlacklist ();
 
     bool blacklisted = driverIsBlacklisted (blacklist.c_str ());
 

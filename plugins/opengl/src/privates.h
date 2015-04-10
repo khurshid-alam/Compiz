@@ -149,6 +149,7 @@ class PrivateGLScreen :
 	~PrivateGLScreen ();
 
 	bool setOption (const CompString &name, CompOption::Value &value);
+	void optionChanged (CompOption*, OpenglOptions::Options);
 
 	void handleEvent (XEvent *event);
 
@@ -185,6 +186,7 @@ class PrivateGLScreen :
 
 	void updateView ();
 
+	bool checkX11GLSyncIsSupported ();
 	bool syncObjectsInitialized () const;
 	bool syncObjectsEnabled ();
 	void initXToGLSyncs ();

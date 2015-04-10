@@ -74,15 +74,6 @@ using namespace compiz::opengl;
 static const size_t NUM_X11_SYNCS = 16;
 
 /**
- * The GPUs to blacklist for X11 sync
- */
-static const char* BLACKLIST_X11_SYNC_GPUS[] = { "GeForce 6150LE",
-						 "GeForce 6150SE",
-						 "GeForce 7025",
-						 "GeForce 7050 PV" };
-static const int BLACKLIST_SZ = sizeof(BLACKLIST_X11_SYNC_GPUS) / sizeof(BLACKLIST_X11_SYNC_GPUS[0]);
-
-/**
  * The maximum time to wait for a sync object, in nanoseconds.
  */
 static const GLuint64 MAX_SYNC_WAIT_TIME = 1000000000ull; // One second
@@ -573,8 +564,6 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     DetectionWorkaround workaround;
 #endif
 
-    int i;
-
     #ifdef USE_GLES
     Display             *xdpy;
     Window               overlay;
@@ -632,7 +621,7 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     visualid = XVisualIDFromVisual (attr.visual);
     config = configs[0];
 
-    for (i = 0; i < count; ++i)
+    for (int i = 0; i < count; ++i)
     {
 	eglGetConfigAttrib (dpy, configs[i], EGL_SAMPLE_BUFFERS, &val);
 	if (val > msaaBuffers)
@@ -1112,20 +1101,14 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	GL::importSync = (GL::GLImportSyncProc)
 	    getProcAddress ("glImportSyncEXT");
 
-	bool blacklist = false;
-
-	for (i = 0; i < BLACKLIST_SZ; ++i)
+	if (GL::importSync)
 	{
-	    if (strstr (glVendor, "NVIDIA") &&
-		strstr (glRenderer, BLACKLIST_X11_SYNC_GPUS[i]))
-	    {
-		blacklist = true;
-		break;
-	    }
-	}
+	    priv->optionSetEnableX11SyncNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistVendorNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistModelNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
 
-	if (GL::importSync && !blacklist)
-	    GL::xToGLSync = true;
+	    GL::xToGLSync = priv->checkX11GLSyncIsSupported ();
+	}
     }
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
@@ -1583,6 +1566,24 @@ void
 GLScreen::setTextureFilter (GLenum filter)
 {
     priv->textureFilter = filter;
+}
+
+void
+PrivateGLScreen::optionChanged(CompOption *opt, OpenglOptions::Options num)
+{
+    switch (num)
+    {
+	case OpenglOptions::EnableX11Sync:
+	case OpenglOptions::X11SyncBlacklistModel:
+	case OpenglOptions::X11SyncBlacklistVendor:
+	    GL::xToGLSync = checkX11GLSyncIsSupported ();
+
+	    if (!syncObjectsEnabled ())
+		destroyXToGLSyncs ();
+	    break;
+	default:
+	    break;
+    }
 }
 
 void
@@ -2118,6 +2119,35 @@ GLDoubleBuffer::GLDoubleBuffer (Display                                         
 }
 
 bool
+PrivateGLScreen::checkX11GLSyncIsSupported ()
+{
+    if (!GL::importSync)
+	return false;
+
+    if (!optionGetEnableX11Sync ())
+	return false;
+
+    bool blacklisted_card = false;
+    size_t blacklisted_cards = optionGetX11SyncBlacklistVendor ().size();
+
+    for (unsigned i = 0; i < blacklisted_cards; ++i)
+    {
+	CompString const& vendor = optionGetX11SyncBlacklistVendor ()[i].s();
+
+	if (glVendor && strstr (glVendor, vendor.c_str()))
+	{
+	    CompString const& model = optionGetX11SyncBlacklistModel ()[i].s();
+	    blacklisted_card = blacklisted (model.c_str(), NULL, glRenderer, glVersion);
+
+	    if (blacklisted_card)
+		break;
+	}
+    }
+
+    return !blacklisted_card;
+}
+
+bool
 PrivateGLScreen::syncObjectsInitialized () const
 {
     return !xToGLSyncs.empty ();
@@ -2126,7 +2156,7 @@ PrivateGLScreen::syncObjectsInitialized () const
 bool
 PrivateGLScreen::syncObjectsEnabled ()
 {
-    return GL::sync && GL::xToGLSync && optionGetEnableX11Sync ();
+    return GL::sync && GL::xToGLSync;
 }
 
 void
@@ -2644,10 +2674,6 @@ PrivateGLScreen::prepareDrawing ()
     if (syncObjectsEnabled () && !syncObjectsInitialized ())
     {
 	initXToGLSyncs ();
-    }
-    else if (!syncObjectsEnabled () && syncObjectsInitialized ())
-    {
-	destroyXToGLSyncs ();
     }
 
     if (currentSync)
