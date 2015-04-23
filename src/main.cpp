@@ -38,6 +38,11 @@
 #include "privatescreen.h"
 #include "privatestackdebugger.h"
 
+namespace
+{
+    bool autoAddCCP = true;
+}
+
 void
 CompManager::usage ()
 {
@@ -48,6 +53,7 @@ CompManager::usage ()
             "  --sm-disable          Disable session management\n"
             "  --sm-client-id ID     Session management client ID\n"
             "  --keep-desktop-hints  Retain existing desktop hints\n"
+            "  --no-auto-add-ccp     Do not automatically load the ccp plugin\n"
             "  --sync                Make all X calls synchronous\n"
             "  --debug               Enable debug mode\n"
             "  --version             Show the program version\n"
@@ -98,6 +104,11 @@ CompManager::parseArguments (int argc, char **argv)
 	else if (!strcmp (argv[i], "--keep-desktop-hints"))
 	{
 	    useDesktopHints = true;
+	}
+	else if (!strcmp (argv[i], "--no-auto-add-ccp"))
+	{
+	    compLogMessage ("core", CompLogLevelInfo, "running without the ccp plugin, no settings will be loaded");
+	    autoAddCCP = false;
 	}
 	else if (!strcmp (argv[i], "--replace"))
 	{
@@ -150,6 +161,9 @@ CompManager::init ()
     ::screen = screen.get();
 
     modHandler = new ModifierHandler ();
+
+    if (initialPlugins.empty () && autoAddCCP)
+        initialPlugins.push_back ("ccp");
 
     if (!screen->init (displayName))
 	return false;
