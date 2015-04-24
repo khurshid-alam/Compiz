@@ -86,8 +86,6 @@ enum
     GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_WRITABLE_SETTINGS  = 5
 };
 
-const guint GWD_SETTINGS_STORAGE_GSETTINGS_N_CONSTRUCTION_PARAMS = 4;
-
 typedef struct _GWDSettingsStorageGSettingsPrivate
 {
     GSettings *desktop;
