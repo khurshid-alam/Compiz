@@ -39,6 +39,8 @@
 
 #include "privates.h"
 
+bool use_legacy_rendering = false;
+
 GLVertexBuffer *PrivateVertexBuffer::streamingBuffer = NULL;
 
 bool GLVertexBuffer::enabled ()
@@ -383,7 +385,7 @@ int GLVertexBuffer::render (const GLMatrix            &projection,
     PRINT_MATRIX(modelview);
     PRINT_MATRIX(projection);
 
-    if (enabled ())
+    if (enabled () && !use_legacy_rendering)
 	return priv->render (&projection, &modelview, &attrib);
     else
 	return priv->legacyRender (projection, modelview, attrib);
@@ -621,7 +623,10 @@ int PrivateVertexBuffer::legacyRender (const GLMatrix            &projection,
 	glTexCoordPointer (2, GL_FLOAT, 0, &textureData[i][0]);
     }
 
-    glDrawArrays (primitiveType, vertexOffset, vertexData.size () / 3);
+    glDrawArrays (primitiveType, vertexOffset, maxVertices > 0 ?
+				    std::min (static_cast <int> (vertexData.size () / 3),
+					      maxVertices) :
+				    vertexData.size () / 3);
 
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
