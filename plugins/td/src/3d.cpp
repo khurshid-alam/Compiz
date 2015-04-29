@@ -2,7 +2,7 @@
 
 COMPIZ_PLUGIN_20090315 (td, TdPluginVTable);
 
-extern bool use_legacy_rendering;
+extern bool GL::shaders;
 
 const double PI = 3.14159265359f;
 
@@ -456,10 +456,10 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 
 		glLoadMatrixf (mTransform.getMatrix ());
 
-		use_legacy_rendering = true;
+		GL::shaders = false;
 		tdw->gWindow->glPaint (tdw->gWindow->paintAttrib (), mTransform,
 				  infiniteRegion, newMask);
-		use_legacy_rendering = false;
+		GL::shaders = true;
 
 		gScreen->glDisableOutputClipping ();
 

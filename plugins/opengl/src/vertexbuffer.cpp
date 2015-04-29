@@ -39,8 +39,6 @@
 
 #include "privates.h"
 
-bool use_legacy_rendering = false;
-
 GLVertexBuffer *PrivateVertexBuffer::streamingBuffer = NULL;
 
 bool GLVertexBuffer::enabled ()
@@ -385,7 +383,7 @@ int GLVertexBuffer::render (const GLMatrix            &projection,
     PRINT_MATRIX(modelview);
     PRINT_MATRIX(projection);
 
-    if (enabled () && !use_legacy_rendering)
+    if (enabled ())
 	return priv->render (&projection, &modelview, &attrib);
     else
 	return priv->legacyRender (projection, modelview, attrib);
