@@ -41,7 +41,6 @@ struct _GWDSettingsStorageInterface
 
     gboolean (*update_use_tooltips) (GWDSettingsStorage *settings);
     gboolean (*update_draggable_border_width) (GWDSettingsStorage *settings);
-    gboolean (*update_attach_modal_dialogs) (GWDSettingsStorage *settings);
     gboolean (*update_blur) (GWDSettingsStorage *settings);
     gboolean (*update_metacity_theme) (GWDSettingsStorage *settings);
     gboolean (*update_opacity) (GWDSettingsStorage *settings);
@@ -52,7 +51,6 @@ struct _GWDSettingsStorageInterface
 
 gboolean gwd_settings_storage_update_use_tooltips (GWDSettingsStorage *settings);
 gboolean gwd_settings_storage_update_draggable_border_width (GWDSettingsStorage *settings);
-gboolean gwd_settings_storage_update_attach_modal_dialogs (GWDSettingsStorage *settings);
 gboolean gwd_settings_storage_update_blur (GWDSettingsStorage *settings);
 gboolean gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *settings);
 gboolean gwd_settings_storage_update_opacity (GWDSettingsStorage *settings);

@@ -39,12 +39,6 @@ gboolean gwd_settings_storage_update_draggable_border_width (GWDSettingsStorage 
     return (*interface->update_draggable_border_width) (settings);
 }
 
-gboolean gwd_settings_storage_update_attach_modal_dialogs (GWDSettingsStorage *settings)
-{
-    GWDSettingsStorageInterface *interface = GWD_SETTINGS_STORAGE_GET_INTERFACE (settings);
-    return (*interface->update_attach_modal_dialogs) (settings);
-}
-
 gboolean gwd_settings_storage_update_blur (GWDSettingsStorage *settings)
 {
     GWDSettingsStorageInterface *interface = GWD_SETTINGS_STORAGE_GET_INTERFACE (settings);
