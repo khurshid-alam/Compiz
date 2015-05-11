@@ -778,6 +778,7 @@ ct::CompizProcess::CompizProcess (::Display                           *dpy,
     if (flags & ct::CompizProcess::ReplaceCurrentWM)
 	args.push_back ("--replace");
 
+    args.push_back ("--no-auto-add-ccp");
     args.push_back ("--send-startup-message");
 
     /* Copy in plugin list and set environment variables */
