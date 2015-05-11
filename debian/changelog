@@ -1,3 +1,20 @@
+compiz (1:0.9.12.1+15.10.20150511-0ubuntu1) wily; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Remove unused setting from gtk-window-decorator.
+  * Stop using ccp_plugin.patch only in ubuntu, apply it to source and
+    remove it from debian/patches.
+
+  [ Martin Wimpress ]
+  * Default MATE keybindings to be consistent with other MATE WMs.
+
+  [ Stephen M. Webb ]
+  * OpenGL plugin: refine GLTexture API to adhere to class invariants
+    (LP: #1101594)
+  * removed redundant 12.04 migration scripts (LP: #1400493, #1423566)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 11 May 2015 16:39:16 +0000
+
 compiz (1:0.9.12.1+15.04.20150410.1-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
