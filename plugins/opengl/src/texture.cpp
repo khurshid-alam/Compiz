@@ -1,5 +1,6 @@
 /*
  * Copyright © 2005 Novell, Inc.
+ * Copyright 2015 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -48,7 +49,7 @@ std::map<Damage, EglTexture*> boundPixmapTex;
 std::map<Damage, TfpTexture*> boundPixmapTex;
 #endif
 
-static GLTexture::Matrix _identity_matrix = {
+static const GLTexture::Matrix _identity_matrix = {
     1.0f, 0.0f,
     0.0f, 1.0f,
     0.0f, 0.0f
@@ -107,7 +108,13 @@ GLTexture::List::clear ()
 
 GLTexture::GLTexture () :
     CompRect (0, 0, 0, 0),
-    priv (new PrivateTexture (this))
+    priv (new PrivateTexture (this, GL_TEXTURE_2D, _identity_matrix, true))
+{
+}
+
+GLTexture::GLTexture (int width, int height, GLenum target, Matrix const& matrix, bool mipmap) :
+    CompRect (0, 0, width, height),
+    priv (new PrivateTexture (this, target, matrix, mipmap))
 {
 }
 
@@ -117,14 +124,17 @@ GLTexture::~GLTexture ()
 	delete priv;
 }
 
-PrivateTexture::PrivateTexture (GLTexture *texture) :
+PrivateTexture::PrivateTexture (GLTexture*               texture,
+                                GLenum                   target,
+                                GLTexture::Matrix const& matrix,
+                                bool                     mipmap) :
     texture (texture),
     name (0),
-    target (GL_TEXTURE_2D),
+    target (target),
     filter (GL_NEAREST),
     wrap   (GL_CLAMP_TO_EDGE),
-    matrix (_identity_matrix),
-    mipmap  (true),
+    matrix (matrix),
+    mipmap  (mipmap),
     mipmapSupport (false),
     initial (true),
     refCount (1)
@@ -255,7 +265,7 @@ GLTexture::disable ()
 }
 
 void
-GLTexture::setData (GLenum target, Matrix &m, bool mipmap)
+GLTexture::setData (GLenum target, Matrix const& m, bool mipmap)
 {
     priv->target = target;
     priv->matrix = m;
@@ -306,9 +316,6 @@ PrivateTexture::loadImageData (const char   *image,
 	return GLTexture::List ();
 
     GLTexture::List rv (1);
-    GLTexture *t = new GLTexture ();
-    rv[0] = t;
-
     GLTexture::Matrix matrix = _identity_matrix;
     GLint             internalFormat;
     GLenum            target;
@@ -341,10 +348,11 @@ PrivateTexture::loadImageData (const char   *image,
     }
     #endif
 
-    t->setData (target, matrix, mipmap);
-    t->setGeometry (0, 0, width, height);
+    GLTexture* t = new GLTexture (width, height, target, matrix, mipmap);
     t->setFilter (GL_NEAREST);
     t->setWrap (GL_CLAMP_TO_EDGE);
+    rv[0] = t;
+
 
     #ifdef USE_GLES
     // For GLES2 no format conversion is allowed, i.e., format must equal internalFormat
@@ -468,7 +476,12 @@ GLTexture::bindPixmapToTexture (Pixmap                       pixmap,
 }
 
 #ifdef USE_GLES
-EglTexture::EglTexture () :
+EglTexture::EglTexture (GLenum                   target,
+                        GLTexture::Matrix const& matrix,
+                        bool                     mipmap,
+                        int                      width,
+                        int                      height) :
+    GLTexture (width, height, target, matrix, mipmap),
     damaged (true),
     damage (None),
     updateMipMap (true)
@@ -489,16 +502,19 @@ EglTexture::~EglTexture ()
 }
 
 GLTexture::List
-EglTexture::bindPixmapToTexture (Pixmap                       pixmap,
-				 int                          width,
-				 int                          height,
-				 int                          depth,
-				 compiz::opengl::PixmapSource source)
+EglTexture::bindPixmapToTexture (Pixmap            pixmap,
+                                 int               width,
+                                 int               height,
+                                 int               depth,
+                                 cgl::PixmapSource source)
 {
     GLTexture::List   rv (1);
     EglTexture        *tex = NULL;
     EGLImageKHR       eglImage = NULL;
+    GLenum            texTarget = GL_TEXTURE_2D;
     GLTexture::Matrix matrix = _identity_matrix;
+    bool              mipmap = GL::textureNonPowerOfTwoMipmap ||
+                              (POWER_OF_TWO (width) && POWER_OF_TWO (height));
 
     const EGLint img_attribs[] = {
 	EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
@@ -521,23 +537,19 @@ EglTexture::bindPixmapToTexture (Pixmap                       pixmap,
     matrix.yy = 1.0f / height;
     matrix.y0 = 0.0f;
 
-    tex = new EglTexture ();
-    tex->setData (GL_TEXTURE_2D, matrix,
-	GL::textureNonPowerOfTwoMipmap ||
-	(POWER_OF_TWO (width) && POWER_OF_TWO (height)));
-    tex->setGeometry (0, 0, width, height);
+    tex = new EglTexture (texTarget, matrix, mipmap, width, height);
 
     rv[0] = tex;
 
-    glBindTexture (GL_TEXTURE_2D, tex->name ());
+    glBindTexture (texTarget, tex->name ());
 
-    GL::eglImageTargetTexture (GL_TEXTURE_2D, (GLeglImageOES)eglImage);
+    GL::eglImageTargetTexture (texTarget, (GLeglImageOES)eglImage);
     GL::destroyImage (eglGetDisplay (screen->dpy ()), eglImage);
 
     tex->setFilter (GL_NEAREST);
     tex->setWrap (GL_CLAMP_TO_EDGE);
 
-    glBindTexture (GL_TEXTURE_2D, 0);
+    glBindTexture (texTarget, 0);
 
     tex->damage = XDamageCreate (screen->dpy (), pixmap,
 			         XDamageReportBoundingBox);
@@ -609,11 +621,21 @@ namespace
     }
 }
 
-TfpTexture::TfpTexture () :
-    pixmap (0),
+TfpTexture::TfpTexture (GLenum                   target,
+                        GLTexture::Matrix const& matrix,
+                        bool                     mipmap,
+                        Pixmap                   pixmap,
+                        int                      width,
+                        int                      height,
+                        Pixmap                   x11Pixmap,
+                        cgl::PixmapSource        source) :
+    GLTexture (width, height, target, matrix, mipmap),
+    x11Pixmap (x11Pixmap),
+    pixmap (pixmap),
     damaged (true),
     damage (None),
-    updateMipMap (true)
+    updateMipMap (true),
+    source (source)
 {
 }
 
@@ -791,12 +813,10 @@ TfpTexture::bindPixmapToTexture (Pixmap            pixmap,
 	    return GLTexture::List ();
     }
 
-    tex = new TfpTexture ();
-    tex->setData (texTarget, matrix, mipmap);
-    tex->setGeometry (0, 0, width, height);
-    tex->pixmap = glxPixmap;
-    tex->x11Pixmap = pixmap;
-    tex->source = source;
+    tex = new TfpTexture (texTarget, matrix, mipmap,
+                          glxPixmap,
+                          width, height,
+                          pixmap, source);
 
     rv[0] = tex;
 

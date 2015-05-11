@@ -2,6 +2,7 @@
  * Copyright © 2008 Dennis Kasprzyk
  * Copyright © 2007 Novell, Inc.
  * Copyright © 2011 Linaro Ltd.
+ * Copyright 2015 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -49,7 +50,10 @@ class GLDisplay;
 
 class PrivateTexture {
     public:
-	PrivateTexture (GLTexture *);
+	PrivateTexture (GLTexture*               texture,
+	                GLenum                   target,
+	                GLTexture::Matrix const& matrix,
+	                bool                     mipmap);
 	~PrivateTexture ();
 
 	static GLTexture::List loadImageData (const char   *image,
@@ -74,7 +78,6 @@ class PrivateTexture {
 #ifdef USE_GLES
 class EglTexture : public GLTexture {
     public:
-	EglTexture ();
 	~EglTexture ();
 
 	void enable (Filter filter);
@@ -84,6 +87,13 @@ class EglTexture : public GLTexture {
 					 int                          height,
 					 int                          depth,
 					 compiz::opengl::PixmapSource source);
+
+    private:
+	EglTexture (GLenum                   target,
+	            GLTexture::Matrix const& matrix,
+	            bool                     mipmap,
+	            int                      width,
+	            int                      height);
 
     public:
 	bool        damaged;
@@ -96,7 +106,6 @@ extern std::map<Damage, EglTexture*> boundPixmapTex;
 
 class TfpTexture : public GLTexture {
     public:
-	TfpTexture ();
 	~TfpTexture ();
 
 	void enable (Filter filter);
@@ -108,6 +117,16 @@ class TfpTexture : public GLTexture {
 					 int                          height,
 					 int                          depth,
 					 compiz::opengl::PixmapSource source);
+
+    private:
+	TfpTexture (GLenum                       target,
+	            GLTexture::Matrix const&     matrix,
+	            bool                         mipmap,
+	            Pixmap                       pixmap,
+	            int                          width,
+	            int                          height,
+	            Pixmap                       x11Pixmap,
+	            compiz::opengl::PixmapSource source);
 
     public:
 	Pixmap                       x11Pixmap;
