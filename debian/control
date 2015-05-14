@@ -152,8 +152,8 @@ Depends: ${shlibs:Depends},
          compiz-plugins-default (= ${binary:Version}),
          gsettings-desktop-schemas,
          gnome-settings-daemon-schemas (>= 3.4.2-0ubuntu9),
-         python
-Recommends: gnome-system-monitor,
+         python3-gi
+Recommends: gnome-system-monitor | mate-system-monitor,
 Replaces: compiz-plugins-main (<= 1:0.9.8),
           compiz-plugins-main-default (<= 1:0.9.8),
           compizconfig-backend-gconf (<= 1:0.9.8),
@@ -167,6 +167,24 @@ Description: OpenGL window and compositing manager - GNOME window decorator
  with special needs.
  .
  This package contains files needed to integrate compiz with the GNOME desktop
+ environment.
+
+Package: compiz-mate
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         ${python:Depends},
+         compiz-gnome,
+         mate-settings-daemon,
+         python
+Recommends: ubuntu-mate-wallpapers-utopic,
+Description: OpenGL window and compositing manager - MATE integration
+ Compiz brings to life a variety of visual effects that make the Linux desktop
+ easier to use, more powerful and intuitive, and more accessible for users
+ with special needs.
+ .
+ This package contains files needed to integrate compiz with the MATE desktop
  environment.
 
 Package: compiz-plugins-default

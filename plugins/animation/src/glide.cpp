@@ -122,11 +122,11 @@ GlideAnim::applyTransform ()
 		      mAWindow->savedOutRect () :
 		      mWindow->outputRect ());
 
-    GLVector rotAxis (1, 0, 0, 0);
+    GLVector rotAxis (1, 0, 0, 1);
     GLVector rotAxisOffset (outRect.x () + outRect.width () / 2.0f,
 			    outRect.y () + outRect.height () / 2.0f,
-			    0, 0);
-    GLVector translation (0, 0, finalz * forwardProgress, 0);
+			    0, 1);
+    GLVector translation (0, 0, finalz * forwardProgress, 1);
 
     float rotAngle   = finalRotAng * forwardProgress;
     glideModRotAngle = fmodf (rotAngle + 720, 360.0f);
@@ -142,9 +142,7 @@ GlideAnim::applyTransform ()
     // animation rotation
     mTransform.rotate (rotAngle, rotAxis);
 
-    // intentional scaling of z by 0 to prevent weird opacity results and
-    // flashing that happen when z coords are between 0 and 1 (bug in compiz?)
-    mTransform.scale (1.0f, 1.0f, 0.0f);
+    mTransform.scale (1.0f, 1.0f, 1.0f);
 
     // place window rotation axis at origin
     mTransform.translate (-rotAxisOffset);

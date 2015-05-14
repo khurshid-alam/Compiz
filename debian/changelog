@@ -1,3 +1,118 @@
+compiz (1:0.9.12.1+15.10.20150511-0ubuntu1) wily; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Remove unused setting from gtk-window-decorator.
+  * Stop using ccp_plugin.patch only in ubuntu, apply it to source and
+    remove it from debian/patches.
+
+  [ Martin Wimpress ]
+  * Default MATE keybindings to be consistent with other MATE WMs.
+
+  [ Stephen M. Webb ]
+  * OpenGL plugin: refine GLTexture API to adhere to class invariants
+    (LP: #1101594)
+  * removed redundant 12.04 migration scripts (LP: #1400493, #1423566)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 11 May 2015 16:39:16 +0000
+
+compiz (1:0.9.12.1+15.04.20150410.1-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Chris Townsend ]
+  * Expo plugin: Make sure the Expo animation is completed before
+    allowing clicks to be handled. (LP: #1026553)
+  * Grid plugin: Float to int division truncating caused a 1 px gap on
+    the right side of right semi-maximized window when the workspace has
+    an odd width. Fix is to add 0.5 to the float division first to
+    account for any truncation error. (LP: #1294864)
+
+  [ Eleni Maria Stea ]
+  * Change in GLVector implementation
+  * Minor change: when the skydome was working (in the c version of
+    compiz) it was rendered on top of the background so, there was no
+    need to clear the screen before drawing (the skydome was rendered on
+    top of the garbage from previous renderings, hiding it). In the c++
+    plugin, the skydome is buggy and the background is visible (as well
+    as some garbage from previous renderings). A temporary
+    glClear(GL_COLOR_BUFFER_BIT) was added until we fix the skydome and
+    the other cube bugs.
+  * glDisableOutputClipping was not implemented in 3d.cpp => a parent
+    class glDisableOutputClipping was called, causing 2d clipping
+    artifacts (the 3d cube was clipped and you couldn't see the windows
+    move)
+
+  [ Marco Trevisan (Treviño) ]
+  * OpenGL: don't hardcode X11 sync blacklisted models, but use settings
+    instead (LP: #1441190)
+
+  [ Stephen M. Webb ]
+  * (Ubuntu packaging) migrate migration scripts to Python3. (LP:
+    #1440548)
+  * exclude Wine applications from window close animations (LP: #957879)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 10 Apr 2015 21:55:34 +0000
+
+compiz (1:0.9.12.1+15.04.20150330-0ubuntu1) vivid; urgency=medium
+
+  [ Chris Townsend ]
+  * Change default behavior of focus-follows-mouse where the desktop
+    will get focus when the mouse is over it. Also add option to allow
+    old behavior. (LP: #1427636)
+  * Clear out the lastMask vars when using the mouse to resize. (LP:
+    #1348254)
+
+  [ Eleni Maria Stea ]
+  * Minor optimisation fix: Replaced glLoadIdentity, glMultMatrixf with
+    glLoadMatrixf to avoid the unnecessary matrix multiplication:
+    identity * some projection matrix
+
+  [ Kevin Lange ]
+  * WinRules plugin: boost arbitrary window size limits to something
+    more reasonable (LP: #1431923)
+
+  [ Stephen M. Webb ]
+  * animations plugin: fixed a potential null pointer dereference (LP:
+    #1101573)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 30 Mar 2015 15:58:21 +0000
+
+compiz (1:0.9.12.1+15.04.20150303-0ubuntu1) vivid; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Do not cache textures in animation.cpp. (LP: #729979, #1072206)
+
+  [ Martin Wimpress ]
+  * tweak MATE profile INI
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 03 Mar 2015 18:31:02 +0000
+
+compiz (1:0.9.12.1+15.04.20150227-0ubuntu1) vivid; urgency=medium
+
+  [ Chris Townsend ]
+  * Add a blacklist of Nvidia integrated GPU's affected by the Nvidia
+    X11 Sync patch. (LP: #1424013)
+
+  [ Martin Wimpress ]
+  * Tweak 'recommends' runtime dependencies for compiz-gnome and compiz-
+    mate.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 27 Feb 2015 15:37:04 +0000
+
+compiz (1:0.9.12.1+15.04.20150213-0ubuntu1) vivid; urgency=medium
+
+  [ Stephen M. Webb ]
+  * Upstream 0.9.12.1 release.
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Martin Wimpress ]
+  * add MATE integration
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 13 Feb 2015 20:25:25 +0000
+
 compiz (1:0.9.12.0+15.04.20150202-0ubuntu1) vivid; urgency=medium
 
   [ Brandon Schaefer ]

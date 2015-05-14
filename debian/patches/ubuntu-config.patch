@@ -98,7 +98,7 @@ Index: scale-xy-offsets/plugins/animation/animation.xml.in
 -	      <value>(type=Normal | Dialog | ModalDialog | Unknown) &amp; !(name=gnome-screensaver)</value>
 -	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo)</value>
 + 	      <value>((type=Normal | Unknown) | name=sun-awt-X11-XFramePeer | name=sun-awt-X11-XDialogPeer) &amp; !(role=toolTipTip | role=qtooltip_label) &amp; !(type=Normal &amp; override_redirect=1) &amp; !(name=gnome-screensaver)</value>
-+ 	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal)</value>
++ 	      <value>((type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal) &amp; !(class=\\.exe$))</value>
  	      <value>(type=Tooltip | Notification | Utility) &amp; !(name=compiz) &amp; !(title=notify-osd)</value>
  	    </default>
  	  </option>
@@ -131,7 +131,7 @@ Index: scale-xy-offsets/plugins/animation/animation.xml.in
 -	      <value>(type=Normal | Dialog | ModalDialog | Unknown) &amp; !(name=gnome-screensaver)</value>
 -	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo)</value>
 + 	      <value>((type=Normal | Unknown) | name=sun-awt-X11-XFramePeer | name=sun-awt-X11-XDialogPeer) &amp; !(role=toolTipTip | role=qtooltip_label) &amp; !(type=Normal &amp; override_redirect=1) &amp; !(name=gnome-screensaver) &amp; !(name=gnome-screenshot)</value>
-+ 	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal)</value>
++ 	      <value>((type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal) &amp; !(class=\\.exe$))</value>
  	      <value>(type=Tooltip | Notification | Utility) &amp; !(name=compiz) &amp; !(title=notify-osd)</value>
  	    </default>
  	  </option>

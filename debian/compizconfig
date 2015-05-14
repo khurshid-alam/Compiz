@@ -8,6 +8,12 @@ integration = true
 plugin_list_autosort = true
 profile = Default
 
+[general_mate]
+backend = gsettings
+integration = false
+plugin_list_autosort = true
+profile = mate
+
 [general_ubuntu]
 backend = gsettings
 integration = true

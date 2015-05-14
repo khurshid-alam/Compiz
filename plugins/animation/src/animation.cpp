@@ -479,16 +479,13 @@ Animation::Animation (CompWindow       *w,
 	mDecorBottomHeight = w->output ().bottom;
     }
 
-    texturesCache         = new GLTexture::List (GLWindow::get (w)->textures ());
     PrivateAnimScreen *as = mAWindow->priv->paScreen ();
 
     mTimestep = as->optionGetTimeStep ();
 }
 
 Animation::~Animation ()
-{
-    delete texturesCache;
-}
+{}
 
 CompOption::Value &
 Animation::optVal (unsigned int optionId)
@@ -1999,17 +1996,22 @@ PrivateAnimScreen::initiateCloseAnim (PrivateAnimWindow *aw)
 		getActualEffect (chosenEffect, AnimEventClose);
 
 	    // handle empty random effect list
-	    if (effectToBePlayed && effectToBePlayed == AnimEffectNone)
+	    if (effectToBePlayed)
 	    {
-		aw->mState = aw->mNewState;
-		return;
-	    }
+		if (effectToBePlayed == AnimEffectNone)
+		{
+		    aw->mState = aw->mNewState;
+		    return;
+		}
 
-	    aw->mCurAnimation =
-		effectToBePlayed->create (w, WindowEventClose, duration,
-					  effectToBePlayed, getIcon (w, true));
-	    aw->mCurAnimation->adjustPointerIconSize ();
-	    aw->enablePainting (true);
+		aw->mCurAnimation = effectToBePlayed->create (w,
+		                                              WindowEventClose,
+		                                              duration,
+		                                              effectToBePlayed,
+		                                              getIcon (w, true));
+		aw->mCurAnimation->adjustPointerIconSize ();
+		aw->enablePainting (true);
+	    }
 	}
 
 	activateEvent (true);

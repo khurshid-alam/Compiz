@@ -1,6 +1,7 @@
 /*
  * Copyright © 2008 Dennis Kasprzyk
  * Copyright © 2007 Novell, Inc.
+ * Copyright 2015 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -71,7 +72,44 @@
 class PrivateTexture;
 
 /**
- * Class which represents an openGL texture
+ * An abstract representation of an OpenGL texture.
+ *
+ * Enabling and disabling the texture, and drawing it with OpenGL
+ * --------------------------------------------------------------
+ *
+ * Because there are different texture binding backends, it is not safe to
+ * enable the texture target using OpenGL directly. Instead, you should use the
+ * ::enable () and ::disable () member functions. The ::enable () member
+ * function also allows you to specifiy a level of texture filtering, either
+ * Fast or Good. If you are drawing the texture at a smaller size then the
+ * render size, then it should be safe to use the Fast filter.
+ *
+ * Getting OpenGL information about the texture
+ * --------------------------------------------
+ *
+ * It is possible to get the ::name () and ::target () of the texture to use
+ * that data for OpenGL purposes.
+ *
+ * Mipmapping
+ * ----------
+ *
+ * Compiz also supports a mipmapping filter to make textures appear smoother
+ * when viewed at angles. To enable this you can use the ::setMipmap and
+ * ::mipmap functions in order to enable this. Mipmapping is not available on
+ * certain hardware. In this case, the function will simply fail silently.
+ *
+ * Overloading the binding of textures
+ * -----------------------------------
+ *
+ * For whatever reason, you may wish to write your own texture binding method
+ * which overloads the standard GLX_ext_texture_from_pixmap method. It is
+ * possible to do this by overloading the ::enable () and ::disable () methods
+ * of the GLTexture through your own class. Then on your plugin's init function
+ * you should use GLTexture::BindPixmapHandle hnd = GLScreen::get
+ * (screen)->registerBindPixmap (YourPixmap::bindPixmapToTexture) and on fini
+ * you must also call GLScreen::get (screen)->unregistrerBindPixmap (hnd).
+ *
+ * A sample implementation can be found in the Copy To Texture plugin.
  */
 class GLTexture : public CompRect {
     public:
@@ -81,6 +119,29 @@ class GLTexture : public CompRect {
 	    Good
 	} Filter;
 
+	/**
+	 * a texture matrix
+	 *
+	 * Texture Matrix manipulation
+	 *
+	 * Since all textures are 2D, it is possible to perform basic 2D
+	 * Manipulation operations on the texture.
+	 *
+	 * Member variable | Function
+	 * ----------------|----------
+	 *          .x0    | X Position on the screen
+	 *          .y0    | Y Position on the screen
+	 *          .xx    | X Scale Factor
+	 *          .yy    | Y Scale Factor
+	 *          .xy    | X Shear Factor
+	 *          .yx    | Y Shear Factor
+	 *
+	 * The COMP_TEX_COORD functions return matrix-adjusted values for
+	 * texture positions. The "real" value of your co-ordinate on the
+	 * texture itself should be inputted into these functions, and these
+	 * functions will return the appropriate number to feed to functions
+	 * such as glTexCoord2f.
+	 */
 	typedef struct {
 	    float xx; float yx;
 	    float xy; float yy;
@@ -90,8 +151,20 @@ class GLTexture : public CompRect {
 	typedef std::vector<Matrix> MatrixList;
 
 	/**
-	 * Class which represents a list of openGL textures,
-	 * usually used for texture tiling
+	 * a list of OpenGL textures, usually used for texture tiling
+	 *
+	 * In order to overcome hardware maximum texture size limitations,
+	 * Compiz supports tiled texturing. As such, all texture generation
+	 * functions (such as bindPixmapTotexture, imageDataToTexture,
+	 * readImageToTexture, etc) will all return a GLTexture:List. When
+	 * rendering these textures you must loop through each texture in the
+	 * list in order that you render each part of the texture that the user
+	 * sees.
+	 *
+	 * On especially small textures, it is ok to directly access the first
+	 * item in the list for the sake of optimization, however whenever it is
+	 * not clear what the size of the texture is, you should always loop the
+	 * list.
 	 */
 	class List : public std::vector <GLTexture *> {
 
@@ -112,23 +185,23 @@ class GLTexture : public CompRect {
     public:
 
 	/**
-	 * Returns the openGL texture name
+	 * Returns the OpenGL texture name.
 	 */
 	GLuint name () const;
 
 	/**
-	 * Returns the openGL texture target
+	 * Returns the OpenGL texture target.
 	 */
 	GLenum target () const;
 
 	/**
-	 * Returns the openGL texture filter
+	 * Returns the openGL texture filter.
 	 */
 	GLenum filter () const;
 
 	/**
 	 * Returns a 2D 2x3 matrix describing the transformation of
-	 * the texture
+	 * this texture.
 	 */
 	const Matrix & matrix () const;
 
@@ -148,42 +221,41 @@ class GLTexture : public CompRect {
 	virtual void disable ();
 
 	/**
-	 * Returns true if this texture is MipMapped
+	 * Returns true if this texture is MipMapped.
 	 */
 	bool mipmap () const;
 
 	/**
-	 * Sets if this texture should be MipMapped
+	 * Sets if this texture should be MipMapped.
 	 */
 	void setMipmap (bool);
 
 	/**
-	 * Sets the openGL filter which should be used on this
-	 * texture
+	 * Sets the openGL filter which should be used on this texture.
 	 */
 	void setFilter (GLenum);
 	void setWrap (GLenum);
 
 	/**
-	 * Increases the reference count of a texture
+	 * Increases the reference count of a texture.
 	 */
 	static void incRef (GLTexture *);
 
 	/**
-	 * Decreases the reference count of a texture
+	 * Decreases the reference count of a texture.
 	 */
 	static void decRef (GLTexture *);
 
 	/**
-	 * Returns a GLTexture::List with the contents of
-	 * some pixmap
+	 * Creates a collection of GLTextures from an X11 pixmap.
+	 * @param pixmap  pixmap data which should be converted
+	 *                into texture data
+	 * @param width   width of the texture
+	 * @param height  height of the texture
+	 * @param depth   color depth of the texture
+	 * @param source  whether the pixmap lifecycle is managed externally
 	 *
-	 * @param pixmap Specifies the pixmap data which should be converted
-	 * into texture data
-	 * @param width Specifies the width of the texture
-	 * @param height Specifies the height of the texture
-	 * @param depth Specifies the color depth of the texture
-	 * @param source Whether the pixmap lifecycle is managed externall
+	 * @returns a GLTexture::List with the contents of the pixmap.
 	 */
 	static List bindPixmapToTexture (Pixmap                       pixmap,
 					 int                          width,
@@ -193,16 +265,23 @@ class GLTexture : public CompRect {
 					     = compiz::opengl::InternallyManaged);
 
 	/**
-	 * Returns a GLTexture::List with the contents of of
-	 * a raw image buffer
+	 * Creates a collection of GLTextures from a raw image buffer.
+	 * @param image  a raw image buffer which should be converted
+	 *               into texture data
+	 * @param size   size of this new texture
 	 *
-	 * @param image Specifies a raw image buffer which should be converted
-	 * into texture data
-	 * @param size Specifies the size of this new texture
+	 * @returns a GLTexture::List with the contents of of
+	 * a raw image buffer.
 	 */
-	static List imageBufferToTexture (const char *image,
-					  CompSize   size);
+	static List imageBufferToTexture (const char *image, CompSize size);
 
+	/**
+	 * Creates a collection of GLTextures from raw pixel data.
+	 * @param image   raw pixel data
+	 * @param size    size of the raw pixel data
+	 * @param format  GL format of the raw pixel data (eg. GL_RGBA)
+	 * @param type    GL data type of the raw pixel data (eg. GL_FLOAT)
+	 */
 	static List imageDataToTexture (const char *image,
 					CompSize   size,
 					GLenum     format,
@@ -212,10 +291,10 @@ class GLTexture : public CompRect {
 	 * Uses image loading plugins to read an image from the disk and
 	 * return a GLTexture::List with its contents
 	 *
-	 * @param imageFileName The filename of the image
-	 * @param pluginName	The name of the plugin, used to find
-	 *			the default image path
-	 * @param size		The size of this new texture
+	 * @param imageFileName  filename of the image
+	 * @param pluginName     name of the plugin, used to find the default
+	 *                       image path
+	 * @param size           size of this new texture
 	 */
 	static List readImageToTexture (CompString &imageFileName,
 					CompString &pluginName,
@@ -224,10 +303,25 @@ class GLTexture : public CompRect {
 	friend class PrivateTexture;
 
     protected:
+	/**
+	 * Consrtucts a defauly empty GLTexture.
+	 *
+	 * @deprecated This function is only for ABI backwards compatibility and
+	 * will be removed in the future.
+	 */
 	GLTexture ();
+
+	/** Constructs an OpenGL texture. */
+	GLTexture (int width, int height, GLenum target, Matrix const& m, bool mipmap);
 	virtual ~GLTexture ();
 
-	void setData (GLenum target, Matrix &m, bool mipmap);
+	/** 
+	 * Initializer.
+	 *
+	 * @deprecated This function is only for ABI backwards compatibility and
+	 * will be removed in the future.
+	 */
+	void setData (GLenum target, Matrix const& m, bool mipmap);
 
     private:
 	PrivateTexture *priv;

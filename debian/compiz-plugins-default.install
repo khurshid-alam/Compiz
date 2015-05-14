@@ -22,6 +22,8 @@ usr/lib/*/compiz/*grid.*
 usr/share/compiz/*grid.*
 usr/lib/*/compiz/*imgpng.*
 usr/share/compiz/*imgpng.*
+usr/lib/*/compiz/*matecompat.*
+usr/share/compiz/*matecompat.*
 usr/lib/*/compiz/*mousepoll.*
 usr/share/compiz/*mousepoll.*
 usr/lib/*/compiz/*move.*

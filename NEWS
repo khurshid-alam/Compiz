@@ -1,3 +1,27 @@
+Release 0.9.12.1 (2015-02-03 Stephen M. Webb <stephen.webb@canonical.com>)
+========================================================================
+
+     1101630 - animation plugin: initialized mPrevAnimSelectionRow
+     1199316 - cube plugin: fix clipping
+             - libdecoration.pc: fix formatting 
+     1410436 - Add a '/' to the path of std::string(home) + '/' HOME_PLUGINDIR
+     1404054 - Fix crash with titlebar-uses-system-font enabled
+     269904  - Use the GL_EXT_x11_sync_object OpenGL extension to synchronize
+               updates with X11 to avoid unrefreshed parts of the screen on
+               Nvidia hardware
+     1101413 - PrivateScreen unit tests: added additional assertions to verify
+               the tests are run in an expected state
+     1101554 - dodge plugin: avoid potential null pointer dereferences
+     1101608 - libcompizconfig: reorder stat() and open() calls to eliminate
+               a race condition
+     959282  - added support for multi-arch installations
+     1395105 - added support for multi-arch installations
+     1101585 - switcher plugin: renamed a local variable so it does not hide
+               a function parameter.
+     1392715 - libdecoration/CMakeLists.txt: use correct variable for
+               link directories
+     1394135 - gtk-window-decorator: support Metacity 3.14
+
 Release 0.9.12.0 (2014-11-04 Stephen M. Webb <stephen.webb@canonical.com>)
 ========================================================================
 

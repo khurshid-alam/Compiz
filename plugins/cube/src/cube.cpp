@@ -1090,6 +1090,7 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 	else
 	    glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
 
+	glClear(GL_COLOR_BUFFER_BIT);
 	glCallList (priv->mSkyListId);
 	glPopMatrix ();
 #endif
@@ -1294,6 +1295,16 @@ PrivateCubeScreen::glEnableOutputClipping (const GLMatrix   &transform,
     }
     else
 	gScreen->glEnableOutputClipping (transform, region, output);
+}
+
+void PrivateCubeScreen::glDisableOutputClipping()
+{
+#ifndef USE_GLES
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+#endif
 }
 
 void 

@@ -100,8 +100,6 @@ protected:
     int mDecorTopHeight;
     int mDecorBottomHeight;
     
-    GLTexture::List *texturesCache;
-    
     CompOption::Value &optVal (unsigned int optionId);
     
     inline bool       optValB (unsigned int optionId) { return optVal (optionId).b (); }

@@ -73,13 +73,6 @@ gboolean gwd_mock_settings_storage_update_draggable_border_width (GWDSettingsSto
     return settingsGMock->updateDraggableBorderWidth ();
 }
 
-gboolean gwd_mock_settings_storage_update_attach_modal_dialogs (GWDSettingsStorage *settings)
-{
-    GWDMockSettingsStorage *settingsStorageMock = GWD_MOCK_SETTINGS_STORAGE (settings)
-    GWDMockSettingsStorageGMockInterface *settingsGMock = GET_PRIVATE (settingsStorageMock)->mock;
-    return settingsGMock->updateAttachModalDialogs ();
-}
-
 gboolean gwd_mock_settings_storage_update_blur (GWDSettingsStorage *settings)
 {
     GWDMockSettingsStorage *settingsStorageMock = GWD_MOCK_SETTINGS_STORAGE (settings);
@@ -126,7 +119,6 @@ static void gwd_mock_settings_storage_interface_init (GWDSettingsStorageInterfac
 {
     interface->update_use_tooltips = gwd_mock_settings_storage_update_use_tooltips;
     interface->update_draggable_border_width = gwd_mock_settings_storage_update_draggable_border_width;
-    interface->update_attach_modal_dialogs = gwd_mock_settings_storage_update_attach_modal_dialogs;
     interface->update_blur = gwd_mock_settings_storage_update_blur;
     interface->update_metacity_theme = gwd_mock_settings_storage_update_metacity_theme;
     interface->update_opacity = gwd_mock_settings_storage_update_opacity;

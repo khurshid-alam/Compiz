@@ -1102,7 +1102,13 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	    getProcAddress ("glImportSyncEXT");
 
 	if (GL::importSync)
-	    GL::xToGLSync = true;
+	{
+	    priv->optionSetEnableX11SyncNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistVendorNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+	    priv->optionSetX11SyncBlacklistModelNotify(boost::bind(&PrivateGLScreen::optionChanged, priv, _1, _2));
+
+	    GL::xToGLSync = priv->checkX11GLSyncIsSupported ();
+	}
     }
 
     glClearColor (0.0, 0.0, 0.0, 1.0);
@@ -1563,6 +1569,24 @@ GLScreen::setTextureFilter (GLenum filter)
 }
 
 void
+PrivateGLScreen::optionChanged(CompOption *opt, OpenglOptions::Options num)
+{
+    switch (num)
+    {
+	case OpenglOptions::EnableX11Sync:
+	case OpenglOptions::X11SyncBlacklistModel:
+	case OpenglOptions::X11SyncBlacklistVendor:
+	    GL::xToGLSync = checkX11GLSyncIsSupported ();
+
+	    if (!syncObjectsEnabled ())
+		destroyXToGLSyncs ();
+	    break;
+	default:
+	    break;
+    }
+}
+
+void
 PrivateGLScreen::handleEvent (XEvent *event)
 {
     CompWindow *w;
@@ -1712,8 +1736,7 @@ PrivateGLScreen::updateView ()
 
     #ifndef USE_GLES
     glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    glMultMatrixf (projection_array);
+    glLoadMatrixf (projection_array);
     glMatrixMode (GL_MODELVIEW);
     #endif
 
@@ -2096,6 +2119,35 @@ GLDoubleBuffer::GLDoubleBuffer (Display                                         
 }
 
 bool
+PrivateGLScreen::checkX11GLSyncIsSupported ()
+{
+    if (!GL::importSync)
+	return false;
+
+    if (!optionGetEnableX11Sync ())
+	return false;
+
+    bool blacklisted_card = false;
+    size_t blacklisted_cards = optionGetX11SyncBlacklistVendor ().size();
+
+    for (unsigned i = 0; i < blacklisted_cards; ++i)
+    {
+	CompString const& vendor = optionGetX11SyncBlacklistVendor ()[i].s();
+
+	if (glVendor && strstr (glVendor, vendor.c_str()))
+	{
+	    CompString const& model = optionGetX11SyncBlacklistModel ()[i].s();
+	    blacklisted_card = blacklisted (model.c_str(), NULL, glRenderer, glVersion);
+
+	    if (blacklisted_card)
+		break;
+	}
+    }
+
+    return !blacklisted_card;
+}
+
+bool
 PrivateGLScreen::syncObjectsInitialized () const
 {
     return !xToGLSyncs.empty ();
@@ -2104,7 +2156,7 @@ PrivateGLScreen::syncObjectsInitialized () const
 bool
 PrivateGLScreen::syncObjectsEnabled ()
 {
-    return GL::sync && GL::xToGLSync && optionGetEnableX11Sync ();
+    return GL::sync && GL::xToGLSync;
 }
 
 void
@@ -2622,10 +2674,6 @@ PrivateGLScreen::prepareDrawing ()
     if (syncObjectsEnabled () && !syncObjectsInitialized ())
     {
 	initXToGLSyncs ();
-    }
-    else if (!syncObjectsEnabled () && syncObjectsInitialized ())
-    {
-	destroyXToGLSyncs ();
     }
 
     if (currentSync)
