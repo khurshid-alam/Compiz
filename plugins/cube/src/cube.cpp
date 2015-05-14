@@ -1075,6 +1075,7 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 {
     WRAPABLE_HND_FUNCTN (cubeClearTargetOutput, xRotate, vRotate)
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (!priv->mSky.empty ())
     {
 	priv->gScreen->setLighting (false);
@@ -1090,7 +1091,6 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 	else
 	    glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
 
-	glClear(GL_COLOR_BUFFER_BIT);
 	glCallList (priv->mSkyListId);
 	glPopMatrix ();
 #endif
