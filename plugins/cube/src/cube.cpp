@@ -1095,7 +1095,7 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 #endif
     }
     else
-	priv->gScreen->clearTargetOutput (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	priv->gScreen->clearTargetOutput (GL_COLOR_BUFFER_BIT);
 }
 
 void 
@@ -1304,7 +1304,6 @@ void PrivateCubeScreen::glDisableOutputClipping()
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
 #endif
-
     gScreen->glDisableOutputClipping();
 }
 
@@ -1347,7 +1346,8 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
     glGetIntegerv (GL_CULL_FACE_MODE, &cullNorm);
 
     int  cullInv   = (cullNorm == GL_BACK)? GL_FRONT : GL_BACK;
-    bool wasCulled = glIsEnabled (GL_CULL_FACE);
+//    bool wasCulled = glIsEnabled (GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
 
     if (!mFullscreenOutput)
     {
@@ -1446,16 +1446,13 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == -1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-        glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr,
 			   mask, mXRotations, size, hsize, paintOrder);
-        if(!wasCulled)
-            glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);
 
-    if (wasCulled && cubeScreen->cubeShouldPaintAllViewports ())
+    //if (wasCulled && cubeScreen->cubeShouldPaintAllViewports ())
 	glDisable (GL_CULL_FACE);
 
     bool paintCaps = !mGrabIndex && hsize > 2 && !mCapsPainted[output] &&
@@ -1510,8 +1507,8 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 	}
     }
 
-    if (wasCulled)
-	glEnable (GL_CULL_FACE);
+    //if (wasCulled)
+//	glEnable (GL_CULL_FACE);
 
     if (mInvert == 1)
 	/* Outside cube - continue with BTF faces */
@@ -1525,11 +1522,8 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == 1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-        glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr, mask, mXRotations,
 			   size, hsize, paintOrder);
-        if(!wasCulled)
-            glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);

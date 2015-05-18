@@ -151,14 +151,8 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
     CUBE_SCREEN (screen);
 
     bool isCulled = glIsEnabled (GL_CULL_FACE);
-    if (isCulled) {
-	glGetIntegerv (GL_CULL_FACE_MODE, &cull);
-	cullInv = (cull == GL_BACK)? GL_FRONT : GL_BACK;
-    }
-    else {
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT_AND_BACK);
-    }
+    glGetIntegerv (GL_CULL_FACE_MODE, &cull);
+    cullInv = (cull == GL_BACK)? GL_FRONT : GL_BACK;
 
     wx = window->x () - window->input ().left;
     wy = window->y () - window->input ().top;
@@ -168,6 +162,7 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 
     bevel = tds->optionGetBevel ();
 
+    glDisable(GL_CULL_FACE);
     if (ww && wh && !(mask & PAINT_WINDOW_OCCLUSION_DETECTION_MASK) &&
 	((cs->paintOrder () == FTB && mFtb) ||
 	(cs->paintOrder () == BTF && !mFtb)))
@@ -179,7 +174,7 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 	glPushMatrix ();
 	glLoadIdentity ();
 
-	if (cs->paintOrder () == BTF && isCulled)
+	if (cs->paintOrder () == BTF)
 	    glCullFace (cullInv);
 
 	glEnable (GL_BLEND);
@@ -283,6 +278,7 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 	    glCullFace (cull);
     }
 
+    glDisable(GL_CULL_FACE);
     if (cs->paintOrder () == BTF)
 	status = gWindow->glPaint (attrib, transform, region, mask);
     else
@@ -331,7 +327,6 @@ TdScreen::glApplyTransform (const GLScreenPaintAttrib &attrib,
 
     transform->scale (mCurrentScale, mCurrentScale, mCurrentScale);
 }
-
 
 void
 TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
