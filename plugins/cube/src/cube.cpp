@@ -1075,7 +1075,6 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 {
     WRAPABLE_HND_FUNCTN (cubeClearTargetOutput, xRotate, vRotate)
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (!priv->mSky.empty ())
     {
 	priv->gScreen->setLighting (false);
@@ -1096,7 +1095,7 @@ CubeScreen::cubeClearTargetOutput (float xRotate,
 #endif
     }
     else
-	priv->gScreen->clearTargetOutput (GL_COLOR_BUFFER_BIT);
+	priv->gScreen->clearTargetOutput (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void 
@@ -1305,6 +1304,8 @@ void PrivateCubeScreen::glDisableOutputClipping()
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
 #endif
+
+    gScreen->glDisableOutputClipping();
 }
 
 void 
