@@ -160,6 +160,9 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 
     bevel = tds->optionGetBevel ();
 
+    glGetIntegerv (GL_CULL_FACE_MODE, &cull);
+    cullInv = (cull == GL_BACK)? GL_FRONT : GL_BACK;
+
     if (ww && wh && !(mask & PAINT_WINDOW_OCCLUSION_DETECTION_MASK) &&
 	((cs->paintOrder () == FTB && mFtb) ||
 	(cs->paintOrder () == BTF && !mFtb)))
@@ -271,7 +274,7 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glPopMatrix ();
 
-	if (cs->paintOrder () == BTF && isCulled)
+	if (cs->paintOrder () == BTF)
 	    glCullFace (cull);
     }
 
