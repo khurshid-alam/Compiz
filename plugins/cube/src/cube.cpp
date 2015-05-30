@@ -1446,11 +1446,11 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == -1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-	glEnable(GL_CULL_FACE);
+	 glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr,
 			   mask, mXRotations, size, hsize, paintOrder);
-	if(!wasCulled)
-	    glDisable(GL_CULL_FACE);
+	 if(!wasCulled)
+	     glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);
@@ -1525,11 +1525,11 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == 1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-	glEnable(GL_CULL_FACE);
+	 glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr, mask, mXRotations,
 			   size, hsize, paintOrder);
-	if(!wasCulled)
-	    glDisable(GL_CULL_FACE);
+	 if(!wasCulled)
+	     glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);
