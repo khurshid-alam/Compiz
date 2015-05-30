@@ -162,7 +162,6 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 
     bevel = tds->optionGetBevel ();
 
-    glDisable(GL_CULL_FACE);
     if (ww && wh && !(mask & PAINT_WINDOW_OCCLUSION_DETECTION_MASK) &&
 	((cs->paintOrder () == FTB && mFtb) ||
 	(cs->paintOrder () == BTF && !mFtb)))
