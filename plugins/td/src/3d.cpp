@@ -396,7 +396,7 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 	    if (w->destroyed ())
 		continue;
 
-	    if (!w->shaded () || !w->isViewable () || w->minimized())
+	    if (!w->shaded () || !w->isViewable () || w->minimized() || w->hidden())
 	    {
 		if (!tdw->cWindow->damaged ())
 		    continue;
