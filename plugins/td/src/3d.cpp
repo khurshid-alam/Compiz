@@ -150,9 +150,7 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
     TD_SCREEN (screen);
     CUBE_SCREEN (screen);
 
-    bool isCulled = glIsEnabled (GL_CULL_FACE);
-    glGetIntegerv (GL_CULL_FACE_MODE, &cull);
-    cullInv = (cull == GL_BACK)? GL_FRONT : GL_BACK;
+    glIsEnabled (GL_CULL_FACE);
 
     wx = window->x () - window->input ().left;
     wy = window->y () - window->input ().top;
