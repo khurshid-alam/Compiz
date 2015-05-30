@@ -275,15 +275,11 @@ TdWindow::glPaintWithDepth (const GLWindowPaintAttrib &attrib,
 	    glCullFace (cull);
     }
 
-    glDisable(GL_CULL_FACE);
     if (cs->paintOrder () == BTF)
 	status = gWindow->glPaint (attrib, transform, region, mask);
     else
 	status = gWindow->glPaint (attrib, tds->mBTransform, region,
 				   mask | PAINT_WINDOW_TRANSFORMED_MASK);
-
-    if (!isCulled)
-	glDisable(GL_CULL_FACE);
 
     return status;
 }
