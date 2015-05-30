@@ -5,7 +5,7 @@
 if [ "x$DESKTOP_SESSION" = "xubuntu" ]; then
     COMPIZ_CONFIG_PROFILE="ubuntu"
     export COMPIZ_CONFIG_PROFILE
-elif [ "x$DESKTOP_SESSION" = "xmate" ] || [ "x$XDG_SESSION_DESKTOP" == "xmate" ]; then
+elif [ "x$DESKTOP_SESSION" = "xmate" ] || [ "x$XDG_SESSION_DESKTOP" = "xmate" ]; then
     COMPIZ_CONFIG_PROFILE="mate"
     export COMPIZ_CONFIG_PROFILE
 fi
