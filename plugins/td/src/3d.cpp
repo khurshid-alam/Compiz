@@ -396,10 +396,10 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 	    CompWindow *w = (*it);
 	    tdw = TdWindow::get (w);
 
-	    if (w->destroyed ())
+	    if (w->destroyed () || !w->isMapped() || w->minimized())
 		continue;
 
-	    if (!w->shaded () || !w->isViewable () || w->minimized())
+	    if (!w->shaded () || !w->isViewable ())
 	    {
 		if (!tdw->cWindow->damaged ())
 		    continue;
