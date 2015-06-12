@@ -17,9 +17,6 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <glib-object.h>
 
 #include <gio/gio.h>
@@ -153,17 +150,10 @@ gwd_settings_storage_gsettings_update_metacity_theme (GWDSettingsStorage *settin
 
     use_metacity_theme = g_settings_get_boolean (priv->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
 
-#ifdef HAVE_METACITY_3_16_0
     if (!priv->metacity)
         return FALSE;
 
     theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
-#else
-    if (!priv->desktop)
-        return FALSE;
-
-    theme = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
-#endif
 
     return gwd_settings_writable_metacity_theme_changed (priv->writable,
                                                          use_metacity_theme,
