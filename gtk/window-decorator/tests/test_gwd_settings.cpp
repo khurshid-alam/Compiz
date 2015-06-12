@@ -1501,7 +1501,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 
 	    /* We do not need to keep a reference to these */
 	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
-	    mMetacitySettings = gwd_get_org_gnome_mutter_settings ();
+	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
 	    mMutterSettings = gwd_get_org_gnome_mutter_settings ();
 	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
