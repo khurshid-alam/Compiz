@@ -78,51 +78,10 @@
 
 #include <gwd-fwd.h>
 
-#define DBUS_DEST       "org.freedesktop.compiz"
-#define DBUS_PATH       "/org/freedesktop/compiz/decor/screen0"
-#define DBUS_INTERFACE  "org.freedesktop.compiz"
-#define DBUS_METHOD_GET "get"
-
-extern const float STROKE_ALPHA;
-
 extern const unsigned short ICON_SPACE;
-
-extern const float DOUBLE_CLICK_DISTANCE;
-
-#define WM_MOVERESIZE_SIZE_TOPLEFT      0
-#define WM_MOVERESIZE_SIZE_TOP          1
-#define WM_MOVERESIZE_SIZE_TOPRIGHT     2
-#define WM_MOVERESIZE_SIZE_RIGHT        3
-#define WM_MOVERESIZE_SIZE_BOTTOMRIGHT  4
-#define WM_MOVERESIZE_SIZE_BOTTOM       5
-#define WM_MOVERESIZE_SIZE_BOTTOMLEFT   6
-#define WM_MOVERESIZE_SIZE_LEFT         7
-#define WM_MOVERESIZE_MOVE              8
-#define WM_MOVERESIZE_SIZE_KEYBOARD     9
-#define WM_MOVERESIZE_MOVE_KEYBOARD    10
-
-extern const float	    SHADOW_RADIUS;
-extern const float	    SHADOW_OPACITY;
-extern const unsigned short SHADOW_OFFSET_X;
-extern const unsigned short SHADOW_OFFSET_Y;
-#define SHADOW_COLOR_RED   0x0000
-#define SHADOW_COLOR_GREEN 0x0000
-#define SHADOW_COLOR_BLUE  0x0000
-
-extern const float META_OPACITY;
-#define META_SHADE_OPACITY	    TRUE;
-extern const float META_ACTIVE_OPACITY;
-#define META_ACTIVE_SHADE_OPACITY   TRUE;
 
 #define META_MAXIMIZED (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | \
 WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY)
-
-#define CMDLINE_OPACITY              (1 << 0)
-#define CMDLINE_OPACITY_SHADE        (1 << 1)
-#define CMDLINE_ACTIVE_OPACITY       (1 << 2)
-#define CMDLINE_ACTIVE_OPACITY_SHADE (1 << 3)
-#define CMDLINE_BLUR                 (1 << 4)
-#define CMDLINE_THEME                (1 << 5)
 
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
@@ -144,16 +103,13 @@ unsigned long decorations;
 
 extern gboolean minimal;
 
-#define SWITCHER_SPACE 40
-
 extern GWDSettingsNotified *notified;
-extern GWDSettings	   *settings;
+extern GWDSettings *settings;
 extern GWDSettingsWritable *writable;
 
 extern gdouble decoration_alpha;
 #ifdef USE_METACITY
-extern MetaButtonLayout   meta_button_layout;
-extern gboolean	          meta_button_layout_set;
+extern gboolean meta_button_layout_set;
 #endif
 
 extern Atom frame_input_window_atom;
@@ -406,21 +362,10 @@ extern decor_t    *switcher_window;
 extern XRenderPictFormat *xformat_rgba;
 extern XRenderPictFormat *xformat_rgb;
 
-/* gtk-window-decorator.c */
-
-double
-dist (double x1, double y1,
-      double x2, double y2);
-
 /* frames.c */
 
 void
 initialize_decorations ();
-
-void
-update_frames_border_extents (gpointer key,
-			      gpointer value,
-			      gpointer user_data);
 
 decor_frame_t *
 gwd_get_decor_frame (const gchar *);
@@ -458,30 +403,6 @@ frame_update_shadow (decor_frame_t	    *frame,
 void
 frame_update_titlebar_font (decor_frame_t *frame);
 
-void
-bare_frame_update_shadow (Display		  *xdisplay,
-			   Screen		  *screen,
-			   decor_frame_t	  *frame,
-			   decor_shadow_t	  **shadow_normal,
-			   decor_context_t	  *context_normal,
-			   decor_shadow_t	  **shadow_max,
-			   decor_context_t	  *context_max,
-			   decor_shadow_info_t    *info,
-			   decor_shadow_options_t *opt_shadow,
-			   decor_shadow_options_t *opt_no_shadow);
-
-void
-decor_frame_update_shadow (Display		  *xdisplay,
-			   Screen		  *screen,
-			   decor_frame_t	  *frame,
-			   decor_shadow_t	  **shadow_normal,
-			   decor_context_t	  *context_normal,
-			   decor_shadow_t	  **shadow_max,
-			   decor_context_t	  *context_max,
-			   decor_shadow_info_t    *info,
-			   decor_shadow_options_t *opt_shadow,
-			   decor_shadow_options_t *opt_no_shadow);
-
 decor_frame_t *
 create_normal_frame (const gchar *type);
 
@@ -500,12 +421,6 @@ update_window_decoration_size (WnckWindow *win);
 
 gboolean
 request_update_window_decoration_size (WnckWindow *win);
-
-void
-update_window_decoration_name (WnckWindow *win);
-
-gint
-max_window_name_width (WnckWindow *win);
 
 unsigned int
 populate_frame_type (decor_t *d);
@@ -538,9 +453,6 @@ void
 update_titlebar_font ();
 
 void
-update_window_decoration_name (WnckWindow *win);
-
-void
 update_window_decoration (WnckWindow *win);
 
 void
@@ -561,10 +473,6 @@ void
 connect_screen (WnckScreen *screen);
 
 void
-window_opened (WnckScreen *screen,
-	       WnckWindow *window);
-
-void
 window_closed (WnckScreen *screen,
 	       WnckWindow *window);
 
@@ -579,10 +487,6 @@ remove_frame_window (WnckWindow *win);
 void
 restack_window (WnckWindow *win,
 		int	   stack_mode);
-
-void
-connect_window (WnckWindow *win);
-
 
 /* blur.c */
 
@@ -711,6 +615,7 @@ cairo_surface_t *
 surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 /* metacity.c */
+
 #ifdef USE_METACITY
 
 MetaFrameType
@@ -718,18 +623,6 @@ meta_get_frame_type_for_decor_type (const gchar *frame_type);
 
 void
 meta_draw_window_decoration (decor_t *d);
-
-void
-meta_get_decoration_geometry (decor_t		*d,
-			      MetaTheme	        *theme,
-			      MetaFrameFlags    *flags,
-			      MetaFrameGeometry *fgeom,
-			      MetaButtonLayout  *button_layout,
-			      MetaFrameType     frame_type,
-			      GdkRectangle      *clip);
-
-void
-meta_calc_button_size (decor_t *d);
 
 gboolean
 meta_calc_decoration_size (decor_t *d,
@@ -748,10 +641,6 @@ meta_get_button_position (decor_t *d,
 			  gint    *y,
 			  gint    *w,
 			  gint    *h);
-
-gboolean
-meta_button_present (MetaButtonLayout   *button_layout,
-		     MetaButtonFunction function);
 
 void
 meta_get_event_window_position (decor_t *d,
@@ -777,6 +666,7 @@ void
 meta_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active);
 
 #endif
+
 /* switcher.c */
 
 #define SWITCHER_ALPHA 0xa0a0
@@ -799,33 +689,11 @@ create_switcher_frame (const gchar *);
 void
 destroy_switcher_frame ();
 
-void
-draw_switcher_decoration (decor_t *d);
-
 gboolean
 update_switcher_window (Window     popup,
 			Window     selected);
 
-decor_t *
-switcher_window_opened (Window popup, Window selected);
-
-void
-switcher_window_closed ();
-
 /* events.c */
-
-void
-move_resize_window (WnckWindow *win,
-		    int	       direction,
-		    decor_event *gtkwd_event);
-
-void
-common_button_event (WnckWindow *win,
-		     decor_event *gtkwd_event,
-		     decor_event_type gtkwd_type,
-		     int	button,
-		     int	max,
-		     char	*tooltip);
 
 void
 close_button_event (WnckWindow *win,
@@ -877,24 +745,9 @@ unstick_button_event (WnckWindow *win,
 		      decor_event_type gtkwd_type);
 
 void
-handle_title_button_event (WnckWindow   *win,
-			   int          action,
-			   decor_event *gtkwd_event);
-
-void
-handle_mouse_wheel_title_event (WnckWindow   *win,
-				unsigned int button);
-
-void
 title_event (WnckWindow       *win,
 	     decor_event      *gtkwd_event,
 	     decor_event_type gtkwd_type);
-
-void
-frame_common_event (WnckWindow       *win,
-		    int              direction,
-		    decor_event      *gtkwd_event,
-		    decor_event_type gtkwd_type);
 
 void
 top_left_event (WnckWindow       *win,
@@ -937,17 +790,6 @@ bottom_right_event (WnckWindow *win,
 void
 frame_window_realized (GtkWidget *widget,
 		       gpointer  data);
-
-event_callback
-find_event_callback_for_point (decor_t *d,
-			       int     x,
-			       int     y,
-			       Bool    *enter,
-			       Bool    *leave,
-			       BoxPtr  *entered_box);
-
-event_callback
-find_leave_event_callback (decor_t *d);
 
 void
 frame_handle_button_press (GtkWidget      *widget,
@@ -1003,18 +845,6 @@ action_menu_map (WnckWindow *win,
 		 Time	     time);
 
 /* util.c */
-
-double
-square (double x);
-
-double
-dist (double x1, double y1,
-      double x2, double y2);
-
-void
-shade (const decor_color_t *a,
-       decor_color_t	   *b,
-       float		   k);
 
 gboolean
 get_window_prop (Window xwindow,

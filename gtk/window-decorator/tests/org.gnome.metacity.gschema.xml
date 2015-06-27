@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema path="/org/gnome/metacity/" id="org.gnome.metacity" gettext-domain="@GETTEXT_DOMAIN">
+    <key type="s" name="theme">
+      <default>'Adwaita'</default>
+      <summary>Current theme</summary>
+      <description>The theme determines the appearance of window borders, titlebar, and so forth.</description>
+    </key>
+  </schema>
+</schemalist>

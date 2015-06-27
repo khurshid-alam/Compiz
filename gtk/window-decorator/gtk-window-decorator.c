@@ -36,28 +36,12 @@ GWDSettings	    *settings;
 
 gdouble decoration_alpha = 0.5;
 #ifdef USE_METACITY
-MetaButtonLayout meta_button_layout;
 gboolean	 meta_button_layout_set = FALSE;
 #endif
 
 gboolean minimal = FALSE;
 
-#define SWITCHER_SPACE 40
-
-const float STROKE_ALPHA = 0.6f;
-
 const unsigned short ICON_SPACE = 20;
-
-const float DOUBLE_CLICK_DISTANCE = 8.0f;
-
-const float	    SHADOW_RADIUS      = 8.0f;
-const float	    SHADOW_OPACITY     = 0.5f;
-const unsigned short SHADOW_OFFSET_X    = 1;
-const unsigned short SHADOW_OFFSET_Y    = 1;
-
-const float META_OPACITY              = 0.75f;
-
-const float META_ACTIVE_OPACITY       = 1.0f;
 
 guint cmdline_options = 0;
 

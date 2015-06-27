@@ -26,6 +26,8 @@
 #include "gtk-window-decorator.h"
 #include "gwd-cairo-window-decoration-util.h"
 
+#define STROKE_ALPHA 0.6f
+
 void
 rounded_rectangle (cairo_t *cr,
 		   double  x,
