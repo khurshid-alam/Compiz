@@ -1,3 +1,25 @@
+compiz (1:0.9.12.1+15.10.20150627.1-0ubuntu1) wily; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Add support for metacity 3.16. (LP: #1463645)
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Eleni Maria Stea ]
+  * removed unnecessary glClear which causes bug #1462612 (LP: #1462612)
+
+  [ Martin Wimpress ]
+  * Tweak the shadows so subtle drop shadows appears on menus, just as
+    they do in Macro.  Change from Shift Switcher to Static Switcher
+    because Shift Switcher is causing Compiz to crash, particularly when
+    switching while Steam is running.
+
+  [ Stephen M. Webb ]
+  * remove a bashism from the xsession set-profile script (LP: #1460324)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Sat, 27 Jun 2015 04:41:51 +0000
+
 compiz (1:0.9.12.1+15.10.20150511-0ubuntu1) wily; urgency=medium
 
   [ Alberts Muktupāvels ]
