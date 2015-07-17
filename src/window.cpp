@@ -5129,7 +5129,19 @@ PrivateWindow::freeIcons ()
 int
 CompWindow::outputDevice () const
 {
-    return screen->outputDeviceForGeometry (priv->serverGeometry);
+    const CompPoint& vp  = defaultViewport ();
+    const CompPoint& svp = screen->vp ();
+
+    if (vp == svp)
+	return screen->outputDeviceForGeometry (priv->serverGeometry);
+
+    Geometry geo (priv->serverGeometry.x () + (svp.x () - vp.x ()) * screen->width (),
+		  priv->serverGeometry.y () + (svp.y () - vp.y ()) * screen->height (),
+		  priv->serverGeometry.width (),
+		  priv->serverGeometry.height (),
+		  priv->serverGeometry.border ());
+
+   return screen->outputDeviceForGeometry (geo);
 }
 
 bool
@@ -5987,10 +5999,9 @@ PrivateWindow::updateStartupId ()
 
 	CompPoint vp   = window->defaultViewport ();
 	CompPoint svp  = screen->vp ();
-	CompSize size  = *screen;
 
-	int x = window->serverGeometry ().x () + (svp.x () - vp.x ()) * size.width ();
-	int y = window->serverGeometry ().y () + (svp.y () - vp.y ()) * size.height ();
+	int x = window->serverGeometry ().x () + (svp.x () - vp.x ()) * screen->width ();
+	int y = window->serverGeometry ().y () + (svp.y () - vp.y ()) * screen->height ();
 	window->moveToViewportPosition (x, y, true);
 
 	if (allowWindowFocus (0, timestamp))
