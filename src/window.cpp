@@ -3572,7 +3572,11 @@ PrivateWindow::addWindowSizeChanges (XWindowChanges       *xwc,
     int x = (viewport.x () - screen->vp ().x ()) * screen->width ();
     int y = (viewport.y () - screen->vp ().y ()) * screen->height ();
 
-    CompOutput *output = &screen->outputDevs ().at (screen->outputDeviceForGeometry (old));
+    CompWindow::Geometry old_relative_to_vp(old.x () - x, old.y () - y,
+					    old.width (), old.height (),
+					    old.border ());
+    int outputDev = screen->outputDeviceForGeometry (old_relative_to_vp);
+    CompOutput *output = &screen->outputDevs ().at (outputDev);
 
     /*
      * output is now the correct output for the given geometry.
