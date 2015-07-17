@@ -14,11 +14,8 @@ is a compositing window manager using OpenGL for rendering.
 
 .SH OPTIONS
 .TP
-.B \-\-help
-Show a summary of options and exit.
-.TP
-.B \-\-version
-Print the version of the program and exit.
+.B \-\-debug
+Enable debug mode.
 .TP
 .BI "\-\-display " DISPLAY
 Manage the display called
@@ -27,31 +24,34 @@ instead of the name obtained from the
 .I $DISPLAY
 environment variable.
 .TP
+.B \-\-help
+Shows a summary of options and exit.
+.TP
+.B \-\-keep\-desktop\-hints
+Retains existing desktop hints.
+.TP
+.B \-\-no\-auto\-add\-ccp
+Do not automatically load the Compiz config plugin (ccp).
+.TP
 .B \-\-replace
-Replace any existing window managers on the given X display.
+Replaces any existing window managers on the given X display.
 .TP
 .B \-\-send\-startup\-message
 Sends a message to all connected X clientd once startup is complete.
 .TP
 .B \-\-sm\-disable
-Disable the session management.
+Disables session management.
 .TP
 .BI "\-\-sm\-client\-id " ID
-Use the given
+Uses the given
 .I ID
 as the client ID for session management.
 .TP
-.B \-\-keep\-desktop\-hints
-Retain existing desktop hints.
-.TP
-.B \-\-no\-auto\-add\-ccp
-Do not automatically load the Compiz config plugin (ccp).
-.TP
 .B \-\-sync
-Make all X calls synchronous.
+Makes all X calls synchronous.
 .TP
-.B \-\-debug
-Enable debug mode.
+.B \-\-version
+Prints the version of the program and exits.
 
 .SH AUTHOR
 compiz was written by David Reveman <davidr@novell.com> and others.
