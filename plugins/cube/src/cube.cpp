@@ -197,7 +197,7 @@ CubeScreen::multioutputMode () const
 	    return OneBigCube;
 	    break;
 
-	case CubeOptions::MultioutputModeMultipleCubes:
+	case 0:
 	    return MultipleCubes;
 	    break;
 

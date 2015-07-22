@@ -93,7 +93,10 @@ TdScreen::preparePaint (int msSinceLastPaint)
 
     cScreen->preparePaint (msSinceLastPaint);
 
-    setFunctions (mActive);
+    if (cubeScreen->multioutputMode() == CubeScreen::MultipleCubes)
+	setFunctions(false);
+    else
+	setFunctions (mActive);
 }
 
 #define DOBEVEL(corner) (tds->optionGetBevel##corner () ? bevel : 0)
