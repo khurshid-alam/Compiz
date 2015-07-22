@@ -1783,7 +1783,6 @@ CubePluginVTable::init ()
 	CompPrivate p;
 	p.uval = COMPIZ_CUBE_ABI;
 	screen->storeValue ("cube_ABI", p);
-
 	return true;
     }
 
