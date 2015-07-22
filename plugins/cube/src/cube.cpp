@@ -32,8 +32,6 @@
 
 #include "privates.h"
 
-static bool td_was_enabled;
-
 class CubePluginVTable :
     public CompPlugin::VTableForScreenAndWindow<CubeScreen, PrivateCubeWindow, COMPIZ_CUBE_ABI>
 {
@@ -347,22 +345,6 @@ PrivateCubeScreen::updateOutputs ()
 
     if (optionGetMultioutputMode () == 0)
     {
-	if (screen->outputDevs ().size () > 1)
-	{
-	    CompPlugin* p = CompPlugin::find("td");
-	    if (p)
-	    {
-		td_was_enabled = true;
-		CompPlugin::unload(p);
-	    }
-	}
-	else
-	{
-	    if (td_was_enabled)
-	    {
-		CompPlugin::load("td");
-	    }
-	}
 	mFullscreenOutput = true;
 	mNOutput = 1;
 	return;
@@ -1770,12 +1752,6 @@ CubeScreen::CubeScreen (CompScreen *s) :
     PluginClassHandler<CubeScreen, CompScreen, COMPIZ_CUBE_ABI> (s),
     priv (new PrivateCubeScreen (s))
 {
-    if (CompPlugin* p = CompPlugin::find("td")) {
-	td_was_enabled = true;
-	if (priv->optionGetMultioutputMode() == 0 && screen->outputDevs().size() > 1)
-	    CompPlugin::unload(p);
-    }
-
 }
 
 CubeScreen::~CubeScreen ()
