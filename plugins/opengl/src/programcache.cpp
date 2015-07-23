@@ -132,7 +132,7 @@ GLProgram* GLProgramCache::operator () (std::list<const GLShaderData*> shaders)
  
     if (it == priv->cache.end ())
     {
-	GLProgramPtr program (compileProgram (name, shaders));
+	program = GLProgramPtr (compileProgram (name, shaders));
 	priv->insert (name, program);
     }
     else
