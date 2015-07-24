@@ -11,6 +11,10 @@ gles2_architectures := armel armhf
 # currently, segfault if CMAKE_BUILD_TYPE=Release
 export DEB_LDFLAGS_MAINT_STRIP=-Wl,-Bsymbolic-functions
 
+# libgtkmm requires C++-11, and some plugins require libgtkmm, so we do too
+# (lp: #1477978)
+export DEB_CXXFLAGS_MAINT_APPEND=-std=c++11
+
 CORE_ABIVERSION := $(shell sed -rn 's/^\#define[[:space:]]+CORE_ABIVERSION[[:space:]]+//p' include/core/abiversion.h )
 
 override_dh_quilt_patch:
