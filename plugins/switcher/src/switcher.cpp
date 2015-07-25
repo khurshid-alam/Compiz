@@ -892,8 +892,10 @@ SwitchWindow::updateIconTexturedWindow (GLWindowPaintAttrib  &sAttrib,
 					int                  y,
 					GLTexture            *icon)
 {
-    sAttrib.xScale = (float) ICON_SIZE / icon->width ();
-    sAttrib.yScale = (float) ICON_SIZE / icon->height ();
+    const unsigned short SWITCHER_ICON_SIZE = 48;
+
+    sAttrib.xScale = (float) SWITCHER_ICON_SIZE / icon->width ();
+    sAttrib.yScale = (float) SWITCHER_ICON_SIZE / icon->height ();
     if (sAttrib.xScale < sAttrib.yScale)
 	sAttrib.yScale = sAttrib.xScale;
     else
