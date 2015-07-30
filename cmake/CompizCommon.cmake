@@ -51,7 +51,7 @@ set (
 )
 
 # Almost everything is a shared library now, so almost everything needs -fPIC
-set (COMMON_FLAGS "-fPIC -Wall -std=c++11")
+set (COMMON_FLAGS "-fPIC -Wall")
 
 option (COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS "Warn unused private fields" OFF)
 if (NOT COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS)
@@ -84,7 +84,7 @@ if (COMPIZ_WERROR)
 endif ()
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -std=c++11")
 
 set (COMMON_LINKER_FLAGS "-Wl,-zdefs")
 set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${COMMON_LINKER_FLAGS}")
