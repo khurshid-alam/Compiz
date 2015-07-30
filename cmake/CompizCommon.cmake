@@ -51,7 +51,7 @@ set (
 )
 
 # Almost everything is a shared library now, so almost everything needs -fPIC
-set (COMMON_FLAGS "-fPIC -Wall")
+set (COMMON_FLAGS "-fPIC -Wall -std=c++11")
 
 option (COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS "Warn unused private fields" OFF)
 if (NOT COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS)
