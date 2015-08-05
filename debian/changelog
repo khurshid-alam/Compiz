@@ -1,3 +1,50 @@
+compiz (1:0.9.12.1+15.10.20150805-0ubuntu1) wily; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Change icon size back to 48px in application switcher plugin. (LP:
+    #1237057)
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Dmitry Shachnev ]
+  * Move window switcher plugins to compiz-plugins-default. (LP:
+    #971051, #1465647)
+  * debian/compiz-gnome.gsettings-override: Remove unityshell from
+    active plugins, and add switcher. (LP: #1469086)
+
+  [ Eleni Maria Stea ]
+  * It fixes the 3d windows plugin. Problem: The 3d clipping is
+    performed in viewing space (modelview transformation) and should be
+    done inside the shader when we use shaders otherwise the viewing
+    space pipeline operations will be ignored. Compiz used to perform
+    the clipping inside the td plugin using pipeline functions, then it
+    was loading a generic shader program (no clipping operations) to
+    render the windows and then it rendered the 3d quads around the
+    windows using the pipeline (so these were clipped correctly). (LP:
+    #1395697)
+  * Sometimes the MultipleCubes, Automatic or OneBigCube option might be
+    set although we are not in multimonitor. Modified the 3d windows
+    plugin to check the number of monitors as well.
+
+  [ Marco Trevisan (Treviño) ]
+  * Window: add clientFrame(), to get the client-side decoration extents
+    (LP: #1422768, #1436553)
+  * Window: compute the correct output using the absolute window
+    position (LP: #1475721)
+
+  [ Martin Wimpress ]
+  * align MATE profile more closely with Marco
+
+  [ Stephen M. Webb ]
+  * Fix a FTBFS when -std=c++11 is used. (LP: #1477654)
+  * Fixed the Compiz manpage and --help message to agree with the actual
+    command-line options supported. (LP: #1475508)
+  * force Compiz to build using C++-11 (required by build dependency
+    libgtkmm-3.0-1). (LP: #1477978)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 05 Aug 2015 11:26:51 +0000
+
 compiz (1:0.9.12.1+15.10.20150627.1-0ubuntu1) wily; urgency=medium
 
   [ Alberts Muktupāvels ]
