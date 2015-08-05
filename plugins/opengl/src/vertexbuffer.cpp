@@ -621,7 +621,10 @@ int PrivateVertexBuffer::legacyRender (const GLMatrix            &projection,
 	glTexCoordPointer (2, GL_FLOAT, 0, &textureData[i][0]);
     }
 
-    glDrawArrays (primitiveType, vertexOffset, vertexData.size () / 3);
+    glDrawArrays (primitiveType, vertexOffset, maxVertices > 0 ?
+				    std::min (static_cast <int> (vertexData.size () / 3),
+					      maxVertices) :
+				    vertexData.size () / 3);
 
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);

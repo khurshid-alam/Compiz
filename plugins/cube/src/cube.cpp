@@ -197,7 +197,7 @@ CubeScreen::multioutputMode () const
 	    return OneBigCube;
 	    break;
 
-	case CubeOptions::MultioutputModeMultipleCubes:
+	case 0:
 	    return MultipleCubes;
 	    break;
 
@@ -343,7 +343,7 @@ PrivateCubeScreen::updateOutputs ()
 	return;
     }
 
-    if (optionGetMultioutputMode () == CubeOptions::MultioutputModeMultipleCubes)
+    if (optionGetMultioutputMode () == 0)
     {
 	mFullscreenOutput = true;
 	mNOutput = 1;
@@ -1304,6 +1304,8 @@ void PrivateCubeScreen::glDisableOutputClipping()
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
 #endif
+
+    gScreen->glDisableOutputClipping();
 }
 
 void 
@@ -1444,11 +1446,11 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == -1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-        glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr,
 			   mask, mXRotations, size, hsize, paintOrder);
-        if(!wasCulled)
-            glDisable(GL_CULL_FACE);
+	if(!wasCulled)
+	    glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);
@@ -1523,11 +1525,11 @@ PrivateCubeScreen::glPaintTransformedOutput (const GLScreenPaintAttrib &sAttrib,
 
     if (mInvert == 1 || cubeScreen->cubeShouldPaintAllViewports ())
     {
-        glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	paintAllViewports (sa, transform, region, outputPtr, mask, mXRotations,
 			   size, hsize, paintOrder);
-        if(!wasCulled)
-            glDisable(GL_CULL_FACE);
+	if(!wasCulled)
+	    glDisable(GL_CULL_FACE);
     }
 
     glCullFace (cullNorm);
