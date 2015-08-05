@@ -1,5 +1,6 @@
 /*
  * Copyright © 2011 Linaro Ltd.
+ * Copyright 2015 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -28,7 +29,8 @@
 #include "privates.h"
 
 typedef std::list<std::string> access_history_t;
-typedef std::pair<boost::shared_ptr<GLProgram>, access_history_t::iterator> value;
+typedef boost::shared_ptr<GLProgram> GLProgramPtr;
+typedef std::pair<GLProgramPtr, access_history_t::iterator> value;
 
 static GLProgram *
 compileProgram (std::string name, std::list<const GLShaderData*> shaders)
@@ -97,7 +99,7 @@ class PrivateProgramCache
 	access_history_t             access_history;
 	std::map<std::string, value> cache;
 
-	void insert (std::string, GLProgram *);
+	void insert (std::string, GLProgramPtr const&);
 	void evict ();
 };
 
@@ -116,6 +118,7 @@ GLProgram* GLProgramCache::operator () (std::list<const GLShaderData*> shaders)
 {
     std::list<const GLShaderData*>::const_iterator name_it;
     std::string name;
+    GLProgramPtr program;
 
     for (name_it = shaders.begin(); name_it != shaders.end(); ++name_it)
     {
@@ -129,9 +132,8 @@ GLProgram* GLProgramCache::operator () (std::list<const GLShaderData*> shaders)
  
     if (it == priv->cache.end ())
     {
-	GLProgram *program = compileProgram (name, shaders);
+	program = GLProgramPtr (compileProgram (name, shaders));
 	priv->insert (name, program);
-	return program;
     }
     else
     {
@@ -139,9 +141,9 @@ GLProgram* GLProgramCache::operator () (std::list<const GLShaderData*> shaders)
 	                             priv->access_history,
 	                             (*it).second.second);
 	(*it).second.second = priv->access_history.rbegin ().base ();
-
-	return (*it).second.first.get ();
+	program = (*it).second.first;
     }
+    return program.get();
 }
 
 PrivateProgramCache::PrivateProgramCache (size_t c) :
@@ -149,7 +151,7 @@ PrivateProgramCache::PrivateProgramCache (size_t c) :
 {
 }
 
-void PrivateProgramCache::insert (std::string name, GLProgram *program)
+void PrivateProgramCache::insert (std::string name, GLProgramPtr const& program)
 {
     assert (cache.find (name) == cache.end ());
 

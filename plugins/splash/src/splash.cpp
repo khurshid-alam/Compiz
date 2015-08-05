@@ -233,7 +233,12 @@ SplashScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 	{
 	    tex->enable (GLTexture::Good);
 
-	    if (!screen->outputDevs ().size () > 1)
+	    if (screen->outputDevs ().size () > 1)
+	    {
+		x = (screen->width () - backSize.width ()) / 2;
+		y = (screen->height () - backSize.height ()) / 2;
+	    }
+	    else
 	    {
 	        CompRect headOutputRect = 
 			splashGetCurrentOutputRect ();
@@ -243,11 +248,6 @@ SplashScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 
 		x += headOutputRect.x ();
 		y += headOutputRect.y ();
-	    }
-	    else
-	    {
-		x = (screen->width () - backSize.width ()) / 2;
-		y = (screen->height () - backSize.height ()) / 2;
 	    }
 
 	    GLTexture::Matrix mat = tex->matrix ();
