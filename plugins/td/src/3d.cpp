@@ -93,7 +93,7 @@ TdScreen::preparePaint (int msSinceLastPaint)
 
     cScreen->preparePaint (msSinceLastPaint);
 
-    if (cubeScreen->multioutputMode() == CubeScreen::MultipleCubes)
+    if (cubeScreen->multioutputMode() != CubeScreen::OneBigCube && screen->outputDevs().size() > 1)
 	setFunctions(false);
     else
 	setFunctions (mActive);
