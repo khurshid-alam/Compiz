@@ -276,6 +276,8 @@ class PrivateWindow :
 
 	void updateIconGeometry ();
 
+	void updateClientFrame ();
+
 	Window getClientLeader ();
 
 	char * getStartupId ();
@@ -429,6 +431,7 @@ class PrivateWindow :
 	CompWindowExtents lastServerInput;
 	CompWindowExtents border;
 	CompWindowExtents output;
+	CompWindowExtents clientFrame;
 
 	CompStruts *struts;
 

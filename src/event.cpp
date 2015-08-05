@@ -1755,6 +1755,12 @@ CompScreenImpl::_handleEvent (XEvent *event)
 	    if (w)
 		w->priv->updateIconGeometry ();
 	}
+	else if (event->xproperty.atom == Atoms::frameGtkExtents)
+	{
+	    w = findWindow (event->xproperty.window);
+	    if (w)
+		w->priv->updateClientFrame ();
+	}
 	else if (event->xproperty.atom == Atoms::wmStrut ||
 		 event->xproperty.atom == Atoms::wmStrutPartial)
 	{

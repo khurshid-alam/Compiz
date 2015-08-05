@@ -107,6 +107,7 @@ namespace Atoms {
     Atom clientListStacking;
 
     Atom frameExtents;
+    Atom frameGtkExtents;
     Atom frameWindow;
 
     Atom wmState;
@@ -270,8 +271,9 @@ namespace Atoms {
 	clientListStacking =
 	    XInternAtom (dpy, "_NET_CLIENT_LIST_STACKING", 0);
 
-	frameExtents = XInternAtom (dpy, "_NET_FRAME_EXTENTS", 0);
-	frameWindow  = XInternAtom (dpy, "_NET_FRAME_WINDOW", 0);
+	frameExtents    = XInternAtom (dpy, "_NET_FRAME_EXTENTS", 0);
+	frameGtkExtents = XInternAtom (dpy, "_GTK_FRAME_EXTENTS", 0);
+	frameWindow     = XInternAtom (dpy, "_NET_FRAME_WINDOW", 0);
 
 	wmState        = XInternAtom (dpy, "WM_STATE", 0);
 	wmChangeState  = XInternAtom (dpy, "WM_CHANGE_STATE", 0);
