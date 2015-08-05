@@ -78,8 +78,6 @@ usr/share/compiz/*showrepaint.*
 usr/lib/*/compiz/*splash.*
 usr/share/compiz/*splash.*
 usr/share/compiz/splash
-usr/lib/*/compiz/*switcher.*
-usr/share/compiz/*switcher.*
 usr/lib/*/compiz/*td.*
 usr/share/compiz/*td.*
 usr/lib/*/compiz/*text.*
