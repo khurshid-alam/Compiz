@@ -72,10 +72,10 @@ class SwitchScreen :
 	int countWindows ();
 	void handleEvent (XEvent *event);
 
-private:
-  void setBackground();
+    private:
+	void setBackground ();
 
-public:
+    public:
 	void initiate (SwitchWindowSelection selection,
 		       bool                  showPopup);
 	void windowRemove (CompWindow *w);
@@ -181,5 +181,4 @@ class SwitchPluginVTable :
 
 	bool init ();
 };
-
 

@@ -219,30 +219,30 @@ SwitchScreen::handleEvent (XEvent *event)
 
 void SwitchScreen::setBackground()
 {
-  SWITCH_SCREEN(screen);
-  if(!ss->popupWindow)
-    return;
+    SWITCH_SCREEN(screen);
+    if(!ss->popupWindow)
+	return;
 
-  Display *dpy = screen->dpy();
+    Display *dpy = screen->dpy();
 
-  unsigned long  background_pixel = 0ul;
-  if (optionGetUseBackgroundColor())
-  {
-    Visual *visual = findArgbVisual(dpy, screen->screenNum());
-    Colormap colormap = XCreateColormap(dpy, screen->root(), visual, AllocNone);
+    unsigned long  background_pixel = 0ul;
+    if (optionGetUseBackgroundColor())
+    {
+	Visual *visual = findArgbVisual(dpy, screen->screenNum());
+	Colormap colormap = XCreateColormap(dpy, screen->root(), visual, AllocNone);
 
-    XColor col;
-    col.red = optionGetBackgroundColorRed();
-    col.green = optionGetBackgroundColorGreen();
-    col.blue = optionGetBackgroundColorBlue();
-    XAllocColor(dpy, colormap, &col);
+	XColor col;
+	col.red = optionGetBackgroundColorRed();
+	col.green = optionGetBackgroundColorGreen();
+	col.blue = optionGetBackgroundColorBlue();
+	XAllocColor(dpy, colormap, &col);
 
-    background_pixel = col.pixel;
+	background_pixel = col.pixel;
 
-    unsigned short alpha = optionGetBackgroundColorAlpha();
-  }
+	unsigned short alpha = optionGetBackgroundColorAlpha();
+    }
 
-  XSetWindowBackground(dpy, ss->popupWindow, background_pixel);
+    XSetWindowBackground(dpy, ss->popupWindow, background_pixel);
 }
 
 void SwitchScreen::initiate(SwitchWindowSelection selection,
