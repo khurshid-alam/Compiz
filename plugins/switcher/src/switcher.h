@@ -71,6 +71,11 @@ class SwitchScreen :
 	void handleSelectionChange (bool toNext, int nextIdx);
 	int countWindows ();
 	void handleEvent (XEvent *event);
+
+private:
+  void setBackground();
+
+public:
 	void initiate (SwitchWindowSelection selection,
 		       bool                  showPopup);
 	void windowRemove (CompWindow *w);
