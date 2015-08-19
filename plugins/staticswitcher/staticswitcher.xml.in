@@ -293,6 +293,24 @@
 			</default>
 		    </option>
 		</subgroup>
+		<subgroup>
+		    <_short>Background</_short>
+		    <option name="use_background_color" type="bool">
+			<_short>Set background color</_short>
+			<_long>Set background color</_long>
+			<default>false</default>
+		    </option>
+		    <option name="background_color" type="color">
+			<_short>Bacground Color</_short>
+			<_long>Background color of the switcher window.</_long>
+			<default>
+			    <red>0x3333</red>
+			    <green>0x3333</green>
+			    <blue>0x3333</blue>
+			    <alpha>0xd998</alpha>
+			</default>
+		    </option>
+		</subgroup>
 	    </group>
 	</options>
     </plugin>

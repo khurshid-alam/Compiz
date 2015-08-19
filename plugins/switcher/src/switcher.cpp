@@ -66,6 +66,34 @@ static float _boxVertices[] =
      (WIDTH >> 1), HEIGHT - BOX_WIDTH, 0.0f,
 };
 
+void
+SwitchScreen::setBackground()
+{
+    SWITCH_SCREEN(screen);
+    if(!ss->popupWindow)
+	return;
+
+    Display *dpy = screen->dpy();
+
+    unsigned long  background_pixel = 0ul;
+    if (optionGetUseBackgroundColor())
+    {
+	Visual *visual = findArgbVisual(dpy, screen->screenNum());
+	Colormap colormap = XCreateColormap(dpy, screen->root(), visual, AllocNone);
+
+	XColor col;
+	col.red = optionGetBackgroundColorRed();
+	col.green = optionGetBackgroundColorGreen();
+	col.blue = optionGetBackgroundColorBlue();
+	XAllocColor(dpy, colormap, &col);
+
+	background_pixel = col.pixel;
+
+	unsigned short alpha = optionGetBackgroundColorAlpha();
+    }
+
+    XSetWindowBackground(dpy, ss->popupWindow, background_pixel);
+}
 
 void
 SwitchScreen::updateWindowList (int count)
@@ -217,35 +245,8 @@ SwitchScreen::handleEvent (XEvent *event)
     BaseSwitchScreen::handleEvent (event);
 }
 
-void SwitchScreen::setBackground()
-{
-    SWITCH_SCREEN(screen);
-    if(!ss->popupWindow)
-	return;
-
-    Display *dpy = screen->dpy();
-
-    unsigned long  background_pixel = 0ul;
-    if (optionGetUseBackgroundColor())
-    {
-	Visual *visual = findArgbVisual(dpy, screen->screenNum());
-	Colormap colormap = XCreateColormap(dpy, screen->root(), visual, AllocNone);
-
-	XColor col;
-	col.red = optionGetBackgroundColorRed();
-	col.green = optionGetBackgroundColorGreen();
-	col.blue = optionGetBackgroundColorBlue();
-	XAllocColor(dpy, colormap, &col);
-
-	background_pixel = col.pixel;
-
-	unsigned short alpha = optionGetBackgroundColorAlpha();
-    }
-
-    XSetWindowBackground(dpy, ss->popupWindow, background_pixel);
-}
-
-void SwitchScreen::initiate(SwitchWindowSelection selection,
+void
+SwitchScreen::initiate (SwitchWindowSelection selection,
 			bool                  showPopup)
 {
     int count;
@@ -326,8 +327,8 @@ void SwitchScreen::initiate(SwitchWindowSelection selection,
 			 XA_ATOM, 32, PropModeReplace,
 			 (unsigned char *) &Atoms::winTypeUtil, 1);
 
-    screen->setWindowProp(popupWindow, Atoms::winDesktop, 0xffffffff);
-    setBackground();
+	screen->setWindowProp (popupWindow, Atoms::winDesktop, 0xffffffff);
+	setBackground();
 
 	setSelectedWindowHint (false);
     }

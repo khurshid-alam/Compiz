@@ -33,6 +33,35 @@ const unsigned short PREVIEWSIZE = 150;
 const unsigned short BORDER = 10;
 
 void
+StaticSwitchScreen::setBackground()
+{
+    SWITCH_SCREEN(screen);
+    if(!ss->popupWindow)
+	return;
+
+    Display *dpy = screen->dpy();
+
+    unsigned long  background_pixel = 0ul;
+    if (optionGetUseBackgroundColor())
+    {
+	Visual *visual = findArgbVisual(dpy, screen->screenNum());
+	Colormap colormap = XCreateColormap(dpy, screen->root(), visual, AllocNone);
+
+	XColor col;
+	col.red = optionGetBackgroundColorRed();
+	col.green = optionGetBackgroundColorGreen();
+	col.blue = optionGetBackgroundColorBlue();
+	XAllocColor(dpy, colormap, &col);
+
+	background_pixel = col.pixel;
+
+	unsigned short alpha = optionGetBackgroundColorAlpha();
+    }
+
+    XSetWindowBackground(dpy, ss->popupWindow, background_pixel);
+}
+
+void
 StaticSwitchScreen::updatePopupWindow ()
 {
     int    newXCount, newYCount;
@@ -286,6 +315,7 @@ StaticSwitchScreen::createPopup ()
 			 (unsigned char *) &Atoms::winTypeUtil, 1);
 
 	::screen->setWindowProp (popupWindow, Atoms::winDesktop, 0xffffffff);
+	setBackground();
 
 	setSelectedWindowHint (false);
 
@@ -1357,6 +1387,9 @@ StaticSwitchScreen::StaticSwitchScreen (CompScreen *screen) :
     move (0),
     mouseSelect (false)
 {
+    optionSetUseBackgroundColorNotify(boost::bind(&StaticSwitchScreen::setBackground, this));
+    optionSetBackgroundColorNotify(boost::bind(&StaticSwitchScreen::setBackground, this));
+
 #define SWITCHBIND(a,b,c) boost::bind (switchInitiateCommon, _1, _2, _3, a, b, c)
 
     optionSetNextButtonInitiate (SWITCHBIND (CurrentViewport, true, true));
