@@ -1,3 +1,9 @@
+compiz (1:0.9.12.2-0ubuntu1) UNRELEASED; urgency=medium
+
+  * new upstream version 0.9.12.2
+
+ -- Stephen M. Webb <stephen.webb@canonical.com>  Wed, 19 Aug 2015 11:51:01 -0400
+
 compiz (1:0.9.12.1+15.10.20150805-0ubuntu1) wily; urgency=medium
 
   [ Alberts Muktupāvels ]
