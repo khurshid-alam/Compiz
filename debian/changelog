@@ -1,6 +1,7 @@
 compiz (1:0.9.12.2-0ubuntu1) UNRELEASED; urgency=medium
 
   * new upstream version 0.9.12.2
+  * debian/upstream: added signing key
 
  -- Stephen M. Webb <stephen.webb@canonical.com>  Wed, 19 Aug 2015 11:51:01 -0400
 
