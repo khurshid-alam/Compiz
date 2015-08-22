@@ -174,7 +174,7 @@
 		    <default>false</default>
 		</option>
 		<option name="background_color" type="color">
-		    <_short>Bacground Color</_short>
+		    <_short>Background Color</_short>
 		    <_long>Background color of the switcher window.</_long>
 		    <default>
 			<red>0x3333</red>

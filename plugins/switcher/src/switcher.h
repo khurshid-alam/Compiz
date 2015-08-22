@@ -48,8 +48,6 @@ class SwitchScreen :
     public PluginClassHandler<SwitchScreen,CompScreen>,
     public SwitcherOptions
 {
-	void setBackground ();
-
     public:
 	SwitchScreen (CompScreen *screen);
 	~SwitchScreen ();

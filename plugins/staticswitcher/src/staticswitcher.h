@@ -45,8 +45,6 @@ class StaticSwitchScreen :
     public PluginClassHandler<StaticSwitchScreen,CompScreen>,
     public StaticswitcherOptions
 {
-	void setBackground ();
-
     public:
 	StaticSwitchScreen (CompScreen *screen);
 	~StaticSwitchScreen ();
