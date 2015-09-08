@@ -2537,7 +2537,7 @@ DecorScreen::handleEvent (XEvent *event)
 		{
 		    DECOR_WINDOW (w);
 
-		    if (dw->isSwitcher && event->xproperty.state != PropertyDelete)
+		    if (dw->isSwitcher && (event->xproperty.state != PropertyDelete))
 			dw->updateSwitcher ();
 		}
 	    }
