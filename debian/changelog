@@ -1,9 +1,25 @@
-compiz (1:0.9.12.2-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.12.2+15.10.20150908-0ubuntu1) wily; urgency=medium
 
+  [ Stephen M. Webb ]
   * new upstream version 0.9.12.2
   * debian/upstream: added signing key
 
- -- Stephen M. Webb <stephen.webb@canonical.com>  Wed, 19 Aug 2015 11:51:01 -0400
+  [ Andrea Azzarone andrea.azzarone@canonical.com ]
+  * Build compiz using c++11.
+  * Enable building compiz from sources using cmake3.
+
+  [ Artur drozd ]
+  * Allow to select background color for switcher and staticswitcher.
+    (LP: #1329811)
+
+  [ Eleni Maria Stea ]
+  * decoration: fixed warning for parentheses order
+
+  [ Tim Lunn ]
+  * Remove unused code that causes a build-dep on gnome-control-center-
+    dev (LP: #1481541) (LP: #1481541)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 08 Sep 2015 11:36:16 +0000
 
 compiz (1:0.9.12.1+15.10.20150805-0ubuntu1) wily; urgency=medium
 
