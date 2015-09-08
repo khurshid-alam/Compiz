@@ -17,6 +17,8 @@ cmake_policy (SET CMP0002 OLD)
 cmake_policy (SET CMP0003 NEW)
 cmake_policy (SET CMP0005 OLD)
 cmake_policy (SET CMP0011 OLD)
+cmake_policy (SET CMP0022 OLD)
+
 
 set (CMAKE_SKIP_RPATH FALSE)
 
@@ -381,7 +383,6 @@ macro (compiz_add_release_signoff)
 	add_custom_target (release-upload-component)
 	add_custom_target (release-upload)
 
-	add_dependencies (release-upload-component release-upload-version)
 	add_dependencies (release-upload release-upload-component)
 
 endmacro ()
