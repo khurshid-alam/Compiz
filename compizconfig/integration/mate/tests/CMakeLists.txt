@@ -8,7 +8,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gsettings/mocks)
 include_directories (${CMAKE_SOURCE_DIR}/compizconfig/tests)
 link_directories (${CMAKE_INSTALL_PREFIX}/lib)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_library (compizconfig_ccs_mock_mate_integrated_setting_composition
 	     ${CMAKE_CURRENT_SOURCE_DIR}/compizconfig_ccs_mock_mate_integrated_setting_composition.c)
