@@ -124,6 +124,24 @@ getXDGUserDir (XDGUserDir userDir)
     return "";
 }
 
+void
+BaseSwitchScreen::updateBackground(bool           useBackgroundColor,
+				   unsigned short backgroundColor[])
+{
+    if (!popupWindow)
+	return;
+
+    unsigned long  background_pixel = 0ul;
+    if (useBackgroundColor)
+    {
+	background_pixel = ((((static_cast<unsigned long>(backgroundColor [3]) * backgroundColor [2]) >> 24) & 0x0000ff) |
+	(((backgroundColor [3] * backgroundColor [1]) >> 16) & 0x00ff00) |
+	(((backgroundColor [3] * backgroundColor [0]) >> 8) & 0xff0000) |
+	(((backgroundColor [3] & 0xff00) << 16)));
+    }
+
+    XSetWindowBackground (screen->dpy(), popupWindow, background_pixel);
+}
 
 void
 BaseSwitchScreen::setSelectedWindowHint (bool focus)

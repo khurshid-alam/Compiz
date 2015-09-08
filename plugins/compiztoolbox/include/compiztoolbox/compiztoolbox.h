@@ -63,7 +63,7 @@ typedef enum
     AllViewports,
     Panels,
     Group
-} SwitchWindowSelection;	    
+} SwitchWindowSelection;
 
 class BaseSwitchScreen
 {
@@ -75,6 +75,7 @@ class BaseSwitchScreen
 	void setSelectedWindowHint (bool focus);
 	void activateEvent (bool activating);
 	void updateForegroundColor ();
+	void updateBackground (bool useBackgroundColor, unsigned short backgroundColor[]);
 
 	CompWindow *switchToWindow (bool toNext, bool autoChangeVPOption, bool focus);
 	static bool compareWindows (CompWindow *w1, CompWindow *w2);

@@ -286,6 +286,7 @@ StaticSwitchScreen::createPopup ()
 			 (unsigned char *) &Atoms::winTypeUtil, 1);
 
 	::screen->setWindowProp (popupWindow, Atoms::winDesktop, 0xffffffff);
+	updateBackground(optionGetUseBackgroundColor(), optionGetBackgroundColor());
 
 	setSelectedWindowHint (false);
 
@@ -1357,6 +1358,10 @@ StaticSwitchScreen::StaticSwitchScreen (CompScreen *screen) :
     move (0),
     mouseSelect (false)
 {
+    auto bgUpdater = [=] (...){ this->updateBackground (this->optionGetUseBackgroundColor (), this->optionGetBackgroundColor ());};
+    optionSetUseBackgroundColorNotify (bgUpdater);
+    optionSetBackgroundColorNotify (bgUpdater);
+
 #define SWITCHBIND(a,b,c) boost::bind (switchInitiateCommon, _1, _2, _3, a, b, c)
 
     optionSetNextButtonInitiate (SWITCHBIND (CurrentViewport, true, true));
