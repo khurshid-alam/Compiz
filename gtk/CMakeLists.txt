@@ -52,17 +52,6 @@ if (USE_GTK)
 	    endif (GNOME_WINDOW_SETTINGS_FOUND)
 	endif (USE_GNOME)
 
-	if (USE_GNOME_KEYBINDINGS)
-	    compiz_pkg_check_modules (GNOME_KEY_BINDINGS gnome-keybindings)
-	    if (GNOME_KEY_BINDINGS_FOUND)
-		exec_program (${PKG_CONFIG_EXECUTABLE}
-		  ARGS "--variable=keysdir gnome-keybindings"
-		  OUTPUT_VARIABLE keybindingsdir
-		)
-	    else (GNOME_KEY_BINDINGS_FOUND)
-		compiz_set (USE_GNOME_KEYBINDINGS 0)
-	    endif (GNOME_KEY_BINDINGS_FOUND)
-        endif (USE_GNOME_KEYBINDINGS)
     else (GTK_WINDOW_DECORATOR_FOUND)
 	compiz_set (USE_GTK 0)
     endif (GTK_WINDOW_DECORATOR_FOUND)

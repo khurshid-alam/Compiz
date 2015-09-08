@@ -53,7 +53,6 @@ Build-Depends: cmake (>= 2.8.5),
                protobuf-compiler,
                python-all-dev,
                python-pyrex,
-               gnome-control-center-dev,
                gsettings-desktop-schemas-dev,
                xserver-xorg-dev (>= 0.7.0),
 Standards-Version: 3.9.6
