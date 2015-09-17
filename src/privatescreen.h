@@ -349,10 +349,18 @@ class ButtonGrab {
 	int          count;
 };
 
+enum class GrabType {
+    POINTER = 1 << 0,
+    KEYBOARD = 2 << 0,
+    ALL = POINTER|KEYBOARD
+};
+
 struct Grab {
-	Grab(Cursor cursor, const char *name) : cursor(cursor), name(name) {}
-	Cursor     cursor;
-	const char *name;
+    Grab(GrabType type, Cursor cursor, const char *name) : type(type), cursor(cursor), name(name) {}
+    Grab(Cursor cursor, const char *name) : Grab(GrabType::ALL, cursor, name) {}
+    GrabType   type;
+    Cursor     cursor;
+    const char *name;
 };
 
 // data members that don't belong (these probably belong
