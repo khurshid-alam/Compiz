@@ -148,6 +148,8 @@ public:
     MOCK_CONST_METHOD0(defaultIcon, CompIcon *());
     virtual bool otherGrabExist (const char *, ...) { return false; }  // TODO How to mock?
     MOCK_METHOD2(pushGrab, GrabHandle (Cursor cursor, const char *name));
+    MOCK_METHOD2(pushPointerGrab, GrabHandle (Cursor cursor, const char *name));
+    MOCK_METHOD1(pushKeyboardGrab, GrabHandle (const char *name));
     MOCK_METHOD2(removeGrab, void (GrabHandle handle, CompPoint *restorePointer));
     MOCK_METHOD4(writeImageToFile, bool (CompString &path,
 			       const char *format,

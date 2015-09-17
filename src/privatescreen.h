@@ -349,7 +349,7 @@ class ButtonGrab {
 	int          count;
 };
 
-enum class GrabType {
+enum GrabType {
     POINTER = 1 << 0,
     KEYBOARD = 2 << 0,
     ALL = POINTER|KEYBOARD
@@ -711,6 +711,10 @@ class PrivateScreen :
 	static void compScreenSnEvent (SnMonitorEvent *event,
 			   void           *userData);
 
+	CompScreen::GrabHandle pushGrabGeneric (::compiz::private_screen::GrabType type,
+						Cursor cursor,
+						const char *name);
+
 	int  getXkbEvent() const { return xkbEvent.get(); }
 	std::vector<XineramaScreenInfo>& getScreenInfo () { return screenInfo; }
 	SnDisplay* getSnDisplay () const { return snDisplay; }
@@ -970,6 +974,12 @@ class CompScreenImpl : public CompScreen,
 	 * can call this and all get events, but the pointer will
 	 * be grabbed once and the actual grab refcounted */
 	GrabHandle pushGrab (Cursor cursor, const char *name);
+
+	/* Adds an X Pointer grab to the stack. */
+	GrabHandle pushPointerGrab (Cursor cursor, const char *name);
+
+	/* Adds an X Keyboard grab to the stack. */
+    	GrabHandle pushKeyboardGrab (const char *name);
 
 	/* Allows you to change the pointer of your grab */
 	void updateGrab (GrabHandle handle, Cursor cursor);
