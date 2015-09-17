@@ -17,7 +17,7 @@ pkg_check_modules (COMPIZCONFIG_TEST_GSETTINGS gio-2.0 glib-2.0)
 
 if (COMPIZCONFIG_TEST_GSETTINGS_FOUND)
 
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
     link_directories (${CMAKE_CURRENT_BINARY_DIR}/../../libcompizconfig/tests)
     link_directories (${CMAKE_CURRENT_BINARY_DIR}/../testenvironments)

@@ -200,17 +200,6 @@ static void gwd_settings_notified_impl_interface_init (GWDSettingsNotifiedInterf
     interface->update_metacity_theme = gwd_settings_notified_impl_update_metacity_theme;
 }
 
-static void gwd_settings_notified_impl_dispose (GObject *object)
-{
-    GWDSettingsNotifiedImplPrivate *priv = GET_PRIVATE (object);
-
-    if (priv->screen)
-    {
-	g_object_unref (priv->screen);
-	priv->screen = NULL;
-    }
-}
-
 static void gwd_settings_notified_impl_finalize (GObject *object)
 {
     G_OBJECT_CLASS (gwd_settings_notified_impl_parent_class)->finalize (object);
@@ -240,7 +229,6 @@ static void gwd_settings_notified_impl_class_init (GWDSettingsNotifiedImplClass 
 
     g_type_class_add_private (klass, sizeof (GWDSettingsNotifiedImplPrivate));
 
-    object_class->dispose = gwd_settings_notified_impl_dispose;
     object_class->finalize = gwd_settings_notified_impl_finalize;
     object_class->set_property = gwd_settings_notified_impl_set_property;
 

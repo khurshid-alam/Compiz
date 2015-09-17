@@ -48,16 +48,17 @@ CompManager::usage ()
 {
     printf ("Usage: %s [OPTIONS] [PLUGINS ...]\n"
             "Options:\n"
-            "  --replace             Replace any existing window managers\n"
-            "  --display DISPLAY     Connect to X display DISPLAY (instead of $DISPLAY)\n"
-            "  --sm-disable          Disable session management\n"
-            "  --sm-client-id ID     Session management client ID\n"
-            "  --keep-desktop-hints  Retain existing desktop hints\n"
-            "  --no-auto-add-ccp     Do not automatically load the ccp plugin\n"
-            "  --sync                Make all X calls synchronous\n"
-            "  --debug               Enable debug mode\n"
-            "  --version             Show the program version\n"
-            "  --help                Show this summary\n"
+            "  --debug                 Enable debug mode\n"
+            "  --display DISPLAY       Connect to X display DISPLAY (instead of $DISPLAY)\n"
+            "  --help                  Show this summary\n"
+            "  --keep-desktop-hints    Retain existing desktop hints\n"
+            "  --no-auto-add-ccp       Do not automatically load the ccp plugin\n"
+            "  --replace               Replace any existing window managers\n"
+            "  --send-startup-message  Sends a message to connected clients on startup completion.\n"
+            "  --sm-client-id ID       Session management client ID\n"
+            "  --sm-disable            Disable session management\n"
+            "  --sync                  Make all X calls synchronous\n"
+            "  --version               Show the program version\n"
             , programName);
 }
 

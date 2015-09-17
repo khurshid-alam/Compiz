@@ -93,7 +93,10 @@ TdScreen::preparePaint (int msSinceLastPaint)
 
     cScreen->preparePaint (msSinceLastPaint);
 
-    setFunctions (mActive);
+    if (cubeScreen->multioutputMode() != CubeScreen::OneBigCube && screen->outputDevs().size() > 1)
+	setFunctions(false);
+    else
+	setFunctions (mActive);
 }
 
 #define DOBEVEL(corner) (tds->optionGetBevel##corner () ? bevel : 0)
@@ -324,7 +327,6 @@ TdScreen::glApplyTransform (const GLScreenPaintAttrib &attrib,
     transform->scale (mCurrentScale, mCurrentScale, mCurrentScale);
 }
 
-
 void
 TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 			     const GLMatrix	       &transform,
@@ -397,7 +399,7 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 	    CompWindow *w = (*it);
 	    tdw = TdWindow::get (w);
 
-	    if (w->destroyed ())
+	    if (w->destroyed () || !w->isMapped() || w->minimized())
 		continue;
 
 	    if (!w->shaded () || !w->isViewable ())
@@ -454,8 +456,10 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 
 		glLoadMatrixf (mTransform.getMatrix ());
 
+		GL::shaders = false;
 		tdw->gWindow->glPaint (tdw->gWindow->paintAttrib (), mTransform,
 				  infiniteRegion, newMask);
+		GL::shaders = true;
 
 		gScreen->glDisableOutputClipping ();
 

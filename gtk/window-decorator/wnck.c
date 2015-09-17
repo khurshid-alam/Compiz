@@ -162,7 +162,7 @@ window_actions_changed (WnckWindow *win)
     }
 }
 
-void
+static void
 update_frames_border_extents (gpointer key,
 			      gpointer value,
 			      gpointer user_data)
@@ -590,7 +590,7 @@ remove_frame_window (WnckWindow *win)
     draw_list = g_slist_remove (draw_list, d);
 }
 
-void
+static void
 connect_window (WnckWindow *win)
 {
     g_signal_connect_object (win, "name_changed",
@@ -762,7 +762,7 @@ active_window_changed (WnckScreen *screen)
     }
 }
 
-void
+static void
 window_opened (WnckScreen *screen,
 	       WnckWindow *win)
 {

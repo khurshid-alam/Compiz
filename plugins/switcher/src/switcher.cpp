@@ -66,7 +66,6 @@ static float _boxVertices[] =
      (WIDTH >> 1), HEIGHT - BOX_WIDTH, 0.0f,
 };
 
-
 void
 SwitchScreen::updateWindowList (int count)
 {
@@ -300,6 +299,7 @@ SwitchScreen::initiate (SwitchWindowSelection selection,
 			 (unsigned char *) &Atoms::winTypeUtil, 1);
 
 	screen->setWindowProp (popupWindow, Atoms::winDesktop, 0xffffffff);
+        updateBackground (optionGetUseBackgroundColor (), optionGetBackgroundColor ());
 
 	setSelectedWindowHint (false);
     }
@@ -892,8 +892,10 @@ SwitchWindow::updateIconTexturedWindow (GLWindowPaintAttrib  &sAttrib,
 					int                  y,
 					GLTexture            *icon)
 {
-    sAttrib.xScale = (float) ICON_SIZE / icon->width ();
-    sAttrib.yScale = (float) ICON_SIZE / icon->height ();
+    const unsigned short SWITCHER_ICON_SIZE = 48;
+
+    sAttrib.xScale = (float) SWITCHER_ICON_SIZE / icon->width ();
+    sAttrib.yScale = (float) SWITCHER_ICON_SIZE / icon->height ();
     if (sAttrib.xScale < sAttrib.yScale)
 	sAttrib.yScale = sAttrib.xScale;
     else
@@ -1120,6 +1122,10 @@ SwitchScreen::SwitchScreen (CompScreen *screen) :
     zooming = (optionGetZoom () > 0.05f);
 
     optionSetZoomNotify (boost::bind (&SwitchScreen::setZoom, this));
+
+    auto bgUpdater = [=] (...){ this->updateBackground (this->optionGetUseBackgroundColor (), this->optionGetBackgroundColor ());};
+    optionSetUseBackgroundColorNotify (bgUpdater);
+    optionSetBackgroundColorNotify (bgUpdater);
 
 #define SWITCHBIND(a,b,c) boost::bind (switchInitiateCommon, _1, _2, _3, a, b, c)
 

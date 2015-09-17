@@ -37,5 +37,3 @@ if (COMPIZ_BUILD_TESTING)
 endif (COMPIZ_BUILD_TESTING)
 
 add_custom_target (pyclean)
-
-add_dependencies (pyclean pyclean_ccsm pyclean_compizconfig)

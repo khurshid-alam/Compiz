@@ -45,11 +45,14 @@ init_settings (GWDSettingsWritable *writable,
 #ifdef USE_GSETTINGS
 #define STORAGE_USED
     GSettings *compiz = gwd_get_org_compiz_gwd_settings ();
+    GSettings *metacity = gwd_get_org_gnome_metacity_settings ();
     GSettings *mutter = gwd_get_org_gnome_mutter_settings ();
     GSettings *gnome  = gwd_get_org_gnome_desktop_wm_preferences_settings ();
-    storage = gwd_settings_storage_gsettings_new (gnome, mutter, compiz, writable);
+
+    storage = gwd_settings_storage_gsettings_new (gnome, metacity, mutter, compiz, writable);
 
     gwd_connect_org_compiz_gwd_settings (compiz, storage);
+    gwd_connect_org_gnome_metacity_settings (metacity, storage);
     gwd_connect_org_gnome_mutter_settings (mutter, storage);
     gwd_connect_org_gnome_desktop_wm_preferences_settings (gnome, storage);
 #endif

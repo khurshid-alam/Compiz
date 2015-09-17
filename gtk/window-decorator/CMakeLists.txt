@@ -138,6 +138,3 @@ if (USE_GTK)
     endif (COMPIZ_BUILD_TESTING)
 
 endif (USE_GTK)
-
-
-

@@ -25,6 +25,8 @@
 
 #include "gtk-window-decorator.h"
 
+#define SWITCHER_SPACE 40
+
 decor_frame_t *
 create_switcher_frame (const gchar *type)
 {
@@ -319,7 +321,7 @@ draw_switcher_foreground (decor_t *d)
     copy_to_front_buffer (d);
 }
 
-void
+static void
 draw_switcher_decoration (decor_t *d)
 {
     if (d->prop_xid)
@@ -328,7 +330,8 @@ draw_switcher_decoration (decor_t *d)
     draw_switcher_foreground (d);
 }
 
-void
+#if 0
+static void
 switcher_window_closed ()
 {
     decor_t *d = switcher_window;
@@ -356,10 +359,11 @@ switcher_window_closed ()
     g_free (switcher_window);
     switcher_window = NULL;
 }
+#endif
 
 /* Switcher is override-redirect now, we need to track
  * it separately */
-decor_t *
+static decor_t *
 switcher_window_opened (Window popup, Window window)
 {
     decor_t      *d;

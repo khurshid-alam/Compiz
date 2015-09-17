@@ -75,6 +75,21 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
 
 	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_gnome_desktop_wm_preferences_schema)
 
+	set (_metacity_gschema_name org.gnome.metacity)
+	set (_metacity_gschema_filename ${_metacity_gschema_name}.gschema.xml)
+	set (_metacity_gschema_filepath ${CMAKE_CURRENT_SOURCE_DIR}/${_metacity_gschema_filename})
+	set (_metacity_gschema_generated_location ${CMAKE_BINARY_DIR}/generated/glib-2.0/schemas/${_metacity_gschema_filename})
+
+	add_custom_command (OUTPUT ${_metacity_gschema_generated_location}
+			    COMMAND cp -r ${_metacity_gschema_filepath} ${_metacity_gschema_generated_location}
+			    DEPENDS ${_metacity_gschema_filepath}
+			    VERBATIM)
+
+	add_custom_target (compiz_gwd_gsettings_org_gnome_metacity_schema ALL
+			   DEPENDS ${_metacity_gschema_generated_location})
+
+	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_gnome_metacity_schema)
+
 	set (_mutter_gschema_name org.gnome.mutter)
 	set (_mutter_gschema_filename ${_mutter_gschema_name}.gschema.xml)
 	set (_mutter_gschema_filepath ${CMAKE_CURRENT_SOURCE_DIR}/${_mutter_gschema_filename})

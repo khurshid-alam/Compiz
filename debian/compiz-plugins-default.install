@@ -43,6 +43,8 @@ usr/lib/*/compiz/*session.*
 usr/share/compiz/*session.*
 usr/lib/*/compiz/*snap.*
 usr/share/compiz/*snap.*
+usr/lib/*/compiz/*switcher.*
+usr/share/compiz/*switcher.*
 usr/lib/*/compiz/*vpswitch.*
 usr/share/compiz/*vpswitch.*
 usr/lib/*/compiz/*wall.*
