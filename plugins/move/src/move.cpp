@@ -104,7 +104,12 @@ moveInitiate (CompAction         *action,
 	ms->snapOffY  = y - workArea.y ();
 
 	if (!ms->grab)
-	    ms->grab = s->pushGrab (ms->moveCursor, "move");
+	{
+	    if (ms->type == WmMoveResizeMove)
+		ms->grab = s->pushPointerGrab (ms->moveCursor, "move");
+	    else if (ms->type == WmMoveResizeMoveKeyboard)
+		ms->grab = s->pushKeyboardGrab ("move");
+	}
 
 	if (ms->grab)
 	{
@@ -200,6 +205,7 @@ moveTerminate (CompAction         *action,
 
 	ms->w             = 0;
 	ms->releaseButton = 0;
+	ms->type          = 0;
     }
 
     action->setState (action->state () & ~(CompAction::StateTermKey |
@@ -572,12 +578,12 @@ MoveScreen::handleEvent (XEvent *event)
 	case ClientMessage:
 	    if (event->xclient.message_type == Atoms::wmMoveResize)
 	    {
-		unsigned   long type = (unsigned long) event->xclient.data.l[2];
-
 		MOVE_SCREEN (screen);
 
-		if (type == WmMoveResizeMove ||
-		    type == WmMoveResizeMoveKeyboard)
+		ms->type = (unsigned long) event->xclient.data.l[2];
+
+		if (ms->type == WmMoveResizeMove ||
+		    ms->type == WmMoveResizeMoveKeyboard)
 		{
 		    CompWindow *w;
 		    w = screen->findWindow (event->xclient.window);
@@ -619,7 +625,7 @@ MoveScreen::handleEvent (XEvent *event)
 			}
 		    }
 		}
-		else if (ms->w && type == WmMoveResizeCancel &&
+		else if (ms->w && ms->type == WmMoveResizeCancel &&
 			 ms->w->id () == event->xclient.window)
 		    {
 			moveTerminate (&optionGetInitiateButton (),
@@ -702,6 +708,7 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     status (RectangleOut),
     releaseButton (0),
     grab (NULL),
+    type (0),
     hasCompositing (false),
     yConstrained (false)
 {
