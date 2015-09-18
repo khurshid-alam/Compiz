@@ -108,6 +108,7 @@ class ResizeLogic
 	int		 stretchMask;
 	int		 centeredMask;
 
+	unsigned long type;
 	int          releaseButton;
 	unsigned int mask;
 	int          pointerDx;

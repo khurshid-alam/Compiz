@@ -56,6 +56,8 @@ class CompScreenInterface
 	virtual bool otherGrabExist (const char *, void *) = 0;
 	virtual void updateGrab (CompScreen::GrabHandle handle, Cursor cursor) = 0;
 	virtual CompScreen::GrabHandle pushGrab (Cursor cursor, const char *name) = 0;
+	virtual CompScreen::GrabHandle pushPointerGrab (Cursor cursor, const char *name) = 0;
+	virtual CompScreen::GrabHandle pushKeyboardGrab (const char *name) = 0;
 	virtual void removeGrab (CompScreen::GrabHandle handle, CompPoint *restorePointer) = 0;
 
 	/* CompOption::Class */
