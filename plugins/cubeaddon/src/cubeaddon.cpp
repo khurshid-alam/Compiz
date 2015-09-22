@@ -591,8 +591,8 @@ CubeaddonScreen::paintCap (const GLScreenPaintAttrib &sAttrib,
 				mCapFill[i * 3 + 1],
 				mCapFill[i * 3 + 2],
 				1.0f);
-		    float s = v * sGen;
-		    float t = v * tGen;
+		    float s = v * sGen + 0.5;
+		    float t = v * tGen + 0.5;
 
 		    *(texCoordsPtr++) = s;
 		    *(texCoordsPtr++) = t;
@@ -653,8 +653,8 @@ CubeaddonScreen::paintCap (const GLScreenPaintAttrib &sAttrib,
 			 * texCoord.s = dot (vec4 (obj, 1.0), sGenPlane)
 			 * texCoord.t = dot (vec4 (obj, 1.0), tGenPlane)
 			 */
-			float s = v * sGen;
-			float t = v * tGen;
+			float s = v * sGen + 0.5;
+			float t = v * tGen + 0.5;
 
 			*(texCoordsPtr++) = s;
 			*(texCoordsPtr++) = t;
