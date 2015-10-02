@@ -352,7 +352,7 @@ PluginFilesystem::PluginFilesystem()
 // tell GLib not to use the slice-allocator implementation
 // and avoid spurious valgrind reporting
 void glib_nice_for_valgrind() { setenv("G_SLICE", "always-malloc", true); }
-int const init = (glib_nice_for_valgrind(), 0);
+__attribute__((unused)) int const init = (glib_nice_for_valgrind(), 0);
 
 PluginFilesystem const* PluginFilesystem::instance = 0;
 
