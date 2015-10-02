@@ -1,3 +1,14 @@
+compiz (1:0.9.12.2+15.10.20151002-0ubuntu1) wily; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Fixes the texture coordinates of the cube and deformed cube caps so
+    that the top and bottom images appear centered. (LP: #1498504)
+
+  [ Marco Trevisan (Treviño) ]
+  * TestPrivateScreen: ignore unused init const. (LP: #1499108)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 02 Oct 2015 00:31:47 +0000
+
 compiz (1:0.9.12.2+15.10.20150908-0ubuntu1) wily; urgency=medium
 
   [ Stephen M. Webb ]
