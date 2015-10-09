@@ -3096,7 +3096,7 @@ CompScreenImpl::pushKeyboardGrab (const char *name)
 void
 CompScreenImpl::updateGrab (CompScreen::GrabHandle handle, Cursor cursor)
 {
-    if (!handle)
+    if (!handle || !(handle->type & cps::GrabType::POINTER))
 	return;
 
     XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
@@ -3107,19 +3107,25 @@ CompScreenImpl::updateGrab (CompScreen::GrabHandle handle, Cursor cursor)
 
 void
 CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
-			CompPoint *restorePointer)
+			    CompPoint *restorePointer)
 {
     if (!handle)
 	return;
 
+    cps::GrabType type = handle->type;
     privateScreen.eventManager.grabsRemove(handle);
 
     if (!privateScreen.eventManager.grabsEmpty ())
     {
-	XChangeActivePointerGrab (privateScreen.dpy,
-				  POINTER_GRAB_MASK,
-				  privateScreen.eventManager.grabsBack ()->cursor,
-				  CurrentTime);
+	CompScreen::GrabHandle current = privateScreen.eventManager.grabsBack ();
+
+	if (current->type & cps::GrabType::POINTER)
+	{
+	    XChangeActivePointerGrab (privateScreen.dpy,
+				      POINTER_GRAB_MASK,
+				      current->cursor,
+				      CurrentTime);
+	}
     }
     else
     {
@@ -3127,8 +3133,11 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    warpPointer (restorePointer->x () - pointerX,
 			 restorePointer->y () - pointerY);
 
-	XUngrabPointer (privateScreen.dpy, CurrentTime);
-	XUngrabKeyboard (privateScreen.dpy, CurrentTime);
+	if (type & cps::GrabType::POINTER)
+	    XUngrabPointer (privateScreen.dpy, CurrentTime);
+
+	if (type & cps::GrabType::KEYBOARD)
+	    XUngrabKeyboard (privateScreen.dpy, CurrentTime);
     }
 }
 
