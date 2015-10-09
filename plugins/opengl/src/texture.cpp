@@ -42,6 +42,7 @@
 #include "glx-tfp-bind.h"
 
 namespace cgl = compiz::opengl;
+namespace cglint = compiz::opengl::internal;
 
 #ifdef USE_GLES
 std::map<Damage, EglTexture*> boundPixmapTex;
@@ -684,6 +685,12 @@ TfpTexture::bindPixmapToTexture (Pixmap            pixmap,
 				 int               depth,
 				 cgl::PixmapSource source)
 {
+    GLScreen *gs = GLScreen::get (screen);
+    const cglint::DriverWorkaroundQuery &query (gs->fetchDriverWorkarounds ());
+
+    if (query.unsafeForExternalBinds () && source == cgl::ExternallyManaged)
+	return GLTexture::List ();
+
     GLTexture::List   rv (1);
     TfpTexture        *tex = NULL;
     unsigned int      target = 0;

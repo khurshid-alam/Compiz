@@ -48,6 +48,24 @@
 
 extern CompOutput *targetOutput;
 
+namespace compiz
+{
+namespace opengl
+{
+namespace internal
+{
+class DriverWorkaroundQuery
+{
+    public:
+
+	virtual ~DriverWorkaroundQuery () {};
+
+	virtual bool unsafeForExternalBinds () const = 0;
+};
+}
+}
+}
+
 class GLDoubleBuffer :
     public compiz::opengl::DoubleBuffer
 {
@@ -142,6 +160,7 @@ class PrivateGLScreen :
     public ScreenInterface,
     public CompositeScreenInterface,
     public compiz::composite::PaintHandler,
+    public compiz::opengl::internal::DriverWorkaroundQuery,
     public OpenglOptions
 {
     public:
@@ -241,6 +260,7 @@ class PrivateGLScreen :
 	std::vector<GLTexture::BindPixmapProc> bindPixmap;
 	bool hasCompositing;
 	bool commonFrontbuffer;
+	bool sharedMemoryTFP;
 	bool incorrectRefreshRate; // hack for NVIDIA specifying an incorrect
 				   // refresh rate, causing us to miss vblanks
 
@@ -268,6 +288,10 @@ class PrivateGLScreen :
 	std::vector<XToGLSync*>::size_type currentSyncNum;
 	XToGLSync *currentSync;
 	std::vector<XToGLSync*>::size_type warmupSyncs;
+
+    private:
+
+	bool unsafeForExternalBinds () const;
 };
 
 class PrivateGLWindow :
