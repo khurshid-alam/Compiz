@@ -84,7 +84,6 @@ class MoveScreen :
 
 	Cursor moveCursor;
 
-	unsigned long type;
 	unsigned int origState;
 
 	int	snapOffX;

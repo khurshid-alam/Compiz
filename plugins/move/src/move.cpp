@@ -34,8 +34,6 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
-#define WmMoveResizeInvalid WmMoveResizeCancel+1
-
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -107,10 +105,10 @@ moveInitiate (CompAction         *action,
 
 	if (!ms->grab)
 	{
-	    if (ms->type == WmMoveResizeMove)
+	    if (state & CompAction::StateInitButton)
 		ms->grab = s->pushPointerGrab (ms->moveCursor, "move");
-	    else if (ms->type == WmMoveResizeMoveKeyboard)
-		ms->grab = s->pushKeyboardGrab ("move");
+	    else
+		ms->grab = s->pushGrab (ms->moveCursor, "move");
 	}
 
 	if (ms->grab)
@@ -207,7 +205,6 @@ moveTerminate (CompAction         *action,
 
 	ms->w             = 0;
 	ms->releaseButton = 0;
-	ms->type          = WmMoveResizeInvalid;
     }
 
     action->setState (action->state () & ~(CompAction::StateTermKey |
@@ -582,10 +579,10 @@ MoveScreen::handleEvent (XEvent *event)
 	    {
 		MOVE_SCREEN (screen);
 
-		ms->type = event->xclient.data.l[2];
+		unsigned long type = event->xclient.data.l[2];
 
-		if (ms->type == WmMoveResizeMove ||
-		    ms->type == WmMoveResizeMoveKeyboard)
+		if (type == WmMoveResizeMove ||
+		    type == WmMoveResizeMoveKeyboard)
 		{
 		    CompWindow *w;
 		    w = screen->findWindow (event->xclient.window);
@@ -627,7 +624,7 @@ MoveScreen::handleEvent (XEvent *event)
 			}
 		    }
 		}
-		else if (ms->w && ms->type == WmMoveResizeCancel &&
+		else if (ms->w && type == WmMoveResizeCancel &&
 			 ms->w->id () == event->xclient.window)
 		    {
 			moveTerminate (&optionGetInitiateButton (),
@@ -710,7 +707,6 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     status (RectangleOut),
     releaseButton (0),
     grab (NULL),
-    type (WmMoveResizeInvalid),
     hasCompositing (false),
     yConstrained (false)
 {
