@@ -59,7 +59,6 @@ ResizeLogic::ResizeLogic() :
     rectangleMask (0),
     stretchMask (0),
     centeredMask (0),
-    type (WmMoveResizeCancel),
     releaseButton (0),
     grabIndex (0),
     isConstrained (false),
@@ -140,7 +139,7 @@ ResizeLogic::handleEvent (XEvent *event)
 	case ClientMessage:
 	    if (event->xclient.message_type == Atoms::wmMoveResize)
 	    {
-		type = event->xclient.data.l[2];
+		unsigned long type = event->xclient.data.l[2];
 
 		if (type <= WmMoveResizeSizeLeft ||
 		    type == WmMoveResizeSizeKeyboard)
@@ -1325,20 +1324,20 @@ ResizeLogic::initiateResize (CompAction		*action,
 
 	if (!grabIndex)
 	{
-	    if (type <= WmMoveResizeSizeLeft)
+	    Cursor cursor;
+
+	    if (state & CompAction::StateInitKey)
+		cursor = middleCursor;
+	    else
+		cursor = cursorFromResizeMask (mask);
+
+	    if (state & CompAction::StateInitButton)
 	    {
-		Cursor cursor;
-
-		if (state & CompAction::StateInitKey)
-		    cursor = middleCursor;
-		else
-		    cursor = cursorFromResizeMask (mask);
-
 		grabIndex = mScreen->pushPointerGrab (cursor, "resize");
 	    }
-	    else if (type == WmMoveResizeSizeKeyboard)
+	    else
 	    {
-		grabIndex = mScreen->pushKeyboardGrab ("resize");
+		grabIndex = mScreen->pushGrab (cursor, "resize");
 	    }
 	}
 
@@ -1557,7 +1556,6 @@ ResizeLogic::terminateResize (CompAction        *action,
 	    grabIndex = 0;
 	}
 
-	type = WmMoveResizeCancel;
 	releaseButton = 0;
     }
 
