@@ -654,17 +654,6 @@ extern const unsigned short WINDOW_TRANS_FILTER;
 
 extern GLScreenPaintAttrib defaultScreenPaintAttrib;
 
-namespace compiz
-{
-namespace opengl
-{
-namespace internal
-{
-class DriverWorkaroundQuery;
-}
-}
-}
-
 class GLScreen;
 class GLFramebufferObject;
 class GLScreenInterface;
@@ -861,13 +850,6 @@ class GLScreen :
 	void resetRasterPos ();
 
 	bool glInitContext (XVisualInfo *);
-
-	/**
-	 * This is only meant to be used internally, here to avoid unnecessarily
-	 * breaking the API and ABI. Fetch any driver workarounds in place
-	 */
-	const compiz::opengl::internal::DriverWorkaroundQuery &
-	fetchDriverWorkarounds ();
 
 	WRAPABLE_HND (0, GLScreenInterface, bool, glPaintOutput,
 		      const GLScreenPaintAttrib &, const GLMatrix &,

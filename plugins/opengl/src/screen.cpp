@@ -67,7 +67,6 @@ class DetectionWorkaround
 
 
 using namespace compiz::opengl;
-namespace cglint = compiz::opengl::internal;
 
 /**
  * The number of X11 sync objects to create.
@@ -559,18 +558,6 @@ class OptionalPostprocessFrameProvider :
 };
 
 bool
-PrivateGLScreen::unsafeForExternalBinds () const
-{
-    return sharedMemoryTFP;
-}
-
-const cglint::DriverWorkaroundQuery &
-GLScreen::fetchDriverWorkarounds ()
-{
-    return *priv;
-}
-
-bool
 GLScreen::glInitContext (XVisualInfo *visinfo)
 {
 #ifndef USE_GLES
@@ -889,7 +876,6 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 
     priv->commonFrontbuffer = true;
     priv->incorrectRefreshRate = false;
-    priv->sharedMemoryTFP = false;
     if (glRenderer != NULL && strstr (glRenderer, "on llvmpipe"))
     {
 	/*
@@ -908,18 +894,6 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	 * NVIDIA provides an incorrect refresh rate, we need to
 	 * force 60Hz */
 	priv->incorrectRefreshRate = true;
-    }
-
-    if (glVendor != NULL && strstr (glVendor, "Humper"))
-    {
-	/*
-	 * VirtualBox uses XShm/XCopyArea in order to implement
-	 * texture_from_pixmap. Because of this, they require
-	 * a second X connection to track damage events and
-	 * changes to the pixmap, and this is incompatible with
-	 * taking a server grab on when querying and binding
-	 * externally managed pixmaps */
-	priv->sharedMemoryTFP = true;
     }
 
     if (strstr (glExtensions, "GL_ARB_texture_non_power_of_two"))
