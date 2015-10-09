@@ -34,6 +34,8 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
+#define WmMoveResizeInvalid WmMoveResizeCancel+1
+
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -205,7 +207,7 @@ moveTerminate (CompAction         *action,
 
 	ms->w             = 0;
 	ms->releaseButton = 0;
-	ms->type          = 0;
+	ms->type          = WmMoveResizeInvalid;
     }
 
     action->setState (action->state () & ~(CompAction::StateTermKey |
@@ -580,7 +582,7 @@ MoveScreen::handleEvent (XEvent *event)
 	    {
 		MOVE_SCREEN (screen);
 
-		ms->type = (unsigned long) event->xclient.data.l[2];
+		ms->type = event->xclient.data.l[2];
 
 		if (ms->type == WmMoveResizeMove ||
 		    ms->type == WmMoveResizeMoveKeyboard)
@@ -708,7 +710,7 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     status (RectangleOut),
     releaseButton (0),
     grab (NULL),
-    type (0),
+    type (WmMoveResizeInvalid),
     hasCompositing (false),
     yConstrained (false)
 {
