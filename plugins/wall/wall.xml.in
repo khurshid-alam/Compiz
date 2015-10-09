@@ -30,12 +30,12 @@
 				<option name="miniscreen" type="bool">
 					<_short>Show Live Viewport Previews</_short>
 					<_long>Show live viewport previews in switcher window</_long>
-					<default>false</default>
+					<default>true</default>
 				</option>
 				<option name="preview_timeout" type="float">
 					<_short>Switch Target Preview Visibility Time</_short>
 					<_long>Duration (in s) the switch target preview should remain visible after switching ends.</_long>
-					<default>0.4</default>
+					<default>0.2</default>
 					<min>0.0</min>
 					<max>2.0</max>
 					<precision>0.05</precision>
@@ -43,7 +43,7 @@
 				<option name="preview_scale" type="int">
 					<_short>Preview Scale</_short>
 					<_long>Size of the preview in %</_long>
-					<default>100</default>
+					<default>130</default>
 					<min>0</min>
 					<max>400</max>
 				</option>
@@ -57,7 +57,7 @@
 				<option name="border_width" type="int">
 					<_short>Border Width</_short>
 					<_long>Width of the border between the previews</_long>
-					<default>10</default>
+					<default>7</default>
 					<min>0</min>
 					<max>30</max>
 				</option>
@@ -65,10 +65,10 @@
 					<_short>Outline Color</_short>
 					<_long>Outline color of the switcher window.</_long>
 					<default>
-						<red>0x3333</red>
-						<green>0x3333</green>
-						<blue>0x3333</blue>
-						<alpha>0xd998</alpha>
+						<red>0xffff</red>
+						<green>0xffff</green>
+						<blue>0xffff</blue>
+						<alpha>0x3232</alpha>
 						</default>
 				</option>
 				<subgroup>
@@ -78,30 +78,30 @@
 						<_short>Base Color</_short>
 						<_long>First color for the background gradient of the switcher window.</_long>
 						<default>
-							<red>0xcccc</red>
-							<green>0xcccc</green>
-							<blue>0xe665</blue>
-							<alpha>0xd998</alpha>
+							<red>0x0000</red>
+							<green>0x0000</green>
+							<blue>0x0000</blue>
+							<alpha>0x6464</alpha>
 						</default>
 					</option>
 					<option name="background_gradient_highlight_color" type="color">
 						<_short>Highlight Color</_short>
 						<_long>Second color for the background gradient of the switcher window.</_long>
 						<default>
-							<red>0xf332</red>
-							<green>0xf332</green>
-							<blue>0xffff</blue>
-							<alpha>0xd998</alpha>
+							<red>0x0000</red>
+							<green>0x0000</green>
+							<blue>0x0000</blue>
+							<alpha>0x6464</alpha>
 						</default>
 					</option>
 					<option name="background_gradient_shadow_color" type="color">
 						<_short>Shadow Color</_short>
 						<_long>Third color for the background gradient of the switcher window.</_long>
 						<default>
-							<red>0xf332</red>
-							<green>0xf332</green>
-							<blue>0xffff</blue>
-							<alpha>0xd998</alpha>
+							<red>0x0000</red>
+							<green>0x0000</green>
+							<blue>0x0000</blue>
+							<alpha>0x6464</alpha>
 						</default>
 					</option>
 				</subgroup>
@@ -112,20 +112,20 @@
 						<_short>Base Color</_short>
 						<_long>First color for the thumb gradient of the switcher window.</_long>
 						<default>
-							<red>0x3333</red>
-							<green>0x3333</green>
-							<blue>0x3333</blue>
-							<alpha>0x5999</alpha>
+							<red>0x5555</red>
+							<green>0x5555</green>
+							<blue>0x5555</blue>
+							<alpha>0x3232</alpha>
 						</default>
 					</option>
 					<option name="thumb_gradient_highlight_color" type="color">
 						<_short>Highlight Color</_short>
 						<_long>Second color for the thumb gradient of the switcher window.</_long>
 						<default>
-							<red>0x3fff</red>
-							<green>0x3fff</green>
-							<blue>0x3fff</blue>
-							<alpha>0x3fff</alpha>
+							<red>0x5555</red>
+							<green>0x5555</green>
+							<blue>0x5555</blue>
+							<alpha>0x3232</alpha>
 						</default>
 					</option>
 				</subgroup>
@@ -139,7 +139,7 @@
 							<red>0xffff</red>
 							<green>0xffff</green>
 							<blue>0xffff</blue>
-							<alpha>0xf332</alpha>
+							<alpha>0xffff</alpha>
 						</default>
 					</option>
 					<option name="thumb_highlight_gradient_shadow_color" type="color">
@@ -149,7 +149,7 @@
 							<red>0xdfff</red>
 							<green>0xdfff</green>
 							<blue>0xdfff</blue>
-							<alpha>0xa665</alpha>
+							<alpha>0xffff</alpha>
 						</default>
 					</option>
 				</subgroup>
@@ -201,7 +201,7 @@
 				<option name="auto_switch_vp_and_window" type="bool">
 					<_short>Auto Switch Vp And Window</_short>
 					<_long>Auto switch the viewport and move window when Alt-Tab to window that is more than half contained in another viewport</_long>
-					<default>true</default>
+					<default>false</default>
 				</option>
 			</group>
 			<group>
@@ -356,7 +356,7 @@
 				<option name="edgeflip_move" type="bool">
 					<_short>Edge Flip Move</_short>
 					<_long>Flip viewport when moving a window to a screen edge</_long>
-					<default>true</default>
+					<default>false</default>
 				</option>
 				<option name="edgeflip_dnd" type="bool">
 					<_short>Edge Flip DnD</_short>

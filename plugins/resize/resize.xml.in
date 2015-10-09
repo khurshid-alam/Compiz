@@ -56,15 +56,15 @@
 	    <option name="maximize_vertically" type="bool">
 	        <short>Maximize Vertically if screen edge hit</short>
 	        <long>Maximizes the window vertically if the top or bottom screen edge is hit while resizing</long>
-	        <default>false</default>
+	        <default>true</default>
 	    </option>
 	    <option name="border_color" type="color">
 		<_short>Border Color</_short>
 		<_long>Border color used for outline and rectangle resize modes</_long>
 		<default>
-		    <red>0x2f2f</red>
-		    <green>0x2f2f</green>
-		    <blue>0x4f4f</blue>
+		    <red>0xfbfb</red>
+		    <green>0x8b8b</green>
+		    <blue>0x0</blue>
 		    <alpha>0x9f9f</alpha>
 		</default>
 	    </option>
@@ -72,10 +72,10 @@
 		<_short>Fill Color</_short>
 		<_long>Fill color used for rectangle resize mode</_long>
 		<default>
-		    <red>0x2f2f</red>
-		    <green>0x2f2f</green>
-		    <blue>0x4f4f</blue>
-		    <alpha>0x4f4f</alpha>
+		    <red>0xfbfb</red>
+		    <green>0x8b8b</green>
+		    <blue>0x0</blue>
+		    <alpha>0x1919</alpha>
 		</default>
 	    </option>
 	    <subgroup>
