@@ -139,7 +139,6 @@ ccsReadGlobalConfig (ConfigOption option,
     *value = NULL;
     section = getSectionName();
     ret = ccsIniGetString (iniFile, section, entry, value);
-    printf("reading iniFile %s, section %s, entry %s, value %s\n",iniFile, section, entry, *value);
     free (section);
     ccsIniClose (iniFile);
 
