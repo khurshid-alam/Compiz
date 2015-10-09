@@ -3137,7 +3137,7 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    XUngrabPointer (privateScreen.dpy, CurrentTime);
 
 	if (type & cps::GrabType::KEYBOARD)
-	   XUngrabKeyboard (privateScreen.dpy, CurrentTime);
+	    XUngrabKeyboard (privateScreen.dpy, CurrentTime);
     }
 }
 
