@@ -239,6 +239,20 @@ class PluginManager
 	CompStringSet blacklist;
 };
 
+enum GrabType {
+    POINTER = 1 << 0,
+    KEYBOARD = 2 << 0,
+    ALL = POINTER|KEYBOARD
+};
+
+struct Grab {
+    Grab (GrabType type, Cursor cursor, const char *name) : type(type), cursor(cursor), name(name) {}
+    Grab (Cursor cursor, const char *name) : Grab(GrabType::ALL, cursor, name) {}
+    GrabType   type;
+    Cursor     cursor;
+    const char *name;
+};
+
 class GrabList
 {
     // TODO: std::list<Grab *> is almost certainly the wrong data
@@ -249,13 +263,14 @@ class GrabList
 public:
     typedef GrabPtrList::iterator GrabIterator;
 
-    bool grabsEmpty() const { return grabs.empty(); }
-    void grabsPush(Grab* grab) { grabs.push_back (grab); }
-    GrabIterator grabsBegin() { return grabs.begin(); }
-    GrabIterator grabsEnd() { return grabs.end(); }
-    void grabsRemove(Grab* grab);
+    bool grabsEmpty () const { return grabs.empty (); }
+    void grabsPush (Grab* grab) { grabs.push_back (grab); }
+    GrabIterator grabsBegin () { return begin (grabs); }
+    GrabIterator grabsEnd () { return end (grabs); }
+    void grabsRemove (Grab* grab);
     bool grabExist (const char *grab);
-    Grab* grabsBack() { return grabs.back (); }
+    Grab* topGrab (GrabType t) { auto it = std::find_if (begin (grabs), end (grabs), [t] (Grab *g) { return (g->type & t); }); return (it != end (grabs)) ? *it : NULL; }
+    Grab* grabsBack () { return grabs.back (); }
 
 private:
     GrabPtrList grabs;
@@ -347,20 +362,6 @@ class ButtonGrab {
 	int          button;
 	unsigned int modifiers;
 	int          count;
-};
-
-enum GrabType {
-    POINTER = 1 << 0,
-    KEYBOARD = 2 << 0,
-    ALL = POINTER|KEYBOARD
-};
-
-struct Grab {
-    Grab(GrabType type, Cursor cursor, const char *name) : type(type), cursor(cursor), name(name) {}
-    Grab(Cursor cursor, const char *name) : Grab(GrabType::ALL, cursor, name) {}
-    GrabType   type;
-    Cursor     cursor;
-    const char *name;
 };
 
 // data members that don't belong (these probably belong
@@ -578,9 +579,6 @@ public:
 private:
     Display* const& dpy;
 };
-
-
-
 
 unsigned int windowStateMask (Atom state);
 

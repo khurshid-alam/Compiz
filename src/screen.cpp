@@ -3030,13 +3030,13 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 				Cursor cursor,
 				const char *name)
 {
+    int status = GrabSuccess;
+
     if (eventManager.grabsEmpty ())
     {
-	int status = GrabSuccess;
-
 	if (type & cps::GrabType::POINTER)
 	{
-	    status = XGrabPointer (dpy, eventManager.getGrabWindow(), true,
+	    status = XGrabPointer (dpy, eventManager.getGrabWindow (), true,
 				   POINTER_GRAB_MASK,
 				   GrabModeAsync, GrabModeAsync,
 				   root, cursor,
@@ -3048,7 +3048,7 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 	    if (type & cps::GrabType::KEYBOARD)
 	    {
 		status = XGrabKeyboard (dpy,
-					eventManager.getGrabWindow(), true,
+					eventManager.getGrabWindow (), true,
 					GrabModeAsync, GrabModeAsync,
 					CurrentTime);
 		if (status != GrabSuccess)
@@ -3063,10 +3063,54 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 	else
 	    return NULL;
     }
-    else if (type & cps::GrabType::POINTER)
+    else
     {
-	XChangeActivePointerGrab (dpy, POINTER_GRAB_MASK,
-				  cursor, CurrentTime);
+	if (type & cps::GrabType::POINTER)
+	{
+	    if (eventManager.topGrab (cps::GrabType::POINTER))
+	    {
+		XChangeActivePointerGrab (dpy, POINTER_GRAB_MASK,
+					  cursor, CurrentTime);
+	    }
+	    else
+	    {
+		status = XGrabPointer (dpy, eventManager.getGrabWindow (), true,
+				       POINTER_GRAB_MASK,
+				       GrabModeAsync, GrabModeAsync,
+				       root, cursor,
+				       CurrentTime);
+
+		if (status != GrabSuccess)
+		    return NULL;
+	    }
+	}
+
+	if ((type & cps::GrabType::KEYBOARD) &&
+            !eventManager.topGrab (cps::GrabType::KEYBOARD))
+	{
+	    status = XGrabKeyboard (dpy,
+				    eventManager.getGrabWindow (), true,
+				    GrabModeAsync, GrabModeAsync,
+				    CurrentTime);
+
+	    if (status != GrabSuccess)
+	    {
+		if (type & cps::GrabType::POINTER)
+		{
+		    if (cps::Grab *lastPtrGrab = eventManager.topGrab (cps::GrabType::POINTER))
+		    {
+			XChangeActivePointerGrab (dpy, POINTER_GRAB_MASK,
+						  lastPtrGrab->cursor, CurrentTime);
+		    }
+		    else
+		    {
+		    	XUngrabPointer (dpy, CurrentTime);
+		    }
+		}
+
+		return NULL;
+	    }
+	}
     }
 
     cps::Grab *grab = new cps::Grab (type, cursor, name);
@@ -3099,8 +3143,11 @@ CompScreenImpl::updateGrab (CompScreen::GrabHandle handle, Cursor cursor)
     if (!handle || !(handle->type & cps::GrabType::POINTER))
 	return;
 
-    XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
-			      cursor, CurrentTime);
+    if (privateScreen.eventManager.topGrab (cps::GrabType::POINTER) == handle)
+    {
+	XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
+				  cursor, CurrentTime);
+    }
 
     handle->cursor = cursor;
 }
@@ -3112,19 +3159,30 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
     if (!handle)
 	return;
 
-    cps::GrabType type = handle->type;
+    cps::GrabType removedType = handle->type;
     privateScreen.eventManager.grabsRemove(handle);
 
     if (!privateScreen.eventManager.grabsEmpty ())
     {
-	CompScreen::GrabHandle current = privateScreen.eventManager.grabsBack ();
-
-	if (current->type & cps::GrabType::POINTER)
+	if (removedType & cps::GrabType::POINTER)
 	{
-	    XChangeActivePointerGrab (privateScreen.dpy,
-				      POINTER_GRAB_MASK,
-				      current->cursor,
-				      CurrentTime);
+	    if (CompScreen::GrabHandle topPtrGrab = privateScreen.eventManager.topGrab (cps::GrabType::POINTER))
+	    {
+		XChangeActivePointerGrab (privateScreen.dpy,
+					  POINTER_GRAB_MASK,
+					  topPtrGrab->cursor,
+					  CurrentTime);
+	    }
+	    else
+	    {
+	        XUngrabPointer (privateScreen.dpy, CurrentTime);
+	    }
+	}
+
+	if (removedType & cps::GrabType::KEYBOARD)
+	{
+	    if (!privateScreen.eventManager.topGrab (cps::GrabType::KEYBOARD))
+		XUngrabKeyboard (privateScreen.dpy, CurrentTime);
 	}
     }
     else
@@ -3133,10 +3191,10 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    warpPointer (restorePointer->x () - pointerX,
 			 restorePointer->y () - pointerY);
 
-	if (type & cps::GrabType::POINTER)
+	if (removedType & cps::GrabType::POINTER)
 	    XUngrabPointer (privateScreen.dpy, CurrentTime);
 
-	if (type & cps::GrabType::KEYBOARD)
+	if (removedType & cps::GrabType::KEYBOARD)
 	    XUngrabKeyboard (privateScreen.dpy, CurrentTime);
     }
 }
