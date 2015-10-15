@@ -144,7 +144,7 @@
 			<option name="focus_prevention_match" type="match">
 			<_short>Focus Prevention Windows</_short>
 			<_long>Focus prevention windows</_long>
-			<default>any</default>
+			<default>!(class=Polkit-gnome-authentication-agent-1)</default>
 			</option>
 		</group>
 		<group>
@@ -179,7 +179,7 @@
 			<option name="minimize_window_key" type="key">
 			<_short>Minimize Window</_short>
 			<_long>Minimize active window</_long>
-			<default>&lt;Alt&gt;F9</default>
+			<default>&lt;Control&gt;&lt;Alt&gt;KP_0</default>
 			</option>
 			<option name="minimize_window_button" type="button">
 			<_short>Minimize Window</_short>
@@ -188,16 +188,16 @@
 			<option name="maximize_window_key" type="key">
 			<_short>Maximize Window</_short>
 			<_long>Maximize active window</_long>
-			<default>&lt;Alt&gt;F10</default>
+			<default>&lt;Control&gt;&lt;Super&gt;Up</default>
 			</option>
 			<option name="unmaximize_window_key" type="key">
 			<_short>Unmaximize Window</_short>
 			<_long>Unmaximize active window</_long>
-			<default>&lt;Alt&gt;F5</default>
 			</option>
 			<option name="unmaximize_or_minimize_window_key" type="key">
 			<_short>Unmaximize or Minimize Window</_short>
 			<_long>Unmaximize or minimize active window</_long>
+			<default>&lt;Control&gt;&lt;Super&gt;Down</default>
 			</option>
 			<option name="maximize_window_horizontally_key" type="key">
 			<_short>Maximize Window Horizontally</_short>
@@ -220,7 +220,6 @@
 			<option name="show_desktop_key" type="key">
 			<_short>Show Desktop</_short>
 			<_long>Hide all windows and focus desktop</_long>
-			<default>&lt;Control&gt;&lt;Alt&gt;d</default>
 			</option>
 			<option name="show_desktop_edge" type="edge">
 			<_short>Show Desktop</_short>
@@ -230,6 +229,7 @@
 			<option name="toggle_window_maximized_key" type="key">
 			<_short>Toggle Window Maximized</_short>
 			<_long>Toggle active window maximized</_long>
+			<default>&lt;Control&gt;&lt;Alt&gt;KP_5</default>
 			</option>
 			<option name="toggle_window_maximized_button" type="button">
 			<_short>Toggle Window Maximized</_short>
@@ -254,7 +254,7 @@
 			<option name="hsize" type="int">
 			<_short>Horizontal Virtual Size</_short>
 			<_long>Screen size multiplier for horizontal virtual size</_long>
-			<default>4</default>
+			<default>1</default>
 			<min>1</min>
 			<max>32</max>
 			</option>

@@ -46,7 +46,7 @@ namespace ct = compiz::testing;
 
 namespace
 {
-unsigned int DEFAULT_VIEWPORT_WIDTH = 4;
+unsigned int DEFAULT_VIEWPORT_WIDTH = 1;
 unsigned int DEFAULT_VIEWPORT_HEIGHT = 1;
 
 bool Advance (Display *d, bool r)
