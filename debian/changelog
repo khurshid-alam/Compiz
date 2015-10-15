@@ -1,8 +1,12 @@
-compiz (1:0.9.12.2+15.10.20151012-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.12.2+15.10.20151015-0ubuntu1) wily; urgency=medium
 
+  [ Marco Trevisan (Treviño) ]
   * Syncing changelog with proposed
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 15 Oct 2015 16:42:12 +0100
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 15 Oct 2015 16:13:32 +0000
 
 compiz (1:0.9.12.2+15.10.20151002-0ubuntu1) wily; urgency=medium
 
