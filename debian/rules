@@ -17,25 +17,6 @@ export DEB_CXXFLAGS_MAINT_APPEND=-std=c++11
 
 CORE_ABIVERSION := $(shell sed -rn 's/^\#define[[:space:]]+CORE_ABIVERSION[[:space:]]+//p' include/core/abiversion.h )
 
-override_dh_quilt_patch:
-	dh_quilt_patch
-	if test -r debian/patches/series.$(DEB_HOST_ARCH); then \
-	  pc=".pc.$(DEB_HOST_ARCH)"; \
-	  test -d "$(CURDIR)/$$pc" || mkdir "$(CURDIR)/$$pc"; \
-	  cp debian/patches/series.$(DEB_HOST_ARCH) $(CURDIR)/$$pc/series; \
-	  cd $(CURDIR); \
-	  QUILT_PC="$$pc" quilt upgrade || true; \
-	  QUILT_PC="$$pc" QUILT_PATCHES="debian/patches/" quilt push -a || true; \
-	fi; \
-
-override_dh_quilt_unpatch:
-	if test -r debian/patches/series.$(DEB_HOST_ARCH); then \
-	  pc=".pc.$(DEB_HOST_ARCH)"; \
-	  cd $(CURDIR); \
-	  QUILT_PC="$$pc" QUILT_PATCHES="debian/patches/" quilt pop -a || true; \
-	fi; \
-	dh_quilt_unpatch
-
 override_dh_auto_configure:
         # right now, xorg-gtest won't compile on arm.
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
@@ -93,5 +74,5 @@ override_dh_auto_test:
 	#dh_auto_test
 
 %:
-	dh $@ --parallel --with quilt,python2,migrations,translations
+	dh $@ --parallel --with python2,migrations,translations
 
