@@ -10,6 +10,9 @@
 	<key type="s" name="command-screenshot">
 	    <default>"gnome-screenshot"</default>
 	</key>
+	<key type="as" name="run-command-21">
+	    <default>["&lt;Control&gt;&lt;Alt&gt;Delete"]</default>
+	</key>
 	<key type="as" name="run-command-12">
 	    <default>["Disabled"]</default>
 	</key>
@@ -45,6 +48,9 @@
 	</key>
 	<key type="as" name="run-command-1">
 	    <default>["Disabled"]</default>
+	</key>
+	<key type="s" name="command-21">
+	    <default>"/usr/bin/gnome-system-monitor -p"</default>
 	</key>
 	<key type="s" name="command-12">
 	    <default>""</default>

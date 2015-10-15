@@ -23,6 +23,7 @@
 import pygtk
 import gtk
 import gtk.gdk
+import os
 
 # Current Screen
 #
@@ -66,6 +67,11 @@ FilterAll = FilterName | FilterLongDesc | FilterValue | FilterCategory
 DataDir = "@prefix@/share"
 IconDir = DataDir+"/ccsm/icons"
 PixmapDir = DataDir+"/ccsm/images"
+ConfigHome = os.getenv("XDG_CONFIG_HOME")
+if not ConfigHome:
+   ConfigHome = os.path.join(os.getenv("HOME"), ".config")
+ConfDir = os.path.join(ConfigHome, "compiz-1/compizconfig/")
+ConfFile = os.path.join(ConfDir, "firstrun")
 
 # Version
 #

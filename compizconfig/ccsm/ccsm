@@ -31,6 +31,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import sys
+import os
 
 def try_register_dbus ():
     '''Return instance of dbus control object on success, None on failure'''
@@ -92,7 +93,7 @@ if gtk.pygtk_version < (2,12,0):
 import compizconfig
 import ccm
 from ccm.Utils import GlobalUpdater
-from ccm.Constants import Version
+from ccm.Constants import Version, ConfFile
 
 plugin   = None
 category = None
@@ -123,5 +124,12 @@ if dbusObj is not None:
 
 idle = ccm.IdleSettingsParser(context, mainWin)
 mainWin.show_all()
+
+# Check if we should show the first run warning dialog.
+if os.path.isfile(ConfFile):
+    pass
+else:
+    warning = ccm.FirstRun(mainWin)
+    warning.show_all()
 
 gtk.main()

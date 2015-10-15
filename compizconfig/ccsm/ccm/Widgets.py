@@ -1371,6 +1371,42 @@ class WarningDialog (gtk.MessageDialog):
         self.set_transient_for (parent)
         self.connect_after ("response", lambda *args: self.destroy ())
 
+# First run dialog providing a user warning.
+#
+class FirstRun (gtk.MessageDialog):
+    '''First run dialog providing a user warning.'''
+
+    def __init__(self, parent):
+        gtk.MessageDialog.__init__ (self, parent,
+                                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                                    gtk.MESSAGE_WARNING,
+                                    gtk.BUTTONS_OK)
+        self.set_position (gtk.WIN_POS_CENTER)
+        title = _("CCSM is an advanced tool. Use with caution.")
+        self.set_markup("<b>%s</b>" % title)
+        message = _("This tool allows you to deeply configure Compiz's settings. Some options may be incompatible with each other. Unless used with care, it is possible to be left with an unusable desktop.")
+        self.format_secondary_markup(message)
+        check_button = gtk.CheckButton(label=_("Show this warning next time?"))
+        check_button.set_active(True)
+        self.vbox.pack_start(check_button, True, True, 2)
+        check_button.show()
+        check_button.connect("toggled", self.callback, "check button 1")
+        self.set_transient_for(parent)
+        self.set_modal(True)
+        self.show_all()
+        self.connect("response", lambda *args: self.destroy ())
+        
+    def callback(self, widget, data=None):
+        if widget.get_active() == True:
+            if os.path.isfile(ConfFile):
+                os.remove(ConfFile)
+        else:
+            if not os.path.exists(ConfDir):
+                os.mkdir(ConfDir)
+            if os.path.isdir(ConfDir):
+                f = open(ConfFile, "w")
+                f.close()
+
 # Plugin Button
 #
 class PluginButton (gtk.HBox):
@@ -1401,7 +1437,11 @@ class PluginButton (gtk.HBox):
         button.set_tooltip_text (plugin.LongDesc)
         button.add (box)
 
-        if plugin.Name != 'core':
+        blacklist_plugins = ['core']
+        if os.getenv('XDG_CURRENT_DESKTOP') == 'Unity':
+            blacklist_plugins.append('unityshell')
+
+        if plugin.Name not in blacklist_plugins:
             enable = gtk.CheckButton ()
             enable.set_tooltip_text(_("Enable %s") % plugin.ShortDesc)
             enable.set_active (plugin.Enabled)

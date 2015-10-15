@@ -1,3 +1,9 @@
+compiz (1:0.9.12.2+15.10.20151012-0ubuntu1) UNRELEASED; urgency=medium
+
+  * Syncing changelog with proposed
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 15 Oct 2015 16:42:12 +0100
+
 compiz (1:0.9.12.2+15.10.20151002-0ubuntu1) wily; urgency=medium
 
   [ Eleni Maria Stea ]
