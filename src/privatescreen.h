@@ -710,6 +710,8 @@ class PrivateScreen :
 
 	void setDefaultWindowAttributes (XWindowAttributes *);
 
+	void updateCursors (const CompString& theme, int size);
+
 	static void compScreenSnEvent (SnMonitorEvent *event,
 			   void           *userData);
 

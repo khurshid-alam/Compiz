@@ -54,6 +54,7 @@
 #include <X11/extensions/shape.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/XInput2.h>
+#include <X11/Xcursor/Xcursor.h>
 
 #include <core/global.h>
 #include <core/screen.h>
@@ -4153,8 +4154,26 @@ CompScreen::cursorChangeNotify (const CompString& theme, int size)
     _cursorChangeNotify (theme, size);
 }
 
-void CompScreenImpl::_cursorChangeNotify (const CompString&, int)
+void
+PrivateScreen::updateCursors (const CompString& theme, int size)
 {
+    XFreeCursor (dpy, normalCursor);
+    XFreeCursor (dpy, busyCursor);
+
+    XcursorSetDefaultSize (dpy, size);
+    XcursorSetTheme (dpy, theme.c_str());
+
+    normalCursor = XCreateFontCursor (dpy, XC_left_ptr);
+    busyCursor   = XCreateFontCursor (dpy, XC_watch);
+
+    XIDefineCursor (dpy, clientPointerDeviceId, root, normalCursor);
+    startupSequence.updateStartupFeedback ();
+}
+
+void
+CompScreenImpl::_cursorChangeNotify (const CompString& theme, int size)
+{
+    privateScreen.updateCursors (theme, size);
 }
 
 /* Returns default viewport for some window geometry. If the window spans
@@ -5154,14 +5173,10 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
     eventManager.setSupportingWmCheck (dpy, rootWindow());
     screen->updateSupportedWmHints ();
 
-    updateResources ();
 
     XIGetClientPointer (dpy, None, &clientPointerDeviceId);
-
-    normalCursor = XCreateFontCursor (dpy, XC_left_ptr);
-    busyCursor   = XCreateFontCursor (dpy, XC_watch);
-
-    XIDefineCursor (dpy, clientPointerDeviceId, rootWindow(), normalCursor);
+    updateCursors (XcursorGetTheme (dpy), XcursorGetDefaultSize (dpy));
+    updateResources ();
 
     /* Attempt to gain SubstructureRedirectMask */
     CompScreenImpl::checkForError (dpy);
