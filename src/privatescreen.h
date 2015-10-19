@@ -712,6 +712,8 @@ class PrivateScreen :
 
 	void updateCursors (const CompString& theme, int size);
 
+	Cursor cursorCache (unsigned int cursorName);
+
 	static void compScreenSnEvent (SnMonitorEvent *event,
 			   void           *userData);
 
@@ -779,9 +781,8 @@ public:
     Window wmSnSelectionWindow;
 
     int    clientPointerDeviceId;
-    Cursor normalCursor;
-    Cursor busyCursor;
     Cursor invisibleCursor;
+    std::vector<Cursor> cursors;
     CompRect workArea;
 
     bool initialized;
@@ -971,8 +972,8 @@ class CompScreenImpl : public CompScreen,
 	void unhookServerWindow (CompWindow *w);
 
 	Cursor normalCursor ();
-
 	Cursor invisibleCursor ();
+	Cursor cursorCache (unsigned int cursorName);
 
 	/* Adds an X Pointer and Keyboard grab to the stack. Since
 	 * compiz as a client only need to grab once, multiple clients
