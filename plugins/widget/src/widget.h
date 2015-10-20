@@ -107,7 +107,6 @@ class WidgetScreen :
 	WidgetState            mState;
 	int                    mFadeTime;
 	CompScreen::GrabHandle mGrabIndex;
-	Cursor                 mCursor;
 };
 
 #define WIDGET_SCREEN(screen)						       \

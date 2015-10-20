@@ -610,7 +610,7 @@ ExpoScreen::donePaint ()
 			       CompWindowGrabMoveMask |
 			       CompWindowGrabButtonMask);
 
-		screen->updateGrab (grabIndex, dragCursor);
+		screen->updateGrab (grabIndex, screen->cursorCache (XC_fleur));
 
 		w->raise ();
 		w->moveInputFocusTo ();
@@ -1578,8 +1578,6 @@ ExpoScreen::ExpoScreen (CompScreen *s) :
     upKey    = XKeysymToKeycode (s->dpy (), XStringToKeysym ("Up"));
     downKey  = XKeysymToKeycode (s->dpy (), XStringToKeysym ("Down"));
 
-    dragCursor = XCreateFontCursor (screen->dpy (), XC_fleur);
-
     EXPOINITBIND (ExpoKey, doExpo);
     EXPOTERMBIND (ExpoKey, termExpo);
     EXPOINITBIND (ExpoButton, doExpo);
@@ -1603,11 +1601,6 @@ ExpoScreen::ExpoScreen (CompScreen *s) :
 						     GL_RGBA, GL_UNSIGNED_BYTE);
 }
 
-ExpoScreen::~ExpoScreen ()
-{
-    if (dragCursor != None)
-	XFreeCursor (screen->dpy (), dragCursor);
-}
 
 ExpoWindow::ExpoWindow (CompWindow *w) :
     PluginClassHandler<ExpoWindow, CompWindow> (w),
