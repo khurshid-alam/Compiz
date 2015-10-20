@@ -59,6 +59,7 @@ class CompScreenInterface
 	virtual CompScreen::GrabHandle pushPointerGrab (Cursor cursor, const char *name) = 0;
 	virtual CompScreen::GrabHandle pushKeyboardGrab (const char *name) = 0;
 	virtual void removeGrab (CompScreen::GrabHandle handle, CompPoint *restorePointer) = 0;
+	virtual Cursor cursorCache (unsigned int cursorName) = 0;
 
 	/* CompOption::Class */
 	virtual CompOption * getOption (const CompString &name) = 0;

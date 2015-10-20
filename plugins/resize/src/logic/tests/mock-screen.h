@@ -54,6 +54,7 @@ class MockScreen :  public CompScreenInterface,
 	MOCK_METHOD2(pushPointerGrab, CompScreen::GrabHandle(Cursor cursor, const char *name));
 	MOCK_METHOD1(pushKeyboardGrab, CompScreen::GrabHandle(const char *name));
 	MOCK_METHOD2(removeGrab, void(CompScreen::GrabHandle handle, CompPoint *restorePointer));
+	MOCK_METHOD1(cursorCache, Cursor (unsigned int));
 
 	MOCK_METHOD1(getOption, CompOption*(const CompString &name));
 
