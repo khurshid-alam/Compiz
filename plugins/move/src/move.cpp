@@ -105,10 +105,12 @@ moveInitiate (CompAction         *action,
 
 	if (!ms->grab)
 	{
+	    Cursor moveCursor = screen->cursorCache (XC_fleur);
+
 	    if (state & CompAction::StateInitButton)
-		ms->grab = s->pushPointerGrab (ms->moveCursor, "move");
+		ms->grab = s->pushPointerGrab (moveCursor, "move");
 	    else
-		ms->grab = s->pushGrab (ms->moveCursor, "move");
+		ms->grab = s->pushGrab (moveCursor, "move");
 	}
 
 	if (ms->grab)
@@ -716,7 +718,6 @@ MoveScreen::MoveScreen (CompScreen *screen) :
 	key[i] = XKeysymToKeycode (screen->dpy (),
 				   XStringToKeysym (mKeys[i].name));
 
-    moveCursor = XCreateFontCursor (screen->dpy (), XC_fleur);
     if (cScreen)
     {
 	CompositeScreenInterface::setHandler (cScreen);
@@ -739,9 +740,6 @@ MoveScreen::~MoveScreen ()
 {
     if (region)
 	XDestroyRegion (region);
-
-    if (moveCursor)
-	XFreeCursor (screen->dpy (), moveCursor);
 }
 
 bool
