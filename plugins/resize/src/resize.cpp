@@ -380,7 +380,6 @@ ResizeScreen::ResizeScreen (CompScreen *s) :
     logic.options = this;
 
     CompOption::Vector atomTemplate;
-    Display *dpy = s->dpy ();
     ResizeOptions::ChangeNotify notify =
 	       boost::bind (&ResizeScreen::optionChanged, this, _1, _2);
 
@@ -403,21 +402,6 @@ ResizeScreen::ResizeScreen (CompScreen *s) :
 
     for (unsigned int i = 0; i < NUM_KEYS; i++)
 	logic.key[i] = XKeysymToKeycode (s->dpy (), XStringToKeysym (logic.rKeys[i].name));
-
-    logic.leftCursor      = XCreateFontCursor (dpy, XC_left_side);
-    logic.rightCursor     = XCreateFontCursor (dpy, XC_right_side);
-    logic.upCursor        = XCreateFontCursor (dpy, XC_top_side);
-    logic.upLeftCursor    = XCreateFontCursor (dpy, XC_top_left_corner);
-    logic.upRightCursor   = XCreateFontCursor (dpy, XC_top_right_corner);
-    logic.downCursor      = XCreateFontCursor (dpy, XC_bottom_side);
-    logic.downLeftCursor  = XCreateFontCursor (dpy, XC_bottom_left_corner);
-    logic.downRightCursor = XCreateFontCursor (dpy, XC_bottom_right_corner);
-    logic.middleCursor    = XCreateFontCursor (dpy, XC_fleur);
-
-    logic.cursor[0] = logic.leftCursor;
-    logic.cursor[1] = logic.rightCursor;
-    logic.cursor[2] = logic.upCursor;
-    logic.cursor[3] = logic.downCursor;
 
     optionSetInitiateKeyInitiate (resizeInitiateDefaultMode);
     optionSetInitiateKeyTerminate (resizeTerminate);
@@ -442,27 +426,6 @@ ResizeScreen::ResizeScreen (CompScreen *s) :
 
 ResizeScreen::~ResizeScreen ()
 {
-    Display *dpy = screen->dpy ();
-
-    if (logic.leftCursor)
-	XFreeCursor (dpy, logic.leftCursor);
-    if (logic.rightCursor)
-	XFreeCursor (dpy, logic.rightCursor);
-    if (logic.upCursor)
-	XFreeCursor (dpy, logic.upCursor);
-    if (logic.downCursor)
-	XFreeCursor (dpy, logic.downCursor);
-    if (logic.middleCursor)
-	XFreeCursor (dpy, logic.middleCursor);
-    if (logic.upLeftCursor)
-	XFreeCursor (dpy, logic.upLeftCursor);
-    if (logic.upRightCursor)
-	XFreeCursor (dpy, logic.upRightCursor);
-    if (logic.downLeftCursor)
-	XFreeCursor (dpy, logic.downLeftCursor);
-    if (logic.downRightCursor)
-	XFreeCursor (dpy, logic.downRightCursor);
-
     delete logic.mScreen;
     delete logic.cScreen;
     delete logic.gScreen;

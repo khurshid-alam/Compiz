@@ -113,19 +113,9 @@ class ResizeLogic
 	int          pointerDx;
 	int          pointerDy;
 	KeyCode      key[NUM_KEYS];
+	unsigned int keyCursorNames[NUM_KEYS];
 
 	CompScreen::GrabHandle grabIndex;
-
-	Cursor leftCursor;
-	Cursor rightCursor;
-	Cursor upCursor;
-	Cursor upLeftCursor;
-	Cursor upRightCursor;
-	Cursor downCursor;
-	Cursor downLeftCursor;
-	Cursor downRightCursor;
-	Cursor middleCursor;
-	Cursor cursor[NUM_KEYS];
 
 	bool       isConstrained;
 	CompRegion constraintRegion;
