@@ -4180,8 +4180,11 @@ PrivateScreen::cursorCache (unsigned int cursorName)
 void
 PrivateScreen::updateCursors (const CompString& theme, int size)
 {
-    XcursorSetDefaultSize (dpy, size);
-    XcursorSetTheme (dpy, theme.c_str());
+    if (size > 0)
+        XcursorSetDefaultSize (dpy, size);
+
+    if (!theme.empty())
+        XcursorSetTheme (dpy, theme.c_str());
 
     for (auto it = begin (cursors); it != end (cursors); ++it)
     {
@@ -5201,7 +5204,6 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
 
 
     XIGetClientPointer (dpy, None, &clientPointerDeviceId);
-    updateCursors (XcursorGetTheme (dpy), XcursorGetDefaultSize (dpy));
     updateResources ();
 
     /* Attempt to gain SubstructureRedirectMask */
