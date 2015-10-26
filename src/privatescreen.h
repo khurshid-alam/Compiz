@@ -241,7 +241,7 @@ class PluginManager
 
 enum GrabType {
     POINTER = 1 << 0,
-    KEYBOARD = 2 << 0,
+    KEYBOARD = 1 << 1,
     ALL = POINTER|KEYBOARD
 };
 
