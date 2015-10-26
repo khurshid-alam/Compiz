@@ -104,7 +104,12 @@ moveInitiate (CompAction         *action,
 	ms->snapOffY  = y - workArea.y ();
 
 	if (!ms->grab)
-	    ms->grab = s->pushGrab (ms->moveCursor, "move");
+	{
+	    if (state & CompAction::StateInitButton)
+		ms->grab = s->pushPointerGrab (ms->moveCursor, "move");
+	    else
+		ms->grab = s->pushGrab (ms->moveCursor, "move");
+	}
 
 	if (ms->grab)
 	{
@@ -572,9 +577,9 @@ MoveScreen::handleEvent (XEvent *event)
 	case ClientMessage:
 	    if (event->xclient.message_type == Atoms::wmMoveResize)
 	    {
-		unsigned   long type = (unsigned long) event->xclient.data.l[2];
-
 		MOVE_SCREEN (screen);
+
+		unsigned long type = event->xclient.data.l[2];
 
 		if (type == WmMoveResizeMove ||
 		    type == WmMoveResizeMoveKeyboard)
