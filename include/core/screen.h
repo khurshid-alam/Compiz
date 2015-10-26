@@ -395,6 +395,7 @@ public:
     virtual const char * displayString () = 0;
     virtual CompRect getCurrentOutputExtents () = 0;
     virtual Cursor normalCursor () = 0;
+    virtual Cursor cursorCache (unsigned int cursorName) = 0;
     virtual bool grabbed () = 0;
     virtual SnDisplay * snDisplay () = 0;
 

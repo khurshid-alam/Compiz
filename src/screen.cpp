@@ -54,6 +54,7 @@
 #include <X11/extensions/shape.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/XInput2.h>
+#include <X11/Xcursor/Xcursor.h>
 
 #include <core/global.h>
 #include <core/screen.h>
@@ -78,9 +79,11 @@ unsigned int pointerMods = 0;
 namespace
 {
 bool inHandleEvent = false;
-
 bool screenInitalized = false;
 }
+
+#define normalCursorName    XC_left_ptr
+#define busyCursorName      XC_watch
 
 #define MwmHintsFunctions   (1L << 0)
 #define MwmHintsDecorations (1L << 1)
@@ -2149,9 +2152,9 @@ cps::StartupSequenceImpl::updateStartupFeedback ()
     if (priv->initialized)
     {
 	if (!emptySequence())
-	    XIDefineCursor (priv->dpy, priv->clientPointerDeviceId, priv->rootWindow(), priv->busyCursor);
+	    XIDefineCursor (priv->dpy, priv->clientPointerDeviceId, priv->rootWindow(), priv->cursorCache (busyCursorName));
 	else
-	    XIDefineCursor (priv->dpy, priv->clientPointerDeviceId, priv->rootWindow(), priv->normalCursor);
+	    XIDefineCursor (priv->dpy, priv->clientPointerDeviceId, priv->rootWindow(), priv->cursorCache (normalCursorName));
     }
 }
 
@@ -3083,13 +3086,19 @@ cps::WindowManager::unhookServerWindow (CompWindow *w)
 Cursor
 CompScreenImpl::normalCursor ()
 {
-    return privateScreen.normalCursor;
+    return privateScreen.cursorCache (normalCursorName);
 }
 
 Cursor
 CompScreenImpl::invisibleCursor ()
 {
     return privateScreen.invisibleCursor;
+}
+
+Cursor
+CompScreenImpl::cursorCache (unsigned int cursorName)
+{
+    return privateScreen.cursorCache (cursorName);
 }
 
 #define POINTER_GRAB_MASK (ButtonReleaseMask | \
@@ -4211,8 +4220,47 @@ CompScreen::cursorChangeNotify (const CompString& theme, int size)
     _cursorChangeNotify (theme, size);
 }
 
-void CompScreenImpl::_cursorChangeNotify (const CompString&, int)
+Cursor
+PrivateScreen::cursorCache (unsigned int cursorName)
 {
+    if (cursorName >= XC_num_glyphs)
+	return 0;
+
+    if (cursors.size() > cursorName && cursors[cursorName])
+	return cursors[cursorName];
+
+    cursors.resize(std::max<size_t>(cursorName + 1, cursors.size()), 0);
+    cursors[cursorName] = XCreateFontCursor (dpy, cursorName);
+
+    return cursors[cursorName];
+}
+
+void
+PrivateScreen::updateCursors (const CompString& theme, int size)
+{
+    if (size > 0)
+        XcursorSetDefaultSize (dpy, size);
+
+    if (!theme.empty())
+        XcursorSetTheme (dpy, theme.c_str());
+
+    for (auto it = begin (cursors); it != end (cursors); ++it)
+    {
+	if (*it)
+	{
+	   XFreeCursor (dpy, *it);
+	   *it = XCreateFontCursor (dpy, it - begin (cursors));
+	}
+    }
+
+    XIDefineCursor (dpy, clientPointerDeviceId, root, cursorCache (normalCursorName));
+    startupSequence.updateStartupFeedback ();
+}
+
+void
+CompScreenImpl::_cursorChangeNotify (const CompString& theme, int size)
+{
+    privateScreen.updateCursors (theme, size);
 }
 
 /* Returns default viewport for some window geometry. If the window spans
@@ -5212,14 +5260,9 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
     eventManager.setSupportingWmCheck (dpy, rootWindow());
     screen->updateSupportedWmHints ();
 
-    updateResources ();
 
     XIGetClientPointer (dpy, None, &clientPointerDeviceId);
-
-    normalCursor = XCreateFontCursor (dpy, XC_left_ptr);
-    busyCursor   = XCreateFontCursor (dpy, XC_watch);
-
-    XIDefineCursor (dpy, clientPointerDeviceId, rootWindow(), normalCursor);
+    updateResources ();
 
     /* Attempt to gain SubstructureRedirectMask */
     CompScreenImpl::checkForError (dpy);
@@ -5395,8 +5438,6 @@ PrivateScreen::PrivateScreen (CompScreen *screen, cps::WindowManager& windowMana
     currentDesktop (0),
     wmSnSelectionWindow (None),
     clientPointerDeviceId (None),
-    normalCursor (None),
-    busyCursor (None),
     invisibleCursor (None),
     initialized (false),
     screen(screen),
@@ -5517,11 +5558,8 @@ PrivateScreen::~PrivateScreen ()
 
 	eventManager.destroyGrabWindow (dpy);
 
-	if (normalCursor != None)
-	    XFreeCursor (dpy, normalCursor);
-
-	if (busyCursor != None)
-	    XFreeCursor (dpy, busyCursor);
+	for (auto cursor : cursors)
+	    XFreeCursor (dpy, cursor);
 
 	if (invisibleCursor != None)
 	    XFreeCursor (dpy, invisibleCursor);

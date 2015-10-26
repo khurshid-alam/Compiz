@@ -101,6 +101,7 @@ set (COMPIZ_REQUIRES
     xext
     xdamage
     xcomposite
+    xcursor
     x11-xcb
     xrandr
     xinerama

@@ -509,7 +509,7 @@ ShelfWindow::handleButtonPress (unsigned int x,
     {
 	window->activate ();
 	ss->grabbedWindow = window->id ();
-	ss->grabIndex = screen->pushGrab (ss->moveCursor, "shelf");
+	ss->grabIndex = screen->pushGrab (screen->cursorCache (XC_fleur), "shelf");
 
 	ss->lastPointerX = x;
 	ss->lastPointerY = y;
@@ -760,7 +760,6 @@ ShelfScreen::ShelfScreen (CompScreen *screen) :
     gScreen (GLScreen::get (screen)),
     grabIndex (0),
     grabbedWindow (None),
-    moveCursor (XCreateFontCursor (screen->dpy (), XC_fleur)),
     lastPointerX (0),
     lastPointerY (0)
 {
@@ -780,11 +779,6 @@ ShelfScreen::ShelfScreen (CompScreen *screen) :
 								_3));
 }
 
-ShelfScreen::~ShelfScreen ()
-{
-    if (moveCursor)
-	XFreeCursor (screen->dpy (), moveCursor);
-}
 
 ShelfWindow::ShelfWindow (CompWindow *window) :
     PluginClassHandler <ShelfWindow, CompWindow> (window),

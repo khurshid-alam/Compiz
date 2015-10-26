@@ -1968,7 +1968,6 @@ ShiftScreen::ShiftScreen (CompScreen *screen) :
     mMvTarget (0),
     mMvVelocity (0),
     mInvert (false),
-    mCursor (XCreateFontCursor (screen->dpy (), XC_left_ptr)),
     mWindows (NULL),
     mNWindows (0),
     mWindowsSize (0),
@@ -2058,8 +2057,6 @@ ShiftScreen::ShiftScreen (CompScreen *screen) :
 ShiftScreen::~ShiftScreen ()
 {
     freeWindowTitle ();
-
-    XFreeCursor (screen->dpy (), mCursor);
 
     if (mWindows)
         free (mWindows);

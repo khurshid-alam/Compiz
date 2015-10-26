@@ -27,6 +27,7 @@
 
 #include <core/core.h>
 #include <core/atoms.h>
+#include <X11/cursorfont.h>
 
 #include "resize-logic.h"
 
@@ -47,6 +48,16 @@ static const unsigned short TOUCH_LEFT = 1;
 static const unsigned short TOUCH_RIGHT = 2;
 static const unsigned short TOUCH_TOP = 3;
 static const unsigned short TOUCH_BOTTOM = 4;
+
+#define LEFT_CURSOR XC_left_side
+#define RIGHT_CURSOR XC_right_side
+#define UP_CURSOR XC_top_side
+#define UP_LEFT_CURSOR XC_top_left_corner
+#define UP_RIGHT_CURSOR XC_top_right_corner
+#define DOWN_CURSOR XC_bottom_side
+#define DOWN_LEFT_CURSOR XC_bottom_left_corner
+#define DOWN_RIGHT_CURSOR XC_bottom_right_corner
+#define MIDDLE_CURSOR XC_fleur
 
 using namespace resize;
 
@@ -428,7 +439,7 @@ ResizeLogic::handleKeyEvent (KeyCode keycode)
 		    lastMaskY = mask;
 		}
 
-		mScreen->updateGrab (grabIndex, cursor[i]);
+		mScreen->updateGrab (grabIndex, screen->cursorCache (keyCursorNames[i]));
 	    }
 	    break;
 	}
@@ -652,36 +663,36 @@ ResizeLogic::getStretchRectangle (BoxPtr pBox)
 Cursor
 ResizeLogic::cursorFromResizeMask (unsigned int mask)
 {
-    Cursor cursor;
+    unsigned int cursor_name;
 
     if (mask & ResizeLeftMask)
     {
 	if (mask & ResizeDownMask)
-	    cursor = downLeftCursor;
+	    cursor_name = DOWN_LEFT_CURSOR;
 	else if (mask & ResizeUpMask)
-	    cursor = upLeftCursor;
+	    cursor_name = UP_LEFT_CURSOR;
 	else
-	    cursor = leftCursor;
+	    cursor_name = LEFT_CURSOR;
     }
     else if (mask & ResizeRightMask)
     {
 	if (mask & ResizeDownMask)
-	    cursor = downRightCursor;
+	    cursor_name = DOWN_RIGHT_CURSOR;
 	else if (mask & ResizeUpMask)
-	    cursor = upRightCursor;
+	    cursor_name = UP_RIGHT_CURSOR;
 	else
-	    cursor = rightCursor;
+	    cursor_name = RIGHT_CURSOR;
     }
     else if (mask & ResizeUpMask)
     {
-	cursor = upCursor;
+	cursor_name = UP_CURSOR;
     }
     else
     {
-	cursor = downCursor;
+	cursor_name = DOWN_CURSOR;
     }
 
-    return cursor;
+    return screen->cursorCache (cursor_name);
 }
 
 void
@@ -1327,7 +1338,7 @@ ResizeLogic::initiateResize (CompAction		*action,
 	    Cursor cursor;
 
 	    if (state & CompAction::StateInitKey)
-		cursor = middleCursor;
+		cursor = screen->cursorCache (MIDDLE_CURSOR);
 	    else
 		cursor = cursorFromResizeMask (mask);
 

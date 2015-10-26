@@ -60,13 +60,12 @@ FWWindow::handleIPWResizeInitiate ()
 
     window->activate ();
     mGrab = grabResize;
-    fws->mRotateCursor = XCreateFontCursor (screen->dpy (), XC_plus);
     if(!screen->otherGrabExist ("freewins", "resize", 0))
 	if(!fws->mGrabIndex)
 	{
 	    unsigned int mods = 0;
 	    mods &= CompNoMask;
-	    fws->mGrabIndex = screen->pushGrab (fws->mRotateCursor, "resize");
+	    fws->mGrabIndex = screen->pushGrab (screen->cursorCache (XC_plus), "resize");
 	    window->grabNotify (window->x () + (window->width () / 2),
 				window->y () + (window->height () / 2), mods,
 				CompWindowGrabMoveMask | CompWindowGrabButtonMask);
@@ -81,13 +80,12 @@ FWWindow::handleIPWMoveInitiate ()
 
     window->activate ();
     mGrab = grabMove;
-    fws->mRotateCursor = XCreateFontCursor (screen->dpy (), XC_fleur);
     if(!screen->otherGrabExist ("freewins", "resize", 0))
 	if(!fws->mGrabIndex)
 	{
 	    unsigned int mods = 0;
 	    mods &= CompNoMask;
-	    fws->mGrabIndex = screen->pushGrab (fws->mRotateCursor, "resize");
+	    fws->mGrabIndex = screen->pushGrab (screen->cursorCache (XC_fleur), "resize");
 	    window->grabNotify (window->x () + (window->width () / 2),
 				window->y () + (window->height () / 2), mods,
 				CompWindowGrabResizeMask | CompWindowGrabButtonMask);

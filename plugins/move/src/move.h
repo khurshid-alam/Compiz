@@ -82,8 +82,6 @@ class MoveScreen :
 
 	CompScreen::GrabHandle grab;
 
-	Cursor moveCursor;
-
 	unsigned int origState;
 
 	int	snapOffX;

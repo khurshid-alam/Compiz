@@ -143,8 +143,6 @@ class ShiftScreen :
 	float           mMvVelocity;
 	bool            mInvert;
 	
-	Cursor          mCursor;
-	
 	/* only used for sorting */
 	CompWindow      **mWindows;
 	int             mNWindows;

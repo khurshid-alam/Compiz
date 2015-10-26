@@ -42,7 +42,6 @@ class ExpoScreen :
     public:
 
 	ExpoScreen (CompScreen *);
-	~ExpoScreen ();
 
 	void handleEvent (XEvent *);
 
@@ -153,8 +152,6 @@ class ExpoScreen :
 	KeyCode rightKey;
 	KeyCode upKey;
 	KeyCode downKey;
-
-	Cursor dragCursor;
 };
 
 class ExpoWindow :

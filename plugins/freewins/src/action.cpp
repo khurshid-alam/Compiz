@@ -82,8 +82,6 @@ FWScreen::initiateFWRotate (CompAction         *action,
 		    useW = getRealWindow (w);
 	}
 
-	mRotateCursor = XCreateFontCursor (screen->dpy (), XC_fleur);
-
 	if (!screen->otherGrabExist ("freewins", 0))
 	    if (!mGrabIndex)
 	    {
@@ -305,11 +303,9 @@ FWScreen::initiateFWScale (CompAction         *action,
 		    useW = getRealWindow (w);
 	}
 
-	mRotateCursor = XCreateFontCursor (screen->dpy (), XC_fleur);
-
 	if (!screen->otherGrabExist ("freewins", 0))
 	    if (!mGrabIndex)
-		mGrabIndex = screen->pushGrab (mRotateCursor, "freewins");
+		mGrabIndex = screen->pushGrab (screen->cursorCache(XC_fleur), "freewins");
     }
 
     if (useW)

@@ -145,7 +145,6 @@ class ShelfScreen :
     public:
 
 	ShelfScreen (CompScreen *);
-	~ShelfScreen ();
 
 	CompositeScreen *cScreen;
 	GLScreen	*gScreen;

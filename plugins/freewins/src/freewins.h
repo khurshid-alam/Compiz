@@ -281,8 +281,6 @@ class FWScreen :
 	int  mSnapMask;
 	int  mInvertMask;
 
-	Cursor mRotateCursor;
-
 	CompScreen::GrabHandle mGrabIndex;
 
 	void preparePaint (int);

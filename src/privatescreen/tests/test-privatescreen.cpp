@@ -178,6 +178,7 @@ public:
     MOCK_METHOD0(displayString, const char * ());
     MOCK_METHOD0(getCurrentOutputExtents, CompRect ());
     MOCK_METHOD0(normalCursor, Cursor ());
+    MOCK_METHOD1(cursorCache, Cursor (unsigned int));
     MOCK_METHOD0(grabbed, bool ());
     MOCK_METHOD0(snDisplay, SnDisplay * ());
     MOCK_CONST_METHOD0(createFailed, bool ());

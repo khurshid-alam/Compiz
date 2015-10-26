@@ -134,6 +134,11 @@ class CompScreenImpl : public CompScreenInterface
 	    return mImpl->height ();
 	}
 
+	virtual Cursor cursorCache (unsigned int cursorName)
+	{
+	    return mImpl->cursorCache (cursorName);
+	}
+
     private:
 	CompScreen *mImpl;
 };

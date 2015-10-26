@@ -312,7 +312,7 @@ WidgetScreen::toggle (CompAction         *action,
     }
 
     if (!mGrabIndex)
-	mGrabIndex = screen->pushGrab (mCursor, "widget");
+	mGrabIndex = screen->pushGrab (screen->cursorCache (XC_watch), "widget");
 
     enableFunctions (this, true);
 
@@ -672,8 +672,7 @@ WidgetScreen::WidgetScreen (CompScreen *screen) :
     mLastActiveWindow (None),
     mCompizWidgetAtom (XInternAtom (screen->dpy (), "_COMPIZ_WIDGET", false)),
     mFadeTime         (0),
-    mGrabIndex        (0),
-    mCursor           (XCreateFontCursor (screen->dpy (), XC_watch))
+    mGrabIndex        (0)
 {
     CompAction::CallBack cb;
     ChangeNotify         notify;
@@ -706,9 +705,6 @@ WidgetScreen::~WidgetScreen ()
 {
     screen->matchExpHandlerChangedSetEnabled (this, false);
     screen->matchExpHandlerChanged ();
-
-    if (mCursor)
-	XFreeCursor (screen->dpy (), mCursor);
 }
 
 WidgetWindow::WidgetWindow (CompWindow *window) :
