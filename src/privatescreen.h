@@ -686,6 +686,8 @@ class PrivateScreen :
 
 	void updateScreenInfo ();
 
+	void updateResources ();
+
 	Window getActiveWindow (Window root);
 
 	void setWindowState (unsigned int state, Window id);
@@ -812,6 +814,7 @@ private:
     Window xdndWindow;
     compiz::private_screen::PluginManager pluginManager;
     compiz::private_screen::WindowManager& windowManager;
+    CompOption::Vector resourceManager;
 };
 
 class CompManager
@@ -1174,6 +1177,7 @@ class CompScreenImpl : public CompScreen,
         virtual void _matchExpHandlerChanged();
         virtual void _matchPropertyChanged(CompWindow *);
         virtual void _outputChangeNotify();
+        virtual void _cursorChangeNotify(const CompString&, int);
 
 	void grabServer ();
 	void ungrabServer ();

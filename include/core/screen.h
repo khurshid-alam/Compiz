@@ -155,6 +155,7 @@ class ScreenInterface : public WrapableInterface<CompScreen, ScreenInterface> {
 	virtual void outputChangeNotify ();
 	virtual void addSupportedAtoms (std::vector<Atom>& atoms);
 
+	virtual void cursorChangeNotify (const CompString& theme, int size);
 };
 
 namespace compiz { namespace private_screen {
@@ -217,7 +218,7 @@ protected:
 }
 
 class CompScreen :
-    public WrapableHandler<ScreenInterface, 18>,
+    public WrapableHandler<ScreenInterface, 19>,
     public PluginClassStorage, // TODO should be an interface here
     public CompSize,
     public virtual ::compiz::DesktopWindowCount,
@@ -267,6 +268,8 @@ public:
     WRAPABLE_HND (16, ScreenInterface, void, outputChangeNotify);
     WRAPABLE_HND (17, ScreenInterface, void, addSupportedAtoms,
 		  std::vector<Atom>& atoms);
+    WRAPABLE_HND (18, ScreenInterface, void, cursorChangeNotify,
+		  const CompString&, int);
 
     unsigned int allocPluginClassIndex ();
     void freePluginClassIndex (unsigned int index);
@@ -445,6 +448,7 @@ private:
     virtual void _matchExpHandlerChanged() = 0;
     virtual void _matchPropertyChanged(CompWindow *) = 0;
     virtual void _outputChangeNotify() = 0;
+    virtual void _cursorChangeNotify(const CompString&, int) = 0;
 };
 
 #endif

@@ -44,6 +44,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 #define foreach BOOST_FOREACH
 
 #include <X11/Xlib.h>
@@ -100,6 +101,14 @@ CompScreen *screen;
 ModifierHandler *modHandler;
 
 PluginClassStorage::Indices screenPluginClassIndices (0);
+
+namespace utils
+{
+bool is_number (CompString const& s)
+{
+    return std::find_if (s.begin (), s.end (), [](char c) { return !std::isdigit (c); }) == s.end ();
+}
+}
 
 void CompScreenImpl::sizePluginClasses(unsigned int size)
 {
@@ -1271,8 +1280,8 @@ PrivateScreen::handleSelectionClear (XEvent *event)
     eventManager.quit ();
 }
 
-static const std::string IMAGEDIR("images");
-static const std::string HOMECOMPIZDIR(".compiz-1");
+static const CompString IMAGEDIR("images");
+static const CompString HOMECOMPIZDIR(".compiz-1");
 
 bool
 CompScreenImpl::readImageFromFile (CompString &name,
@@ -1351,6 +1360,68 @@ PrivateScreen::getActiveWindow (Window root)
     }
 
     return w;
+}
+
+void
+PrivateScreen::updateResources ()
+{
+    Atom	  actual;
+    int		  result, format;
+    unsigned long n, left;
+    unsigned char *data;
+
+    result = XGetWindowProperty (dpy, root,
+				 XA_RESOURCE_MANAGER, 0L, 65536, False,
+				 XA_STRING, &actual, &format,
+				 &n, &left, &data);
+
+    int oldCursorSize = CompOption::getIntOptionNamed (resourceManager, "Xcursor.size", -1);
+    CompString oldCursorTheme = CompOption::getStringOptionNamed (resourceManager, "Xcursor.theme");
+    resourceManager.clear ();
+
+    if (result == Success && data)
+    {
+	if (actual == XA_STRING)
+	{
+	    std::vector<CompString> lines;
+	    CompString resources (reinterpret_cast<char *> (data));
+	    boost::split (lines, resources, boost::is_any_of ("\n"));
+
+	    for (auto const& line : lines)
+	    {
+		std::vector<CompString> pair;
+		boost::split (pair, line, boost::is_any_of ("\t"));
+
+		if (pair.size () == 2 && pair[0].back () == ':')
+		{
+		    CompOption option;
+		    auto key = pair[0].substr (0, pair[0].size () - 1);
+		    auto const& value = pair[1];
+
+		    if (utils::is_number (value))
+		    {
+			option.setName (key, CompOption::TypeInt);
+			option.value ().set (std::atoi (value.c_str ()));
+		    }
+		    else
+		    {
+			option.setName (key, CompOption::TypeString);
+			option.value ().set (value);
+		    }
+
+		    resourceManager.push_back (option);
+		}
+	    }
+	}
+
+	XFree (data);
+    }
+
+    int cursorSize = CompOption::getIntOptionNamed (resourceManager, "Xcursor.size", -1);
+    CompString const& cursorTheme = CompOption::getStringOptionNamed (resourceManager, "Xcursor.theme");
+
+    if (cursorSize != oldCursorSize || cursorTheme != oldCursorTheme)
+	screen->cursorChangeNotify (cursorTheme, cursorSize);
 }
 
 bool
@@ -3360,10 +3431,19 @@ cps::GrabManager::grabUngrabKeys (unsigned int modifiers,
 	     * This is so that we can detect taps on individual modifier
 	     * keys, and know to cancel the tap if <modifier>+k is pressed.
 	     */
-	    if (!(currentState & CompAction::StateIgnoreTap))
+	    int minCode, maxCode;
+	    XDisplayKeycodes (screen->dpy(), &minCode, &maxCode);
+
+	    if ((currentState & CompAction::StateIgnoreTap))
 	    {
-		int minCode, maxCode;
-		XDisplayKeycodes (screen->dpy(), &minCode, &maxCode);
+		KeyCode code_p = XKeysymToKeycode(screen->dpy(), XK_p);
+
+		for (k = minCode; k <= maxCode; k++)
+		    if (k != code_p)
+			grabUngrabOneKey (modifiers | ignore, k, grab);
+	    }
+	    else
+	    {
 		for (k = minCode; k <= maxCode; k++)
 		    grabUngrabOneKey (modifiers | modifierForKeycode | ignore, k, grab);
 	    }
@@ -3840,11 +3920,11 @@ CompScreenImpl::runCommand (CompString command)
 	setsid ();
 
 	pos = env.find (':');
-	if (pos != std::string::npos)
+	if (pos != CompString::npos)
 	{
 	    size_t pointPos = env.find ('.', pos);
 
-	    if (pointPos != std::string::npos)
+	    if (pointPos != CompString::npos)
 	    {
 		env.erase (pointPos);
 	    }
@@ -4124,6 +4204,17 @@ CompScreenImpl::_outputChangeNotify ()
 {
 }
 
+void
+CompScreen::cursorChangeNotify (const CompString& theme, int size)
+{
+    WRAPABLE_HND_FUNCTN (cursorChangeNotify, theme, size);
+    _cursorChangeNotify (theme, size);
+}
+
+void CompScreenImpl::_cursorChangeNotify (const CompString&, int)
+{
+}
+
 /* Returns default viewport for some window geometry. If the window spans
  * more than one viewport the most appropriate viewport is returned. How the
  * most appropriate viewport is computed can be made optional if necessary. It
@@ -4266,6 +4357,9 @@ void
 ScreenInterface::addSupportedAtoms (std::vector<Atom>& atoms)
     WRAPABLE_DEF (addSupportedAtoms, atoms)
 
+void
+ScreenInterface::cursorChangeNotify (const CompString& theme, int size)
+    WRAPABLE_DEF (cursorChangeNotify, theme, size)
 
 Window
 CompScreenImpl::root ()
@@ -5117,6 +5211,8 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
 
     eventManager.setSupportingWmCheck (dpy, rootWindow());
     screen->updateSupportedWmHints ();
+
+    updateResources ();
 
     XIGetClientPointer (dpy, None, &clientPointerDeviceId);
 

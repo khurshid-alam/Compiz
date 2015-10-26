@@ -1801,6 +1801,11 @@ CompScreenImpl::_handleEvent (XEvent *event)
 	    if (w)
 		w->priv->updateClassHints ();
 	}
+	else if (event->xproperty.atom == XA_RESOURCE_MANAGER)
+	{
+	    if (event->xproperty.window == privateScreen.rootWindow())
+		privateScreen.updateResources();
+	}
 	break;
     case MotionNotify:
 	break;

@@ -81,6 +81,7 @@ public:
     MOCK_METHOD0(_matchExpHandlerChanged, void ());
     MOCK_METHOD1(_matchPropertyChanged, void (CompWindow *));
     MOCK_METHOD0(_outputChangeNotify, void ());
+    MOCK_METHOD2(_cursorChangeNotify, void (const CompString&, int));
 
     MOCK_METHOD0(outputDevs, CompOutput::vector & ());
     MOCK_METHOD2(setWindowState, void (unsigned int state, Window id));
