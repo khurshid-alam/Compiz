@@ -102,6 +102,16 @@ class CompScreenImpl : public CompScreenInterface
 	    return mImpl->pushGrab (cursor, name);
 	}
 
+	virtual CompScreen::GrabHandle pushPointerGrab (Cursor cursor, const char *name)
+	{
+		return mImpl->pushPointerGrab (cursor, name);
+	}
+
+	virtual CompScreen::GrabHandle pushKeyboardGrab (const char *name)
+	{
+		return mImpl->pushKeyboardGrab (name);
+	}
+
 	virtual void removeGrab (CompScreen::GrabHandle handle, CompPoint *restorePointer)
 	{
 	    mImpl->removeGrab (handle, restorePointer);
