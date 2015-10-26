@@ -104,7 +104,7 @@ PluginClassStorage::Indices screenPluginClassIndices (0);
 void CompScreenImpl::sizePluginClasses(unsigned int size)
 {
     if(size != pluginClasses.size ())
- 	pluginClasses.resize (size);
+	pluginClasses.resize (size);
 }
 
 void CompScreenImpl::setWindowState (unsigned int state, Window id)
@@ -712,7 +712,7 @@ PrivateScreen::setOption (const CompString  &name,
 	return false;
 
     if (!CompOption::findOption (getOptions (), name, &index))
-        return false;
+	return false;
 
     switch (index) {
 	case CoreOptions::ActivePlugins:
@@ -870,7 +870,7 @@ PrivateScreen::processEvents ()
 	    break;
 	default:
 	    break;
-        }
+	}
 
 	sn_display_process_event (snDisplay, &event);
 
@@ -1584,8 +1584,8 @@ PrivateScreen::setWindowState (unsigned int state, Window id)
 
     i = compiz::window::fillStateData (state, data);
     XChangeProperty (dpy, id, Atoms::winState,
-                     XA_ATOM, 32, PropModeReplace,
-                     (unsigned char *) data, i);
+		     XA_ATOM, 32, PropModeReplace,
+		     (unsigned char *) data, i);
 }
 
 unsigned int
@@ -2760,10 +2760,10 @@ cps::WindowManager::findWindow (Window id) const
     }
     else
     {
-        CompWindow::Map::const_iterator it = windowsMap.find (id);
+	CompWindow::Map::const_iterator it = windowsMap.find (id);
 
-        if (it != windowsMap.end ())
-            return (lastFoundWindow = it->second);
+	if (it != windowsMap.end ())
+	    return (lastFoundWindow = it->second);
     }
 
     return 0;
@@ -2933,7 +2933,7 @@ void
 cps::WindowManager::eraseWindowFromMap (Window id)
 {
     if (id != 1)
-        windowsMap.erase (id);
+	windowsMap.erase (id);
 }
 
 void
@@ -3024,29 +3024,40 @@ CompScreenImpl::invisibleCursor ()
 #define POINTER_GRAB_MASK (ButtonReleaseMask | \
 			   ButtonPressMask   | \
 			   PointerMotionMask)
-CompScreenImpl::GrabHandle
-CompScreenImpl::pushGrab (Cursor cursor, const char *name)
-{
-    if (privateScreen.eventManager.grabsEmpty ())
-    {
-	int status;
 
-	status = XGrabPointer (privateScreen.dpy, privateScreen.eventManager.getGrabWindow(), true,
-			       POINTER_GRAB_MASK,
-			       GrabModeAsync, GrabModeAsync,
-			       privateScreen.rootWindow(), cursor,
-			       CurrentTime);
+CompScreen::GrabHandle
+PrivateScreen::pushGrabGeneric (cps::GrabType type,
+				Cursor cursor,
+				const char *name)
+{
+    int status = GrabSuccess;
+
+    if (eventManager.grabsEmpty ())
+    {
+	if (type & cps::GrabType::POINTER)
+	{
+	    status = XGrabPointer (dpy, eventManager.getGrabWindow (), true,
+				   POINTER_GRAB_MASK,
+				   GrabModeAsync, GrabModeAsync,
+				   root, cursor,
+				   CurrentTime);
+	}
 
 	if (status == GrabSuccess)
 	{
-	    status = XGrabKeyboard (privateScreen.dpy,
-				    privateScreen.eventManager.getGrabWindow(), true,
-				    GrabModeAsync, GrabModeAsync,
-				    CurrentTime);
-	    if (status != GrabSuccess)
+	    if (type & cps::GrabType::KEYBOARD)
 	    {
-		XUngrabPointer (privateScreen.dpy, CurrentTime);
-		return NULL;
+		status = XGrabKeyboard (dpy,
+					eventManager.getGrabWindow (), true,
+					GrabModeAsync, GrabModeAsync,
+					CurrentTime);
+		if (status != GrabSuccess)
+		{
+		    if (type & cps::GrabType::POINTER)
+			XUngrabPointer (dpy, CurrentTime);
+
+		    return NULL;
+		}
 	    }
 	}
 	else
@@ -3054,43 +3065,125 @@ CompScreenImpl::pushGrab (Cursor cursor, const char *name)
     }
     else
     {
-	XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
-				  cursor, CurrentTime);
+	if (type & cps::GrabType::POINTER)
+	{
+	    if (eventManager.topGrab (cps::GrabType::POINTER))
+	    {
+		XChangeActivePointerGrab (dpy, POINTER_GRAB_MASK,
+					  cursor, CurrentTime);
+	    }
+	    else
+	    {
+		status = XGrabPointer (dpy, eventManager.getGrabWindow (), true,
+				       POINTER_GRAB_MASK,
+				       GrabModeAsync, GrabModeAsync,
+				       root, cursor,
+				       CurrentTime);
+
+		if (status != GrabSuccess)
+		    return NULL;
+	    }
+	}
+
+	if ((type & cps::GrabType::KEYBOARD) &&
+            !eventManager.topGrab (cps::GrabType::KEYBOARD))
+	{
+	    status = XGrabKeyboard (dpy,
+				    eventManager.getGrabWindow (), true,
+				    GrabModeAsync, GrabModeAsync,
+				    CurrentTime);
+
+	    if (status != GrabSuccess)
+	    {
+		if (type & cps::GrabType::POINTER)
+		{
+		    if (cps::Grab *lastPtrGrab = eventManager.topGrab (cps::GrabType::POINTER))
+		    {
+			XChangeActivePointerGrab (dpy, POINTER_GRAB_MASK,
+						  lastPtrGrab->cursor, CurrentTime);
+		    }
+		    else
+		    {
+		    	XUngrabPointer (dpy, CurrentTime);
+		    }
+		}
+
+		return NULL;
+	    }
+	}
     }
 
-    cps::Grab *grab = new cps::Grab (cursor, name);
-    privateScreen.eventManager.grabsPush (grab);
+    cps::Grab *grab = new cps::Grab (type, cursor, name);
+    eventManager.grabsPush (grab);
 
     return grab;
+}
+
+CompScreenImpl::GrabHandle
+CompScreenImpl::pushGrab (Cursor cursor, const char *name)
+{
+    return privateScreen.pushGrabGeneric(cps::GrabType::ALL, cursor, name);
+}
+
+CompScreenImpl::GrabHandle
+CompScreenImpl::pushPointerGrab (Cursor cursor, const char *name)
+{
+    return privateScreen.pushGrabGeneric(cps::GrabType::POINTER, cursor, name);
+}
+
+CompScreenImpl::GrabHandle
+CompScreenImpl::pushKeyboardGrab (const char *name)
+{
+    return privateScreen.pushGrabGeneric(cps::GrabType::KEYBOARD, XC_X_cursor, name);
 }
 
 void
 CompScreenImpl::updateGrab (CompScreen::GrabHandle handle, Cursor cursor)
 {
-    if (!handle)
+    if (!handle || !(handle->type & cps::GrabType::POINTER))
 	return;
 
-    XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
-			      cursor, CurrentTime);
+    if (privateScreen.eventManager.topGrab (cps::GrabType::POINTER) == handle)
+    {
+	XChangeActivePointerGrab (privateScreen.dpy, POINTER_GRAB_MASK,
+				  cursor, CurrentTime);
+    }
 
     handle->cursor = cursor;
 }
 
 void
 CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
-			CompPoint *restorePointer)
+			    CompPoint *restorePointer)
 {
     if (!handle)
 	return;
 
+    cps::GrabType removedType = handle->type;
     privateScreen.eventManager.grabsRemove(handle);
 
     if (!privateScreen.eventManager.grabsEmpty ())
     {
-	XChangeActivePointerGrab (privateScreen.dpy,
-				  POINTER_GRAB_MASK,
-				  privateScreen.eventManager.grabsBack ()->cursor,
-				  CurrentTime);
+	if (removedType & cps::GrabType::POINTER)
+	{
+	    if (CompScreen::GrabHandle topPtrGrab = privateScreen.eventManager.topGrab (cps::GrabType::POINTER))
+	    {
+		XChangeActivePointerGrab (privateScreen.dpy,
+					  POINTER_GRAB_MASK,
+					  topPtrGrab->cursor,
+					  CurrentTime);
+	    }
+	    else
+	    {
+	        XUngrabPointer (privateScreen.dpy, CurrentTime);
+	    }
+	}
+
+	if (removedType & cps::GrabType::KEYBOARD)
+	{
+	    if (!privateScreen.eventManager.topGrab (cps::GrabType::KEYBOARD))
+		XUngrabKeyboard (privateScreen.dpy, CurrentTime);
+	}
     }
     else
     {
@@ -3098,8 +3191,11 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    warpPointer (restorePointer->x () - pointerX,
 			 restorePointer->y () - pointerY);
 
-	XUngrabPointer (privateScreen.dpy, CurrentTime);
-	XUngrabKeyboard (privateScreen.dpy, CurrentTime);
+	if (removedType & cps::GrabType::POINTER)
+	    XUngrabPointer (privateScreen.dpy, CurrentTime);
+
+	if (removedType & cps::GrabType::KEYBOARD)
+	    XUngrabKeyboard (privateScreen.dpy, CurrentTime);
     }
 }
 
@@ -3265,12 +3361,12 @@ cps::GrabManager::grabUngrabKeys (unsigned int modifiers,
 	     * keys, and know to cancel the tap if <modifier>+k is pressed.
 	     */
 	    if (!(currentState & CompAction::StateIgnoreTap))
-            {
- 		int minCode, maxCode;
- 		XDisplayKeycodes (screen->dpy(), &minCode, &maxCode);
- 		for (k = minCode; k <= maxCode; k++)
- 		    grabUngrabOneKey (modifiers | modifierForKeycode | ignore, k, grab);
-            }
+	    {
+		int minCode, maxCode;
+		XDisplayKeycodes (screen->dpy(), &minCode, &maxCode);
+		for (k = minCode; k <= maxCode; k++)
+		    grabUngrabOneKey (modifiers | modifierForKeycode | ignore, k, grab);
+	    }
 	}
 
 	if (CompScreen::checkForError (screen->dpy()))
@@ -3517,7 +3613,7 @@ void
 CompScreenImpl::removeAction (CompAction *action)
 {
     if (!privateScreen.initialized ||
-        !action->active ())
+	!action->active ())
 	return;
 
     grabManager.setCurrentState(action->state());
@@ -3746,7 +3842,7 @@ CompScreenImpl::runCommand (CompString command)
 	pos = env.find (':');
 	if (pos != std::string::npos)
 	{
-            size_t pointPos = env.find ('.', pos);
+	    size_t pointPos = env.find ('.', pos);
 
 	    if (pointPos != std::string::npos)
 	    {
@@ -3754,7 +3850,7 @@ CompScreenImpl::runCommand (CompString command)
 	    }
 	    else
 	    {
-                unsigned int displayNum = atoi (env.substr (pos + 1).c_str ());
+		unsigned int displayNum = atoi (env.substr (pos + 1).c_str ());
 		env.erase (pos);
 		env.append (compPrintf (":%i", displayNum));
 	    }
@@ -5160,7 +5256,7 @@ CompScreenImpl::~CompScreenImpl ()
     privateScreen.startupSequence.removeAllSequences ();
 
     while (!windowManager.getWindows().empty ())
-        delete windowManager.getWindows().front ();
+	delete windowManager.getWindows().front ();
 
     while (CompPlugin* p = CompPlugin::pop ())
 	CompPlugin::unload (p);

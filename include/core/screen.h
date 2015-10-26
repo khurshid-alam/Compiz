@@ -364,6 +364,8 @@ public:
     virtual CompIcon *defaultIcon () const = 0;
     virtual bool otherGrabExist (const char *, ...) = 0;
     virtual GrabHandle pushGrab (Cursor cursor, const char *name) = 0;
+    virtual GrabHandle pushPointerGrab (Cursor cursor, const char *name) = 0;
+    virtual GrabHandle pushKeyboardGrab (const char *name) = 0;
     virtual void removeGrab (GrabHandle handle, CompPoint *restorePointer) = 0;
     virtual bool writeImageToFile (CompString &path,
 			       const char *format,

@@ -239,6 +239,20 @@ class PluginManager
 	CompStringSet blacklist;
 };
 
+enum GrabType {
+    POINTER = 1 << 0,
+    KEYBOARD = 1 << 1,
+    ALL = POINTER|KEYBOARD
+};
+
+struct Grab {
+    Grab (GrabType type, Cursor cursor, const char *name) : type(type), cursor(cursor), name(name) {}
+    Grab (Cursor cursor, const char *name) : Grab(GrabType::ALL, cursor, name) {}
+    GrabType   type;
+    Cursor     cursor;
+    const char *name;
+};
+
 class GrabList
 {
     // TODO: std::list<Grab *> is almost certainly the wrong data
@@ -249,13 +263,14 @@ class GrabList
 public:
     typedef GrabPtrList::iterator GrabIterator;
 
-    bool grabsEmpty() const { return grabs.empty(); }
-    void grabsPush(Grab* grab) { grabs.push_back (grab); }
-    GrabIterator grabsBegin() { return grabs.begin(); }
-    GrabIterator grabsEnd() { return grabs.end(); }
-    void grabsRemove(Grab* grab);
+    bool grabsEmpty () const { return grabs.empty (); }
+    void grabsPush (Grab* grab) { grabs.push_back (grab); }
+    GrabIterator grabsBegin () { return begin (grabs); }
+    GrabIterator grabsEnd () { return end (grabs); }
+    void grabsRemove (Grab* grab);
     bool grabExist (const char *grab);
-    Grab* grabsBack() { return grabs.back (); }
+    Grab* topGrab (GrabType t) { auto it = std::find_if (begin (grabs), end (grabs), [t] (Grab *g) { return (g->type & t); }); return (it != end (grabs)) ? *it : NULL; }
+    Grab* grabsBack () { return grabs.back (); }
 
 private:
     GrabPtrList grabs;
@@ -347,12 +362,6 @@ class ButtonGrab {
 	int          button;
 	unsigned int modifiers;
 	int          count;
-};
-
-struct Grab {
-	Grab(Cursor cursor, const char *name) : cursor(cursor), name(name) {}
-	Cursor     cursor;
-	const char *name;
 };
 
 // data members that don't belong (these probably belong
@@ -571,9 +580,6 @@ private:
     Display* const& dpy;
 };
 
-
-
-
 unsigned int windowStateMask (Atom state);
 
 }} // namespace compiz::private_screen
@@ -702,6 +708,10 @@ class PrivateScreen :
 
 	static void compScreenSnEvent (SnMonitorEvent *event,
 			   void           *userData);
+
+	CompScreen::GrabHandle pushGrabGeneric (::compiz::private_screen::GrabType type,
+						Cursor cursor,
+						const char *name);
 
 	int  getXkbEvent() const { return xkbEvent.get(); }
 	std::vector<XineramaScreenInfo>& getScreenInfo () { return screenInfo; }
@@ -962,6 +972,12 @@ class CompScreenImpl : public CompScreen,
 	 * can call this and all get events, but the pointer will
 	 * be grabbed once and the actual grab refcounted */
 	GrabHandle pushGrab (Cursor cursor, const char *name);
+
+	/* Adds an X Pointer grab to the stack. */
+	GrabHandle pushPointerGrab (Cursor cursor, const char *name);
+
+	/* Adds an X Keyboard grab to the stack. */
+    	GrabHandle pushKeyboardGrab (const char *name);
 
 	/* Allows you to change the pointer of your grab */
 	void updateGrab (GrabHandle handle, Cursor cursor);
