@@ -36,7 +36,7 @@
 	    <extensible/>
 	    <sort start="2"/>
 	    <default>
-	      <value>animation:Zoom</value>
+	      <value>animation:Glide 2</value>
 	      <value>animation:Fade</value>
 	      <value>animation:Fade</value>
 	    </default>
@@ -48,9 +48,9 @@
 	    <min>50</min>
 	    <max>4000</max>
 	    <default>
-	      <value>200</value>
-	      <value>150</value>
-	      <value>150</value>
+	      <value>120</value>
+	      <value>80</value>
+	      <value>80</value>
 	    </default>
 	  </option>
 	  <option name="open_matches" type="list">
@@ -58,8 +58,8 @@
 	    <_long>The windows that will be animated.</_long>
 	    <type>match</type>
 	    <default>
-	      <value>(type=Normal | Dialog | ModalDialog | Unknown) &amp; !(name=gnome-screensaver)</value>
-	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo)</value>
+ 	      <value>((type=Normal | Unknown) | name=sun-awt-X11-XFramePeer | name=sun-awt-X11-XDialogPeer) &amp; !(role=toolTipTip | role=qtooltip_label) &amp; !(type=Normal &amp; override_redirect=1) &amp; !(name=gnome-screensaver)</value>
+ 	      <value>((type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal) &amp; !(class=\\.exe$))</value>
 	      <value>(type=Tooltip | Notification | Utility) &amp; !(name=compiz) &amp; !(title=notify-osd)</value>
 	    </default>
 	  </option>
@@ -102,7 +102,7 @@
 	    <extensible/>
 	    <sort start="2"/>
 	    <default>
-	      <value>animation:Zoom</value>
+	      <value>animation:Glide 2</value>
 	      <value>animation:Fade</value>
 	      <value>animation:Fade</value>
 	    </default>
@@ -114,9 +114,9 @@
 	    <min>50</min>
 	    <max>4000</max>
 	    <default>
-	      <value>200</value>
-	      <value>150</value>
-	      <value>150</value>
+	      <value>120</value>
+	      <value>80</value>
+	      <value>50</value>
 	    </default>
 	  </option>
 	  <option name="close_matches" type="list">
@@ -124,8 +124,8 @@
 	    <_long>The windows that will be animated.</_long>
 	    <type>match</type>
 	    <default>
-	      <value>(type=Normal | Dialog | ModalDialog | Unknown) &amp; !(name=gnome-screensaver)</value>
-	      <value>(type=Menu | PopupMenu | DropdownMenu | Combo)</value>
+ 	      <value>((type=Normal | Unknown) | name=sun-awt-X11-XFramePeer | name=sun-awt-X11-XDialogPeer) &amp; !(role=toolTipTip | role=qtooltip_label) &amp; !(type=Normal &amp; override_redirect=1) &amp; !(name=gnome-screensaver) &amp; !(name=gnome-screenshot)</value>
+ 	      <value>((type=Menu | PopupMenu | DropdownMenu | Combo | Dialog | ModalDialog | Normal) &amp; !(class=\\.exe$))</value>
 	      <value>(type=Tooltip | Notification | Utility) &amp; !(name=compiz) &amp; !(title=notify-osd)</value>
 	    </default>
 	  </option>
@@ -168,7 +168,7 @@
 	    <extensible/>
 	    <sort start="2"/>
 	    <default>
-	      <value>animation:Magic Lamp</value>
+	      <value>animation:Zoom</value>
 	    </default>
 	  </option>
 	  <option name="minimize_durations" type="list">
@@ -178,7 +178,7 @@
 	    <min>50</min>
 	    <max>4000</max>
 	    <default>
-	      <value>300</value>
+	      <value>220</value>
 	    </default>
 	  </option>
 	  <option name="minimize_matches" type="list">
@@ -341,7 +341,7 @@
 	    <extensible/>
 	    <sort start="1"/>
 	    <default>
-	      <value>animation:None</value>
+	      <value>animation:Fade</value>
 	    </default>
 	  </option>
 	  <option name="focus_durations" type="list">
@@ -351,7 +351,7 @@
 	    <min>50</min>
 	    <max>4000</max>
 	    <default>
-	      <value>300</value>
+	      <value>150</value>
 	    </default>
 	  </option>
 	  <option name="focus_matches" type="list">
@@ -385,7 +385,7 @@
 	<option name="time_step" type="int">
 	  <_short>Animation Time Step</_short>
 	  <_long>The amount of time in milliseconds between each render of the animation. The higher the number, the jerkier the movements become.</_long>
-	  <default>10</default>
+	  <default>16</default>
 	  <min>1</min>
 	  <max>400</max>
 	</option>
@@ -473,7 +473,7 @@
 	  <option name="glide2_away_position" type="float">
 	    <_short>Away Position</_short>
 	    <_long>Closeness of window to camera at the end of the animation (1.0: Close to camera, -2.0: Away from camera).</_long>
-	    <default>-0.4</default>
+	    <default>-0.1</default>
 	    <min>-2</min>
 	    <max>1</max>
 	    <precision>0.05</precision>
@@ -481,7 +481,7 @@
 	  <option name="glide2_away_angle" type="float">
 	    <_short>Away Angle</_short>
 	    <_long>Angle of window at the end of the animation.</_long>
-	    <default>-45</default>
+	    <default>0</default>
 	    <min>-540</min>
 	    <max>540</max>
 	    <precision>5</precision>
@@ -686,7 +686,7 @@
 	  <option name="zoom_springiness" type="float">
 	    <_short>Springiness</_short>
 	    <_long>How spring-like the Zoom animation should be.</_long>
-	    <default>0.0</default>
+	    <default>0.08</default>
 	    <min>0</min>
 	    <max>1</max>
 	    <precision>0.01</precision>

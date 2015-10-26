@@ -54,6 +54,7 @@
 		<option name="run_command_terminal_key" type="key">
 		    <_short>Open a terminal</_short>
 		    <_long>Open a terminal</_long>
+		    <default>&lt;Control&gt;&lt;Alt&gt;T</default>
 		</option>
 	    </group>
 	</options>
