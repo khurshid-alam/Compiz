@@ -1,3 +1,18 @@
+compiz (1:0.9.12.2+16.04.20151026-0ubuntu1) xenial; urgency=medium
+
+  * Move: remember the type of movement and use the proper grabbing for
+    it (LP: #1487637)
+  * Resize: remember the type of movement and use the proper grabbing
+    for it (LP: #1487637)
+  * Screen: add cursorChangeNotify function and call it on
+    XA_RESOURCE_MANAGER
+  * Screen: add pushKeyboardGrab and pushPointerGrab methods to add
+    different kinds of grabs
+  * Screen: monitor root RESOURCE_MANAGER and update cursors when Size
+    or Theme changes (LP: #1359211)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 26 Oct 2015 17:15:54 +0000
+
 compiz (1:0.9.12.2+15.10.20151015-0ubuntu1) wily; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
