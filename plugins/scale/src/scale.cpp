@@ -1749,7 +1749,7 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 		else if (optionGetClickOnDesktop () != ScaleOptions::ClickOnDesktopNone)
 		{
 		    CompPoint pointer (button->x_root, button->y_root);
-		    CompRect  workArea (screen->workArea ());
+		    CompRect  workArea (screen->currentOutputDev ().workArea ());
 		    workArea.setX (workArea.x() + optionGetXOffset ());
 		    workArea.setY (workArea.y() + optionGetYOffset ());
 
