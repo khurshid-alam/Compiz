@@ -13,15 +13,12 @@ def add_info(report, ui):
         report.add_hooks_info(ui, srcpackage='xorg')
         return
 
-    
-    # ok, add maximum interesting info without too much spam
-    report['CompizPlugins'] = command_output(['gconftool-2',
-        '--get', '/apps/compiz-1/general/screen0/options/active_plugins'])
-    # User configuration
-    report['GconfCompiz'] = command_output(['gconftool-2', '-R', '/apps/compiz-1'])
+    # get the current profiles, gsettings returns the string quoted so strip those before using
+    current_profile = command_output(['gsettings', 'get', 'org.compiz', 'current-profile']).strip("'")
+    attach_gsettings_schema(report, 'org.compiz.core:/org/compiz/profiles/%s/plugins/core/' % current_profile)
 
     unity_bug = False
-    if ui and "unity" in report['CompizPlugins'] and report['SourcePackage'] != "unity":
+    if ui and "unity" in report['GsettingsChanges'] and report['SourcePackage'] != "unity":
         if ui.yesno("Thanks for reporting this bug. It seems you have unity running. Is the issue you are reporting is related to unity itself rather than compiz?"):
             unity_bug = True
             
