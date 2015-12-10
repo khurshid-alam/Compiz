@@ -10,8 +10,6 @@ if (USE_GSETTINGS)
 
     if (COMPIZCONFIG_MATE_GSETTINGS_INTEGRATION_FOUND)
 
-	add_definitions (-DUSE_GCONF)
-
 	include_directories (${CMAKE_SOURCE_DIR}/compizconfig/libcompizconfig/include
 			     ${CMAKE_SOURCE_DIR}/compizconfig/gsettings/gsettings_backend_shared
 			     ${CMAKE_SOURCE_DIR}/compizconfig/integration/mate/include

@@ -1,16 +1,10 @@
 #include <glib.h>
 #include "ccs_gnome_integration_constants.h"
 
-const char * watchedGConfGnomeDirectories[] = {
-    METACITY,
-    "/desktop/gnome/applications/terminal",
-    "/apps/panel/applets/window_list/prefs"
-};
-
 const CCSGNOMEIntegratedSettingNames ccsGNOMEIntegratedSettingNames =
 {
     { "audible_bell", "audible_bell" },
-    { "click_to_focus", "focus_mode" },
+    { "click_to_focus", "focumode" },
     { "raise_on_click", "raise_on_click" },
     { "autoraise_delay", "auto_raise_delay" },
     { "autoraise", "auto_raise" },
