@@ -23,6 +23,14 @@ if (XORG_SERVER_FOUND)
     string (STRIP ${_xorg_gtest_source_dir} _xorg_gtest_source_dir)
     string (STRIP ${_xorg_gtest_cflags} _xorg_gtest_cflags)
 
+    # This is a workaround for bug #1521366 caused by recent pkg-config variables unquoting
+    set (_unescaped_double_quote "([^\\])\\\"")
+    set (_escaped_double_quote "\\1\\\\\"")
+    string (REGEX REPLACE ${_unescaped_double_quote} ${_escaped_double_quote} _xorg_gtest_prefix ${_xorg_gtest_prefix})
+    string (REGEX REPLACE ${_unescaped_double_quote} ${_escaped_double_quote} _xorg_gtest_include_dir ${_xorg_gtest_include_dir})
+    string (REGEX REPLACE ${_unescaped_double_quote} ${_escaped_double_quote} _xorg_gtest_source_dir ${_xorg_gtest_source_dir})
+    string (REGEX REPLACE ${_unescaped_double_quote} ${_escaped_double_quote} _xorg_gtest_cflags ${_xorg_gtest_cflags})
+
     set (XORG_SERVER_GTEST_INCLUDES ${XORG_SERVER_INCLUDE_DIRS})
     set (XORG_SERVER_GTEST_LIBRARY_DIRS ${XORG_SERVER_LIBRARIES})
     set (XORG_SERVER_GTEST_LIBRARIES} ${XORG_SERVER_LIBRARIES})
