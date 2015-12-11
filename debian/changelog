@@ -1,3 +1,18 @@
+compiz (1:0.9.12.2+16.04.20151211-0ubuntu1) xenial; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * FindXorgGTest: escape unscaped quotes on pkg-config variables (LP:
+    #1521366)
+  * Scale: use current monitor workarea to check whether the mouse is
+    inside or not (LP: #1516599)
+  * backends: drop gconf support
+
+  [ Sebastien Bacher ]
+  * Update the apport hook, get the gsettings config not the gconf one
+    (LP: #1508974)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 11 Dec 2015 10:00:39 +0000
+
 compiz (1:0.9.12.2+16.04.20151026-0ubuntu1) xenial; urgency=medium
 
   * Move: remember the type of movement and use the proper grabbing for
