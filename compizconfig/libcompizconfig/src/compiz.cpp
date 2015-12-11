@@ -872,8 +872,8 @@ addPluginFromPB (CCSContext * context,
     if (ccsFindPlugin (context, name))
 	return;
 
-    if (!strcmp (name, "ini") || !strcmp (name, "gconf") ||
-	!strcmp (name, "ccp") || !strcmp (name, "kconfig"))
+    if (!strcmp (name, "ini") || !strcmp (name, "ccp") ||
+	!strcmp (name, "kconfig"))
 	return;
 
     plugin = (CCSPlugin *) calloc (1, sizeof (CCSPlugin));
@@ -2534,8 +2534,8 @@ addPluginFromXMLNode (CCSContext * context,
 	return FALSE;
     }
 
-    if (!strcmp (name, "ini") || !strcmp (name, "gconf") ||
-	!strcmp (name, "ccp") || !strcmp (name, "kconfig"))
+    if (!strcmp (name, "ini") || !strcmp (name, "ccp") ||
+	!strcmp (name, "kconfig"))
     {
 	free (name);
 	return FALSE;
@@ -2986,8 +2986,8 @@ addPluginNamed (CCSContext * context, char *name)
     if (ccsFindPlugin (context, name))
 	return;
 
-    if (!strcmp (name, "ini") || !strcmp (name, "gconf") ||
-	!strcmp (name, "ccp") || !strcmp (name, "kconfig"))
+    if (!strcmp (name, "ini") || !strcmp (name, "ccp") ||
+	!strcmp (name, "kconfig"))
 	return;
 
     plugin = (CCSPlugin *) calloc (1, sizeof (CCSPlugin));

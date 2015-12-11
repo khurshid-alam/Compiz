@@ -380,7 +380,7 @@ struct _CCSBackendInterface
     CCSBackendGetInfoFunc      backendGetInfo;
 
     /* something like a event loop call for the backend,
-       so it can check for file changes (gconf changes in the gconf backend)
+       so it can check for file changes
        no need for reload settings signals anymore */
     CCSBackendExecuteEventsFunc executeEvents;
 
@@ -423,7 +423,7 @@ const CCSBackendInfo * ccsBackendGetInfo (CCSBackend *backend);
  * @param flags ProcessEventsGlibMainLoopMask or 0
  *
  * something like a event loop call for the backend,
- * so it can check for file changes (gconf changes in the gconf backend)
+ * so it can check for file changes
  */
 void ccsBackendExecuteEvents (CCSBackend *backend, unsigned int flags);
 

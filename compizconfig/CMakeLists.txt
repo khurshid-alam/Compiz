@@ -16,16 +16,10 @@ else (COMPIZ_PACKAGING_ENABLED)
     set (libcompizconfig_exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
 endif (COMPIZ_PACKAGING_ENABLED)
 
-option (USE_GCONF "Enable legacy GNOME 2.x option integration with GConf" ON)
-
 add_subdirectory (libcompizconfig)
 add_subdirectory (compizconfig-python)
 add_subdirectory (integration)
 add_subdirectory (ccsm)
-
-if (USE_GCONF)
-    add_subdirectory (gconf)
-endif (USE_GCONF)
 
 if (USE_GSETTINGS)
     add_subdirectory (gsettings)

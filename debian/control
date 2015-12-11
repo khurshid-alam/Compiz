@@ -155,11 +155,9 @@ Depends: ${shlibs:Depends},
 Recommends: gnome-system-monitor | mate-system-monitor,
 Replaces: compiz-plugins-main (<= 1:0.9.8),
           compiz-plugins-main-default (<= 1:0.9.8),
-          compizconfig-backend-gconf (<= 1:0.9.8),
           libcompizconfig0 (<= 1:0.9.8),
 Breaks: compiz-plugins-main (<= 1:0.9.8),
         compiz-plugins-main-default (<= 1:0.9.8),
-        compizconfig-backend-gconf (<= 1:0.9.8),
 Description: OpenGL window and compositing manager - GNOME window decorator
  Compiz brings to life a variety of visual effects that make the Linux desktop
  easier to use, more powerful and intuitive, and more accessible for users
@@ -352,12 +350,3 @@ Section: oldlibs
 Description: transitional dummy package
  This package ensures a clean upgrade path, and can be safely removed
  after the upgrade.
-
-Package: compizconfig-backend-gconf
-Depends: compiz-gnome, gconf2, ${misc:Depends}
-Architecture: all
-Section: oldlibs
-Description: transitional dummy package
- This package ensures a clean upgrade path, and can be safely removed
- after the upgrade.
-

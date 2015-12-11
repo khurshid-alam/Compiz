@@ -1,6 +1,5 @@
 include (FindPkgConfig)
 
-add_subdirectory (gconf)
 add_subdirectory (gsettings)
 
 set (_deps

@@ -8,12 +8,6 @@ include (CompizGSettings)
 set (_deps glib-2.0>=2.20.0
 	   gio-2.0>=2.25.0)
 
-if (USE_GCONF)
-    list (APPEND _deps gconf-2.0>=2.31.1)
-
-    add_definitions (-DUSE_GCONF)
-endif (USE_GCONF)
-
 if (COMPIZ_BUILD_TESTING)
     add_subdirectory (mocks)
 endif (COMPIZ_BUILD_TESTING)

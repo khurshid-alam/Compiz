@@ -182,8 +182,6 @@ struct _CCSGNOMEIntegratedPluginNames
 
 extern const CCSGNOMEIntegratedPluginNames ccsGNOMEIntegratedPluginNames;
 
-extern const char* watchedGConfGnomeDirectories[];
-
 typedef struct _CCSGSettingsWrapperIntegratedSchemasQuarks
 {
     GQuark ORG_GNOME_DESKTOP_WM_PREFERENCES;
