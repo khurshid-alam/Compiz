@@ -4,7 +4,7 @@
 const CCSGNOMEIntegratedSettingNames ccsGNOMEIntegratedSettingNames =
 {
     { "audible_bell", "audible_bell" },
-    { "click_to_focus", "focumode" },
+    { "click_to_focus", "focus_mode" },
     { "raise_on_click", "raise_on_click" },
     { "autoraise_delay", "auto_raise_delay" },
     { "autoraise", "auto_raise" },
