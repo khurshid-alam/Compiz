@@ -587,9 +587,9 @@ meta_get_decoration_geometry (decor_t           *d,
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
 
 #ifdef HAVE_METACITY_3_20_0
-        style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_theme_create_style_info (theme, screen, NULL);
 #else
-        style_info = meta_theme_create_style_info (screen, NULL);
+    style_info = meta_theme_create_style_info (screen, NULL);
 #endif
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
@@ -717,9 +717,9 @@ meta_draw_window_decoration (decor_t *d)
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
 
 #ifdef HAVE_METACITY_3_20_0
-        style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_theme_create_style_info (theme, screen, NULL);
 #else
-        style_info = meta_theme_create_style_info (screen, NULL);
+    style_info = meta_theme_create_style_info (screen, NULL);
 #endif
 
     cairo_paint (cr);
@@ -1530,9 +1530,9 @@ meta_update_border_extents (decor_frame_t *frame)
     screen = gtk_widget_get_screen (frame->style_window_rgba);
 
 #ifdef HAVE_METACITY_3_20_0
-        style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_theme_create_style_info (theme, screen, NULL);
 #else
-        style_info = meta_theme_create_style_info (screen, NULL);
+    style_info = meta_theme_create_style_info (screen, NULL);
 #endif
 
     meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
