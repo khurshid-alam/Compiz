@@ -34,11 +34,15 @@ G_BEGIN_DECLS
 
 #ifdef USE_METACITY
 typedef MetaTheme * (*GWDMetaThemeGetCurrentProc) ();
+#ifdef HAVE_METACITY_3_20_0
 typedef void (*GWDMetaThemeSetProc) (const gchar                *theme,
                                      gboolean                    force_update,
                                      gboolean                    composited,
                                      const PangoFontDescription *titlebar_font);
-
+#else
+typedef void (*GWDMetaThemeSetProc) (const gchar *theme,
+                                     gboolean     force_update);
+#endif
 gboolean
 gwd_metacity_window_decoration_update_meta_theme (const gchar		     *theme,
 						  GWDMetaThemeGetCurrentProc get_current,

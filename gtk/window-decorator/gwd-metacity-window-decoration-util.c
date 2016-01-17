@@ -38,7 +38,12 @@ gwd_metacity_window_decoration_update_meta_theme (const gchar		     *theme,
     if (!strlen (theme))
 	return FALSE;
 
+#ifdef HAVE_METACITY_3_20_0
     (*set_current) (theme, TRUE, TRUE, NULL);
+#else
+    (*set_current) (theme, TRUE);
+#endif
+
     if (!(*get_current) ())
 	return FALSE;
 
