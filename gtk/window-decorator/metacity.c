@@ -614,7 +614,6 @@ meta_draw_window_decoration (decor_t *d)
     MetaFrameType frame_type;
     MetaTheme *theme;
     MetaStyleInfo *style_info;
-    GtkStyleContext *context;
     cairo_t *cr;
     gint i;
     Region top_region;
@@ -627,9 +626,6 @@ meta_draw_window_decoration (decor_t *d)
     gboolean meta_inactive_shade_opacity;
     double alpha;
     gboolean shade_alpha;
-    MetaFrameStyle *frame_style;
-    GtkWidget *style_window;
-    GdkRGBA bg_rgba;
 
     if (!d->surface || !d->picture)
         return;
@@ -653,13 +649,6 @@ meta_draw_window_decoration (decor_t *d)
     if (decoration_alpha == 1.0)
         alpha = 1.0;
 
-    if (cairo_xlib_surface_get_depth (d->surface) == 32)
-        style_window = d->frame->style_window_rgba;
-    else
-        style_window = d->frame->style_window_rgb;
-
-    context = gtk_widget_get_style_context (style_window);
-
     cr = cairo_create (d->buffer_surface ? d->buffer_surface : d->surface);
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
@@ -680,19 +669,6 @@ meta_draw_window_decoration (decor_t *d)
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (d, i);
 
-    frame_style = meta_theme_get_frame_style (theme, frame_type, flags);
-
-    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg_rgba);
-    bg_rgba.alpha = 1.0;
-
-    if (frame_style->window_background_color)
-    {
-        meta_color_spec_render (frame_style->window_background_color,
-                                context, &bg_rgba);
-
-        bg_rgba.alpha = frame_style->window_background_alpha / 255.0;
-    }
-
     /* Draw something that will be almost invisible to user. This is hacky way
      * to fix invisible decorations. */
     cairo_set_source_rgba (cr, 0, 0, 0, 0.01);
@@ -708,7 +684,6 @@ meta_draw_window_decoration (decor_t *d)
         surface = create_surface (fgeom.width, fgeom.height, d->frame->style_window_rgba);
 
     cr = cairo_create (surface);
-    gdk_cairo_set_source_rgba (cr, &bg_rgba);
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
