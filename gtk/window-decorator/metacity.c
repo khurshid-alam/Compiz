@@ -93,12 +93,10 @@ decor_update_meta_window_property (decor_t        *d,
      * pixmap type decorations */
     if (!d->frame_window)
     {
-        GdkScreen *screen;
         MetaStyleInfo *style_info;
         MetaFrameBorders borders;
 
-        screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-        style_info = meta_theme_create_style_info (theme, screen, NULL);
+        style_info = meta_style_info_new (NULL, TRUE);
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -494,7 +492,6 @@ meta_get_decoration_geometry (decor_t           *d,
                               MetaButtonLayout  *button_layout,
                               MetaFrameType      frame_type)
 {
-    GdkScreen *screen;
     MetaStyleInfo *style_info;
     gint client_width;
     gint client_height;
@@ -579,8 +576,7 @@ meta_get_decoration_geometry (decor_t           *d,
     else
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
-    screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_style_info_new (NULL, TRUE);
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
                               *flags, client_width, client_height,
@@ -593,7 +589,6 @@ void
 meta_draw_window_decoration (decor_t *d)
 {
     GdkDisplay *display;
-    GdkScreen *screen;
     Display *xdisplay;
     cairo_surface_t *surface;
     Picture src;
@@ -679,8 +674,7 @@ meta_draw_window_decoration (decor_t *d)
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 get_format_for_surface (d, surface), 0, NULL);
 
-    screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_style_info_new (NULL, TRUE);
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,
@@ -1262,7 +1256,6 @@ void
 meta_update_border_extents (decor_frame_t *frame)
 {
     MetaTheme *theme;
-    GdkScreen *screen;
     MetaStyleInfo *style_info;
     MetaFrameBorders borders;
     MetaFrameType frame_type;
@@ -1279,8 +1272,7 @@ meta_update_border_extents (decor_frame_t *frame)
 
     theme = meta_theme_get_current ();
 
-    screen = gtk_widget_get_screen (frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (theme, screen, NULL);
+    style_info = meta_style_info_new (NULL, TRUE);
 
     meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
                                   0, &borders);
