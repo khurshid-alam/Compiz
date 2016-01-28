@@ -98,12 +98,7 @@ decor_update_meta_window_property (decor_t        *d,
         MetaFrameBorders borders;
 
         screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-
-#ifdef HAVE_METACITY_3_20_0
         style_info = meta_theme_create_style_info (theme, screen, NULL);
-#else
-        style_info = meta_theme_create_style_info (screen, NULL);
-#endif
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -585,12 +580,7 @@ meta_get_decoration_geometry (decor_t           *d,
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-
-#ifdef HAVE_METACITY_3_20_0
     style_info = meta_theme_create_style_info (theme, screen, NULL);
-#else
-    style_info = meta_theme_create_style_info (screen, NULL);
-#endif
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
                               *flags, client_width, client_height,
@@ -690,12 +680,7 @@ meta_draw_window_decoration (decor_t *d)
                                 get_format_for_surface (d, surface), 0, NULL);
 
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-
-#ifdef HAVE_METACITY_3_20_0
     style_info = meta_theme_create_style_info (theme, screen, NULL);
-#else
-    style_info = meta_theme_create_style_info (screen, NULL);
-#endif
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,
@@ -1264,60 +1249,6 @@ meta_get_event_window_position (decor_t *d,
     }
 }
 
-static MetaButtonFunction
-meta_button_function_from_string (const char *str)
-{
-    if (strcmp (str, "menu") == 0)
-        return META_BUTTON_FUNCTION_MENU;
-    else if (strcmp (str, "appmenu") == 0)
-        return META_BUTTON_FUNCTION_APPMENU;
-    else if (strcmp (str, "minimize") == 0)
-        return META_BUTTON_FUNCTION_MINIMIZE;
-    else if (strcmp (str, "maximize") == 0)
-        return META_BUTTON_FUNCTION_MAXIMIZE;
-    else if (strcmp (str, "close") == 0)
-        return META_BUTTON_FUNCTION_CLOSE;
-    else if (strcmp (str, "shade") == 0)
-        return META_BUTTON_FUNCTION_SHADE;
-    else if (strcmp (str, "above") == 0)
-        return META_BUTTON_FUNCTION_ABOVE;
-    else if (strcmp (str, "stick") == 0)
-        return META_BUTTON_FUNCTION_STICK;
-    else if (strcmp (str, "unshade") == 0)
-        return META_BUTTON_FUNCTION_UNSHADE;
-    else if (strcmp (str, "unabove") == 0)
-        return META_BUTTON_FUNCTION_UNABOVE;
-    else if (strcmp (str, "unstick") == 0)
-        return META_BUTTON_FUNCTION_UNSTICK;
-    else
-        return META_BUTTON_FUNCTION_LAST;
-}
-
-static MetaButtonFunction
-meta_button_opposite_function (MetaButtonFunction ofwhat)
-{
-    switch (ofwhat)
-    {
-    case META_BUTTON_FUNCTION_SHADE:
-        return META_BUTTON_FUNCTION_UNSHADE;
-    case META_BUTTON_FUNCTION_UNSHADE:
-        return META_BUTTON_FUNCTION_SHADE;
-
-    case META_BUTTON_FUNCTION_ABOVE:
-        return META_BUTTON_FUNCTION_UNABOVE;
-    case META_BUTTON_FUNCTION_UNABOVE:
-        return META_BUTTON_FUNCTION_ABOVE;
-
-    case META_BUTTON_FUNCTION_STICK:
-        return META_BUTTON_FUNCTION_UNSTICK;
-    case META_BUTTON_FUNCTION_UNSTICK:
-        return META_BUTTON_FUNCTION_STICK;
-
-    default:
-        return META_BUTTON_FUNCTION_LAST;
-    }
-}
-
 static void
 meta_initialize_button_layout (MetaButtonLayout *layout)
 {
@@ -1362,7 +1293,7 @@ meta_update_button_layout (const char *value)
             if (i > 0 && strcmp ("spacer", buttons[b]) == 0)
             {
                 new_layout.left_buttons_has_spacer[i - 1] = TRUE;
-                f = meta_button_opposite_function (f);
+                f = meta_button_function_get_opposite (f);
 
                 if (f != META_BUTTON_FUNCTION_LAST)
                     new_layout.left_buttons_has_spacer[i - 2] = TRUE;
@@ -1374,7 +1305,7 @@ meta_update_button_layout (const char *value)
                     used[f] = TRUE;
                     new_layout.left_buttons[i++] = f;
 
-                    f = meta_button_opposite_function (f);
+                    f = meta_button_function_get_opposite (f);
 
                     if (f != META_BUTTON_FUNCTION_LAST)
                         new_layout.left_buttons[i++] = f;
@@ -1407,7 +1338,7 @@ meta_update_button_layout (const char *value)
                 if (i > 0 && strcmp ("spacer", buttons[b]) == 0)
                 {
                     new_layout.right_buttons_has_spacer[i - 1] = TRUE;
-                    f = meta_button_opposite_function (f);
+                    f = meta_button_function_get_opposite (f);
                     if (f != META_BUTTON_FUNCTION_LAST)
                         new_layout.right_buttons_has_spacer[i - 2] = TRUE;
                 }
@@ -1418,7 +1349,7 @@ meta_update_button_layout (const char *value)
                         used[f] = TRUE;
                         new_layout.right_buttons[i++] = f;
 
-                        f = meta_button_opposite_function (f);
+                        f = meta_button_function_get_opposite (f);
 
                         if (f != META_BUTTON_FUNCTION_LAST)
                             new_layout.right_buttons[i++] = f;
@@ -1503,12 +1434,7 @@ meta_update_border_extents (decor_frame_t *frame)
     theme = meta_theme_get_current ();
 
     screen = gtk_widget_get_screen (frame->style_window_rgba);
-
-#ifdef HAVE_METACITY_3_20_0
     style_info = meta_theme_create_style_info (theme, screen, NULL);
-#else
-    style_info = meta_theme_create_style_info (screen, NULL);
-#endif
 
     meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
                                   0, &borders);
