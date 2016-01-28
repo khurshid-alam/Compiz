@@ -35,11 +35,11 @@ meta_button_present (MetaButtonLayout   *button_layout,
 {
     int i;
 
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
         if (button_layout->left_buttons[i] == function)
             return TRUE;
 
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
         if (button_layout->right_buttons[i] == function)
             return TRUE;
 
@@ -512,14 +512,14 @@ meta_get_decoration_geometry (decor_t           *d,
 
         button_layout->left_buttons[0] = META_BUTTON_FUNCTION_MENU;
 
-        for (i = 1; i < MAX_BUTTONS_PER_CORNER; ++i)
+        for (i = 1; i < META_BUTTON_FUNCTION_LAST; ++i)
             button_layout->left_buttons[i] = META_BUTTON_FUNCTION_LAST;
 
         button_layout->right_buttons[0] = META_BUTTON_FUNCTION_MINIMIZE;
         button_layout->right_buttons[1] = META_BUTTON_FUNCTION_MAXIMIZE;
         button_layout->right_buttons[2] = META_BUTTON_FUNCTION_CLOSE;
 
-        for (i = 3; i < MAX_BUTTONS_PER_CORNER; ++i)
+        for (i = 3; i < META_BUTTON_FUNCTION_LAST; ++i)
             button_layout->right_buttons[i] = META_BUTTON_FUNCTION_LAST;
     }
 
