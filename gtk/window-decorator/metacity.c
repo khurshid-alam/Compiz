@@ -96,7 +96,7 @@ decor_update_meta_window_property (decor_t        *d,
         MetaStyleInfo *style_info;
         MetaFrameBorders borders;
 
-        style_info = meta_theme_get_style_info (theme, NULL);
+        style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -574,7 +574,7 @@ meta_get_decoration_geometry (decor_t           *d,
     else
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
-    style_info = meta_theme_get_style_info (theme, NULL);
+    style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
                               *flags, client_width, client_height,
@@ -708,7 +708,7 @@ meta_draw_window_decoration (decor_t *d)
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 get_format_for_surface (d, surface), 0, NULL);
 
-    style_info = meta_theme_get_style_info (theme, NULL);
+    style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,

@@ -97,3 +97,41 @@ get_mwm_prop (Window xwindow)
 
     return decor;
 }
+
+gchar *
+get_gtk_theme_variant (Window xwindow)
+{
+  GdkDisplay *display;
+  Display *xdisplay;
+  gint result;
+  Atom actual;
+  gint format;
+  gulong n;
+  gulong left;
+  guchar *data;
+
+  display = gdk_display_get_default ();
+  xdisplay = gdk_x11_display_get_xdisplay (display);
+
+  gdk_error_trap_push ();
+  result = XGetWindowProperty (xdisplay, xwindow, gtk_theme_variant_atom,
+                               0L, 1024L, False, utf8_string_atom,
+                               &actual, &format, &n, &left, &data);
+  gdk_error_trap_pop_ignored ();
+
+  if (result == Success && data)
+    {
+      gchar *gtk_theme_variant;
+
+      gtk_theme_variant = NULL;
+
+      if (n)
+        gtk_theme_variant = g_strdup ((gchar *) data);
+
+      XFree (data);
+
+      return gtk_theme_variant;
+    }
+
+  return NULL;
+}
