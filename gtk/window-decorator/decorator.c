@@ -88,7 +88,11 @@ frame_update_titlebar_font (decor_frame_t *frame)
 
         gtk_style_context_add_provider (context, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_FALLBACK);
 
+        gtk_style_context_save (context);
+        gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
         gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL, "font", &free_font_desc, NULL);
+        gtk_style_context_restore (context);
+
         font_desc = (const PangoFontDescription *) free_font_desc;
     }
 
