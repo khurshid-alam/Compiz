@@ -96,7 +96,7 @@ decor_update_meta_window_property (decor_t        *d,
         MetaStyleInfo *style_info;
         MetaFrameBorders borders;
 
-        style_info = meta_style_info_new (NULL, TRUE);
+        style_info = meta_theme_get_style_info (theme, NULL);
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -117,8 +117,6 @@ decor_update_meta_window_property (decor_t        *d,
             frame_max_win_extents.bottom += borders.invisible.bottom;
             frame_max_win_extents.top += borders.invisible.top;
         }
-
-        meta_style_info_unref (style_info);
     }
 
     w = d->border_layout.top.x2 - d->border_layout.top.x1 -
@@ -576,13 +574,47 @@ meta_get_decoration_geometry (decor_t           *d,
     else
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
-    style_info = meta_style_info_new (NULL, TRUE);
+    style_info = meta_theme_get_style_info (theme, NULL);
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
                               *flags, client_width, client_height,
                               button_layout, fgeom);
+}
 
-    meta_style_info_unref (style_info);
+static void
+style_updated_cb (GtkWidget *widget,
+                  gpointer   user_data)
+{
+  MetaTheme *theme;
+  WnckScreen *screen;
+
+  theme = meta_theme_get_current ();
+  screen = wnck_screen_get_default ();
+
+  meta_theme_style_invalidate (theme);
+  decorations_changed (screen);
+}
+
+static void
+connect_to_style_updated_signal (void)
+{
+  static GtkWidget *widget;
+  GtkWindow *window;
+
+  if (widget != NULL)
+    return;
+
+  widget = gtk_window_new (GTK_WINDOW_POPUP);
+
+  g_signal_connect (widget, "style-updated",
+                    G_CALLBACK (style_updated_cb), NULL);
+
+  window = GTK_WINDOW (widget);
+
+  gtk_window_move (window, -200, -200);
+  gtk_window_resize (window, 1, 1);
+
+  gtk_widget_show (widget);
 }
 
 void
@@ -614,6 +646,8 @@ meta_draw_window_decoration (decor_t *d)
 
     if (!d->surface || !d->picture)
         return;
+
+    connect_to_style_updated_signal ();
 
     display = gdk_display_get_default ();
     xdisplay = gdk_x11_display_get_xdisplay (display);
@@ -674,7 +708,7 @@ meta_draw_window_decoration (decor_t *d)
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 get_format_for_surface (d, surface), 0, NULL);
 
-    style_info = meta_style_info_new (NULL, TRUE);
+    style_info = meta_theme_get_style_info (theme, NULL);
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,
@@ -682,8 +716,6 @@ meta_draw_window_decoration (decor_t *d)
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            d->layout, d->frame->text_height, &button_layout,
                            button_states, d->icon_pixbuf, NULL);
-
-    meta_style_info_unref (style_info);
 
     if (fgeom.borders.visible.top)
     {
@@ -1272,7 +1304,7 @@ meta_update_border_extents (decor_frame_t *frame)
 
     theme = meta_theme_get_current ();
 
-    style_info = meta_style_info_new (NULL, TRUE);
+    style_info = meta_theme_get_style_info (theme, NULL);
 
     meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
                                   0, &borders);
@@ -1303,8 +1335,6 @@ meta_update_border_extents (decor_frame_t *frame)
     frame->max_win_extents.right  = right_width;
 
     frame->max_titlebar_height = top_height - frame->max_win_extents.top;
-
-    meta_style_info_unref (style_info);
 
     gwd_decor_frame_unref (frame);
 }
