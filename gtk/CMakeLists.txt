@@ -25,7 +25,7 @@ if (USE_GTK)
         set (CMAKE_REQUIRED_LIBRARIES "")
 
         if (USE_METACITY)
-            pkg_check_modules (METACITY libmetacity libmetacity-private>=3.19.1)
+            pkg_check_modules (METACITY libmetacity>=3.19.1)
             if (NOT METACITY_FOUND)
                 compiz_set (USE_METACITY 0)
             endif (NOT METACITY_FOUND)

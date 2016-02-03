@@ -73,7 +73,7 @@
 #define N_(x) x
 
 #ifdef USE_METACITY
-#include <metacity-private/theme.h>
+#include <libmetacity/meta-theme.h>
 #endif
 
 #include <gwd-fwd.h>

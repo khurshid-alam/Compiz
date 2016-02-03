@@ -27,7 +27,7 @@
 #include <glib.h>
 
 #ifdef USE_METACITY
-#include <metacity-private/theme.h>
+#include <libmetacity/meta-theme.h>
 #endif
 
 G_BEGIN_DECLS
