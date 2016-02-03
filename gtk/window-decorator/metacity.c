@@ -93,12 +93,9 @@ decor_update_meta_window_property (decor_t        *d,
      * pixmap type decorations */
     if (!d->frame_window)
     {
-        MetaStyleInfo *style_info;
         MetaFrameBorders borders;
 
-        style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
-
-        meta_theme_get_frame_borders (theme, style_info, type,
+        meta_theme_get_frame_borders (theme, d->gtk_theme_variant, type,
                                       d->frame->text_height,
                                       flags, &borders);
 
@@ -490,7 +487,6 @@ meta_get_decoration_geometry (decor_t           *d,
                               MetaButtonLayout  *button_layout,
                               MetaFrameType      frame_type)
 {
-    MetaStyleInfo *style_info;
     gint client_width;
     gint client_height;
 
@@ -574,9 +570,8 @@ meta_get_decoration_geometry (decor_t           *d,
     else
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
-    style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
-
-    meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
+    meta_theme_calc_geometry (theme, d->gtk_theme_variant, frame_type,
+                              d->frame->text_height,
                               *flags, client_width, client_height,
                               button_layout, fgeom);
 }
@@ -630,7 +625,6 @@ meta_draw_window_decoration (decor_t *d)
     MetaFrameFlags flags;
     MetaFrameType frame_type;
     MetaTheme *theme;
-    MetaStyleInfo *style_info;
     cairo_t *cr;
     gint i;
     Region top_region;
@@ -708,10 +702,8 @@ meta_draw_window_decoration (decor_t *d)
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 get_format_for_surface (d, surface), 0, NULL);
 
-    style_info = meta_theme_get_style_info (theme, d->gtk_theme_variant);
-
     cairo_paint (cr);
-    meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,
+    meta_theme_draw_frame (theme, d->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            d->layout, d->frame->text_height, &button_layout,
@@ -1288,7 +1280,6 @@ void
 meta_update_border_extents (decor_frame_t *frame)
 {
     MetaTheme *theme;
-    MetaStyleInfo *style_info;
     MetaFrameBorders borders;
     MetaFrameType frame_type;
     gint top_height;
@@ -1304,9 +1295,7 @@ meta_update_border_extents (decor_frame_t *frame)
 
     theme = meta_theme_get_current ();
 
-    style_info = meta_theme_get_style_info (theme, NULL);
-
-    meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
+    meta_theme_get_frame_borders (theme, NULL, frame_type, frame->text_height,
                                   0, &borders);
 
     top_height = borders.visible.top;
@@ -1321,7 +1310,7 @@ meta_update_border_extents (decor_frame_t *frame)
 
     frame->titlebar_height = top_height - frame->win_extents.top;
 
-    meta_theme_get_frame_borders (theme, style_info, frame_type, frame->text_height,
+    meta_theme_get_frame_borders (theme, NULL, frame_type, frame->text_height,
                                   META_FRAME_MAXIMIZED, &borders);
 
     top_height = borders.visible.top;
