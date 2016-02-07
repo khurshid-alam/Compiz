@@ -1192,7 +1192,7 @@ meta_get_event_window_position (decor_t *d,
             *x = fgeom.borders.total.left;
             *y = fgeom.title_rect.y + TOP_RESIZE_HEIGHT;
             *w = width - fgeom.borders.total.left - fgeom.borders.total.right;
-            *h = height - fgeom.top_titlebar_edge - fgeom.borders.total.bottom;
+            *h = height - fgeom.borders.total.top  - fgeom.borders.total.bottom;
             break;
         case 0: /* left */
         default:
