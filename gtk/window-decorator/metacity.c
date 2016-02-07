@@ -586,7 +586,7 @@ style_updated_cb (GtkWidget *widget,
   theme = meta_theme_get_current ();
   screen = wnck_screen_get_default ();
 
-  meta_theme_style_invalidate (theme);
+  meta_theme_invalidate (theme);
   decorations_changed (screen);
 }
 
