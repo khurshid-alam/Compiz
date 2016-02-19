@@ -75,6 +75,17 @@ typedef struct _GWDSettingsStorageGSettingsClass
     GObjectClass parent_class;
 } GWDSettingsStorageGSettingsClass;
 
+static gboolean
+is_mate_desktop () {
+    const gchar *session;
+
+    session = g_getenv ("XDG_CURRENT_DESKTOP");
+    if (session && strcasecmp (session, "MATE") == 0)
+	return TRUE;
+    else
+	return FALSE;
+}
+
 static void gwd_settings_storage_gsettings_interface_init (GWDSettingsStorageInterface *interface);
 
 G_DEFINE_TYPE_WITH_CODE (GWDSettingsStorageGSettings, gwd_settings_storage_gsettings, G_TYPE_OBJECT,
@@ -151,24 +162,22 @@ gwd_settings_storage_gsettings_update_metacity_theme (GWDSettingsStorage *settin
     GWDSettingsStorageGSettings *storage;
     GWDSettingsStorageGSettingsPrivate *priv;
     gboolean use_metacity_theme;
-    const gchar *session;
     gchar *theme;
 
     storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
     priv = GET_PRIVATE (storage);
 
     if (!priv->gwd)
-        return FALSE;
+	return FALSE;
 
     use_metacity_theme = g_settings_get_boolean (priv->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
 
-    session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if (priv->marco && session && strlen (session) && strcasecmp (session, "MATE") == 0)
-        theme = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_THEME);
+    if (priv->marco && is_mate_desktop ())
+	theme = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_THEME);
     else if (priv->metacity)
-        theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
+	theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
     else
-        return FALSE;
+	return FALSE;
 
     return gwd_settings_writable_metacity_theme_changed (priv->writable,
                                                          use_metacity_theme,
@@ -200,16 +209,14 @@ gwd_settings_storage_gsettings_update_button_layout (GWDSettingsStorage *setting
 {
     GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
     GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
-    const gchar *session;
     gchar *button_layout;
 
-    session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if (priv->marco && session && strlen (session) && strcasecmp (session, "MATE") == 0)
-        button_layout = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
+    if (priv->marco && is_mate_desktop ())
+	button_layout = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
     else if (priv->desktop)
-        button_layout = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT);
+	button_layout = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT);
     else
-        return FALSE;
+	return FALSE;
 
     return gwd_settings_writable_button_layout_changed (priv->writable,
 							button_layout);
@@ -220,19 +227,17 @@ gwd_settings_storage_gsettings_update_font (GWDSettingsStorage *settings)
 {
     GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
     GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
-    const gchar *session;
     gchar *titlebar_font;
     gboolean titlebar_system_font;
 
-    session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if (priv->marco && session && strlen (session) && strcasecmp (session, "MATE") == 0) {
-        titlebar_font = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
-        titlebar_system_font = g_settings_get_boolean (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT);
+    if (priv->marco && is_mate_desktop ()) {
+	titlebar_font = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
+	titlebar_system_font = g_settings_get_boolean (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT);
     } else if (priv->desktop) {
-        titlebar_font = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT);
-        titlebar_system_font = g_settings_get_boolean (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT);
+	titlebar_font = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT);
+	titlebar_system_font = g_settings_get_boolean (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT);
     } else
-        return FALSE;
+	return FALSE;
 
     return gwd_settings_writable_font_changed (priv->writable,
 					       titlebar_system_font,
@@ -262,29 +267,27 @@ gwd_settings_storage_gsettings_update_titlebar_actions (GWDSettingsStorage *sett
 {
     GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
     GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
-    const gchar *session;
     gchar *double_click_action, *middle_click_action, *right_click_action;
 
     if (!priv->gwd)
 	return FALSE;
 
-    session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if (priv->marco && session && strlen (session) && strcasecmp (session, "MATE") == 0) {
-        double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
+    if (priv->marco && is_mate_desktop ()) {
+	double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
 										      ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR));
-        middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
+	middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
 										      ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR));
-        right_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
+	right_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
 										      ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR));
     } else if (priv->desktop) {
-        double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
+	double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
 										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR));
-        middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
+	middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
 										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR));
-        right_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
+	right_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
 										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR));
     } else
-        return FALSE;
+	return FALSE;
 
     return gwd_settings_writable_titlebar_actions_changed (priv->writable,
 							   double_click_action,
