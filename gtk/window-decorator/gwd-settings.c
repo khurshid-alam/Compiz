@@ -60,21 +60,20 @@ enum
     GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADOW = 1,
     GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADOW = 2,
     GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS = 3,
-    GWD_SETTINGS_IMPL_PROPERTY_DRAGGABLE_BORDER_WIDTH = 4,
-    GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED = 5,
-    GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME = 6,
-    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_OPACITY = 7,
-    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_OPACITY = 8,
-    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADE_OPACITY = 9,
-    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADE_OPACITY = 10,
-    GWD_SETTINGS_IMPL_PROPERTY_BUTTON_LAYOUT = 11,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK = 12,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK = 13,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK = 14,
-    GWD_SETTINGS_IMPL_PROPERTY_MOUSE_WHEEL_ACTION = 15,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_FONT = 16,
-    GWD_SETTINGS_IMPL_PROPERTY_CMDLINE_OPTIONS = 17,
-    GWD_SETTINGS_IMPL_PROPERTY_SETTINGS_NOTIFIED = 18
+    GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED = 4,
+    GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME = 5,
+    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_OPACITY = 6,
+    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_OPACITY = 7,
+    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADE_OPACITY = 8,
+    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADE_OPACITY = 9,
+    GWD_SETTINGS_IMPL_PROPERTY_BUTTON_LAYOUT = 10,
+    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK = 11,
+    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK = 12,
+    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK = 13,
+    GWD_SETTINGS_IMPL_PROPERTY_MOUSE_WHEEL_ACTION = 14,
+    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_FONT = 15,
+    GWD_SETTINGS_IMPL_PROPERTY_CMDLINE_OPTIONS = 16,
+    GWD_SETTINGS_IMPL_PROPERTY_SETTINGS_NOTIFIED = 17
 };
 
 enum
@@ -90,7 +89,6 @@ typedef struct _GWDSettingsImplPrivate
     decor_shadow_options_t active_shadow;
     decor_shadow_options_t inactive_shadow;
     gboolean		   use_tooltips;
-    gint		   draggable_border_width;
     gint		   blur_type;
     gchar		   *metacity_theme;
     gdouble		   metacity_active_opacity;
@@ -238,24 +236,6 @@ gwd_settings_use_tooltips_changed (GWDSettingsWritable *settings,
     }
 
     return FALSE;
-}
-
-static gboolean
-gwd_settings_draggable_border_width_changed (GWDSettingsWritable *settings,
-					     gint	         draggable_border_width)
-{
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
-
-    if (priv->draggable_border_width != draggable_border_width)
-    {
-	priv->draggable_border_width = draggable_border_width;
-	append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-	release_notify_funcs (settings_impl);
-	return TRUE;
-    }
-    else
-	return FALSE;
 }
 
 static gboolean
@@ -533,7 +513,6 @@ gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface)
 {
     interface->shadow_property_changed = gwd_settings_shadow_property_changed;
     interface->use_tooltips_changed = gwd_settings_use_tooltips_changed;
-    interface->draggable_border_width_changed = gwd_settings_draggable_border_width_changed;
     interface->blur_changed = gwd_settings_blur_changed;
     interface->metacity_theme_changed = gwd_settings_metacity_theme_changed;
     interface->opacity_changed = gwd_settings_opacity_changed;
@@ -635,9 +614,6 @@ gwd_settings_get_property (GObject    *object,
 	case GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS:
 	    g_value_set_boolean (value, priv->use_tooltips);
 	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_DRAGGABLE_BORDER_WIDTH:
-	    g_value_set_int (value, priv->draggable_border_width);
-	    break;
 	case GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED:
 	    g_value_set_int (value, priv->blur_type);
 	    break;
@@ -701,9 +677,6 @@ gwd_settings_impl_class_init (GWDSettingsImplClass *klass)
     g_object_class_override_property (object_class,
 				      GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS,
 				      "use-tooltips");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_DRAGGABLE_BORDER_WIDTH,
-				      "draggable-border-width");
     g_object_class_override_property (object_class,
 				      GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED,
 				      "blur");
@@ -779,7 +752,6 @@ static void gwd_settings_impl_init (GWDSettingsImpl *self)
     priv->inactive_shadow.shadow_color[0] = 0;
     priv->inactive_shadow.shadow_color[1] = 0;
     priv->inactive_shadow.shadow_color[2] = 0;
-    priv->draggable_border_width  = DRAGGABLE_BORDER_WIDTH_DEFAULT;
     priv->blur_type = BLUR_TYPE_DEFAULT;
     priv->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
     priv->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;

@@ -29,7 +29,6 @@
 
 const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
 const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
-const gchar * ORG_GNOME_MUTTER = "org.gnome.mutter";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
 
 const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
@@ -41,7 +40,6 @@ const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = "metaci
 const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
 const gchar * ORG_GNOME_METACITY_THEME = "theme";
-const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH = "draggable-border-width";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
@@ -78,16 +76,14 @@ enum
 {
     GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_DESKTOP_GSETTINGS  = 1,
     GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_METACITY_GSETTINGS = 2,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_MUTTER_GSETTINGS   = 3,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_GWD_GSETTINGS      = 4,
-    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_WRITABLE_SETTINGS  = 5
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_GWD_GSETTINGS      = 3,
+    GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_WRITABLE_SETTINGS  = 4
 };
 
 typedef struct _GWDSettingsStorageGSettingsPrivate
 {
     GSettings *desktop;
     GSettings *metacity;
-    GSettings *mutter;
     GSettings *gwd;
     GWDSettingsWritable *writable;
 } GWDSettingsStorageGSettingsPrivate;
@@ -104,20 +100,6 @@ gwd_settings_storage_gsettings_update_use_tooltips (GWDSettingsStorage *settings
     return gwd_settings_writable_use_tooltips_changed (priv->writable,
 						       g_settings_get_boolean (priv->gwd,
 									       ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS));
-}
-
-static gboolean
-gwd_settings_storage_gsettings_update_draggable_border_width (GWDSettingsStorage *settings)
-{
-    GWDSettingsStorageGSettings	       *storage = GWD_SETTINGS_STORAGE_GSETTINGS (settings);
-    GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
-
-    if (!priv->mutter)
-	return FALSE;
-
-    return gwd_settings_writable_draggable_border_width_changed (priv->writable,
-								 g_settings_get_int (priv->mutter,
-										     ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH));
 }
 
 static gboolean
@@ -268,7 +250,6 @@ static void
 gwd_settings_storage_gsettings_interface_init (GWDSettingsStorageInterface *interface)
 {
     interface->update_use_tooltips = gwd_settings_storage_gsettings_update_use_tooltips;
-    interface->update_draggable_border_width = gwd_settings_storage_gsettings_update_draggable_border_width;
     interface->update_blur = gwd_settings_storage_gsettings_update_blur;
     interface->update_metacity_theme = gwd_settings_storage_gsettings_update_metacity_theme;
     interface->update_opacity = gwd_settings_storage_gsettings_update_opacity;
@@ -299,12 +280,6 @@ gwd_settings_storage_gsettings_set_property (GObject *object,
 
 	    priv->metacity = g_value_dup_object (value);
 	    break;
-	case GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_MUTTER_GSETTINGS:
-	    if (priv->mutter)
-		g_object_unref (priv->mutter);
-
-	    priv->mutter = g_value_dup_object (value);
-	    break;
 	case GWD_SETTINGS_STORAGE_GSETTINGS_PROPERTY_GWD_GSETTINGS:
 	    if (priv->gwd)
 		g_object_unref (priv->gwd);
@@ -332,9 +307,6 @@ gwd_settings_storage_gsettings_dispose (GObject *object)
     if (priv->metacity)
 	g_object_unref (priv->metacity);
 
-    if (priv->mutter)
-	g_object_unref (priv->mutter);
-
     if (priv->gwd)
 	g_object_unref (priv->gwd);
 }
@@ -360,11 +332,6 @@ gwd_settings_storage_gsettings_class_init (GWDSettingsStorageGSettingsClass *kla
 	g_param_spec_object ("metacity-gsettings",
 			     ORG_GNOME_METACITY,
 			     "GSettings Object for org.gnome.metacity",
-			     G_TYPE_SETTINGS,
-			     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY),
-	g_param_spec_object ("mutter-gsettings",
-			     ORG_GNOME_MUTTER,
-			     "GSettings Object for org.gnome.mutter",
 			     G_TYPE_SETTINGS,
 			     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY),
 	g_param_spec_object ("gwd-gsettings",
@@ -396,7 +363,6 @@ void gwd_settings_storage_gsettings_init (GWDSettingsStorageGSettings *self)
 GWDSettingsStorage *
 gwd_settings_storage_gsettings_new (GSettings *desktop,
 				    GSettings *metacity,
-				    GSettings *mutter,
 				    GSettings *gwd,
 				    GWDSettingsWritable *writable)
 {
@@ -405,7 +371,6 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
 
     GValue desktop_value = G_VALUE_INIT;
     GValue metacity_value = G_VALUE_INIT;
-    GValue mutter_value = G_VALUE_INIT;
     GValue gwd_value = G_VALUE_INIT;
     GValue writable_value = G_VALUE_INIT;
 
@@ -415,13 +380,11 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
 
     g_value_init (&desktop_value, G_TYPE_OBJECT);
     g_value_init (&metacity_value, G_TYPE_OBJECT);
-    g_value_init (&mutter_value, G_TYPE_OBJECT);
     g_value_init (&gwd_value, G_TYPE_OBJECT);
     g_value_init (&writable_value, G_TYPE_POINTER);
 
     g_value_take_object (&desktop_value, desktop);
     g_value_take_object (&metacity_value, metacity);
-    g_value_take_object (&mutter_value, mutter);
     g_value_take_object (&gwd_value, gwd);
     g_value_set_pointer (&writable_value, writable);
 
@@ -429,12 +392,10 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
     param[0].value = desktop_value;
     param[1].name = "metacity-gsettings";
     param[1].value = metacity_value;
-    param[2].name = "mutter-gsettings";
-    param[2].value = mutter_value;
-    param[3].name = "gwd-gsettings";
-    param[3].value = gwd_value;
-    param[4].name = "writable-settings";
-    param[4].value = writable_value;
+    param[2].name = "gwd-gsettings";
+    param[2].value = gwd_value;
+    param[3].name = "writable-settings";
+    param[3].value = writable_value;
 
     storage = GWD_SETTINGS_STORAGE_INTERFACE (g_object_newv (GWD_TYPE_SETTINGS_STORAGE_GSETTINGS,
 							     gwd_settings_storage_gsettings_n_construction_params,
@@ -442,7 +403,6 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
 
     g_value_unset (&desktop_value);
     g_value_unset (&metacity_value);
-    g_value_unset (&mutter_value);
     g_value_unset (&gwd_value);
     g_value_unset (&writable_value);
 
@@ -528,33 +488,6 @@ GSettings *
 gwd_get_org_gnome_metacity_settings ()
 {
     return get_settings_no_abort (ORG_GNOME_METACITY);
-}
-
-static void
-org_gnome_mutter_settings_changed (GSettings   *settings,
-				   const gchar *key,
-				   gpointer    user_data)
-{
-    GWDSettingsStorage *storage = GWD_SETTINGS_STORAGE_INTERFACE (user_data);
-
-    if (strcmp (key, ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH) == 0)
-	gwd_settings_storage_update_draggable_border_width (storage);
-}
-
-void
-gwd_connect_org_gnome_mutter_settings (GSettings	  *settings,
-				       GWDSettingsStorage *storage)
-{
-    if (!settings)
-	return;
-
-    g_signal_connect (settings, "changed", (GCallback) org_gnome_mutter_settings_changed, storage);
-}
-
-GSettings *
-gwd_get_org_gnome_mutter_settings ()
-{
-    return get_settings_no_abort (ORG_GNOME_MUTTER);
 }
 
 static void

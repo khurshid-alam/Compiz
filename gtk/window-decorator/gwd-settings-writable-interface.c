@@ -77,14 +77,6 @@ gwd_settings_writable_use_tooltips_changed (GWDSettingsWritable *settings,
 }
 
 gboolean
-gwd_settings_writable_draggable_border_width_changed (GWDSettingsWritable *settings,
-						      gint	         draggable_border_width)
-{
-    GWDSettingsWritableInterface *iface = GWD_SETTINGS_WRITABLE_GET_INTERFACE (settings);
-    return (*iface->draggable_border_width_changed) (settings, draggable_border_width);
-}
-
-gboolean
 gwd_settings_writable_blur_changed (GWDSettingsWritable *settings,
 				    const gchar         *blur_type)
 {
