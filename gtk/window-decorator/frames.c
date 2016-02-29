@@ -225,7 +225,11 @@ update_style (GtkWidget *widget)
     decor_color_t spot_color;
 
     context = gtk_widget_get_style_context (widget);
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_SELECTED);
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_SELECTED, &bg);
+    gtk_style_context_restore (context);
 
     spot_color.r = bg.red;
     spot_color.g = bg.green;
