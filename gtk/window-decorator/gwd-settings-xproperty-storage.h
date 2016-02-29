@@ -17,24 +17,23 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifndef _COMPIZ_GWD_SETTINGS_STORAGE_XPROP_H
-#define _COMPIZ_GWD_SETTINGS_STORAGE_XPROP_H
+
+#ifndef GWD_SETTINGS_XPROPERTY_STORAGE_H
+#define GWD_SETTINGS_XPROPERTY_STORAGE_H
 
 #include <glib-object.h>
-#include <gwd-fwd.h>
-
-typedef struct _XDisplay Display;
-typedef unsigned long Window;
 
 G_BEGIN_DECLS
 
-#define GWD_TYPE_SETTINGS_STORAGE_XPROP (gwd_settings_storage_xprop_get_type ())
-GType gwd_settings_storage_xprop_get_type ();
+#define GWD_TYPE_SETTINGS_XPROPERTY_STORAGE gwd_settings_xproperty_storage_get_type ()
+G_DECLARE_FINAL_TYPE (GWDSettingsXPropertyStorage, gwd_settings_xproperty_storage,
+                      GWD, SETTINGS_XPROPERTY_STORAGE, GObject)
 
 GWDSettingsXPropertyStorage *
-gwd_settings_storage_xprop_new (Display *xdpy,
-				Window  root,
-				GWDSettingsWritable *writable);
+gwd_settings_xproperty_storage_new        (GWDSettingsWritable         *writable);
+
+gboolean
+gwd_settings_xproperty_storage_update_all (GWDSettingsXPropertyStorage *storage);
 
 G_END_DECLS
 
