@@ -36,6 +36,7 @@ GWDSettings	    *settings;
 
 gdouble decoration_alpha = 0.5;
 #ifdef USE_METACITY
+MetaTheme *meta_theme_current = NULL;
 gboolean	 meta_button_layout_set = FALSE;
 #endif
 

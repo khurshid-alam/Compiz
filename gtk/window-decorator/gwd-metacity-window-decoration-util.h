@@ -33,17 +33,9 @@
 G_BEGIN_DECLS
 
 #ifdef USE_METACITY
-typedef MetaTheme * (*GWDMetaThemeGetCurrentProc) ();
-
-typedef void (*GWDMetaThemeSetProc) (const gchar                *theme,
-                                     gboolean                    force_update,
-                                     gboolean                    composited,
-                                     const PangoFontDescription *titlebar_font);
-
 gboolean
-gwd_metacity_window_decoration_update_meta_theme (const gchar		     *theme,
-						  GWDMetaThemeGetCurrentProc get_current,
-						  GWDMetaThemeSetProc	     set_current);
+gwd_metacity_window_decoration_update_meta_theme (MetaThemeType  theme_type,
+                                                  const gchar   *theme_name);
 #endif
 
 G_END_DECLS;

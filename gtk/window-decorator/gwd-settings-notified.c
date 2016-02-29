@@ -125,12 +125,11 @@ static gboolean
 gwd_settings_notified_impl_update_metacity_theme (GWDSettingsNotified *notified)
 {
 #ifdef USE_METACITY
+    MetaThemeType type = META_THEME_TYPE_METACITY;
     const gchar *meta_theme = NULL;
     g_object_get (settings, "metacity-theme", &meta_theme, NULL);
 
-    if (gwd_metacity_window_decoration_update_meta_theme (meta_theme,
-							  meta_theme_get_current,
-							  meta_theme_set_current))
+    if (gwd_metacity_window_decoration_update_meta_theme (type, meta_theme))
     {
 	theme_draw_window_decoration	= meta_draw_window_decoration;
 	theme_calc_decoration_size	= meta_calc_decoration_size;

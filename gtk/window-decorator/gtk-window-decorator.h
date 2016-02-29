@@ -109,6 +109,7 @@ extern GWDSettingsWritable *writable;
 
 extern gdouble decoration_alpha;
 #ifdef USE_METACITY
+extern MetaTheme *meta_theme_current;
 extern gboolean meta_button_layout_set;
 #endif
 

@@ -20,29 +20,30 @@
 #include <string.h>
 #include <glib.h>
 #include "gwd-metacity-window-decoration-util.h"
+#include "gtk-window-decorator.h"
 
 #ifdef USE_METACITY
 gboolean
-gwd_metacity_window_decoration_update_meta_theme (const gchar		     *theme,
-						  GWDMetaThemeGetCurrentProc get_current,
-						  GWDMetaThemeSetProc	     set_current)
+gwd_metacity_window_decoration_update_meta_theme (MetaThemeType  theme_type,
+                                                  const gchar   *theme_name)
 {
-    if (!theme)
-	return FALSE;
+    MetaTheme *theme;
+    gboolean retval;
+    GError *error;
 
-    /* meta_theme_get_current seems to return the last
-     * good theme now, so if one was already set this function
-     * will be ineffectual, so we need to check if the theme
-     * is obviously bad as the user intended to disable metacity
-     * themes */
-    if (!strlen (theme))
-	return FALSE;
+    theme = meta_theme_new (theme_type);
+    retval = TRUE;
 
-    (*set_current) (theme, TRUE, TRUE, NULL);
+    error = NULL;
+    if (!meta_theme_load (theme, theme_name, &error)) {
+        g_warning ("%s", error->message);
+        g_error_free (error);
 
-    if (!(*get_current) ())
-	return FALSE;
+        retval = FALSE;
+    }
 
-    return TRUE;
+    g_set_object (&meta_theme_current, theme);
+
+    return retval;
 }
 #endif

@@ -580,13 +580,11 @@ static void
 style_updated_cb (GtkWidget *widget,
                   gpointer   user_data)
 {
-  MetaTheme *theme;
   WnckScreen *screen;
 
-  theme = meta_theme_get_current ();
   screen = wnck_screen_get_default ();
 
-  meta_theme_invalidate (theme);
+  meta_theme_invalidate (meta_theme_current);
   decorations_changed (screen);
 }
 
@@ -624,7 +622,6 @@ meta_draw_window_decoration (decor_t *d)
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
-    MetaTheme *theme;
     cairo_t *cr;
     gint i;
     Region top_region;
@@ -666,14 +663,12 @@ meta_draw_window_decoration (decor_t *d)
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
-    theme = meta_theme_get_current ();
-
     frame_type = meta_frame_type_from_string (d->frame->type);
 
     if (frame_type == META_FRAME_TYPE_LAST)
       frame_type = META_FRAME_TYPE_NORMAL;
 
-    meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
+    meta_get_decoration_geometry (d, meta_theme_current, &flags, &fgeom, &button_layout,
                                   frame_type);
 
     if ((d->prop_xid || !d->buffer_surface) && !d->frame_window)
@@ -703,7 +698,7 @@ meta_draw_window_decoration (decor_t *d)
                                 get_format_for_surface (d, surface), 0, NULL);
 
     cairo_paint (cr);
-    meta_theme_draw_frame (theme, d->gtk_theme_variant, cr, frame_type, flags,
+    meta_theme_draw_frame (meta_theme_current, d->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            d->layout, d->frame->text_height, &button_layout,
@@ -793,7 +788,7 @@ meta_draw_window_decoration (decor_t *d)
         if (left_region)
             XOffsetRegion (left_region, -fgeom.borders.total.left, 0);
 
-        decor_update_meta_window_property (d, theme, flags, frame_type,
+        decor_update_meta_window_property (d, meta_theme_current, flags, frame_type,
                                            top_region, bottom_region,
                                            left_region, right_region);
 
@@ -813,7 +808,6 @@ meta_draw_window_decoration (decor_t *d)
 static void
 meta_calc_button_size (decor_t *d)
 {
-    MetaTheme *theme;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
     MetaFrameGeometry fgeom;
@@ -826,13 +820,11 @@ meta_calc_button_size (decor_t *d)
         return;
     }
 
-    theme = meta_theme_get_current ();
-
     frame_type = meta_frame_type_from_string (d->frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
 
-    meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
+    meta_get_decoration_geometry (d, meta_theme_current, &flags, &fgeom, &button_layout,
                                   frame_type);
 
     width = d->border_layout.top.x2 - d->border_layout.top.x1 -
@@ -908,7 +900,6 @@ meta_get_button_position (decor_t *d,
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
-    MetaTheme *theme;
     MetaButtonFunction button_function;
     MetaButtonSpace *space;
 
@@ -918,13 +909,11 @@ meta_get_button_position (decor_t *d,
         return FALSE;
     }
 
-    theme = meta_theme_get_current ();
-
     frame_type = meta_frame_type_from_string (d->frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
 
-    meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
+    meta_get_decoration_geometry (d, meta_theme_current, &flags, &fgeom, &button_layout,
                                   frame_type);
 
     button_function = button_to_meta_button_function (i);
@@ -987,18 +976,16 @@ meta_get_button_position (decor_t *d,
 gfloat
 meta_get_title_scale (decor_frame_t *frame)
 {
-    MetaTheme *theme;
     MetaFrameType type;
     MetaFrameFlags flags; 
 
-    theme = meta_theme_get_current ();
     type = meta_frame_type_from_string (frame->type);
     flags = 0xc33; /* fixme */
 
     if (type == META_FRAME_TYPE_LAST)
         return 1.0f;
 
-    gfloat scale = meta_theme_get_title_scale (theme, type, flags);
+    gfloat scale = meta_theme_get_title_scale (meta_theme_current, type, flags);
 
     return scale;
 }
@@ -1121,11 +1108,8 @@ meta_get_event_window_position (decor_t *d,
     MetaButtonLayout button_layout;
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
-    MetaTheme *theme;
 
-    theme = meta_theme_get_current ();
-
-    meta_get_decoration_geometry (d, theme, &flags, &fgeom, &button_layout,
+    meta_get_decoration_geometry (d, meta_theme_current, &flags, &fgeom, &button_layout,
                                   meta_frame_type_from_string (d->frame->type));
 
     width += fgeom.borders.total.right + fgeom.borders.total.left;
@@ -1192,7 +1176,7 @@ meta_get_event_window_position (decor_t *d,
             *x = fgeom.borders.total.left;
             *y = fgeom.title_rect.y + TOP_RESIZE_HEIGHT;
             *w = width - fgeom.borders.total.left - fgeom.borders.total.right;
-            *h = height - fgeom.borders.total.top  - fgeom.borders.total.bottom;
+            *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom;
             break;
         case 0: /* left */
         default:
@@ -1279,7 +1263,6 @@ meta_update_button_layout (const char *value)
 void
 meta_update_border_extents (decor_frame_t *frame)
 {
-    MetaTheme *theme;
     MetaFrameBorders borders;
     MetaFrameType frame_type;
     gint top_height;
@@ -1293,9 +1276,7 @@ meta_update_border_extents (decor_frame_t *frame)
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
 
-    theme = meta_theme_get_current ();
-
-    meta_theme_get_frame_borders (theme, NULL, frame_type, frame->text_height,
+    meta_theme_get_frame_borders (meta_theme_current, NULL, frame_type, frame->text_height,
                                   0, &borders);
 
     top_height = borders.visible.top;
@@ -1310,7 +1291,7 @@ meta_update_border_extents (decor_frame_t *frame)
 
     frame->titlebar_height = top_height - frame->win_extents.top;
 
-    meta_theme_get_frame_borders (theme, NULL, frame_type, frame->text_height,
+    meta_theme_get_frame_borders (meta_theme_current, NULL, frame_type, frame->text_height,
                                   META_FRAME_MAXIMIZED, &borders);
 
     top_height = borders.visible.top;
