@@ -28,7 +28,7 @@
 #include "gwd-settings-storage-gsettings.h"
 
 const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
-const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
+const gchar * ORG_GNOME_METACITY = "org.gnome.metacity.theme";
 const gchar * ORG_GNOME_MUTTER = "org.gnome.mutter";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
 
@@ -40,7 +40,7 @@ const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY = "metacity
 const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = "metacity-theme-inactive-shade-opacity";
 const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
-const gchar * ORG_GNOME_METACITY_THEME = "theme";
+const gchar * ORG_GNOME_METACITY_THEME = "name";
 const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH = "draggable-border-width";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
