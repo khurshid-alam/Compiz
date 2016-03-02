@@ -513,7 +513,7 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
             gchar **desktops;
             gint i;
 
-            desktops = g_strsplit (xdg_current_desktop, ":", 0);
+            desktops = g_strsplit (xdg_current_desktop, ":", -1);
             for (i = 0; desktops[i] != NULL; i++) {
                 if (g_strcmp0 (desktops[i], "MATE") == 0) {
                     priv->is_mate_desktop = TRUE;
