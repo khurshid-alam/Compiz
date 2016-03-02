@@ -80,7 +80,8 @@ is_mate_desktop () {
     const gchar *session;
 
     session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if (session && strcasecmp (session, "MATE") == 0)
+    if ((strlen (session) >= 4 && g_strcmp0 (session, "MATE") == 0) ||
+      (strlen (session) > 5 && g_strcmp0 (session + strlen (session) - 5, ":MATE") == 0))
 	return TRUE;
     else
 	return FALSE;
@@ -168,14 +169,14 @@ gwd_settings_storage_gsettings_update_metacity_theme (GWDSettingsStorage *settin
     priv = GET_PRIVATE (storage);
 
     if (!priv->gwd)
-	return FALSE;
+        return FALSE;
 
     use_metacity_theme = g_settings_get_boolean (priv->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
 
     if (priv->marco && is_mate_desktop ())
 	theme = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_THEME);
     else if (priv->metacity)
-	theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
+    theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
     else
 	return FALSE;
 
@@ -281,11 +282,11 @@ gwd_settings_storage_gsettings_update_titlebar_actions (GWDSettingsStorage *sett
 										      ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR));
     } else if (priv->desktop) {
 	double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
-										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR));
+											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR));
 	middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
-										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR));
+											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR));
 	right_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->desktop,
-										      ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR));
+											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR));
     } else
 	return FALSE;
 

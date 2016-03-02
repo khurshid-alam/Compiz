@@ -105,6 +105,21 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
 
 	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_gnome_mutter_schema)
 
+	set (_marco_gschema_name org.mate.marco)
+	set (_marco_gschema_filename ${_marco_gschema_name}.gschema.xml)
+	set (_marco_gschema_filepath ${CMAKE_CURRENT_SOURCE_DIR}/${_marco_gschema_filename})
+	set (_marco_gschema_generated_location ${CMAKE_BINARY_DIR}/generated/glib-2.0/schemas/${_marco_gschema_filename})
+
+	add_custom_command (OUTPUT ${_marco_gschema_generated_location}
+			    COMMAND cp -r ${_marco_gschema_filepath} ${_marco_gschema_generated_location}
+			    DEPENDS ${_marco_gschema_filepath}
+			    VERBATIM)
+
+	add_custom_target (compiz_gwd_gsettings_org_mate_marco_schema ALL
+			   DEPENDS ${_marco_gschema_generated_location})
+
+	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_nate_marco_schema)
+
 	set (COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES
 	     ${COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES}
 	     gtk_window_decorator_settings_storage_gsettings)
