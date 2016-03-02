@@ -75,18 +75,6 @@ typedef struct _GWDSettingsStorageGSettingsClass
     GObjectClass parent_class;
 } GWDSettingsStorageGSettingsClass;
 
-static gboolean
-is_mate_desktop () {
-    const gchar *session;
-
-    session = g_getenv ("XDG_CURRENT_DESKTOP");
-    if ((strlen (session) >= 4 && g_strcmp0 (session, "MATE") == 0) ||
-      (strlen (session) > 5 && g_strcmp0 (session + strlen (session) - 5, ":MATE") == 0))
-	return TRUE;
-    else
-	return FALSE;
-}
-
 static void gwd_settings_storage_gsettings_interface_init (GWDSettingsStorageInterface *interface);
 
 G_DEFINE_TYPE_WITH_CODE (GWDSettingsStorageGSettings, gwd_settings_storage_gsettings, G_TYPE_OBJECT,
@@ -110,7 +98,10 @@ typedef struct _GWDSettingsStorageGSettingsPrivate
     GSettings *desktop;
     GSettings *metacity;
     GSettings *mutter;
+
     GSettings *marco;
+    gboolean   is_mate_desktop;
+
     GSettings *gwd;
     GWDSettingsWritable *writable;
 } GWDSettingsStorageGSettingsPrivate;
@@ -173,7 +164,7 @@ gwd_settings_storage_gsettings_update_metacity_theme (GWDSettingsStorage *settin
 
     use_metacity_theme = g_settings_get_boolean (priv->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
 
-    if (priv->marco && is_mate_desktop ())
+    if (priv->is_mate_desktop)
 	theme = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_THEME);
     else if (priv->metacity)
     theme = g_settings_get_string (priv->metacity, ORG_GNOME_METACITY_THEME);
@@ -212,7 +203,7 @@ gwd_settings_storage_gsettings_update_button_layout (GWDSettingsStorage *setting
     GWDSettingsStorageGSettingsPrivate *priv = GET_PRIVATE (storage);
     gchar *button_layout;
 
-    if (priv->marco && is_mate_desktop ())
+    if (priv->is_mate_desktop)
 	button_layout = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
     else if (priv->desktop)
 	button_layout = g_settings_get_string (priv->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT);
@@ -231,7 +222,7 @@ gwd_settings_storage_gsettings_update_font (GWDSettingsStorage *settings)
     gchar *titlebar_font;
     gboolean titlebar_system_font;
 
-    if (priv->marco && is_mate_desktop ()) {
+    if (priv->is_mate_desktop) {
 	titlebar_font = g_settings_get_string (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
 	titlebar_system_font = g_settings_get_boolean (priv->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT);
     } else if (priv->desktop) {
@@ -273,7 +264,7 @@ gwd_settings_storage_gsettings_update_titlebar_actions (GWDSettingsStorage *sett
     if (!priv->gwd)
 	return FALSE;
 
-    if (priv->marco && is_mate_desktop ()) {
+    if (priv->is_mate_desktop) {
 	double_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
 										      ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR));
 	middle_click_action = translate_dashes_to_underscores (g_settings_get_string (priv->marco,
@@ -469,6 +460,7 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
     GValue writable_value = G_VALUE_INIT;
 
     GWDSettingsStorage *storage = NULL;
+    GWDSettingsStorageGSettingsPrivate *priv;
 
     g_return_val_if_fail (writable != NULL, NULL);
 
@@ -509,6 +501,29 @@ gwd_settings_storage_gsettings_new (GSettings *desktop,
     g_value_unset (&marco_value);
     g_value_unset (&gwd_value);
     g_value_unset (&writable_value);
+
+    priv = GET_PRIVATE (storage);
+    priv->is_mate_desktop = FALSE;
+
+    if (marco) {
+        const gchar *xdg_current_desktop;
+
+        xdg_current_desktop = g_getenv ("XDG_CURRENT_DESKTOP");
+        if (xdg_current_desktop) {
+            gchar **desktops;
+            gint i;
+
+            desktops = g_strsplit (xdg_current_desktop, ":", 0);
+            for (i = 0; desktops[i] != NULL; i++) {
+                if (g_strcmp0 (desktops[i], "MATE") == 0) {
+                    priv->is_mate_desktop = TRUE;
+                    break;
+                }
+            }
+
+            g_strfreev (desktops);
+        }
+    }
 
     return storage;
 }
