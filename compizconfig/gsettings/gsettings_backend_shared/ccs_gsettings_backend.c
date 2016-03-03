@@ -183,8 +183,6 @@ ccsGSettingsBackendUpdateProfileDefault (CCSBackend *backend, CCSContext *contex
     const char *ccsProfile = ccsGetProfile (context);
     char *profile = NULL;
 
-    CCSGSettingsBackendPrivate *priv = (CCSGSettingsBackendPrivate *) ccsObjectGetPrivate (backend);
-
     if (!ccsProfile)
 	profile = strdup (DEFAULTPROF);
     else
