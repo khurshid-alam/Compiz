@@ -439,7 +439,7 @@ ResizeLogic::handleKeyEvent (KeyCode keycode)
 		    lastMaskY = mask;
 		}
 
-		mScreen->updateGrab (grabIndex, screen->cursorCache (keyCursorNames[i]));
+		mScreen->updateGrab (grabIndex, mScreen->cursorCache (keyCursorNames[i]));
 	    }
 	    break;
 	}
@@ -1338,7 +1338,7 @@ ResizeLogic::initiateResize (CompAction		*action,
 	    Cursor cursor;
 
 	    if (state & CompAction::StateInitKey)
-		cursor = screen->cursorCache (MIDDLE_CURSOR);
+		cursor = mScreen->cursorCache (MIDDLE_CURSOR);
 	    else
 		cursor = cursorFromResizeMask (mask);
 
