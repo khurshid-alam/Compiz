@@ -197,11 +197,7 @@ ccsGSettingsBackendUpdateProfileDefault (CCSBackend *backend, CCSContext *contex
     }
 
     if (g_strcmp0 (profile, currentProfile))
-    {
 	ccsGSettingsBackendUpdateCurrentProfileName (backend, profile);
-	g_list_free_full (priv->settingsList, ccsGSettingsWrapperDestroyNotify);
-	priv->settingsList = NULL;
-    }
 
     free (profile);
 
