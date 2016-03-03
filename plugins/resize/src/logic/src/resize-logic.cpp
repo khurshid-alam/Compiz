@@ -692,7 +692,7 @@ ResizeLogic::cursorFromResizeMask (unsigned int mask)
 	cursor_name = DOWN_CURSOR;
     }
 
-    return screen->cursorCache (cursor_name);
+    return mScreen->cursorCache (cursor_name);
 }
 
 void

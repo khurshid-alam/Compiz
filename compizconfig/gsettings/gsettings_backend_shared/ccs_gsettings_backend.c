@@ -288,6 +288,9 @@ ccsGSettingsBackendSetCurrentProfileDefault (CCSBackend *backend, const gchar *v
     if (priv->currentProfileSettings)
 	ccsGSettingsWrapperUnref (priv->currentProfileSettings);
 
+    g_list_free_full (priv->settingsList, ccsGSettingsWrapperDestroyNotify);
+    priv->settingsList = NULL;
+
     priv->currentProfile = strdup (value);
     priv->currentProfileSettings = ccsGSettingsWrapperNewForSchemaWithPath (PROFILE_SCHEMA_ID,
 									    profilePath,
