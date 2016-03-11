@@ -46,14 +46,12 @@ init_settings (GWDSettingsWritable *writable,
 #define STORAGE_USED
     GSettings *compiz = gwd_get_org_compiz_gwd_settings ();
     GSettings *metacity = gwd_get_org_gnome_metacity_settings ();
-    GSettings *mutter = gwd_get_org_gnome_mutter_settings ();
     GSettings *gnome  = gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
-    storage = gwd_settings_storage_gsettings_new (gnome, metacity, mutter, compiz, writable);
+    storage = gwd_settings_storage_gsettings_new (gnome, metacity, compiz, writable);
 
     gwd_connect_org_compiz_gwd_settings (compiz, storage);
     gwd_connect_org_gnome_metacity_settings (metacity, storage);
-    gwd_connect_org_gnome_mutter_settings (mutter, storage);
     gwd_connect_org_gnome_desktop_wm_preferences_settings (gnome, storage);
 #endif
 
@@ -72,7 +70,6 @@ init_settings (GWDSettingsWritable *writable,
     gwd_settings_storage_update_font (storage);
     gwd_settings_storage_update_titlebar_actions (storage);
     gwd_settings_storage_update_blur (storage);
-    gwd_settings_storage_update_draggable_border_width (storage);
     gwd_settings_storage_update_use_tooltips (storage);
     gwd_process_decor_shadow_property_update ();
 #else

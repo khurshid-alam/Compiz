@@ -197,7 +197,6 @@ namespace testing_values
     const std::string INACTIVE_SHADOW_COLOR_STR_VALUE ("#00000000");
     const gushort INACTIVE_SHADOW_COLOR_VALUE[] = { 0, 0, 0 };
     const gboolean USE_TOOLTIPS_VALUE = !USE_TOOLTIPS_DEFAULT;
-    const guint DRAGGABLE_BORDER_WIDTH_VALUE = 1;
     const std::string BLUR_TYPE_TITLEBAR_VALUE ("titlebar");
     const gint BLUR_TYPE_TITLEBAR_INT_VALUE = BLUR_TYPE_TITLEBAR;
     const std::string BLUR_TYPE_ALL_VALUE ("all");
@@ -328,7 +327,6 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 						       testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
 						       Eq (testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, useTooltipsChanged (testing_values::USE_TOOLTIPS_VALUE)).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, draggableBorderWidthChanged (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE)).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, blurChanged (Eq (testing_values::BLUR_TYPE_TITLEBAR_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, metacityThemeChanged (TRUE, Eq (testing_values::METACITY_THEME_VALUE))).WillOnce (Return (TRUE));
     EXPECT_CALL (writableGMock, opacityChanged (testing_values::ACTIVE_OPACITY_VALUE,
@@ -361,7 +359,6 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 								testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
 								testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (writableMock.get (), testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_draggable_border_width_changed (writableMock.get (), testing_values::DRAGGABLE_BORDER_WIDTH_VALUE), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_blur_changed (writableMock.get (), testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (writableMock.get (),
 							       testing_values::USE_METACITY_THEME_VALUE,
@@ -460,14 +457,6 @@ TEST_F(GWDMockSettingsTest, TestMock)
     g_object_get_property (G_OBJECT (settingsMock.get ()),
 			   "use-tooltips",
 			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_DRAGGABLE_BORDER_WIDTH,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "draggable-border-width",
-			   &integerGValue);
 
     EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BLUR_CHANGED,
 					     GValueMatch <gint> (0, g_value_get_int),
@@ -747,29 +736,6 @@ TEST_F(GWDSettingsTest, TestUseTooltipsChangedIsDefault)
 {
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     USE_TOOLTIPS_DEFAULT), IsFalse ());
-}
-
-TEST_F(GWDSettingsTest, TestDraggableBorderWidthChanged)
-{
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_draggable_border_width_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-								       testing_values::DRAGGABLE_BORDER_WIDTH_VALUE), IsTrue ());
-
-    AutoUnsetGValue draggableBorderWidthValue (G_TYPE_INT);
-    GValue &draggableBorderWidthGValue = draggableBorderWidthValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "draggable-border-width",
-			   &draggableBorderWidthGValue);
-
-    EXPECT_THAT (&draggableBorderWidthGValue, GValueMatch <gint> (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE,
-								  g_value_get_int));
-}
-
-TEST_F(GWDSettingsTest, TestDraggableBorderWidthChangedIsDefault)
-{
-    EXPECT_THAT (gwd_settings_writable_draggable_border_width_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-								       DRAGGABLE_BORDER_WIDTH_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
@@ -1183,7 +1149,6 @@ class GWDSettingsStorageFactoryWrapperInterface
 	virtual void SetUp (GWDSettingsWritable *writable) = 0;
 	virtual GWDSettingsStorage * GetStorage () = 0;
 	virtual void SetUseTooltips (gboolean useTooltips) = 0;
-	virtual void SetDraggableBorderWidth (gint draggableBorderWidth) = 0;
 	virtual void SetBlur (const std::string &blurType) = 0;
 	virtual void SetOpacity (gdouble activeOpacity,
 				 gdouble inactiveOpacity,
@@ -1245,16 +1210,6 @@ TEST_P (GWDSettingsTestStorageUpdates, TestSetUseTooltips)
     EXPECT_CALL (*mSettingsMock, useTooltipsChanged (testing_values::USE_TOOLTIPS_VALUE));
 
     gwd_settings_storage_update_use_tooltips (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetDraggableBorderWidth)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetDraggableBorderWidth (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, draggableBorderWidthChanged (testing_values::DRAGGABLE_BORDER_WIDTH_VALUE));
-
-    gwd_settings_storage_update_draggable_border_width (storage);
 }
 
 TEST_P (GWDSettingsTestStorageUpdates, TestSetBlur)
@@ -1358,15 +1313,6 @@ class GWDMockSettingsStorageFactoryWrapper :
 			InvokeFunctor (
 			    boost::bind (
 				gwd_settings_writable_use_tooltips_changed, mWritable, useTooltips)));
-	}
-
-	virtual void SetDraggableBorderWidth (gint draggableBorderWidth)
-	{
-	    EXPECT_CALL (*mStorageMock, updateDraggableBorderWidth ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_draggable_border_width_changed, mWritable, draggableBorderWidth)));
 	}
 
 	virtual void SetBlur (const std::string &blurType)
@@ -1482,7 +1428,6 @@ TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObje
 
     gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
-    gwd_connect_org_gnome_mutter_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
 
     EXPECT_CALL (*mStorageMock, dispose ());
@@ -1502,12 +1447,10 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    /* We do not need to keep a reference to these */
 	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
 	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
-	    mMutterSettings = gwd_get_org_gnome_mutter_settings ();
 	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
 	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
 								mMetacitySettings,
-								mMutterSettings,
 								mGWDSettings,
 								writable),
 			    boost::bind (gwd_settings_storage_unref, _1));
@@ -1521,11 +1464,6 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	virtual void SetUseTooltips (gboolean useTooltips)
 	{
 	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS, useTooltips);
-	}
-
-	virtual void SetDraggableBorderWidth (gint draggableBorderWidth)
-	{
-	    g_settings_set_int (mMutterSettings, ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH, draggableBorderWidth);
 	}
 
 	virtual void SetBlur (const std::string &blurType)
@@ -1600,7 +1538,6 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    mStorage.reset ();
 	    mGWDSettings = NULL;
 	    mMetacitySettings = NULL;
-	    mMutterSettings = NULL;
 	    mDesktopSettings = NULL;
 	    gsettingsEnv.TearDownEnv ();
 	    gsliceEnv.TearDownEnv ();
@@ -1610,7 +1547,6 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 
 	GSettings			       *mGWDSettings;
 	GSettings			       *mMetacitySettings;
-	GSettings			       *mMutterSettings;
 	GSettings			       *mDesktopSettings;
 	boost::shared_ptr <GWDSettingsStorage> mStorage;
 	CompizGLibGSliceOffEnv                 gsliceEnv;
