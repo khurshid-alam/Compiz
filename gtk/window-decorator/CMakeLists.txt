@@ -38,9 +38,6 @@ if (USE_GTK)
     add_library (gtk_window_decorator_settings_storage_interface STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-storage-interface.c)
 
-    add_library (gtk_window_decorator_settings_storage_xproperty_interface STATIC
-		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-xproperty-interface.c)
-
     add_library (gtk_window_decorator_settings_writable_interface STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-writable-interface.c)
 
@@ -53,7 +50,6 @@ if (USE_GTK)
 	 gtk_window_decorator_settings_writable_interface
 	 gtk_window_decorator_settings
 	 gtk_window_decorator_settings_storage_interface
-	 gtk_window_decorator_settings_storage_xproperty_interface
 	 gtk_window_decorator_metacity_window_decoration_util
 	 gtk_window_decorator_cairo_window_decoration_util)
 
