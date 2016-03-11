@@ -183,8 +183,6 @@ ccsGSettingsBackendUpdateProfileDefault (CCSBackend *backend, CCSContext *contex
     const char *ccsProfile = ccsGetProfile (context);
     char *profile = NULL;
 
-    CCSGSettingsBackendPrivate *priv = (CCSGSettingsBackendPrivate *) ccsObjectGetPrivate (backend);
-
     if (!ccsProfile)
 	profile = strdup (DEFAULTPROF);
     else
@@ -197,11 +195,7 @@ ccsGSettingsBackendUpdateProfileDefault (CCSBackend *backend, CCSContext *contex
     }
 
     if (g_strcmp0 (profile, currentProfile))
-    {
 	ccsGSettingsBackendUpdateCurrentProfileName (backend, profile);
-	g_list_free_full (priv->settingsList, ccsGSettingsWrapperDestroyNotify);
-	priv->settingsList = NULL;
-    }
 
     free (profile);
 
@@ -293,6 +287,9 @@ ccsGSettingsBackendSetCurrentProfileDefault (CCSBackend *backend, const gchar *v
 
     if (priv->currentProfileSettings)
 	ccsGSettingsWrapperUnref (priv->currentProfileSettings);
+
+    g_list_free_full (priv->settingsList, ccsGSettingsWrapperDestroyNotify);
+    priv->settingsList = NULL;
 
     priv->currentProfile = strdup (value);
     priv->currentProfileSettings = ccsGSettingsWrapperNewForSchemaWithPath (PROFILE_SCHEMA_ID,
