@@ -172,6 +172,9 @@ public:
 
 	EXPECT_CALL (mockScreen, glPaintOutputSetEnabled (_))
 	    .Times(AnyNumber());
+
+        EXPECT_CALL (mockScreen, cursorCache(_))
+            .WillRepeatedly (Return (0));
     }
 
     void SetUpFakePropertyWriter ()

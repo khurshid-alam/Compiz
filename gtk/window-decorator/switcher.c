@@ -89,8 +89,12 @@ draw_switcher_background (decor_t *d)
 	return;
 
     context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg);
     gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+    gtk_style_context_restore (context);
 
     color.r = bg.red;
     color.g = bg.green;
@@ -281,8 +285,12 @@ draw_switcher_foreground (decor_t *d)
 	return;
 
     context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg);
     gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+    gtk_style_context_restore (context);
 
     cr = cairo_create (d->buffer_surface);
 

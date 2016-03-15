@@ -260,7 +260,11 @@ button_state_paint (cairo_t         *cr,
 
 #define IN_STATE (PRESSED_EVENT_WINDOW | IN_EVENT_WINDOW)
 
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
     gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+    gtk_style_context_restore (context);
+
     fg.alpha = STROKE_ALPHA;
 
     if ((state & IN_STATE) == IN_STATE)
@@ -310,8 +314,12 @@ draw_window_decoration (decor_t *d)
 	return;
 
     context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg);
     gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+    gtk_style_context_restore (context);
 
     if (d->state & (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY |
 		    WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY))

@@ -155,7 +155,11 @@ decor_update_switcher_property (decor_t *d)
 			     0, 0, quads, nQuad, frame_type, frame_state, frame_actions);
 
     context = gtk_widget_get_style_context (d->frame->style_window_rgba);
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
     gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+    gtk_style_context_restore (context);
 
     fgColor[0] = fg.red;
     fgColor[1] = fg.green;

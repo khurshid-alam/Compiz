@@ -27,16 +27,10 @@
 #include "gwd-settings-storage-gsettings.h"
 #endif
 
-#include "gwd-settings-xproperty-interface.h"
 #include "gwd-settings-xproperty-storage.h"
 
 GWDSettingsStorage *storage = NULL;
 GWDSettingsXPropertyStorage *xprop_storage = NULL;
-
-#ifdef USE_GSETTINGS
-
-
-#endif
 
 gboolean
 init_settings (GWDSettingsWritable *writable,
@@ -57,13 +51,7 @@ init_settings (GWDSettingsWritable *writable,
     gwd_connect_org_mate_marco_general_settings (marco, storage);
 #endif
 
-    GdkDisplay *display = gdk_display_get_default ();
-    Display    *xdisplay = gdk_x11_display_get_xdisplay (display);
-    Window     root = gdk_x11_get_default_root_xwindow ();
-
-    xprop_storage = gwd_settings_storage_xprop_new (xdisplay,
-						    root,
-						    writable);
+    xprop_storage = gwd_settings_xproperty_storage_new (writable);
 
 #ifdef STORAGE_USED
     gwd_settings_storage_update_metacity_theme (storage);
@@ -86,11 +74,8 @@ init_settings (GWDSettingsWritable *writable,
 void
 fini_settings ()
 {
-    if (storage)
-	g_object_unref (storage);
-
-    if (xprop_storage)
-	g_object_unref (xprop_storage);
+    g_clear_object (&storage);
+    g_clear_object (&xprop_storage);
 }
 
 gboolean
