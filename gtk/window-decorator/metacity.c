@@ -98,7 +98,7 @@ decor_update_meta_window_property (decor_t        *d,
         MetaFrameBorders borders;
 
         screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-        style_info = meta_theme_create_style_info (screen, NULL);
+        style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -580,7 +580,7 @@ meta_get_decoration_geometry (decor_t           *d,
         client_height = d->border_layout.left.y2 - d->border_layout.left.y1;
 
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, NULL);
+    style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
 
     meta_theme_calc_geometry (theme, style_info, frame_type, d->frame->text_height,
                               *flags, client_width, client_height,
@@ -705,7 +705,7 @@ meta_draw_window_decoration (decor_t *d)
                                 get_format_for_surface (d, surface), 0, NULL);
 
     screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, NULL);
+    style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
 
     cairo_paint (cr);
     meta_theme_draw_frame (theme, style_info, cr, frame_type, flags,

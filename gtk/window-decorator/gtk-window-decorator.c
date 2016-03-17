@@ -59,13 +59,13 @@ Atom compiz_shadow_color_atom;
 Atom toolkit_action_atom;
 Atom toolkit_action_window_menu_atom;
 Atom toolkit_action_force_quit_dialog_atom;
+Atom net_wm_state_atom;
+Atom net_wm_state_modal_atom;
 Atom decor_request_atom;
 Atom decor_pending_atom;
 Atom decor_delete_pixmap_atom;
-
-Atom net_wm_state_atom;
-Atom net_wm_state_modal_atom;
-
+Atom utf8_string_atom;
+Atom gtk_theme_variant_atom;
 
 Time dm_sn_timestamp;
 
@@ -250,6 +250,9 @@ main (int argc, char *argv[])
     decor_request_atom = XInternAtom (xdisplay, DECOR_REQUEST_PIXMAP_ATOM_NAME, 0);
     decor_pending_atom = XInternAtom (xdisplay, DECOR_PIXMAP_PENDING_ATOM_NAME, 0);
     decor_delete_pixmap_atom = XInternAtom (xdisplay, DECOR_DELETE_PIXMAP_ATOM_NAME, 0);
+
+    utf8_string_atom = XInternAtom (xdisplay, "UTF8_STRING", 0); 
+    gtk_theme_variant_atom = XInternAtom (xdisplay, "_GTK_THEME_VARIANT", 0);
 
     status = decor_acquire_dm_session (xdisplay,
 				       gdk_screen_get_number (gdkscreen),

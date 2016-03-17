@@ -131,6 +131,8 @@ extern Atom net_wm_state_modal_atom;
 extern Atom decor_request_atom;
 extern Atom decor_pending_atom;
 extern Atom decor_delete_pixmap_atom;
+extern Atom utf8_string_atom;
+extern Atom gtk_theme_variant_atom;
 
 extern Time dm_sn_timestamp;
 
@@ -280,6 +282,7 @@ typedef struct _decor {
     gboolean	      active;
     PangoLayout	      *layout;
     gchar	      *name;
+    gchar	      *gtk_theme_variant;
     cairo_pattern_t   *icon;
     cairo_surface_t   *icon_surface;
     GdkPixbuf	      *icon_pixbuf;
@@ -853,6 +856,9 @@ get_window_prop (Window xwindow,
 
 unsigned int
 get_mwm_prop (Window xwindow);
+
+gchar *
+get_gtk_theme_variant (Window xwindow);
 
 /* settings.c */
 
