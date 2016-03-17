@@ -1,3 +1,27 @@
+compiz (1:0.9.12.2+16.04.20160311-0ubuntu1) xenial; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Avoid GtkStyleContext warnings with GTK+ 3.20+.
+  * Remove GWDSettingsXPropertyStorageInterface.
+  * gtk-window-decorator: Remove unused setting from mutter.
+
+  [ Martin Wimpress ]
+  * mate.ini: Enable 'Keep Minimzed Windows' by default for the MATE
+    profile (LP: #1067951)
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * Fix broken tests
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 11 Mar 2016 08:26:45 +0000
+
+compiz (1:0.9.12.2+16.04.20160209-0ubuntu1) xenial; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * chrome and chromium windows are considered compiz windows in
+    fullscreen to avoid tearing (Bug #1442728) (LP: #1442728)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 09 Feb 2016 01:16:01 +0000
+
 compiz (1:0.9.12.2+16.04.20151211-0ubuntu1) xenial; urgency=medium
 
   [ Marco Trevisan (Treviño) ]

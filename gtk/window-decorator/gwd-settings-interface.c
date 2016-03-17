@@ -33,7 +33,6 @@ const gint    INACTIVE_SHADOW_OFFSET_X_DEFAULT = 1;
 const gint    INACTIVE_SHADOW_OFFSET_Y_DEFAULT = 1;
 const gchar   *INACTIVE_SHADOW_COLOR_DEFAULT = "#00000000";
 
-const guint   DRAGGABLE_BORDER_WIDTH_DEFAULT = 7;
 const gint    BLUR_TYPE_DEFAULT = BLUR_TYPE_NONE;
 
 const gchar   *METACITY_THEME_DEFAULT = "Adwaita";
@@ -73,14 +72,6 @@ static void gwd_settings_interface_default_init (GWDSettingsInterface *settings_
 							       "Use Tooltips Setting",
 							       USE_TOOLTIPS_DEFAULT,
 							       G_PARAM_READABLE));
-    g_object_interface_install_property (settings_interface,
-					 g_param_spec_int ("draggable-border-width",
-							   "Draggable Border Width",
-							   "Draggable Border Width Setting",
-							   0,
-							   64,
-							   DRAGGABLE_BORDER_WIDTH_DEFAULT,
-							   G_PARAM_READABLE));
     g_object_interface_install_property (settings_interface,
 					 g_param_spec_int ("blur",
 							   "Blur Type",

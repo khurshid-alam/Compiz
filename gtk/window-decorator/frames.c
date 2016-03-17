@@ -227,7 +227,7 @@ update_style (GtkWidget *widget)
     context = gtk_widget_get_style_context (widget);
 
     gtk_style_context_save (context);
-    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_SELECTED);
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_SELECTED, &bg);
     gtk_style_context_restore (context);
 

@@ -128,12 +128,6 @@ static void gwd_mock_settings_class_init (GWDMockSettingsClass *klass)
 				      GWD_MOCK_SETTINGS_PROPERTY_USE_TOOLTIPS,
 				      "use-tooltips");
     g_object_class_override_property (object_class,
-				      GWD_MOCK_SETTINGS_PROPERTY_DRAGGABLE_BORDER_WIDTH,
-				      "draggable-border-width");
-    g_object_class_override_property (object_class,
-				      GWD_MOCK_SETTINGS_PROPERTY_ATTACH_MODAL_DIALOGS,
-				      "attach-modal-dialogs");
-    g_object_class_override_property (object_class,
 				      GWD_MOCK_SETTINGS_PROPERTY_BLUR_CHANGED,
 				      "blur");
     g_object_class_override_property (object_class,

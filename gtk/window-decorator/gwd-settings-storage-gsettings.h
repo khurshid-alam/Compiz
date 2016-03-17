@@ -31,7 +31,6 @@ GType gwd_settings_storage_gsettings_get_type ();
 GWDSettingsStorage *
 gwd_settings_storage_gsettings_new (GSettings *orgGNOMEDesktopSettings,
 				    GSettings *metacitySettings,
-				    GSettings *mutterSettings,
 				    GSettings *gwdSettings,
 				    GWDSettingsWritable *writableSettings);
 
@@ -50,13 +49,6 @@ GSettings *
 gwd_get_org_gnome_metacity_settings ();
 
 void
-gwd_connect_org_gnome_mutter_settings (GSettings	  *settings,
-				       GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_gnome_mutter_settings ();
-
-void
 gwd_connect_org_gnome_desktop_wm_preferences_settings (GSettings	  *settings,
 						       GWDSettingsStorage *storage);
 
@@ -65,7 +57,6 @@ gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
 extern const gchar * ORG_COMPIZ_GWD;
 extern const gchar * ORG_GNOME_METACITY;
-extern const gchar * ORG_GNOME_MUTTER;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES;
 
 extern const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS;
@@ -77,7 +68,6 @@ extern const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY;
 extern const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME;
 extern const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION;
 extern const gchar * ORG_GNOME_METACITY_THEME;
-extern const gchar * ORG_GNOME_MUTTER_DRAGGABLE_BORDER_WIDTH;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR;

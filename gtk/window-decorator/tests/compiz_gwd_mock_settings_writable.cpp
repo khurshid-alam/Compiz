@@ -108,14 +108,6 @@ gwd_mock_settings_writable_use_tooltips_changed (GWDSettingsWritable *settings,
 }
 
 gboolean
-gwd_mock_settings_writable_draggable_border_width_changed (GWDSettingsWritable *settings,
-							   gint	 draggable_border_width)
-{
-    GWDMockSettingsWritableGMockInterface *gmockSettingsWritable = GET_PRIVATE (settings)->mock;
-    return gmockSettingsWritable->draggableBorderWidthChanged (draggable_border_width);
-}
-
-gboolean
 gwd_mock_settings_writable_blur_changed (GWDSettingsWritable *settings,
 					 const gchar         *blur_type)
 {
@@ -178,7 +170,6 @@ static void gwd_mock_settings_writable_interface_init (GWDSettingsWritableInterf
 {
     interface->shadow_property_changed = gwd_mock_settings_writable_shadow_property_changed;
     interface->use_tooltips_changed = gwd_mock_settings_writable_use_tooltips_changed;
-    interface->draggable_border_width_changed = gwd_mock_settings_writable_draggable_border_width_changed;
     interface->blur_changed = gwd_mock_settings_writable_blur_changed;
     interface->metacity_theme_changed = gwd_mock_settings_writable_metacity_theme_changed;
     interface->opacity_changed = gwd_mock_settings_writable_opacity_changed;

@@ -27,16 +27,10 @@
 #include "gwd-settings-storage-gsettings.h"
 #endif
 
-#include "gwd-settings-xproperty-interface.h"
 #include "gwd-settings-xproperty-storage.h"
 
 GWDSettingsStorage *storage = NULL;
 GWDSettingsXPropertyStorage *xprop_storage = NULL;
-
-#ifdef USE_GSETTINGS
-
-
-#endif
 
 gboolean
 init_settings (GWDSettingsWritable *writable,
@@ -46,24 +40,16 @@ init_settings (GWDSettingsWritable *writable,
 #define STORAGE_USED
     GSettings *compiz = gwd_get_org_compiz_gwd_settings ();
     GSettings *metacity = gwd_get_org_gnome_metacity_settings ();
-    GSettings *mutter = gwd_get_org_gnome_mutter_settings ();
     GSettings *gnome  = gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
-    storage = gwd_settings_storage_gsettings_new (gnome, metacity, mutter, compiz, writable);
+    storage = gwd_settings_storage_gsettings_new (gnome, metacity, compiz, writable);
 
     gwd_connect_org_compiz_gwd_settings (compiz, storage);
     gwd_connect_org_gnome_metacity_settings (metacity, storage);
-    gwd_connect_org_gnome_mutter_settings (mutter, storage);
     gwd_connect_org_gnome_desktop_wm_preferences_settings (gnome, storage);
 #endif
 
-    GdkDisplay *display = gdk_display_get_default ();
-    Display    *xdisplay = gdk_x11_display_get_xdisplay (display);
-    Window     root = gdk_x11_get_default_root_xwindow ();
-
-    xprop_storage = gwd_settings_storage_xprop_new (xdisplay,
-						    root,
-						    writable);
+    xprop_storage = gwd_settings_xproperty_storage_new (writable);
 
 #ifdef STORAGE_USED
     gwd_settings_storage_update_metacity_theme (storage);
@@ -72,7 +58,6 @@ init_settings (GWDSettingsWritable *writable,
     gwd_settings_storage_update_font (storage);
     gwd_settings_storage_update_titlebar_actions (storage);
     gwd_settings_storage_update_blur (storage);
-    gwd_settings_storage_update_draggable_border_width (storage);
     gwd_settings_storage_update_use_tooltips (storage);
     gwd_process_decor_shadow_property_update ();
 #else
@@ -87,11 +72,8 @@ init_settings (GWDSettingsWritable *writable,
 void
 fini_settings ()
 {
-    if (storage)
-	g_object_unref (storage);
-
-    if (xprop_storage)
-	g_object_unref (xprop_storage);
+    g_clear_object (&storage);
+    g_clear_object (&xprop_storage);
 }
 
 gboolean

@@ -66,13 +66,6 @@ gboolean gwd_mock_settings_storage_update_use_tooltips (GWDSettingsStorage *sett
     return settingsGMock->updateUseTooltips ();
 }
 
-gboolean gwd_mock_settings_storage_update_draggable_border_width (GWDSettingsStorage *settings)
-{
-    GWDMockSettingsStorage *settingsStorageMock = GWD_MOCK_SETTINGS_STORAGE (settings);
-    GWDMockSettingsStorageGMockInterface *settingsGMock = GET_PRIVATE (settingsStorageMock)->mock;
-    return settingsGMock->updateDraggableBorderWidth ();
-}
-
 gboolean gwd_mock_settings_storage_update_blur (GWDSettingsStorage *settings)
 {
     GWDMockSettingsStorage *settingsStorageMock = GWD_MOCK_SETTINGS_STORAGE (settings);
@@ -118,7 +111,6 @@ gboolean gwd_mock_settings_storage_update_titlebar_actions (GWDSettingsStorage *
 static void gwd_mock_settings_storage_interface_init (GWDSettingsStorageInterface *interface)
 {
     interface->update_use_tooltips = gwd_mock_settings_storage_update_use_tooltips;
-    interface->update_draggable_border_width = gwd_mock_settings_storage_update_draggable_border_width;
     interface->update_blur = gwd_mock_settings_storage_update_blur;
     interface->update_metacity_theme = gwd_mock_settings_storage_update_metacity_theme;
     interface->update_opacity = gwd_mock_settings_storage_update_opacity;

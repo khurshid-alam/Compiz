@@ -58,7 +58,6 @@ class GWDMockSettingsWritableGMockInterface
 						gdouble inactive_shadow_offset_y,
 						const gchar	*inactive_shadow_color) = 0;
 	virtual gboolean useTooltipsChanged (gboolean newValue) = 0;
-	virtual gboolean draggableBorderWidthChanged (gint newValue) = 0;
 	virtual gboolean blurChanged (const gchar *type) = 0;
 	virtual gboolean metacityThemeChanged (gboolean useMetacityTheme, const gchar *metacityTheme) = 0;
 	virtual gboolean opacityChanged (gdouble inactiveOpacity,
@@ -88,7 +87,6 @@ class GWDMockSettingsWritableGMock :
 	MOCK_METHOD10 (shadowPropertyChanged, gboolean (gdouble, gdouble, gdouble, gdouble, const gchar *,
 							gdouble, gdouble, gdouble, gdouble, const gchar *));
 	MOCK_METHOD1 (useTooltipsChanged, gboolean (gboolean));
-	MOCK_METHOD1 (draggableBorderWidthChanged, gboolean (gint));
 	MOCK_METHOD1 (blurChanged, gboolean (const gchar *));
 	MOCK_METHOD2 (metacityThemeChanged, gboolean (gboolean, const gchar *));
 	MOCK_METHOD4 (opacityChanged, gboolean (gdouble, gdouble, gboolean, gboolean));
