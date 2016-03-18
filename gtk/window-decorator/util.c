@@ -98,11 +98,24 @@ get_mwm_prop (Window xwindow)
     return decor;
 }
 
+static gboolean
+get_prefer_dark_theme (void)
+{
+  gboolean prefer_dark_theme;
+
+  g_object_get (gtk_settings_get_default (),
+                "gtk-application-prefer-dark-theme", &prefer_dark_theme,
+                NULL);
+
+  return prefer_dark_theme;
+}
+
 gchar *
 get_gtk_theme_variant (Window xwindow)
 {
   GdkDisplay *display;
   Display *xdisplay;
+  gchar *gtk_theme_variant;
   gint result;
   Atom actual;
   gint format;
@@ -112,6 +125,7 @@ get_gtk_theme_variant (Window xwindow)
 
   display = gdk_display_get_default ();
   xdisplay = gdk_x11_display_get_xdisplay (display);
+  gtk_theme_variant = NULL;
 
   gdk_error_trap_push ();
   result = XGetWindowProperty (xdisplay, xwindow, gtk_theme_variant_atom,
@@ -121,17 +135,14 @@ get_gtk_theme_variant (Window xwindow)
 
   if (result == Success && data)
     {
-      gchar *gtk_theme_variant;
-
-      gtk_theme_variant = NULL;
-
       if (n)
         gtk_theme_variant = g_strdup ((gchar *) data);
 
       XFree (data);
-
-      return gtk_theme_variant;
     }
 
-  return NULL;
+  if (gtk_theme_variant == NULL && get_prefer_dark_theme ())
+    gtk_theme_variant = g_strdup ("dark");
+
+  return gtk_theme_variant;
 }

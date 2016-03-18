@@ -31,6 +31,7 @@ GType gwd_settings_storage_gsettings_get_type ();
 GWDSettingsStorage *
 gwd_settings_storage_gsettings_new (GSettings *orgGNOMEDesktopSettings,
 				    GSettings *metacitySettings,
+				    GSettings *marcoSettings,
 				    GSettings *gwdSettings,
 				    GWDSettingsWritable *writableSettings);
 
@@ -55,9 +56,17 @@ gwd_connect_org_gnome_desktop_wm_preferences_settings (GSettings	  *settings,
 GSettings *
 gwd_get_org_gnome_desktop_wm_preferences_settings ();
 
+void
+gwd_connect_org_mate_marco_general_settings (GSettings          *settings,
+                                         GWDSettingsStorage *storage);
+
+GSettings *
+gwd_get_org_mate_marco_general_settings ();
+
 extern const gchar * ORG_COMPIZ_GWD;
 extern const gchar * ORG_GNOME_METACITY;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES;
+extern const gchar * ORG_MATE_MARCO_GENERAL;
 
 extern const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS;
 extern const gchar * ORG_COMPIZ_GWD_KEY_BLUR_TYPE;
@@ -75,6 +84,13 @@ extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT;
 extern const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT;
+extern const gchar * ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR;
+extern const gchar * ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR;
+extern const gchar * ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR;
+extern const gchar * ORG_MATE_MARCO_GENERAL_THEME;
+extern const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT;
+extern const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT;
+extern const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT;
 
 G_END_DECLS
 
