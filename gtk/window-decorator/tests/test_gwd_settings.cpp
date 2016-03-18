@@ -1429,6 +1429,7 @@ TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObje
     gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
+    gwd_connect_org_mate_marco_settings (NULL, mStorage.get ());
 
     EXPECT_CALL (*mStorageMock, dispose ());
     EXPECT_CALL (*mStorageMock, finalize ());
@@ -1448,9 +1449,11 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
 	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
 	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
+	    mMarcoSettings = gwd_get_org_mate_marco_settings ();
 
 	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
 								mMetacitySettings,
+								mMarcoSettings,
 								mGWDSettings,
 								writable),
 			    boost::bind (gwd_settings_storage_unref, _1));
@@ -1487,12 +1490,16 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	{
 	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME, useMetacityTheme);
 	    g_settings_set_string (mDesktopSettings, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME, metacityTheme.c_str ());
+	    g_settings_set_string (mMarcoSettings, ORG_MATE_MARCO_GENERAL_THEME, metacityTheme.c_str ());
 	}
 
 	virtual void SetButtonLayout (const std::string &buttonLayout)
 	{
 	    g_settings_set_string (mDesktopSettings,
 				   ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT,
+				   buttonLayout.c_str ());
+	    g_settings_set_string (mMarcoSettings,
+				   ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT,
 				   buttonLayout.c_str ());
 	}
 
@@ -1503,6 +1510,12 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 				    useSystemFont);
 	    g_settings_set_string (mDesktopSettings,
 				   ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT,
+				   titlebarFont.c_str ());
+	    g_settings_set_boolean (mMarcoSettings,
+				    ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT,
+				    useSystemFont);
+	    g_settings_set_string (mMarcoSettings,
+				   ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT,
 				   titlebarFont.c_str ());
 	}
 
@@ -1528,6 +1541,15 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    g_settings_set_string (mDesktopSettings,
 				   ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR,
 				   translatedRC.c_str ());
+	    g_settings_set_string (mMarcoSettings,
+				   ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR,
+				   translatedDC.c_str ());
+	    g_settings_set_string (mMarcoSettings,
+				   ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR,
+				   translatedMC.c_str ());
+	    g_settings_set_string (mMarcoSettings,
+				   ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR,
+				   translatedRC.c_str ());
 	    g_settings_set_string (mGWDSettings,
 				   ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION,
 				   mouseWheelAction.c_str ());
@@ -1539,6 +1561,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    mGWDSettings = NULL;
 	    mMetacitySettings = NULL;
 	    mDesktopSettings = NULL;
+	    mMarcoSettings = NULL;
 	    gsettingsEnv.TearDownEnv ();
 	    gsliceEnv.TearDownEnv ();
 	}
@@ -1548,6 +1571,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	GSettings			       *mGWDSettings;
 	GSettings			       *mMetacitySettings;
 	GSettings			       *mDesktopSettings;
+	GSettings			       *mMarcoSettings;
 	boost::shared_ptr <GWDSettingsStorage> mStorage;
 	CompizGLibGSliceOffEnv                 gsliceEnv;
 	CompizGLibGSettingsMemoryBackendTestingEnv gsettingsEnv;

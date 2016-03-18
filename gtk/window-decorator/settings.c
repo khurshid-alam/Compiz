@@ -41,12 +41,14 @@ init_settings (GWDSettingsWritable *writable,
     GSettings *compiz = gwd_get_org_compiz_gwd_settings ();
     GSettings *metacity = gwd_get_org_gnome_metacity_settings ();
     GSettings *gnome  = gwd_get_org_gnome_desktop_wm_preferences_settings ();
+    GSettings *marco = gwd_get_org_mate_marco_general_settings ();
 
-    storage = gwd_settings_storage_gsettings_new (gnome, metacity, compiz, writable);
+    storage = gwd_settings_storage_gsettings_new (gnome, metacity, marco, compiz, writable);
 
     gwd_connect_org_compiz_gwd_settings (compiz, storage);
     gwd_connect_org_gnome_metacity_settings (metacity, storage);
     gwd_connect_org_gnome_desktop_wm_preferences_settings (gnome, storage);
+    gwd_connect_org_mate_marco_general_settings (marco, storage);
 #endif
 
     xprop_storage = gwd_settings_xproperty_storage_new (writable);
