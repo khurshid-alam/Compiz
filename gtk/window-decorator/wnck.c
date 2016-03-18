@@ -404,6 +404,9 @@ add_frame_window (WnckWindow *win,
 	if (get_mwm_prop (xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE))
 	    d->decorated = TRUE;
 
+	g_assert (d->gtk_theme_variant == NULL);
+	d->gtk_theme_variant = get_gtk_theme_variant (xid);
+
 	for (i = 0; i < 3; ++i)
 	    for (j = 0; j < 3; ++j)
 	    {
@@ -507,6 +510,12 @@ remove_frame_window (WnckWindow *win)
     {
 	g_free (d->name);
 	d->name = NULL;
+    }
+
+    if (d->gtk_theme_variant)
+    {
+	g_free (d->gtk_theme_variant);
+	d->gtk_theme_variant = NULL;
     }
 
     if (d->layout)

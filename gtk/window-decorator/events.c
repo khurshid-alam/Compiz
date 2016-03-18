@@ -1086,6 +1086,26 @@ event_filter_func (GdkXEvent *gdkxevent,
 	    if (get_window_prop (xevent->xproperty.window, select_window_atom, &select))
 		update_switcher_window (xevent->xproperty.window, select);
 	}
+	else if (xevent->xproperty.atom == gtk_theme_variant_atom)
+	{
+	    WnckWindow *win;
+
+	    xid = xevent->xproperty.window;
+
+	    win = wnck_window_get (xid);
+	    if (win)
+	    {
+		decor_t  *d = g_object_get_data (G_OBJECT (win), "decor");
+		gchar *old_variant = d->gtk_theme_variant;
+
+		d->gtk_theme_variant = get_gtk_theme_variant (xid);
+		if (g_strcmp0 (d->gtk_theme_variant, old_variant) != 0)
+			decorations_changed (wnck_screen_get_default ());
+
+		g_free (old_variant);
+
+	    }
+	}
 	break;
     case DestroyNotify:
 	g_hash_table_remove (frame_table,
