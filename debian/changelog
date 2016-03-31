@@ -1,3 +1,13 @@
+compiz (1:0.9.12.2+16.04.20160331-0ubuntu1) xenial; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: fix typos in tests.
+
+  [ Martin Wimpress ]
+  * Fix compiz-mate Recommends: use ubuntu-mate-wallpapers-common.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 31 Mar 2016 22:55:09 +0000
+
 compiz (1:0.9.12.2+16.04.20160318-0ubuntu1) xenial; urgency=medium
 
   [ Alberts Muktupāvels ]
