@@ -1,3 +1,10 @@
+compiz (1:0.9.12.2+16.04.20160415-0ubuntu1) xenial; urgency=medium
+
+  [ Martin Wimpress ]
+  * mate.ini: Fixes flickery thumbnails
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 15 Apr 2016 05:30:50 +0000
+
 compiz (1:0.9.12.2+16.04.20160331-0ubuntu1) xenial; urgency=medium
 
   [ Alberts Muktupāvels ]
