@@ -86,7 +86,7 @@ PrivateGLScreen::paintBackground (const GLMatrix   &transform,
     if (!nBox)
 	return;
 
-    if (screen->desktopWindowCount ())
+    if (screen->opaqueDesktopWindowCount ())
     {
 	if (!backgroundTextures.empty ())
 	{

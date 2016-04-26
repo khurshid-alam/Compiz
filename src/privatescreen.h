@@ -542,10 +542,14 @@ public:
     DesktopWindowCount();
     virtual ~DesktopWindowCount() {}
     virtual void incrementDesktopWindowCount();
+    virtual void incrementOpaqueDesktopWindowCount();
     virtual void decrementDesktopWindowCount();
+    virtual void decrementOpaqueDesktopWindowCount();
     virtual int desktopWindowCount();
+    virtual int opaqueDesktopWindowCount();
 private:
-    int       count;
+    int       countAll;
+    int       countOpaque;
 };
 
 class MapNum :

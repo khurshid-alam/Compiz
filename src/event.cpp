@@ -1679,9 +1679,17 @@ CompScreenImpl::_handleEvent (XEvent *event)
 		    if (w->isViewable ())
 		    {
 			if (w->type () == CompWindowTypeDesktopMask)
-			    decrementDesktopWindowCount();
+			{
+			    decrementDesktopWindowCount ();
+			    if (!w->alpha ())
+			        decrementOpaqueDesktopWindowCount ();
+			}
 			else if (type == CompWindowTypeDesktopMask)
-			    incrementDesktopWindowCount();
+			{
+			    incrementDesktopWindowCount ();
+			    if (!w->alpha ())
+			        incrementOpaqueDesktopWindowCount ();
+			}
 		    }
 
 		    w->wmType () = type;
