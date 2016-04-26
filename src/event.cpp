@@ -942,8 +942,8 @@ PrivateScreen::handleActionEvent (XEvent *event)
 	o[6].value ().set ((int) event->xkey.keycode);
 	o[7].value ().set ((int) event->xkey.time);
 
-	o[8].value ().set (next_key_press_is_repeated_);
-	next_key_press_is_repeated_ = false;
+	o[8].value ().set (nextKeyPressIsRepeated_);
+	nextKeyPressIsRepeated_ = false;
 
 	eventManager.resetPossibleTap();
 	foreach (CompPlugin *p, CompPlugin::getPlugins ())
@@ -971,7 +971,7 @@ PrivateScreen::handleActionEvent (XEvent *event)
 
 	bool handled = false;
 
-	next_key_press_is_repeated_ = false;
+	nextKeyPressIsRepeated_ = false;
 	if (XEventsQueued (dpy, QueuedAfterReading))
 	{
 	    XEvent nev;
@@ -980,7 +980,7 @@ PrivateScreen::handleActionEvent (XEvent *event)
 	    if (nev.type == KeyPress && nev.xkey.time == event->xkey.time &&
 		nev.xkey.keycode == event->xkey.keycode)
 	    {
-		next_key_press_is_repeated_ = true;
+		nextKeyPressIsRepeated_ = true;
 	    }
 	}
 

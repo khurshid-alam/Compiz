@@ -819,7 +819,7 @@ private:
     compiz::private_screen::WindowManager& windowManager;
     CompOption::Vector resourceManager;
 
-    bool next_key_press_is_repeated_;
+    bool nextKeyPressIsRepeated_;
 };
 
 class CompManager
