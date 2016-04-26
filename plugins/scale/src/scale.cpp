@@ -1791,6 +1791,11 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 			moveFocusWindow (0, 1);
 		    else if (keySym == XK_Tab)
 			moveFocusWindow (!(event->xkey.state & ShiftMask) ? 1 : -1);
+		    else if (keySym == XK_w && (event->xkey.state & ControlMask))
+		    {
+			if (CompWindow *selected = screen->findWindow (selectedWindow))
+			    selected->close (0);
+		    }
 		}
 	    }
 	    break;
