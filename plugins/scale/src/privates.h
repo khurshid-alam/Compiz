@@ -94,7 +94,9 @@ class PrivateScaleScreen :
 	bool selectWindowAt (int x, int y, bool moveInputFocus);
 	bool selectWindowAt (int x, int y);
 
+	void moveFocusWindow (CompWindow *);
 	void moveFocusWindow (int dx, int dy);
+	void moveFocusWindow (int distance);
 
 	void windowRemove (CompWindow *);
 
@@ -116,8 +118,6 @@ class PrivateScaleScreen :
 	Window       selectedWindow;
 	Window       hoveredWindow;
 	Window       previousActiveWindow;
-
-	KeyCode	 leftKeyCode, rightKeyCode, upKeyCode, downKeyCode;
 
 	bool grab;
 	CompScreen::GrabHandle grabIndex;
