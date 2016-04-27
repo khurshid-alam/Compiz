@@ -1547,7 +1547,7 @@ PrivateScaleScreen::moveFocusWindow (int distance)
 	int cy1 = (sw1->priv->slot->y1 () + sw1->priv->slot->y2 ()) / 2;
 	int cy2 = (sw2->priv->slot->y1 () + sw2->priv->slot->y2 ()) / 2;
 
-	if (abs (cy1 - cy2) < std::max (sw1->priv->slot->height (), sw2->priv->slot->height ()))
+	if (abs (cy1 - cy2) < std::max (sw1->priv->slot->height (), sw2->priv->slot->height ()) / 2)
 	{
 	    int cx1 = (sw1->priv->slot->x1 () + sw1->priv->slot->x2 ()) / 2;
 	    int cx2 = (sw2->priv->slot->x1 () + sw2->priv->slot->x2 ()) / 2;
