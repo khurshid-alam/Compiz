@@ -137,7 +137,7 @@ class ScaleWindow :
     public:
 	ScaleWindow (CompWindow *w);
 	~ScaleWindow ();
-	
+
 	CompWindow	*window;
 
 	bool hasSlot () const;
