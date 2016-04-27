@@ -1429,7 +1429,7 @@ TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObje
     gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
     gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
-    gwd_connect_org_mate_marco_settings (NULL, mStorage.get ());
+    gwd_connect_org_mate_marco_general_settings (NULL, mStorage.get ());
 
     EXPECT_CALL (*mStorageMock, dispose ());
     EXPECT_CALL (*mStorageMock, finalize ());
@@ -1449,7 +1449,7 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
 	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
 	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
-	    mMarcoSettings = gwd_get_org_mate_marco_settings ();
+	    mMarcoSettings = gwd_get_org_mate_marco_general_settings ();
 
 	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
 								mMetacitySettings,

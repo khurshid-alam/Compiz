@@ -103,7 +103,7 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
 	add_custom_target (compiz_gwd_gsettings_org_mate_marco_schema ALL
 			   DEPENDS ${_marco_gschema_generated_location})
 
-	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_nate_marco_schema)
+	add_gsettings_schema_to_recompilation_list (compiz_gwd_gsettings_org_mate_marco_schema)
 
 	set (COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES
 	     ${COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES}
