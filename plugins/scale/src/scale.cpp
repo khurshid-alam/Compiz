@@ -509,7 +509,7 @@ PrivateScaleScreen::layoutSlotsForArea (const CompRect& workArea,
     int nSlots  = 0;
 
     y      = optionGetYOffset() + workArea.y () + spacing;
-    height = (workArea.height () - optionGetYOffset() - (lines + 1) * spacing) / lines;
+    height = (workArea.height () - optionGetYOffset () - optionGetYBottomOffset () - (lines + 1) * spacing) / lines;
 
     for (int i = 0; i < lines; i++)
     {
@@ -1752,7 +1752,7 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 		    CompRect  workArea (screen->currentOutputDev ().workArea ());
 		    workArea.setX (workArea.x() + optionGetXOffset ());
 		    workArea.setY (workArea.y() + optionGetYOffset ());
-		    workArea.setBottom (optionGetYBottomOffset());
+		    workArea.setBottom (optionGetYBottomOffset ());
 
 		    if (workArea.contains (pointer))
 		    {
