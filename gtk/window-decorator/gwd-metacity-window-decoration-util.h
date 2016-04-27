@@ -33,7 +33,7 @@
 G_BEGIN_DECLS
 
 #ifdef USE_METACITY
-gboolean
+MetaTheme *
 gwd_metacity_window_decoration_update_meta_theme (MetaThemeType  theme_type,
                                                   const gchar   *theme_name);
 #endif

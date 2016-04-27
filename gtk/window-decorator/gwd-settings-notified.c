@@ -129,7 +129,9 @@ gwd_settings_notified_impl_update_metacity_theme (GWDSettingsNotified *notified)
     const gchar *meta_theme = NULL;
     g_object_get (settings, "metacity-theme", &meta_theme, NULL);
 
-    if (gwd_metacity_window_decoration_update_meta_theme (type, meta_theme))
+    meta_theme_current = gwd_metacity_window_decoration_update_meta_theme (type, meta_theme);
+
+    if (meta_theme_current != NULL)
     {
 	theme_draw_window_decoration	= meta_draw_window_decoration;
 	theme_calc_decoration_size	= meta_calc_decoration_size;

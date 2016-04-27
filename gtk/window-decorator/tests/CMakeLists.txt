@@ -148,6 +148,7 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
     target_link_libraries (compiz_test_gwd_metacity_decorations
 			   gtk_window_decorator_metacity_window_decoration_util
 			   ${COMPIZ_TEST_GTK_WINDOW_DECORATOR_LIBRARIES}
+			   ${METACITY_LIBRARIES}
 			   ${GTEST_BOTH_LIBRARIES}
 			   ${GMOCK_LIBRARY}
 		       	   ${GMOCK_MAIN_LIBRARY}

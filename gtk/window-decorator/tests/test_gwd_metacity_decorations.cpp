@@ -25,6 +25,9 @@
 #include "gtest_unspecified_bool_type_matcher.h"
 #include "gwd-metacity-window-decoration-util.h"
 
+using ::testing::IsNull;
+using ::testing::NotNull;
+
 class GWDMetacityDecorationUtilTest :
     public ::testing::Test
 {
@@ -32,20 +35,7 @@ class GWDMetacityDecorationUtilTest :
 
 namespace
 {
-    MetaTheme * get_current_returns_null ()
-    {
-	return NULL;
-    }
-
-    MetaTheme * get_current_returns_nonnull ()
-    {
-	return (MetaTheme *) 1;
-    }
-
-    void set_current_seam (const gchar *theme,
-			   gboolean    force)
-    {
-    }
+    const MetaThemeType themeType = META_THEME_TYPE_METACITY;
 
     const std::string emptyTheme ("");
     const std::string realTheme ("Adwaita");
@@ -54,28 +44,20 @@ namespace
 
 TEST (GWDMetacityDecorationUtilTest, TestNULLDecorationRevertsToCairo)
 {
-    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (NULL,
-								   get_current_returns_nonnull,
-								   set_current_seam), IsFalse ());
+    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (themeType, NULL), IsNull ());
 }
 
 TEST (GWDMetacityDecorationUtilTest, TestEmptyStringDecorationRevertsToCairo)
 {
-    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (emptyTheme.c_str (),
-								   get_current_returns_nonnull,
-								   set_current_seam), IsFalse ());
+    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (themeType, emptyTheme.c_str ()), IsNull ());
 }
 
 TEST (GWDMetacityDecorationUtilTest, TestBadThemeStringDecorationRevertsToCairo)
 {
-    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (badTheme.c_str (),
-								   get_current_returns_null,
-								   set_current_seam), IsFalse ());
+    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (themeType, badTheme.c_str ()), IsNull ());
 }
 
 TEST (GWDMetacityDecorationUtilTest, TestGoodThemeStringDecorationUsesMetacity)
 {
-    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (realTheme.c_str (),
-								   get_current_returns_nonnull,
-								   set_current_seam), IsTrue ());
+    EXPECT_THAT (gwd_metacity_window_decoration_update_meta_theme (themeType, realTheme.c_str ()), NotNull ());
 }

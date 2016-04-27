@@ -20,30 +20,25 @@
 #include <string.h>
 #include <glib.h>
 #include "gwd-metacity-window-decoration-util.h"
-#include "gtk-window-decorator.h"
 
 #ifdef USE_METACITY
-gboolean
+MetaTheme *
 gwd_metacity_window_decoration_update_meta_theme (MetaThemeType  theme_type,
                                                   const gchar   *theme_name)
 {
     MetaTheme *theme;
-    gboolean retval;
     GError *error;
 
     theme = meta_theme_new (theme_type);
-    retval = TRUE;
 
     error = NULL;
     if (!meta_theme_load (theme, theme_name, &error)) {
         g_warning ("%s", error->message);
         g_error_free (error);
 
-        retval = FALSE;
+        g_clear_object (&theme);
     }
 
-    g_set_object (&meta_theme_current, theme);
-
-    return retval;
+    return theme;
 }
 #endif
