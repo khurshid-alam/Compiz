@@ -543,11 +543,11 @@ CompWindow::changeState (unsigned int newState)
 
     recalcType ();
     recalcActions ();
+    stateChangeNotify (oldState);
 
     if (priv->managed)
 	screen->setWindowState (priv->state, priv->id);
 
-    stateChangeNotify (oldState);
     screen->matchPropertyChanged (this);
 }
 
