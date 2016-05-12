@@ -19,11 +19,10 @@ list (APPEND _PluginExtensionFiles
       plugin_extensions/CompizGenInstallImages.cmake)
 list (APPEND _PluginExtensionFiles
       plugin_extensions/CompizOpenGLFixups.cmake)
-
-if (USE_GSETTINGS)
-    list (APPEND _files CompizGSettings.cmake)
-    list (APPEND _PluginExtensionFiles plugin_extensions/CompizGenGSettings.cmake)
-endif (USE_GSETTINGS)
+list (APPEND _files
+      CompizGSettings.cmake)
+list (APPEND _PluginExtensionFiles
+      plugin_extensions/CompizGenGSettings.cmake)
 
 install (
     FILES ${_files}

@@ -1,7 +1,5 @@
 include (FindPkgConfig)
 
-if (USE_GSETTINGS)
-
     set (_deps
 	glib-2.0>=2.20.0
 	gio-2.0>=2.25.0)
@@ -83,5 +81,3 @@ if (USE_GSETTINGS)
 	endif (COMPIZ_BUILD_TESTING)
 
     endif (COMPIZCONFIG_GNOME_GSETTINGS_INTEGRATION_FOUND)
-
-endif (USE_GSETTINGS)
