@@ -40,7 +40,7 @@ class PrivateProgram;
 class GLProgram
 {
     public:
-	GLProgram (CompString &vertexShader, CompString &fragmentShader);
+        GLProgram (const CompString &vertexShader, const CompString &fragmentShader);
 	~GLProgram ();
 
 	bool valid ();
