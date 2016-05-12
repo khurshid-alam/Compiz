@@ -17,51 +17,14 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifndef _COMPIZ_GWD_SETTINGS_STORAGE_GSETTINGS_H
-#define _COMPIZ_GWD_SETTINGS_STORAGE_GSETTINGS_H
+
+#ifndef GWD_SETTINGS_STORAGE_H
+#define GWD_SETTINGS_STORAGE_H
 
 #include <glib-object.h>
 #include <gwd-fwd.h>
 
 G_BEGIN_DECLS
-
-#define GWD_TYPE_SETTINGS_STORAGE_GSETTINGS (gwd_settings_storage_gsettings_get_type ())
-GType gwd_settings_storage_gsettings_get_type ();
-
-GWDSettingsStorage *
-gwd_settings_storage_gsettings_new (GSettings *orgGNOMEDesktopSettings,
-				    GSettings *metacitySettings,
-				    GSettings *marcoSettings,
-				    GSettings *gwdSettings,
-				    GWDSettingsWritable *writableSettings);
-
-void
-gwd_connect_org_compiz_gwd_settings (GSettings		*settings,
-				     GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_compiz_gwd_settings ();
-
-void
-gwd_connect_org_gnome_metacity_settings (GSettings          *settings,
-                                         GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_gnome_metacity_settings ();
-
-void
-gwd_connect_org_gnome_desktop_wm_preferences_settings (GSettings	  *settings,
-						       GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_gnome_desktop_wm_preferences_settings ();
-
-void
-gwd_connect_org_mate_marco_general_settings (GSettings          *settings,
-                                         GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_mate_marco_general_settings ();
 
 extern const gchar * ORG_COMPIZ_GWD;
 extern const gchar * ORG_GNOME_METACITY;
@@ -91,6 +54,47 @@ extern const gchar * ORG_MATE_MARCO_GENERAL_THEME;
 extern const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT;
 extern const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT;
 extern const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT;
+
+#define GWD_TYPE_SETTINGS_STORAGE gwd_settings_storage_get_type ()
+G_DECLARE_FINAL_TYPE (GWDSettingsStorage, gwd_settings_storage,
+                      GWD, SETTINGS_STORAGE, GObject)
+
+GWDSettingsStorage *
+gwd_settings_storage_new                          (GWDSettingsWritable *writable,
+                                                   gboolean             connect);
+
+gboolean
+gwd_settings_storage_update_use_tooltips          (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_blur                  (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_metacity_theme        (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_opacity               (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_button_layout         (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_font                  (GWDSettingsStorage  *storage);
+
+gboolean
+gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage *storage);
+
+GSettings *
+gwd_get_org_compiz_gwd_settings                   (GWDSettingsStorage  *storage);
+
+GSettings *
+gwd_get_org_gnome_desktop_wm_preferences_settings (GWDSettingsStorage  *storage);
+
+GSettings *
+gwd_get_org_gnome_metacity_settings               (GWDSettingsStorage  *storage);
+
+GSettings *
+gwd_get_org_mate_marco_general_settings           (GWDSettingsStorage  *storage);
 
 G_END_DECLS
 
