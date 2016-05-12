@@ -100,7 +100,7 @@ get_settings_no_abort (const gchar *schema)
     return settings;
 }
 
-static inline gchar *
+static void
 translate_dashes_to_underscores (gchar *original)
 {
     gint i = 0;
@@ -109,8 +109,6 @@ translate_dashes_to_underscores (gchar *original)
         if (original[i] == '-')
             original[i] = '_';
     }
-
-    return original;
 }
 
 static void
@@ -465,9 +463,10 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
     } else
         return FALSE;
 
-    double_click_action = translate_dashes_to_underscores (double_click_action);
-    middle_click_action = translate_dashes_to_underscores (middle_click_action);
-    right_click_action = translate_dashes_to_underscores (right_click_action);
+    translate_dashes_to_underscores (double_click_action);
+    translate_dashes_to_underscores (middle_click_action);
+    translate_dashes_to_underscores (right_click_action);
+
     mouse_wheel_action = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION);
 
     retval = gwd_settings_writable_titlebar_actions_changed (storage->writable, double_click_action,
