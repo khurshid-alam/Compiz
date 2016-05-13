@@ -74,3 +74,13 @@ virtualbox
  RESOLVED. WORKAROUND: force the usage of the copy-to-texture path
  when using this driver ("Chromium") and binding an externally
  managed pixmap to a texture
+
+vmwgfx
+======
+
+ 1. vmwgfx does not implement glGenerateMipmap for FBO-backed
+    textures.
+
+ RESOLVED. WORKAROUND: do not use glGenerateMipmap with vmwgfx. This
+ means that some functionality, like smoothed blurs will not be
+ available on this driver.
