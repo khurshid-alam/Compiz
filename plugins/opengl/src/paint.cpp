@@ -1367,6 +1367,14 @@ GLWindow::glDraw (const GLMatrix     &transform,
     return true;
 }
 
+void
+GLWindow::glTransformationComplete (const GLMatrix   &matrix,
+				    const CompRegion &reg,
+				    unsigned int     mask)
+{
+    WRAPABLE_HND_FUNCTN (glTransformationComplete, matrix, reg, mask);
+}
+
 bool
 GLWindow::glPaint (const GLWindowPaintAttrib &attrib,
 		   const GLMatrix            &transform,
@@ -1383,6 +1391,8 @@ GLWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	mask |= PAINT_WINDOW_TRANSLUCENT_MASK;
 
     priv->lastMask = mask;
+
+    glTransformationComplete (transform, region, mask);
 
     if (mask & PAINT_WINDOW_OCCLUSION_DETECTION_MASK)
     {
