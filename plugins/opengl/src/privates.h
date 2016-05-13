@@ -268,6 +268,8 @@ class PrivateGLScreen :
 	std::vector<XToGLSync*>::size_type currentSyncNum;
 	XToGLSync *currentSync;
 	std::vector<XToGLSync*>::size_type warmupSyncs;
+
+	bool driverHasBrokenFBOMipmapImplementation;
 };
 
 class PrivateGLWindow :

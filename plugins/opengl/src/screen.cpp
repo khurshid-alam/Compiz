@@ -896,6 +896,20 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
 	priv->incorrectRefreshRate = true;
     }
 
+    if (glVendor != NULL && strstr (glVendor, "VMware") &&
+        glRenderer != NULL && strstr (glRenderer, "on SVGA3D"))
+    {
+        /* vmwgfx has an incomplete glGenerateMipmap implementation.
+         * It does not seem to support generating mipmaps for
+         * FBO backed textures - instead it raises SIGABRT with
+         * an exception stating that the command does not exist.
+         *
+         * This is actually supported in the spec, it just seems
+         * to be unavailable in the driver.
+         */
+        priv->driverHasBrokenFBOMipmapImplementation = true;
+    }
+
     if (strstr (glExtensions, "GL_ARB_texture_non_power_of_two"))
 	GL::textureNonPowerOfTwo = true;
     GL::textureNonPowerOfTwoMipmap = GL::textureNonPowerOfTwo;
@@ -1161,6 +1175,12 @@ GLScreen::glInitContext (XVisualInfo *visinfo)
     priv->updateFrameProvider ();
 
     return true;
+}
+
+bool
+GLScreen::driverHasBrokenFBOMipmaps () const
+{
+    return priv->driverHasBrokenFBOMipmapImplementation;
 }
 
 
@@ -1536,7 +1556,8 @@ PrivateGLScreen::PrivateGLScreen (GLScreen   *gs) :
     prevBlacklisted (false),
     currentSyncNum (0),
     currentSync (0),
-    warmupSyncs (0)
+    warmupSyncs (0),
+    driverHasBrokenFBOMipmapImplementation (false)
 {
     ScreenInterface::setHandler (screen);
     CompositeScreenInterface::setHandler (cScreen);

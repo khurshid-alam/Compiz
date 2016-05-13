@@ -1473,7 +1473,10 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 
 	    else
 	    {
-		bScreen->gScreen->setTextureFilter (GL_LINEAR);
+		unsigned int filter = (bScreen->gScreen->driverHasBrokenFBOMipmaps () ?
+				       GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
+		bScreen->gScreen->setTextureFilter (filter);
+
 		bScreen->fbo->tex ()->enable (GLTexture::Good);
 
 		const CompRect &r (*bScreen->fbo->tex ());
@@ -1483,7 +1486,8 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 				     r.width (),
 				     r.height ());
 
-		//GL::generateMipmap (bScreen->fbo->tex ()->target ());
+		if (!bScreen->gScreen->driverHasBrokenFBOMipmaps ())
+		    GL::generateMipmap (bScreen->fbo->tex ()->target ());
 
 		bScreen->fbo->tex ()->disable ();
 	    }
@@ -1503,12 +1507,13 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
     foreach (GLTexture *tex, bScreen->texture)
     {
 	/* We need to set the active texture filter to GL_LINEAR_MIPMAP_LINEAR */
-	if (filter == BlurOptions::FilterMipmap)
+	if (filter == BlurOptions::FilterMipmap &&
+	    !bScreen->gScreen->driverHasBrokenFBOMipmaps ())
 	    bScreen->gScreen->setTextureFilter (GL_LINEAR_MIPMAP_LINEAR);
 
-	tex->enable (GLTexture::Good);
+        tex->enable (GLTexture::Good);
 
-	CompRect::vector rects (updateRegion->rects ());
+        CompRect::vector rects (updateRegion->rects ());
 
 	foreach (const CompRect &r, rects)
 	{
@@ -1523,8 +1528,9 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 
 	/* Force mipmap regeneration, because GLTexture assumes static
 	 * textures and won't do it for us */
-	//if (filter == BlurOptions::FilterMipmap)
-	    //GL::generateMipmap (tex->target ());
+	if (filter == BlurOptions::FilterMipmap &&
+	    !bScreen->gScreen->driverHasBrokenFBOMipmaps ())
+	    GL::generateMipmap (tex->target ());
 
 	if (filter == BlurOptions::FilterGaussian)
 	    ret |=  bScreen->fboUpdate (updateRegion->handle ()->rects,

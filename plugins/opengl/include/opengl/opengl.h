@@ -851,6 +851,8 @@ class GLScreen :
 
 	bool glInitContext (XVisualInfo *);
 
+	bool driverHasBrokenFBOMipmaps () const;
+
 	WRAPABLE_HND (0, GLScreenInterface, bool, glPaintOutput,
 		      const GLScreenPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, CompOutput *, unsigned int);
