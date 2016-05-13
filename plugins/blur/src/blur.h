@@ -23,42 +23,41 @@
  * Author: David Reveman <davidr@novell.com>
  */
 
-#include "blur_options.h"
-
-#include <composite/composite.h>
-#include <opengl/opengl.h>
-#include <decoration.h>
+#include <iosfwd>
+#include <boost/shared_ptr.hpp>
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-
 #include <X11/Xatom.h>
-#include <GL/glu.h>
+
+#include "blur_options.h"
+
+#include <composite/composite.h>
+#include <opengl/opengl.h>
+#include <opengl/program.h>
+#include <decoration.h>
 
 
-extern const unsigned short BLUR_GAUSSIAN_RADIUS_MAX;
+const unsigned short BLUR_GAUSSIAN_RADIUS_MAX = 15;
 
-struct BlurFunction {
+const unsigned short BLUR_STATE_CLIENT = 0;
+const unsigned short BLUR_STATE_DECOR  = 1;
+const unsigned short BLUR_STATE_NUM    = 2;
 
-    GLFragment::FunctionId id;
-
+struct BlurFunction
+{
+    CompString shader;
     int target;
-    int param;
-    int unit;
     int startTC;
     int numITC;
+    int saturation;
 };
 
 struct BlurBox {
     decor_point_t p1;
     decor_point_t p2;
 };
-
-extern const unsigned short BLUR_STATE_CLIENT;
-extern const unsigned short BLUR_STATE_DECOR;
-extern const unsigned short BLUR_STATE_NUM;
 
 struct BlurState {
     int                  threshold;
@@ -88,6 +87,8 @@ class BlurScreen :
 	void preparePaint (int);
 	void donePaint ();
 
+	void damageCutoff ();
+
 	bool glPaintOutput (const GLScreenPaintAttrib &,
 			    const GLMatrix &, const CompRegion &,
 			    CompOutput *, unsigned int);
@@ -99,12 +100,11 @@ class BlurScreen :
 	void updateFilterRadius ();
         void blurReset ();
 
-	GLFragment::FunctionId getSrcBlurFragmentFunction (GLTexture *, int);
-	GLFragment::FunctionId getDstBlurFragmentFunction (GLTexture *texture,
-							   int       param,
-							   int       unit,
-							   int       numITC,
-							   int       startTC);
+	const CompString & getSrcBlurFragmentFunction (GLTexture *);
+	const CompString & getDstBlurFragmentFunction (GLTexture *texture,
+						       int       unit,
+						       int       numITC,
+						       int       startTC);
 
 	bool projectVertices (CompOutput     *output,
 			      const GLMatrix &transform,
@@ -112,8 +112,9 @@ class BlurScreen :
 			      float          *scr,
 			      int            n);
 
-	bool loadFragmentProgram (GLuint     *program,
-				  const char *string);
+	bool loadFragmentProgram (boost::shared_ptr <GLProgram> &program,
+				  const char                    *vertex,
+				  const char                    *fragment);
 
 	bool loadFilterProgram (int numITC);
 
@@ -152,24 +153,34 @@ class BlurScreen :
 	CompOutput *output;
 	int count;
 
-	GLuint texture[2];
+	GLTexture::List texture;
 
-	GLenum target;
 	float  tx;
 	float  ty;
 	int    width;
 	int    height;
 
-	GLuint program;
+	boost::shared_ptr <GLProgram> program;
 	int    maxTemp;
-	GLuint fbo;
-	bool   fboStatus;
+	boost::shared_ptr <GLFramebufferObject> fbo;
+
+	GLFramebufferObject *oldDrawFramebuffer;
 
 	float amp[BLUR_GAUSSIAN_RADIUS_MAX];
 	float pos[BLUR_GAUSSIAN_RADIUS_MAX];
 	int   numTexop;
 
 	GLMatrix mvp;
+
+	bool     determineProjectedBlurRegionsPass;
+	bool     allowAreaDirtyOnOwnDamageBuffer;
+	CompRegion backbufferUpdateRegionThisFrame;
+
+	compiz::composite::buffertracking::AgeDamageQuery::Ptr damageQuery;
+
+    private:
+
+	bool markAreaDirty (const CompRegion &r);
 };
 
 class BlurWindow :
@@ -188,11 +199,16 @@ class BlurWindow :
 
 	bool glPaint (const GLWindowPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, unsigned int);
-	bool glDraw (const GLMatrix &, GLFragment::Attrib &,
-		     const CompRegion &, unsigned int);
-	void glDrawTexture (GLTexture *texture, GLFragment::Attrib &,
-			    unsigned int);
+	void glTransformationComplete (const GLMatrix   &matrix,
+				       const CompRegion &region,
+				       unsigned int     mask);
 
+	bool glDraw (const GLMatrix &, const GLWindowPaintAttrib &,
+		     const CompRegion &, unsigned int);
+	void glDrawTexture (GLTexture *texture,
+			    const GLMatrix &,
+			    const GLWindowPaintAttrib &,
+			    unsigned int);
 	void updateRegion ();
 
 	void setBlur (int                  state,
@@ -206,9 +222,13 @@ class BlurWindow :
 	void projectRegion (CompOutput     *output,
 			    const GLMatrix &transform);
 
+	void determineBlurRegion (int            filter,
+				  const GLMatrix &transform,
+				  int            clientThreshold);
+
 	bool updateDstTexture (const GLMatrix &transform,
 			       CompRect       *pExtents,
-			       int            clientThreshold);
+			       unsigned int mask);
 
     public:
 	CompWindow      *window;
@@ -225,6 +245,7 @@ class BlurWindow :
 
 	CompRegion region;
 	CompRegion clip;
+	CompRegion projectedBlurRegion;
 };
 
 #define BLUR_SCREEN(s) \

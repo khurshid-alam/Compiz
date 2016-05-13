@@ -22,19 +22,22 @@
  *
  * Author: David Reveman <davidr@novell.com>
  */
-
 #include <blur.h>
+#include <sstream>
+#include <opengl/framebufferobject.h>
+
+/* Supporting independent texture fetch operations will require
+ * GLVertexBuffer to support per-plugin attributes as texture co-ordinates
+ * are two-component and not four-component
+ */
+#define INDEPENDENT_TEX_SUPPORTED 0
 
 COMPIZ_PLUGIN_20090315 (blur, BlurPluginVTable)
 
-const unsigned short BLUR_GAUSSIAN_RADIUS_MAX = 15;
-
-const unsigned short BLUR_STATE_CLIENT = 0;
-const unsigned short BLUR_STATE_DECOR  = 1;
-const unsigned short BLUR_STATE_NUM    = 2;
-
 /* pascal triangle based kernel generator */
-static int
+namespace
+{
+int
 blurCreateGaussianLinearKernel (int   radius,
 				float strength,
 				float *amp,
@@ -106,6 +109,7 @@ blurCreateGaussianLinearKernel (int   radius,
 
     return radius;
 }
+}
 
 void
 BlurScreen::updateFilterRadius ()
@@ -137,20 +141,11 @@ BlurScreen::blurReset ()
 {
     updateFilterRadius ();
 
-    foreach (BlurFunction &bf, srcBlurFunctions)
-	GLFragment::destroyFragmentFunction (bf.id);
     srcBlurFunctions.clear ();
-    foreach (BlurFunction &bf, dstBlurFunctions)
-	GLFragment::destroyFragmentFunction (bf.id);
     dstBlurFunctions.clear ();
 
-    width = height = 0;
-
-    if (program)
-    {
-	GL::deletePrograms (1, &program);
-	program = 0;
-    }
+    program.reset ();
+    texture.clear ();
 }
 
 static CompRegion
@@ -249,7 +244,6 @@ BlurWindow::setBlur (int                  state,
 		     int                  threshold,
 		     std::vector<BlurBox> box)
 {
-
     this->state[state].threshold = threshold;
     this->state[state].box       = box;
 
@@ -289,7 +283,7 @@ BlurWindow::updateMatch ()
 
     match = &bScreen->optionGetFocusBlurMatch ();
 
-    focus = GL::fragmentProgram && match->evaluate (window);
+    focus = GL::shaders && match->evaluate (window);
     if (focus != focusBlur)
     {
 	focusBlur = focus;
@@ -421,49 +415,75 @@ BlurScreen::preparePaint (int msSinceLastPaint)
     }
 
     cScreen->preparePaint (msSinceLastPaint);
+}
 
-    if (cScreen->damageMask () & COMPOSITE_SCREEN_DAMAGE_REGION_MASK)
+bool
+BlurScreen::markAreaDirty (const CompRegion &r)
+{
+    return allowAreaDirtyOnOwnDamageBuffer;
+}
+
+void
+BlurScreen::damageCutoff ()
+{
+    if (alphaBlur)
     {
-	/* walk from bottom to top and expand damage */
-	if (alphaBlur)
+	this->output = &screen->fullscreenOutput ();
+
+	/* We need to do a primary pass here with glPaint to check which
+	 * regions of the backbuffer need to be updated.
+	 *
+	 * Because the backbuffer is effectively partially undefined, we are completely
+	 * reliant on what core is telling us the repair regions of the
+	 * backbuffer need to be - but obviously we can't completely rely
+	 * on it because of a feedback effect, as we need to expand
+	 * the repair region slightly so that the texture sampler
+	 * doesn't go out of range of the damage region. If we were to
+	 * simply expand the damage region, then that would feedback to us
+	 * on the next frame, until the damage region eventually became infinite.
+	 *
+	 * As such, we have a tracker in core to track all damage except the effect
+	 * of expanding the damage region that came back to us. We then use
+	 * this tracker along with the frame age to determine what damage really
+	 * needs to be expanded in order to determine the backbuffer update region,
+	 * and then use the real damage in order to determine what blur regions
+	 * should be updated
+	 */
+	backbufferUpdateRegionThisFrame &= emptyRegion;
+	CompRegion frameAgeDamage = damageQuery->damageForFrameAge (cScreen->getFrameAge ());
+	foreach (CompWindow *w, screen->windows ())
 	{
-	    int	       x1, y1, x2, y2;
-	    int	       count = 0;
-	    CompRegion damage (cScreen->currentDamage ());
+	    /* Skip windows that would not have glPaint called on them */
+	    if (w->destroyed ())
+		continue;
 
-	    foreach (CompWindow *w, screen->windows ())
-	    {
-		BLUR_WINDOW (w);
+	    if (!w->shaded () && !w->isViewable ())
+		continue;
 
-		if (!w->isViewable () || !CompositeWindow::get (w)->damaged ())
-		    continue;
+	    BlurWindow *bw = BlurWindow::get (w);
 
-		if (!bw->region.isEmpty ())
-		{
-		    CompRect r = bw->region.boundingRect ();
-		    CompRect d = damage.boundingRect ();
-		    x1 = r.x1 () - filterRadius;
-		    y1 = r.y1 () - filterRadius;
-		    x2 = r.x2 () + filterRadius;
-		    y2 = r.y2 () + filterRadius;
+	    if (!bw->cWindow->redirected ())
+		continue;
 
-		    if (x1 < d.x2 () &&
-			y1 < d.y2 () &&
-			x2 > d.x1 () &&
-			y2 > d.y1 ())
-		    {
-			damage.shrink (-filterRadius, -filterRadius);
-			count++;
-		    }
-		}
-	    }
+	    if (!bw->projectedBlurRegion.isEmpty ())
+		bw->projectedBlurRegion &= emptyRegion;
 
-	    if (count)
-		cScreen->damageRegion (damage);
+	    GLMatrix screenSpace;
+	    screenSpace.toScreenSpace (this->output, -DEFAULT_Z_CAMERA);
 
-	    this->count = count;
+	    bw->gWindow->glPaint (bw->gWindow->paintAttrib (), screenSpace,
+				  frameAgeDamage,
+				  PAINT_WINDOW_NO_CORE_INSTANCE_MASK);
+
+	    backbufferUpdateRegionThisFrame += bw->projectedBlurRegion;
 	}
+
+	allowAreaDirtyOnOwnDamageBuffer = false;
+	cScreen->damageRegion (backbufferUpdateRegionThisFrame);
+	allowAreaDirtyOnOwnDamageBuffer = true;
     }
+
+    cScreen->damageCutoff ();
 }
 
 bool
@@ -471,23 +491,10 @@ BlurScreen::glPaintOutput (const GLScreenPaintAttrib &sAttrib,
 			   const GLMatrix &transform, const CompRegion &region,
 			   CompOutput *output, unsigned int mask)
 {
-    bool status;
-
     if (alphaBlur)
     {
 	stencilBox = region.boundingRect ();
 	this->region = region;
-
-	if (mask & PAINT_SCREEN_REGION_MASK)
-	{
-	    /* we need to redraw more than the screen region being updated */
-	    if (count)
-	    {
-		this->region.shrink (-filterRadius * 2, -filterRadius * 2);
-
-		this->region &= screen->region ();
-	    }
-	}
     }
 
     if (!blurOcclusion)
@@ -500,12 +507,7 @@ BlurScreen::glPaintOutput (const GLScreenPaintAttrib &sAttrib,
 
     this->output = output;
 
-    if (alphaBlur)
-	status = gScreen->glPaintOutput (sAttrib, transform, this->region, output, mask);
-    else
-	status = gScreen->glPaintOutput (sAttrib, transform, region, output, mask);
-
-    return status;
+    return gScreen->glPaintOutput (sAttrib, transform, region, output, mask);
 }
 
 void
@@ -542,12 +544,42 @@ BlurScreen::donePaint ()
     cScreen->donePaint ();
 }
 
+void
+BlurWindow::glTransformationComplete (const GLMatrix   &matrix,
+				      const CompRegion &region,
+				      unsigned int     mask)
+{
+    gWindow->glTransformationComplete (matrix, region, mask);
+
+    int              clientThreshold;
+    const CompRegion *reg = NULL;
+
+    /* only care about client window blurring when it's translucent */
+    if (mask & PAINT_WINDOW_TRANSLUCENT_MASK)
+	clientThreshold = state[BLUR_STATE_CLIENT].threshold;
+    else
+	clientThreshold = 0;
+
+    if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
+	reg = &infiniteRegion;
+    else
+	reg = &region;
+
+    bScreen->tmpRegion = this->region.intersected (*reg);
+
+    if (state[BLUR_STATE_DECOR].threshold || clientThreshold)
+    {
+	determineBlurRegion (bScreen->optionGetFilter (),
+			     matrix,
+			     clientThreshold);
+    }
+}
+
 bool
 BlurWindow::glPaint (const GLWindowPaintAttrib &attrib,
 		     const GLMatrix &transform,
 		     const CompRegion &region, unsigned int mask)
 {
-
     bool status = gWindow->glPaint (attrib, transform, region, mask);
 
     if (!bScreen->blurOcclusion &&
@@ -564,307 +596,359 @@ BlurWindow::glPaint (const GLWindowPaintAttrib &attrib,
     return status;
 }
 
-GLFragment::FunctionId
-BlurScreen::getSrcBlurFragmentFunction (GLTexture *texture,
-					int       param)
+namespace
 {
-    GLFragment::FunctionData data;
-    BlurFunction             function;
-    int		             target;
+struct SamplerInfo
+{
+    GLint      target;
+    CompString func;
+};
 
-    if (texture->target () == GL_TEXTURE_2D)
-	target = COMP_FETCH_TARGET_2D;
-    else
-	target = COMP_FETCH_TARGET_RECT;
+SamplerInfo
+getSamplerInfoForSize (const CompSize &size)
+{
+    SamplerInfo info;
 
-    foreach (BlurFunction &bf, srcBlurFunctions)
-	if (bf.param == param && bf.target == target)
-	    return bf.id;
-
-    if (data.status ())
+#ifdef USE_GLES
+    info.target = GL_TEXTURE_2D;
+    info.func = "texture2D";
+#else
+    if (GL::textureNonPowerOfTwo ||
+	(POWER_OF_TWO (size.width ()) && POWER_OF_TWO (size.height ())))
     {
-	static const char *temp[] = { "offset0", "offset1", "sum" };
-	unsigned int      i;
-
-	for (i = 0; i < sizeof (temp) / sizeof (temp[0]); i++)
-	    data.addTempHeaderOp (temp[i]);
-
-	data.addDataOp (
-	    "MUL offset0, program.env[%d].xyzw, { 1.0, 1.0, 0.0, 0.0 };"
-	    "MUL offset1, program.env[%d].zwww, { 1.0, 1.0, 0.0, 0.0 };",
-	    param, param);
-
-
-	switch (optionGetFilter ()) {
-	    case BlurOptions::Filter4xbilinear:
-	    default:
-		data.addFetchOp ("output", "offset0", target);
-		data.addDataOp ("MUL sum, output, 0.25;");
-		data.addFetchOp ("output", "-offset0", target);
-		data.addDataOp ("MAD sum, output, 0.25, sum;");
-		data.addFetchOp ("output", "offset1", target);
-		data.addDataOp ("MAD sum, output, 0.25, sum;");
-		data.addFetchOp ("output", "-offset1", target);
-		data.addDataOp ("MAD output, output, 0.25, sum;");
-		break;
-	}
-
-	if (!data.status ())
-	    return 0;
-
-	function.id     = data.createFragmentFunction ("blur");
-	function.target = target;
-	function.param  = param;
-	function.unit   = 0;
-
-	srcBlurFunctions.push_back (function);
-
-	return function.id;
+	info.target = GL_TEXTURE_2D;
+	info.func = "texture2D";
     }
+    else
+    {
+	info.target = GL_TEXTURE_RECTANGLE_NV;
+	info.func = "textureRECT";
+    }
+#endif
 
-    return 0;
+    return info;
+}
 }
 
-GLFragment::FunctionId
+/* XXX: param is redundant */
+const CompString &
+BlurScreen::getSrcBlurFragmentFunction (GLTexture *texture)
+{
+    BlurFunction             function;
+    std::stringstream        data (std::stringstream::out);
+
+    SamplerInfo info (getSamplerInfoForSize (CompSize (texture->width (),
+						       texture->height ())));
+
+    foreach (const BlurFunction &bf, srcBlurFunctions)
+	if (bf.target == info.target)
+	    return bf.shader;
+
+    data << "uniform vec4 focusblur_input_offset;\n"\
+	    "\n"\
+	    "void focusblur_fragment ()\n"\
+	    "{\n";
+
+    if (optionGetFilter () == BlurOptions::Filter4xbilinear)
+	data << "    float blur_offset0, blur_offset1;\n"\
+		"    vec4 blur_sum;\n"\
+		"    vec4 offset0 = focusblur_input_offset.xyzw * vec4 (1.0, 1.0, 0.0, 0.0);\n"\
+		"    vec4 offset1 = focusblur_input_offset.zwww * vec4 (1.0, 1.0, 0.0, 0.0);\n"
+		"    vec4 output = texture2D (texture0, vTexCoord0 + offset0);\n"\
+		"    blur_sum = output * 0.25;\n"\
+		"    output = " << info.func << " (texture0, vTexCoord0 - offset0);\n"\
+		"    blur_sum += output * 0.25;\n"\
+		"    output = " << info.func << " (texture0, vTexCoord0 + offset1);\n"\
+		"    blur_sum += output * 0.25;\n"\
+		"    output = " << info.func << " (texture0, vTexCoord0 - offset1);\n"\
+		"    output = output * 0.25 + blur_sum;\n"\
+		"    gl_FragColor = output;\n";
+
+    data << "}\n";
+
+    function.shader = data.str ();
+    function.target = info.target;
+
+    srcBlurFunctions.push_back (function);
+
+    return srcBlurFunctions.back ().shader;
+}
+
+/* This seems incomplete to me */
+
+const CompString &
 BlurScreen::getDstBlurFragmentFunction (GLTexture *texture,
-				        int       param,
-				        int       unit,
+					int       unit,
 				        int       numITC,
 				        int       startTC)
 {
-    BlurFunction             function;
-    GLFragment::FunctionData data;
-    int                      target;
-    char                     *targetString;
+    BlurFunction    function;
+    std::stringstream data (std::stringstream::out);
+    int             saturation = optionGetSaturation ();
 
-    if (texture->target () == GL_TEXTURE_2D)
-    {
-	target	     = COMP_FETCH_TARGET_2D;
-	targetString = (char *) "2D";
-    }
-    else
-    {
-	target	     = COMP_FETCH_TARGET_RECT;
-	targetString = (char *) "RECT";
-    }
+    SamplerInfo info (getSamplerInfoForSize (CompSize (texture->width (),
+						       texture->height ())));
 
     foreach (BlurFunction &function, dstBlurFunctions)
-	if (function.param   == param  &&
-	    function.target  == target &&
-	    function.unit    == unit   &&
+	if (function.target  == info.target &&
 	    function.numITC  == numITC &&
-	    function.startTC == startTC)
-	    return function.id;
+	    function.startTC == startTC &&
+	    function.saturation == saturation)
+	    return function.shader;
 
-    if (data.status ())
+    data << "uniform vec4 blur_translation;\n"\
+	    "uniform vec4 blur_threshold;\n";
+
+    int	          i, j;
+    /* These are always initialized if running a gaussian shader */
+    int               numIndirect = 0;
+    int               numIndirectOp = 0;
+    int               base, end, ITCbase;
+
+    /* Set per-shader uniforms */
+    switch (optionGetFilter ())
     {
-	static const char *temp[] = { "fCoord", "mask", "sum", "dst" };
-	int	          i, j;
-	char              str[1024];
-	int               saturation = optionGetSaturation ();
-	int               numIndirect;
-	int               numIndirectOp;
-	int               base, end, ITCbase;
-
-	for (i = 0; (unsigned int) i < sizeof (temp) / sizeof (temp[0]); i++)
-	    data.addTempHeaderOp (temp[i]);
-
-	if (saturation < 100)
-	    data.addTempHeaderOp ("sat");
-
-	switch (optionGetFilter ()) {
-	    case BlurOptions::Filter4xbilinear: {
-		static const char *filterTemp[] = {
-		    "t0", "t1", "t2", "t3",
-		    "s0", "s1", "s2", "s3"
-		};
-
-		for (i = 0;
-		     (unsigned int) i < sizeof (filterTemp) / sizeof (filterTemp[0]);
-		     i++)
-		    data.addTempHeaderOp (filterTemp[i]);
-
-		data.addFetchOp ("output", NULL, target);
-		data.addColorOp ("output", "output");
-
-		data.addDataOp (
-		    "MUL fCoord, fragment.position, program.env[%d];",
-		    param);
-
-
-		data.addDataOp (
-		    "ADD t0, fCoord, program.env[%d];"
-		    "TEX s0, t0, texture[%d], %s;"
-
-		    "SUB t1, fCoord, program.env[%d];"
-		    "TEX s1, t1, texture[%d], %s;"
-
-		    "MAD t2, program.env[%d], { -1.0, 1.0, 0.0, 0.0 }, fCoord;"
-		    "TEX s2, t2, texture[%d], %s;"
-
-		    "MAD t3, program.env[%d], { 1.0, -1.0, 0.0, 0.0 }, fCoord;"
-		    "TEX s3, t3, texture[%d], %s;"
-
-		    "MUL_SAT mask, output.a, program.env[%d];"
-
-		    "MUL sum, s0, 0.25;"
-		    "MAD sum, s1, 0.25, sum;"
-		    "MAD sum, s2, 0.25, sum;"
-		    "MAD sum, s3, 0.25, sum;",
-
-		    param + 2, unit, targetString,
-		    param + 2, unit, targetString,
-		    param + 2, unit, targetString,
-		    param + 2, unit, targetString,
-		    param + 1);
-
-	    } break;
-	    case BlurOptions::FilterGaussian: {
-
-		/* try to use only half of the available temporaries to keep
-		   other plugins working */
-		if ((maxTemp / 2) - 4 >
-		     (numTexop + (numTexop - numITC)) * 2)
-		{
-		    numIndirect   = 1;
-		    numIndirectOp = numTexop;
-		}
-		else
-		{
-		    i = MAX (((maxTemp / 2) - 4) / 4, 1);
-		    numIndirect = ceil ((float)numTexop / (float)i);
-		    numIndirectOp = ceil ((float)numTexop / (float)numIndirect);
-		}
-
-		/* we need to define all coordinate temporaries if we have
-		   multiple indirection steps */
-		j = (numIndirect > 1) ? 0 : numITC;
-
-		for (i = 0; i < numIndirectOp * 2; i++)
-		{
-		    snprintf (str, 1024, "pix_%d", i);
-		    data.addTempHeaderOp (str);
-		}
-
-		for (i = j * 2; i < numIndirectOp * 2; i++)
-		{
-		    snprintf (str, 1024, "coord_%d", i);
-		    data.addTempHeaderOp (str);
-		}
-
-		data.addFetchOp ("output", NULL, target);
-		data.addColorOp ("output", "output");
-
-		data.addDataOp (
-		    "MUL fCoord, fragment.position, program.env[%d];",
-		    param);
-
-
-		data.addDataOp ("TEX sum, fCoord, texture[%d], %s;",
-			        unit + 1, targetString);
-
-
-		data.addDataOp ("MUL_SAT mask, output.a, program.env[%d];"
-				"MUL sum, sum, %f;",
-				param + 1, amp[numTexop]);
-
-		for (j = 0; j < numIndirect; j++)
-		{
-		    base = j * numIndirectOp;
-		    end  = MIN ((j + 1) * numIndirectOp, numTexop) - base;
-
-		    ITCbase = MAX (numITC - base, 0);
-
-		    for (i = ITCbase; i < end; i++)
-		    {
-			data.addDataOp (
-			    "ADD coord_%d, fCoord, {0.0, %g, 0.0, 0.0};"
-			    "SUB coord_%d, fCoord, {0.0, %g, 0.0, 0.0};",
-			    i * 2, pos[base + i] * ty,
-			    (i * 2) + 1, pos[base + i] * ty);
-		    }
-
-		    for (i = 0; i < ITCbase; i++)
-		    {
-			data.addDataOp (
-			    "TXP pix_%d, fragment.texcoord[%d], texture[%d], %s;"
-			    "TXP pix_%d, fragment.texcoord[%d], texture[%d], %s;",
-			    i * 2, startTC + ((i + base) * 2),
-			    unit + 1, targetString,
-			    (i * 2) + 1, startTC + 1 + ((i + base) * 2),
-			    unit + 1, targetString);
-		    }
-
-		    for (i = ITCbase; i < end; i++)
-		    {
-			data.addDataOp (
-			    "TEX pix_%d, coord_%d, texture[%d], %s;"
-			    "TEX pix_%d, coord_%d, texture[%d], %s;",
-			    i * 2, i * 2,
-			    unit + 1, targetString,
-			    (i * 2) + 1, (i * 2) + 1,
-			    unit + 1, targetString);
-		    }
-
-		    for (i = 0; i < end * 2; i++)
-		    {
-			data.addDataOp (
-			    "MAD sum, pix_%d, %f, sum;",
-			    i, amp[base + (i / 2)]);
-		    }
-		}
-
-	    } break;
-	    case BlurOptions::FilterMipmap:
-		data.addFetchOp ("output", NULL, target);
-		data.addColorOp ("output", "output");
-
-		data.addDataOp (
-		    "MUL fCoord, fragment.position, program.env[%d].xyzz;"
-		    "MOV fCoord.w, program.env[%d].w;"
-		    "TXB sum, fCoord, texture[%d], %s;"
-		    "MUL_SAT mask, output.a, program.env[%d];",
-		    param, param, unit, targetString,
-		    param + 1);
-
-		break;
-	}
-
-	if (saturation < 100)
-	{
-	    data.addDataOp (
-		"MUL sat, sum, { 1.0, 1.0, 1.0, 0.0 };"
-		"DP3 sat, sat, { %f, %f, %f, %f };"
-		"LRP sum.xyz, %f, sum, sat;",
-		RED_SATURATION_WEIGHT, GREEN_SATURATION_WEIGHT,
-		BLUE_SATURATION_WEIGHT, 0.0f, saturation / 100.0f);
-	}
-
-	data.addDataOp (
-	    "MAD dst, mask, -output.a, mask;"
-	    "MAD output.rgb, sum, dst.a, output;"
-	    "ADD output.a, output.a, dst.a;");
-
-	if (!data.status ())
-	{
-	    return 0;
-	}
-
-
-
-	function.id      = data.createFragmentFunction ("blur");
-	function.target  = target;
-	function.param   = param;
-	function.unit    = unit;
-	function.numITC  = numITC;
-	function.startTC = startTC;
-
-	dstBlurFunctions.push_back (function);
-
-	return function.id;
+	case BlurOptions::Filter4xbilinear:
+	    data << "uniform vec4 blur_dxdy;\n";
+	    break;
+	default:
+	    break;
     }
 
-    return 0;
+    data << "\n"\
+	    "void blur_fragment ()\n"\
+	    "{\n"\
+	    "    vec4 blur_sum, blur_dst, blur_output;\n"\
+	    "    vec2 blur_fCoord;\n"\
+	    "    vec4 blur_mask;\n";
+
+    if (saturation < 100)
+	data << "    float blur_sat;\n";
+
+    /* Define per-filter temporaries */
+    switch (optionGetFilter ())
+    {
+	case BlurOptions::Filter4xbilinear:
+	{
+	    static const char *filterTemp[] = {
+		"blur_t0", "blur_t1", "blur_t2", "blur_t3",
+	    };
+
+	    static const char *filterSampleTemp[] = {
+		"blur_s0", "blur_s1", "blur_s2", "blur_s3"
+	    };
+
+	    for (i = 0;
+		 (unsigned int) i < sizeof (filterTemp) / sizeof (filterTemp[0]);
+		 ++i)
+		data << "    vec2 " << filterTemp[i] << ";\n";
+
+	    for (i = 0;
+		 (unsigned int) i < sizeof (filterSampleTemp) / sizeof (filterSampleTemp[0]);
+		 ++i)
+		data << "    vec4 " << filterSampleTemp[i] << ";\n";
+	}
+	break;
+	case BlurOptions::FilterGaussian:
+	{
+	    /* try to use only half of the available temporaries to keep
+	       other plugins working */
+	    if ((maxTemp / 2) - 4 >
+		 (numTexop + (numTexop - numITC)) * 2)
+	    {
+		numIndirect   = 1;
+		numIndirectOp = numTexop;
+	    }
+	    else
+	    {
+		i = MAX (((maxTemp / 2) - 4) / 4, 1);
+		numIndirect = ceil ((float)numTexop / (float)i);
+		numIndirectOp = ceil ((float)numTexop / (float)numIndirect);
+	    }
+
+	    /* we need to define all coordinate temporaries if we have
+	       multiple indirection steps */
+	    j = (numIndirect > 1) ? 0 : numITC;
+
+	    for (i = 0; i < numIndirectOp * 2; i++)
+		data << "    vec4 blur_pix_" << i << ";\n";
+
+	    for (i = j * 2; i < numIndirectOp * 2; i++)
+		data << "    vec2 blur_coord_" << i << ";\n";
+	}
+	break;
+	case BlurOptions::FilterMipmap:
+	{
+	    data << "    float lod_bias;\n";
+	}
+	default:
+	    break;
+    }
+
+    /*
+     * blur_output: copy the original gl_FragColor determined by sampling
+     * the window texture in the core shader
+     * blur_fCoord: take the fragment co-ordinate in window co-ordinates
+     * and normalize it (eg, blur_translation). Once normalized we can
+     * sample texUnitN + 1 (for the copy of the backbuffer we wish to blur)
+     * and texUnitN + 2 (scratch fbo for gaussian blurs)
+     * blur_mask: take blur_output pixel alpha value, multiply by threshold value
+     * and clamp between 0 - 1. We will use this later to mix the blur fragments
+     * with the window fragments.
+     */
+    data << "\n"\
+	    "    blur_output = gl_FragColor;\n"\
+	    "    blur_fCoord = gl_FragCoord.st * blur_translation.st;\n"\
+	    "    blur_mask = clamp (blur_output.a * blur_threshold, vec4 (0.0, 0.0, 0.0, 0.), vec4 (1.0, 1.0, 1.0, 1.0));\n"\
+	    "\n";
+
+    /* Define filter program */
+    switch (optionGetFilter ())
+    {
+	case BlurOptions::Filter4xbilinear:
+	{
+	    data << "    blur_t0 = blur_fCoord + blur_dxdy.st;\n"\
+		    "    blur_s0 = " << info.func << " (texture1, blur_t0);\n"\
+		    "    blur_t1 = blur_fCoord - blur_dxdy.st;\n"\
+		    "    blur_s1 = " << info.func << " (texture1, blur_t1);\n"\
+		    "    blur_t2 = blur_fCoord + vec2 (-1.0, 1.0) * blur_dxdy.st;\n"\
+		    "    blur_s2 = " << info.func << " (texture1, blur_t2);\n"\
+		    "    blur_t3 = blur_fCoord + vec2 (1.0, -1.0) * blur_dxdy.st;\n"\
+		    "    blur_s3 = " << info.func << " (texture1, blur_t3);\n"\
+		    "    blur_sum = blur_s0 * 0.25;\n"\
+		    "    blur_sum += blur_s1 * 0.25;\n"\
+		    "    blur_sum += blur_s2 * 0.25;\n"\
+		    "    blur_sum += blur_s3 * 0.25;\n";
+	} break;
+	case BlurOptions::FilterGaussian:
+	{
+	    /* Invert y */
+	    data << "    blur_fCoord.y = 1.0 - blur_fCoord.y;\n"\
+		    "    blur_sum = " << info.func << " (texture2, blur_fCoord);\n"\
+		    "    blur_sum *= " << amp[numTexop] << ";\n";
+
+	    for (j = 0; j < numIndirect; j++)
+	    {
+		base = j * numIndirectOp;
+		end  = MIN ((j + 1) * numIndirectOp, numTexop) - base;
+
+		ITCbase = MAX (numITC - base, 0);
+
+		for (i = ITCbase; i < end; i++)
+		{
+		    data << "    blur_coord_" << i * 2 << " = blur_fCoord + vec2 (0.0, " << pos[base + i] * ty << ");\n"\
+			    "    blur_coord_" << (i * 2) + 1 << " = blur_fCoord - vec2 (0.0, " << pos[base + i] * ty << ");\n";
+		}
+#if INDEPENDENT_TEX_SUPPORTED
+		for (i = 0; i < ITCbase; i++)
+		{
+		    data << "    blur_pix_" + i * 2 + " vTexCoord"
+		    data.addDataOp (
+			"TXP pix_%d, fragment.texcoord[%d], texture[%d], %s;"
+			"TXP pix_%d, fragment.texcoord[%d], texture[%d], %s;",
+			i * 2, startTC + ((i + base) * 2),
+			unit + 1, targetString,
+			(i * 2) + 1, startTC + 1 + ((i + base) * 2),
+			unit + 1, targetString);
+		}
+#endif
+		for (i = ITCbase; i < end; i++)
+		{
+		    data << "    blur_pix_" << i * 2 << " = " << info.func << " (texture2, blur_coord_" << i * 2 << ");\n"\
+			    "    blur_pix_" << (i * 2) + 1 << " = " << info.func << " (texture2, blur_coord_" << (i * 2) + 1 << ");\n";
+		}
+
+		for (i = 0; i < end * 2; i++)
+		    data << "    blur_sum += blur_pix_" << i << " * " << amp[base + (i / 2)] << ";\n";
+	    }
+
+	} break;
+	case BlurOptions::FilterMipmap:
+	    data << "    lod_bias = blur_translation.w;\n"\
+		    "    blur_sum = " << info.func << " (texture1, blur_fCoord, lod_bias);\n";
+
+	    break;
+    }
+
+    if (saturation < 100)
+    {
+	data << "    blur_sat = blur_sum * vec4 (1.0, 1.0, 1.0, 0.0);\n"\
+		"    blur_sat = dot (blur_sat, vec4 (" <<
+		RED_SATURATION_WEIGHT << ", " << GREEN_SATURATION_WEIGHT << ", " <<
+		BLUE_SATURATION_WEIGHT << ", 0.0f);\n"\
+		"    blur_sum.xyz = mix (" << saturation / 100.f << ",  blur_sat);\n";
+    }
+
+    data << "    blur_dst = (blur_mask * -blur_output.a) + blur_mask;\n"\
+	    "    blur_output.rgb = blur_sum.rgb * blur_dst.a + blur_output.rgb;\n"\
+	    "    blur_output.a += blur_dst.a;\n"\
+	    "    gl_FragColor = blur_output;\n"\
+	    "}";
+
+    function.shader  = data.str ();
+    function.target  = texture->target ();
+    function.numITC  = numITC;
+    function.startTC = startTC;
+    function.saturation = saturation;
+
+    dstBlurFunctions.push_back (function);
+
+    return dstBlurFunctions.back ().shader;
+}
+
+namespace
+{
+bool
+project (float objx, float objy, float objz,
+	 const float modelview[16], const float projection[16],
+	 const GLint viewport[4],
+	 float *winx, float *winy, float *winz)
+{
+    unsigned int i;
+    float in[4];
+    float out[4];
+
+    in[0] = objx;
+    in[1] = objy;
+    in[2] = objz;
+    in[3] = 1.0;
+
+    for (i = 0; i < 4; i++) {
+	out[i] =
+	    in[0] * modelview[i] +
+	    in[1] * modelview[4  + i] +
+	    in[2] * modelview[8  + i] +
+	    in[3] * modelview[12 + i];
+    }
+
+    for (i = 0; i < 4; i++) {
+	in[i] =
+	    out[0] * projection[i] +
+	    out[1] * projection[4  + i] +
+	    out[2] * projection[8  + i] +
+	    out[3] * projection[12 + i];
+    }
+
+    if (in[3] == 0.0)
+	return false;
+
+    in[0] /= in[3];
+    in[1] /= in[3];
+    in[2] /= in[3];
+    /* Map x, y and z to range 0-1 */
+    in[0] = in[0] * 0.5 + 0.5;
+    in[1] = in[1] * 0.5 + 0.5;
+    in[2] = in[2] * 0.5 + 0.5;
+
+    /* Map x,y to viewport */
+    in[0] = in[0] * viewport[2] + viewport[0];
+    in[1] = in[1] * viewport[3] + viewport[1];
+
+    *winx = in[0];
+    *winy = in[1];
+    *winz = in[2];
+    return true;
+}
 }
 
 bool
@@ -874,11 +958,11 @@ BlurScreen::projectVertices (CompOutput     *output,
 			     float          *scr,
 			     int            n)
 {
-    GLdouble dProjection[16];
-    GLdouble dModel[16];
-    GLint    viewport[4];
-    double   x, y, z;
-    int	     i;
+    GLfloat dProjection[16];
+    GLfloat dModel[16];
+    GLint   viewport[4];
+    float   x, y, z;
+    int	    i;
 
     viewport[0] = output->x1 ();
     viewport[1] = screen->height () - output->y2 ();
@@ -888,14 +972,14 @@ BlurScreen::projectVertices (CompOutput     *output,
     for (i = 0; i < 16; i++)
     {
 	dModel[i]      = transform.getMatrix ()[i];
-	dProjection[i] = gScreen->projectionMatrix ()[i];
+	dProjection[i] = gScreen->projectionMatrix ()->getMatrix ()[i];
     }
 
     while (n--)
     {
-	if (!gluProject (object[0], object[1], object[2],
-			 dModel, dProjection, viewport,
-			 &x, &y, &z))
+	if (!project (object[0], object[1], object[2],
+		      dModel, dProjection, viewport,
+		      &x, &y, &z))
 	    return false;
 
 	scr[0] = x;
@@ -909,57 +993,56 @@ BlurScreen::projectVertices (CompOutput     *output,
 }
 
 bool
-BlurScreen::loadFragmentProgram (GLuint	*program,
-				 const char *string)
+BlurScreen::loadFragmentProgram (boost::shared_ptr <GLProgram> &program,
+				 const char                    *vertex,
+				 const char                    *fragment)
 {
-    GLint errorPos;
+    if (!program)
+	program.reset (new GLProgram (CompString (vertex),
+				      CompString (fragment)));
 
-    /* clear errors */
-    glGetError ();
-
-    if (!*program)
-	(*GL::genPrograms) (1, program);
-
-    (*GL::bindProgram) (GL_FRAGMENT_PROGRAM_ARB, *program);
-    (*GL::programString) (GL_FRAGMENT_PROGRAM_ARB,
-			  GL_PROGRAM_FORMAT_ASCII_ARB,
-			  strlen (string), string);
-
-    glGetIntegerv (GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
-    if (glGetError () != GL_NO_ERROR || errorPos != -1)
+    if (program && program->valid ())
+	return true;
+    else
     {
+	program.reset ();
 	compLogMessage ("blur", CompLogLevelError,
-			"Failed to load blur program %s", string);
-
-	(*GL::deletePrograms) (1, program);
-	*program = 0;
-
+			"Failed to load blur program %s", fragment);
 	return false;
     }
-
-    return true;
 }
 
 bool
 BlurScreen::loadFilterProgram (int numITC)
 {
-    char  buffer[4096];
-    char  *targetString;
-    char  *str = buffer;
+    std::stringstream svtx;
+
+    /* A simple pass-thru vertex shader */
+    svtx << "#ifdef GL_ES\n"\
+	    "precision mediump float;\n"\
+	    "#endif\n"\
+	    "uniform mat4 modelview;\n"\
+	    "uniform mat4 projection;\n"\
+	    "attribute vec4 position;\n"\
+	    "attribute vec2 texCoord0;\n"\
+	    "varying vec2 vTexCoord0;\n"\
+	    "\n"\
+	    "void main ()\n"\
+	    "{\n"\
+	    "    vTexCoord0 = texCoord0;\n"\
+	    "    gl_Position = projection * modelview * position;\n"\
+	    "}";
+
+    std::stringstream str;
     int   i, j;
     int   numIndirect;
     int   numIndirectOp;
     int   base, end, ITCbase;
 
-    if (target == GL_TEXTURE_2D)
-	targetString = (char *) "2D";
-    else
-	targetString = (char *) "RECT";
+    SamplerInfo info (getSamplerInfoForSize (*screen));
 
-    str += sprintf (str,
-		    "!!ARBfp1.0"
-		    "ATTRIB texcoord = fragment.texcoord[0];"
-		    "TEMP sum;");
+    str << "varying vec2 vTexCoord0;\n"\
+	   "uniform sampler2D texture0;\n";
 
     if (maxTemp - 1 > (numTexop + (numTexop - numITC)) * 2)
     {
@@ -977,19 +1060,19 @@ BlurScreen::loadFilterProgram (int numITC)
        multiple indirection steps */
     j = (numIndirect > 1) ? 0 : numITC;
 
+    str << "\n"\
+	   "void main ()\n"\
+	   "{\n";
+
     for (i = 0; i < numIndirectOp; i++)
-	str += sprintf (str,"TEMP pix_%d, pix_%d;", i * 2, (i * 2) + 1);
+	str << "    vec4 blur_pix_" << i * 2 << ", blur_pix_" << (i * 2) + 1 << ";\n";
 
     for (i = j; i < numIndirectOp; i++)
-	str += sprintf (str,"TEMP coord_%d, coord_%d;", i * 2, (i * 2) + 1);
+	str << "    vec2 blur_coord_" << i * 2 << ", blur_coord_" << (i * 2) + 1 << ";\n";
 
-    str += sprintf (str,
-		    "TEX sum, texcoord, texture[0], %s;",
-		    targetString);
-
-    str += sprintf (str,
-		    "MUL sum, sum, %f;",
-		    amp[numTexop]);
+    str << "    vec4 blur_sum;\n";
+    str << "    blur_sum = " << info.func << " (texture0, vTexCoord0);\n"\
+	   "    blur_sum = blur_sum * " << amp[numTexop] << ";\n";
 
     for (j = 0; j < numIndirect; j++)
     {
@@ -999,37 +1082,30 @@ BlurScreen::loadFilterProgram (int numITC)
 	ITCbase = MAX (numITC - base, 0);
 
 	for (i = ITCbase; i < end; i++)
-	    str += sprintf (str,
-			    "ADD coord_%d, texcoord, {%g, 0.0, 0.0, 0.0};"
-			    "SUB coord_%d, texcoord, {%g, 0.0, 0.0, 0.0};",
-			    i * 2, pos[base + i] * tx,
-			    (i * 2) + 1, pos[base + i] * tx);
-
+	    str << "    blur_coord_" << i * 2 << " = vTexCoord0 + vec2 (" << pos[base + i] * tx << ", 0.0);\n"\
+		   "    blur_coord_" << (i * 2) + 1 << " = vTexCoord0 - vec2 (" << pos[base + i] * tx << ", 0.0);\n";
+#if INDEPENDENT_TEX_SUPPORTED
 	for (i = 0; i < ITCbase; i++)
-	    str += sprintf (str,
+	    str << sprintf (str,
 		"TEX pix_%d, fragment.texcoord[%d], texture[0], %s;"
 		"TEX pix_%d, fragment.texcoord[%d], texture[0], %s;",
 		i * 2, ((i + base) * 2) + 1, targetString,
 		(i * 2) + 1, ((i + base) * 2) + 2, targetString);
-
+#endif
 	for (i = ITCbase; i < end; i++)
-	    str += sprintf (str,
-			    "TEX pix_%d, coord_%d, texture[0], %s;"
-			    "TEX pix_%d, coord_%d, texture[0], %s;",
-			    i * 2, i * 2, targetString,
-			    (i * 2) + 1, (i * 2) + 1, targetString);
+	    str << "    blur_pix_" << (i * 2) << " = " << info.func << " (texture0, blur_coord_" << i * 2 << ");\n"\
+		   "    blur_pix_" << (i * 2) + 1 << " = " << info.func << " (texture0, blur_coord_" << (i * 2) + 1 << ");\n";
 
 	for (i = 0; i < end * 2; i++)
-	    str += sprintf (str,
-			    "MAD sum, pix_%d, %f, sum;",
-			    i, amp[base + (i / 2)]);
+	    str << "    blur_sum += blur_pix_" << i << " * " << amp[base + (i / 2)] << ";\n";
     }
 
-    str += sprintf (str,
-		    "MOV result.color, sum;"
-		    "END");
+    str << "    gl_FragColor = blur_sum;\n"\
+	   "}";
 
-    return loadFragmentProgram (&program, buffer);
+    return loadFragmentProgram (program,
+				svtx.str ().c_str (),
+				str.str ().c_str ());
 }
 
 bool
@@ -1038,51 +1114,7 @@ BlurScreen::fboPrologue ()
     if (!fbo)
 	return false;
 
-    (*GL::bindFramebuffer) (GL_FRAMEBUFFER_EXT, fbo);
-
-    /* bind texture and check status the first time */
-    if (!fboStatus)
-    {
-	(*GL::framebufferTexture2D) (GL_FRAMEBUFFER_EXT,
-				     GL_COLOR_ATTACHMENT0_EXT,
-				     target, texture[1],
-				     0);
-
-	int currStatus = (*GL::checkFramebufferStatus) (GL_FRAMEBUFFER_EXT);
-	if (currStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-	{
-	    compLogMessage ("blur", CompLogLevelError,
-			    "Framebuffer incomplete");
-
-	    (*GL::bindFramebuffer) (GL_FRAMEBUFFER_EXT, 0);
-	    (*GL::deleteFramebuffers) (1, &fbo);
-
-	    fbo = 0;
-
-	    return false;
-	}
-	else
-	    fboStatus = true;
-    }
-
-    glPushAttrib (GL_VIEWPORT_BIT | GL_ENABLE_BIT);
-
-    glDrawBuffer (GL_COLOR_ATTACHMENT0_EXT);
-    glReadBuffer (GL_COLOR_ATTACHMENT0_EXT);
-
-    glDisable (GL_CLIP_PLANE0);
-    glDisable (GL_CLIP_PLANE1);
-    glDisable (GL_CLIP_PLANE2);
-    glDisable (GL_CLIP_PLANE3);
-
-    glViewport (0, 0, width, height);
-    glMatrixMode (GL_PROJECTION);
-    glPushMatrix ();
-    glLoadIdentity ();
-    glOrtho (0.0, width, 0.0, height, -1.0, 1.0);
-    glMatrixMode (GL_MODELVIEW);
-    glPushMatrix ();
-    glLoadIdentity ();
+    oldDrawFramebuffer = fbo->bind ();
 
     return true;
 }
@@ -1090,37 +1122,22 @@ BlurScreen::fboPrologue ()
 void
 BlurScreen::fboEpilogue ()
 {
-    (*GL::bindFramebuffer) (GL_FRAMEBUFFER_EXT, 0);
+    oldDrawFramebuffer->bind ();
 
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity ();
-    glDepthRange (0, 1);
-    glViewport (-1, -1, 2, 2);
-    glRasterPos2f (0, 0);
+    fbo->tex ()->enable (GLTexture::Good);
+    //GL::generateMipmap (fbo->tex ()->target ());
 
-    gScreen->resetRasterPos ();
-
-    glMatrixMode (GL_PROJECTION);
-    glPopMatrix ();
-    glMatrixMode (GL_MODELVIEW);
-    glPopMatrix ();
-
-    glDrawBuffer (GL_BACK);
-    glReadBuffer (GL_BACK);
-
-    glPopAttrib ();
+    fbo->tex ()->disable ();
 }
 
 bool
 BlurScreen::fboUpdate (BoxPtr pBox,
 		       int    nBox)
 {
-    int  i, y, iTC = 0;
+    float  iTC = 0;
     bool wasCulled = glIsEnabled (GL_CULL_FACE);
 
-    if (GL::maxTextureUnits && optionGetIndependentTex ())
+    if (GL::maxTextureUnits && optionGetIndependentTex () && false)
 	iTC = MIN ((GL::maxTextureUnits - 1) / 2, numTexop);
 
     if (!program)
@@ -1131,82 +1148,50 @@ BlurScreen::fboUpdate (BoxPtr pBox,
 	return false;
 
     glDisable (GL_CULL_FACE);
+    GL::activeTexture (GL_TEXTURE0);
+    texture[0]->enable (GLTexture::Good);
 
-    glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-
-    glBindTexture (target, texture[0]);
-
-    glEnable (GL_FRAGMENT_PROGRAM_ARB);
-    (*GL::bindProgram) (GL_FRAGMENT_PROGRAM_ARB, program);
-
-    glBegin (GL_QUADS);
+    GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
 
     while (nBox--)
     {
-	y = screen->height () - pBox->y2;
+	float x1 = pBox->x1;
+	float x2 = pBox->x2;
+	float y1 = screen->height () - pBox->y2;
+	float y2 = screen->height () - pBox->y1;
 
-	for (i = 0; i < iTC; i++)
+	GLfloat texCoords[] =
 	{
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2),
-				    tx * (pBox->x1 + pos[i]),
-				    ty * y);
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2) + 1,
-				    tx * (pBox->x1 - pos[i]),
-				    ty * y);
-	}
+	    tx * x1, ty * y1,
+	    tx * x1, ty * y2,
+	    tx * x2, ty * y1,
+	    tx * x2, ty * y2
+	};
 
-	glTexCoord2f (tx * pBox->x1, ty * y);
-	glVertex2i   (pBox->x1, y);
-
-	for (i = 0; i < iTC; i++)
+	GLfloat vertices[] =
 	{
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2),
-				    tx * (pBox->x2 + pos[i]),
-				    ty * y);
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2) + 1,
-				    tx * (pBox->x2 - pos[i]),
-				    ty * y);
-	}
+	    x1, y1, 0,
+	    x1, y2, 0,
+	    x2, y1, 0,
+	    x2, y2, 0
+	};
 
-	glTexCoord2f (tx * pBox->x2, ty * y);
-	glVertex2i   (pBox->x2, y);
+	GLMatrix mv;
+	mv.toScreenSpace (output, -DEFAULT_Z_CAMERA);
 
-	y = screen->height () - pBox->y1;
+	streamingBuffer->begin (GL_TRIANGLE_STRIP);
+	streamingBuffer->setProgram (program.get ());
+	streamingBuffer->addTexCoords (0, 4, texCoords);
+	streamingBuffer->addVertices (4, vertices);
 
-	for (i = 0; i < iTC; i++)
-	{
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2),
-				    tx * (pBox->x2 + pos[i]),
-				    ty * y);
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2) + 1,
-				    tx * (pBox->x2 - pos[i]),
-				    ty * y);
-	}
+	if (streamingBuffer->end ())
+	    streamingBuffer->render (mv);
 
-	glTexCoord2f (tx * pBox->x2, ty * y);
-	glVertex2i   (pBox->x2, y);
-
-	for (i = 0; i < iTC; i++)
-	{
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2),
-				    tx * (pBox->x1 + pos[i]),
-				    ty * y);
-	    (*GL::multiTexCoord2f) (GL_TEXTURE1_ARB + (i * 2) + 1,
-				    tx * (pBox->x1 - pos[i]),
-				    ty * y);
-	}
-
-	glTexCoord2f (tx * pBox->x1, ty * y);
-	glVertex2i   (pBox->x1, y);
+	/* Unset program */
+	streamingBuffer->setProgram (NULL);
 
 	pBox++;
     }
-
-    glEnd ();
-
-    glDisable (GL_FRAGMENT_PROGRAM_ARB);
-
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
     if (wasCulled)
 	glEnable (GL_CULL_FACE);
@@ -1231,92 +1216,70 @@ BlurWindow::projectRegion (CompOutput     *output,
     float      *scr;
 
     GLTexture::MatrixList ml;
-    GLWindow::Geometry    *gm;
 
-    gWindow->geometry ().reset ();
+    gWindow->vertexBuffer ()->begin ();
     gWindow->glAddGeometry (ml, bScreen->tmpRegion2, infiniteRegion);
 
-    if (!gWindow->geometry ().vCount)
+    if (!gWindow->vertexBuffer ()->end ())
 	return;
 
-    gm = &gWindow->geometry ();
+    GLVertexBuffer        *vb = gWindow->vertexBuffer ();
 
-    nVertices    = (gm->indexCount) ? gm->indexCount: gm->vCount;
+    nVertices    = vb->countVertices ();
     nQuadCombine = 1;
 
-    stride = gm->vertexStride;
-    vert = gm->vertices + (stride - 3);
+    stride = vb->getVertexStride ();
+    vert = vb->getVertices () + (stride - 3);
 
-    /* we need to find the best value here */
-    if (nVertices <= MAX_VERTEX_PROJECT_COUNT)
+    /* construct quads from bounding vertices */
+    minX = screen->width ();
+    maxX = 0;
+    minY = screen->height ();
+    maxY = 0;
+    minZ = 1000000;
+    maxZ = -1000000;
+
+    for (i = 0; i < vb->countVertices (); i++)
     {
-	for (i = 0; i < nVertices; i++)
-	{
-	    if (gm->indexCount)
-	    {
-		v = vert + (stride * gm->indices[i]);
-	    }
-	    else
-	    {
-		v = vert + (stride * i);
-	    }
+	v = vert + (stride * i);
 
-	    vertices[i * 3] = v[0];
-	    vertices[(i * 3) + 1] = v[1];
-	    vertices[(i * 3) + 2] = v[2];
-	}
+	if (v[0] < minX)
+	    minX = v[0];
+
+	if (v[0] > maxX)
+	    maxX = v[0];
+
+	if (v[1] < minY)
+	    minY = v[1];
+
+	if (v[1] > maxY)
+	    maxY = v[1];
+
+	if (v[2] < minZ)
+	    minZ = v[2];
+
+	if (v[2] > maxZ)
+	    maxZ = v[2];
     }
-    else
+
+    vertices[0] = vertices[9]  = minX;
+    vertices[1] = vertices[4]  = minY;
+    vertices[3] = vertices[6]  = maxX;
+    vertices[7] = vertices[10] = maxY;
+    vertices[2] = vertices[5]  = maxZ;
+    vertices[8] = vertices[11] = maxZ;
+
+    nVertices = 4;
+
+    if (maxZ != minZ)
     {
-	minX = screen->width ();
-	maxX = 0;
-	minY = screen->height ();
-	maxY = 0;
-	minZ = 1000000;
-	maxZ = -1000000;
-
-	for (i = 0; i < gm->vCount; i++)
-	{
-	    v = vert + (stride * i);
-
-	    if (v[0] < minX)
-		minX = v[0];
-
-	    if (v[0] > maxX)
-		maxX = v[0];
-
-	    if (v[1] < minY)
-		minY = v[1];
-
-	    if (v[1] > maxY)
-		maxY = v[1];
-
-	    if (v[2] < minZ)
-		minZ = v[2];
-
-	    if (v[2] > maxZ)
-		maxZ = v[2];
-	}
-
-	vertices[0] = vertices[9]  = minX;
-	vertices[1] = vertices[4]  = minY;
-	vertices[3] = vertices[6]  = maxX;
-	vertices[7] = vertices[10] = maxY;
-	vertices[2] = vertices[5]  = maxZ;
-	vertices[8] = vertices[11] = maxZ;
-
-	nVertices = 4;
-
-	if (maxZ != minZ)
-	{
-	    vertices[12] = vertices[21] = minX;
-	    vertices[13] = vertices[16] = minY;
-	    vertices[15] = vertices[18] = maxX;
-	    vertices[19] = vertices[22] = maxY;
-	    vertices[14] = vertices[17] = minZ;
-	    vertices[20] = vertices[23] = minZ;
-	    nQuadCombine = 2;
-	}
+	vertices[12] = vertices[21] = minX;
+	vertices[13] = vertices[16] = minY;
+	vertices[15] = vertices[18] = maxX;
+	vertices[19] = vertices[22] = maxY;
+	vertices[14] = vertices[17] = minZ;
+	vertices[20] = vertices[23] = minZ;
+	nQuadCombine = 2;
     }
 
     if (!bScreen->projectVertices (output, transform, vertices, scrv,
@@ -1349,10 +1312,10 @@ BlurWindow::projectRegion (CompOutput     *output,
 
 	int x1, y1, x2, y2;
 
-        x1 = minX - bScreen->filterRadius;
-        y1 = screen->height () - maxY - bScreen->filterRadius;
-        x2 = maxX + bScreen->filterRadius + 0.5f;
-        y2 = screen->height () - minY + bScreen->filterRadius + 0.5f;
+	x1 = minX - bScreen->filterRadius - 0.5;
+	y1 = screen->height () - maxY - bScreen->filterRadius - 0.5;
+	x2 = maxX + bScreen->filterRadius + 0.5;
+	y2 = screen->height () - minY + bScreen->filterRadius + 0.5;
 
 
         bScreen->tmpRegion3 += CompRect (x1, y1, x2 - x1, y2 - y1);
@@ -1360,21 +1323,15 @@ BlurWindow::projectRegion (CompOutput     *output,
     }
 }
 
-bool
-BlurWindow::updateDstTexture (const GLMatrix &transform,
-			      CompRect       *pExtents,
-			      int            clientThreshold)
+void
+BlurWindow::determineBlurRegion (int            filter,
+				 const GLMatrix &transform,
+				 int            clientThreshold)
 {
-    int        y;
-    int        filter;
-
-    filter = bScreen->optionGetFilter ();
-
     bScreen->tmpRegion3 = CompRegion ();
 
     if (filter == BlurOptions::FilterGaussian)
     {
-
 	if (state[BLUR_STATE_DECOR].threshold)
 	{
 	    int  xx, yy, ww, hh;
@@ -1394,7 +1351,7 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 	    // bottom
 	    xx = window->x () - window->output ().left;
 	    yy = window->y () + window->height ();
-            ww = window->width () + window->output ().left +
+	    ww = window->width () + window->output ().left +
 		 window->output ().right;
 	    hh = window->output ().bottom;
 
@@ -1410,7 +1367,7 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 	    ww = window->output ().left;
 	    hh = window->height ();
 
-            bScreen->tmpRegion2 = bScreen->tmpRegion.intersected (
+	    bScreen->tmpRegion2 = bScreen->tmpRegion.intersected (
 		CompRect (xx, yy, ww, hh));
 
 	    if (!bScreen->tmpRegion2.isEmpty ())
@@ -1422,7 +1379,7 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 	    ww = window->output ().right;
 	    hh = window->height ();
 
-            bScreen->tmpRegion2 = bScreen->tmpRegion.intersected (
+	    bScreen->tmpRegion2 = bScreen->tmpRegion.intersected (
 		CompRect (xx, yy, ww, hh));
 
 	    if (!bScreen->tmpRegion2.isEmpty ())
@@ -1451,141 +1408,141 @@ BlurWindow::updateDstTexture (const GLMatrix &transform,
 	    projectRegion (bScreen->output, transform);
     }
 
-    bScreen->tmpRegion = bScreen->region.intersected (bScreen->tmpRegion3);
+    projectedBlurRegion = bScreen->tmpRegion3;
+}
+
+bool
+BlurWindow::updateDstTexture (const GLMatrix &transform,
+			      CompRect       *pExtents,
+			      unsigned int   mask)
+{
+    bool       ret = false;
+    int        filter = bScreen->optionGetFilter ();
+
+    /* Paint region n projected region */
+    bScreen->tmpRegion = bScreen->region.intersected (projectedBlurRegion);
+
+    if (!bScreen->blurOcclusion &&
+	!(mask & PAINT_WINDOW_TRANSFORMED_MASK))
+	bScreen->tmpRegion -= clip;
 
     if (bScreen->tmpRegion.isEmpty ())
 	return false;
 
-    *pExtents = bScreen->tmpRegion.boundingRect ();
+    CompRect br (bScreen->tmpRegion.boundingRect ());
 
-    if (!bScreen->texture[0] || bScreen->width != screen->width () ||
-	bScreen->height != screen->height ())
+    if (bScreen->texture.empty () ||
+	CompSize (bScreen->texture[0]->width (),
+		  bScreen->texture[0]->height ()) !=
+	    static_cast <const CompSize &> (*screen))
     {
-	int i, textures = 1;
+	bScreen->texture = GLTexture::imageDataToTexture (NULL,
+							  *screen,
+							  GL_RGB,
+#if IMAGE_BYTE_ORDER == MSBFirst
+							  GL_UNSIGNED_INT_8_8_8_8_REV);
+#else
+							  GL_UNSIGNED_BYTE);
+#endif
 
-	bScreen->width  = screen->width ();
-	bScreen->height = screen->height ();
-
-	if (GL::textureNonPowerOfTwo ||
-	    (POWER_OF_TWO (bScreen->width) && POWER_OF_TWO (bScreen->height)))
+	if (bScreen->texture[0]->target () == GL_TEXTURE_2D)
 	{
-	    bScreen->target = GL_TEXTURE_2D;
-	    bScreen->tx = 1.0f / bScreen->width;
-	    bScreen->ty = 1.0f / bScreen->height;
+	    bScreen->tx = 1.0f / bScreen->texture[0]->width ();
+	    bScreen->ty = 1.0f / bScreen->texture[0]->height ();
 	}
 	else
 	{
-	    bScreen->target = GL_TEXTURE_RECTANGLE_NV;
 	    bScreen->tx = 1;
 	    bScreen->ty = 1;
 	}
 
 	if (filter == BlurOptions::FilterGaussian)
 	{
-	    if (GL::fbo && !bScreen->fbo)
-		(*GL::genFramebuffers) (1, &bScreen->fbo);
+	    bScreen->fbo->allocate (*screen,
+				    NULL,
+				    GL_BGRA);
 
-	    if (!bScreen->fbo)
+	    /* We have to bind it in order to get a status */
+	    GLFramebufferObject *old = bScreen->fbo->bind();
+	    bool status = bScreen->fbo->checkStatus ();
+	    old->bind();
+
+	    if (!status)
 		compLogMessage ("blur", CompLogLevelError,
 				"Failed to create framebuffer object");
 
-	    textures = 2;
-	}
-
-	bScreen->fboStatus = false;
-
-	for (i = 0; i < textures; i++)
-	{
-	    if (!bScreen->texture[i])
-		glGenTextures (1, &bScreen->texture[i]);
-
-	    glBindTexture (bScreen->target, bScreen->texture[i]);
-
-	    glTexImage2D (bScreen->target, 0, GL_RGB,
-			  bScreen->width,
-			  bScreen->height,
-			  0, GL_BGRA,
-
-#if IMAGE_BYTE_ORDER == MSBFirst
-			  GL_UNSIGNED_INT_8_8_8_8_REV,
-#else
-			  GL_UNSIGNED_BYTE,
-#endif
-
-			  NULL);
-
-	    glTexParameteri (bScreen->target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri (bScreen->target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	    if (filter == BlurOptions::FilterMipmap)
+	    else
 	    {
-		if (!GL::fbo)
-		{
-		    compLogMessage ("blur", CompLogLevelWarn,
-			     "GL_EXT_framebuffer_object extension "
-			     "is required for mipmap filter");
-		}
-		else if (bScreen->target != GL_TEXTURE_2D)
-		{
-		    compLogMessage ("blur", CompLogLevelWarn,
-			     "GL_ARB_texture_non_power_of_two "
-			     "extension is required for mipmap filter");
-		}
-		else
-		{
-		    glTexParameteri (bScreen->target, GL_TEXTURE_MIN_FILTER,
-				     GL_LINEAR_MIPMAP_LINEAR);
-		    glTexParameteri (bScreen->target, GL_TEXTURE_MAG_FILTER,
-				     GL_LINEAR_MIPMAP_LINEAR);
-		}
+		bScreen->gScreen->setTextureFilter (GL_LINEAR);
+		bScreen->fbo->tex ()->enable (GLTexture::Good);
+
+		const CompRect &r (*bScreen->fbo->tex ());
+
+		glCopyTexSubImage2D (bScreen->fbo->tex ()->target (),
+				     0, 0, 0, 0, 0,
+				     r.width (),
+				     r.height ());
+
+		//GL::generateMipmap (bScreen->fbo->tex ()->target ());
+
+		bScreen->fbo->tex ()->disable ();
 	    }
-
-	    glTexParameteri (bScreen->target, GL_TEXTURE_WRAP_S,
-			     GL_CLAMP_TO_EDGE);
-	    glTexParameteri (bScreen->target, GL_TEXTURE_WRAP_T,
-			     GL_CLAMP_TO_EDGE);
-
-	    glCopyTexSubImage2D (bScreen->target, 0, 0, 0, 0, 0,
-				 bScreen->width, bScreen->height);
 	}
+
+	/* Set update region to entire screen */
+	br.setGeometry (0, 0,
+			screen->width (),
+			screen->height ());
     }
-    else
+
+    *pExtents = br;
+
+    CompRegion *updateRegion = NULL;
+    updateRegion = &bScreen->tmpRegion;
+
+    foreach (GLTexture *tex, bScreen->texture)
     {
-	glBindTexture (bScreen->target, bScreen->texture[0]);
+	/* We need to set the active texture filter to GL_LINEAR_MIPMAP_LINEAR */
+	if (filter == BlurOptions::FilterMipmap)
+	    bScreen->gScreen->setTextureFilter (GL_LINEAR_MIPMAP_LINEAR);
 
-	CompRect br = bScreen->tmpRegion.boundingRect ();
+	tex->enable (GLTexture::Good);
 
-	y = screen->height () - br.y2 ();
+	CompRect::vector rects (updateRegion->rects ());
 
-	glCopyTexSubImage2D (bScreen->target, 0,
-			     br.x1 (), y,
-			     br.x1 (), y,
-			     br.width (),
-			     br.height ());
+	foreach (const CompRect &r, rects)
+	{
+	    int y = screen->height () - r.y2 ();
+
+	    glCopyTexSubImage2D (bScreen->texture[0]->target (), 0,
+				 r.x1 (), y,
+				 r.x1 (), y,
+				 r.width (),
+				 r.height ());
+	}
+
+	/* Force mipmap regeneration, because GLTexture assumes static
+	 * textures and won't do it for us */
+	//if (filter == BlurOptions::FilterMipmap)
+	    //GL::generateMipmap (tex->target ());
+
+	if (filter == BlurOptions::FilterGaussian)
+	    ret |=  bScreen->fboUpdate (updateRegion->handle ()->rects,
+					updateRegion->numRects ());
+	else
+	    ret = true;
+
+	tex->disable ();
     }
 
-    switch (filter) {
-	case BlurOptions::FilterGaussian:
-	    return bScreen->fboUpdate (bScreen->tmpRegion.handle ()->rects,
-				       bScreen->tmpRegion.numRects ());
-	case BlurOptions::FilterMipmap:
-	    if (GL::generateMipmap)
-		(*GL::generateMipmap) (bScreen->target);
-	    break;
-	case BlurOptions::Filter4xbilinear:
-	    break;
-    }
-
-    glBindTexture (bScreen->target, 0);
-
-    return true;
+    return ret;
 }
 
 bool
-BlurWindow::glDraw (const GLMatrix     &transform,
-		    GLFragment::Attrib &attrib,
-		    const CompRegion   &region,
-		    unsigned int       mask)
+BlurWindow::glDraw (const GLMatrix      &transform,
+		    const GLWindowPaintAttrib &attrib,
+		    const CompRegion    &region,
+		    unsigned int        mask)
 {
     bool       status;
 
@@ -1603,22 +1560,11 @@ BlurWindow::glDraw (const GLMatrix     &transform,
 	{
 	    bool       clipped = false;
 	    CompRect   box (0, 0, 0, 0);
-	    CompRegion reg;
 
-	    bScreen->mvp = GLMatrix (bScreen->gScreen->projectionMatrix ());
+	    bScreen->mvp = *(bScreen->gScreen->projectionMatrix ());
 	    bScreen->mvp *= transform;
 
-	    if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
-		reg = infiniteRegion;
-	    else
-		reg = region;
-
-	    bScreen->tmpRegion = this->region.intersected (reg);
-	    if (!bScreen->blurOcclusion &&
-		!(mask & PAINT_WINDOW_TRANSFORMED_MASK))
-		bScreen->tmpRegion -= clip;
-
-	    if (updateDstTexture (transform, &box, clientThreshold))
+	    if (updateDstTexture (transform, &box, mask))
 	    {
 		if (clientThreshold)
 		{
@@ -1672,11 +1618,17 @@ BlurWindow::glDraw (const GLMatrix     &transform,
 	    if (clipped)
 	    {
 		GLTexture::MatrixList ml;
+		const CompRegion      *reg = NULL;
 
-		gWindow->geometry ().reset ();
+		if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
+		    reg = &infiniteRegion;
+		else
+		    reg = &region;
 
-		gWindow->glAddGeometry (ml, bScreen->tmpRegion, reg);
-		if (gWindow->geometry ().vCount)
+		gWindow->vertexBuffer ()->begin ();
+		gWindow->glAddGeometry (ml, bScreen->tmpRegion, *reg);
+		gWindow->vertexBuffer ()->color4f (1.0, 1.0, 1.0, 1.0);
+		if (gWindow->vertexBuffer ()->end ())
 		{
 		    CompRect clearBox = bScreen->stencilBox;
 
@@ -1684,28 +1636,44 @@ BlurWindow::glDraw (const GLMatrix     &transform,
 
 		    glEnable (GL_STENCIL_TEST);
 		    glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		    glStencilMask (1);
 
 		    if (clearBox.x2 () > clearBox.x1 () &&
 			clearBox.y2 () > clearBox.y1 ())
 		    {
-			glPushAttrib (GL_SCISSOR_BIT);
-			glEnable (GL_SCISSOR_TEST);
+			/* We might have a previous scissor region, so we need
+			 * to fetch it, however slow that might be .. */
+			GLint scissorBox[4];
+			GLboolean scissorEnabled;
+
+			scissorEnabled = glIsEnabled (GL_SCISSOR_TEST);
+			glGetIntegerv (GL_SCISSOR_BOX, scissorBox);
+
+			if (!scissorEnabled)
+			    glEnable (GL_SCISSOR_TEST);
+
 			glScissor (clearBox.x1 (),
 				   screen->height () - clearBox.y2 (),
 				   clearBox.width (),
 				   clearBox.height ());
+			glClearStencil (0);
 			glClear (GL_STENCIL_BUFFER_BIT);
-			glPopAttrib ();
+			
+			if (!scissorEnabled)
+			    glDisable (GL_SCISSOR_TEST);
+
+			glScissor (scissorBox[0], scissorBox[1],
+				   scissorBox[2], scissorBox[3]);
 		    }
 
-		    glStencilFunc (GL_ALWAYS, 0x1, ~0);
+		    glStencilFunc (GL_ALWAYS, 1, 1);
 		    glStencilOp (GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		    glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-		    gWindow->glDrawGeometry ();
-		    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		    /* Render a white polygon where the window is */
+		    gWindow->vertexBuffer ()->render (transform);
 
 		    glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		    glStencilMask (0);
 		    glDisable (GL_STENCIL_TEST);
 		}
 	    }
@@ -1720,10 +1688,248 @@ BlurWindow::glDraw (const GLMatrix     &transform,
     return status;
 }
 
+namespace
+{
+void setupShadersAndUniformsForDstBlur (GLTexture  *texture,
+					GLWindow   *gWindow,
+					BlurScreen *bScreen,
+					int        &unit,
+					int        &iTC,
+					float      threshold)
+{
+    GLfloat	       dx, dy;
+
+    switch (bScreen->optionGetFilter ())
+    {
+	case BlurOptions::Filter4xbilinear:
+	{
+	    dx = bScreen->tx / 2.1f;
+	    dy = bScreen->ty / 2.1f;
+
+	    unit  = 1; // FIXME!!
+
+	    const CompString &function (
+		bScreen->getDstBlurFragmentFunction (
+		texture, unit, 0, 0));
+
+	    if (!function.empty ())
+	    {
+		(*GL::activeTexture) (GL_TEXTURE0 + unit);
+		bScreen->texture[0]->enable (GLTexture::Good);
+		gWindow->vertexBuffer ()->addTexCoords (unit, 0, NULL);
+		(*GL::activeTexture) (GL_TEXTURE0);
+
+		gWindow->addShaders ("blur",
+				     "",
+				     function);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_translation",
+							bScreen->tx, bScreen->ty,
+							0.0f, 0.0f);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_threshold",
+							threshold,
+							threshold,
+							threshold,
+							threshold);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_dxdy",
+							dx, dy, 0.0, 0.0);
+	    }
+	}
+	break;
+	case BlurOptions::FilterGaussian:
+	{
+#if INDEPENDENT_TEX_SUPPORTED
+	    if (bScreen->optionGetIndependentTex ())
+	    {
+		/* leave one free texture unit for fragment position */
+		iTC = MAX (0, GL::maxTextureUnits -
+			   (gWindow->geometry ().texUnits + 1));
+		if (iTC)
+		    iTC = MIN (iTC / 2, bScreen->numTexop);
+	    }
+#endif
+	    unit  = 1;
+
+	    const CompString &function (
+		bScreen->getDstBlurFragmentFunction (
+		    texture, unit, iTC,
+		    gWindow->vertexBuffer ()->countTextures ()));
+
+	    if (!function.empty ())
+	    {
+		gWindow->addShaders ("blur",
+				     "",
+				     function);
+
+		(*GL::activeTexture) (GL_TEXTURE0 + unit);
+		bScreen->texture[0]->enable (GLTexture::Good);
+		gWindow->vertexBuffer ()->addTexCoords (unit, 0, NULL);
+		(*GL::activeTexture) (GL_TEXTURE0 + unit + 1);
+		bScreen->fbo->tex ()->enable (GLTexture::Good);
+		gWindow->vertexBuffer ()->addTexCoords (unit + 1, 0, NULL);
+		(*GL::activeTexture) (GL_TEXTURE0);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_translation",
+							bScreen->tx, bScreen->ty,
+							0.0f, 0.0f);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_threshold",
+							threshold,
+							threshold,
+							threshold,
+							threshold);
+#if INDEPENDENT_TEX_SUPPORTED
+		if (iTC)
+		{
+		    GLMatrix tm, rm;
+		    float s_gen[4], t_gen[4], q_gen[4];
+
+		    for (unsigned int i = 0; i < 16; i++)
+			tm[i] = 0;
+		    tm[0] = (bScreen->output->width () / 2.0) *
+			    bScreen->tx;
+		    tm[5] = (bScreen->output->height () / 2.0) *
+			    bScreen->ty;
+		    tm[10] = 1;
+
+		    tm[12] = (bScreen->output->width () / 2.0 +
+			     bScreen->output->x1 ()) * bScreen->tx;
+		    tm[13] = (bScreen->output->height () / 2.0 +
+			     screen->height () -
+			     bScreen->output->y2 ()) * bScreen->ty;
+		    tm[14] = 1;
+		    tm[15] = 1;
+
+		    tm *= bScreen->mvp;
+
+		    for (int i = 0; i < iTC; i++)
+		    {
+			(*GL::activeTexture) (GL_TEXTURE0 +
+			    gWindow->geometry ().texUnits + (i * 2));
+
+			rm.reset ();
+			rm[13] = bScreen->ty * bScreen->pos[i];
+			rm *= tm;
+
+			s_gen[0] = rm[0];
+			s_gen[1] = rm[4];
+			s_gen[2] = rm[8];
+			s_gen[3] = rm[12];
+			t_gen[0] = rm[1];
+			t_gen[1] = rm[5];
+			t_gen[2] = rm[9];
+			t_gen[3] = rm[13];
+			q_gen[0] = rm[3];
+			q_gen[1] = rm[7];
+			q_gen[2] = rm[11];
+			q_gen[3] = rm[15];
+
+			glTexGenfv (GL_T, GL_OBJECT_PLANE, t_gen);
+			glTexGenfv (GL_S, GL_OBJECT_PLANE, s_gen);
+			glTexGenfv (GL_Q, GL_OBJECT_PLANE, q_gen);
+
+			glTexGeni (GL_S, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+			glTexGeni (GL_T, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+			glTexGeni (GL_Q, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+
+			glEnable (GL_TEXTURE_GEN_S);
+			glEnable (GL_TEXTURE_GEN_T);
+			glEnable (GL_TEXTURE_GEN_Q);
+
+			(*GL::activeTexture) (GL_TEXTURE0 +
+			    gWindow->geometry ().texUnits +
+			    1 + (i * 2));
+
+			rm.reset ();
+
+			rm[13] = -bScreen->ty * bScreen->pos[i];
+			rm *= tm;
+
+			s_gen[0] = rm[0];
+			s_gen[1] = rm[4];
+			s_gen[2] = rm[8];
+			s_gen[3] = rm[12];
+			t_gen[0] = rm[1];
+			t_gen[1] = rm[5];
+			t_gen[2] = rm[9];
+			t_gen[3] = rm[13];
+			q_gen[0] = rm[3];
+			q_gen[1] = rm[7];
+			q_gen[2] = rm[11];
+			q_gen[3] = rm[15];
+
+			glTexGenfv (GL_T, GL_OBJECT_PLANE, t_gen);
+			glTexGenfv (GL_S, GL_OBJECT_PLANE, s_gen);
+			glTexGenfv (GL_Q, GL_OBJECT_PLANE, q_gen);
+
+			glTexGeni (GL_S, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+			glTexGeni (GL_T, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+			glTexGeni (GL_Q, GL_TEXTURE_GEN_MODE,
+				   GL_OBJECT_LINEAR);
+
+			glEnable (GL_TEXTURE_GEN_S);
+			glEnable (GL_TEXTURE_GEN_T);
+			glEnable (GL_TEXTURE_GEN_Q);
+		    }
+
+		    (*GL::activeTexture) (GL_TEXTURE0);
+		}
+#endif
+	    }
+	}
+	break;
+	case BlurOptions::FilterMipmap:
+	{
+	    unit  = 1; // FIXME!!
+
+	    const CompString &function (
+		bScreen->getDstBlurFragmentFunction (texture,
+						     unit,
+						     0,
+						     0));
+
+	    if (!function.empty ())
+	    {
+		float lod =
+		    bScreen->optionGetMipmapLod ();
+
+		gWindow->addShaders ("blur",
+				     "",
+				     function);
+
+		(*GL::activeTexture) (GL_TEXTURE0 + unit);
+		bScreen->texture[0]->enable (GLTexture::Good);
+		gWindow->vertexBuffer ()->addTexCoords (unit, 0, NULL);
+		(*GL::activeTexture) (GL_TEXTURE0);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_translation",
+							bScreen->tx, bScreen->ty,
+							0.0f, lod);
+
+		gWindow->vertexBuffer ()->addUniform4f ("blur_threshold",
+							threshold,
+							threshold,
+							threshold,
+							threshold);
+	    }
+	}
+	break;
+    }
+}
+}
+
 void
-BlurWindow::glDrawTexture (GLTexture          *texture,
-			   GLFragment::Attrib &attrib,
-			   unsigned int       mask)
+BlurWindow::glDrawTexture (GLTexture                 *texture,
+			   const GLMatrix            &matrix,
+			   const GLWindowPaintAttrib &attrib,
+			   unsigned int              mask)
 {
     int state = BLUR_STATE_DECOR;
 
@@ -1733,295 +1939,108 @@ BlurWindow::glDrawTexture (GLTexture          *texture,
 
     if (blur || this->state[state].active)
     {
-	GLFragment::Attrib fa (attrib);
-	int	           param, function;
 	int	           unit = 0;
-	GLfloat	           dx, dy;
 	int                iTC = 0;
 
 	if (blur)
 	{
-	    param = fa.allocParameters (1);
+	    GLfloat	           dx, dy;
 
-	    function = bScreen->getSrcBlurFragmentFunction (texture, param);
-	    if (function)
+	    const CompString &function (
+		bScreen->getSrcBlurFragmentFunction (texture));
+
+	    if (!function.empty ())
 	    {
-		fa.addFunction (function);
+		gWindow->addShaders ("focusblur",
+				     "",
+				     function);
 
 		dx = ((texture->matrix ().xx / 2.1f) * blur) / 65535.0f;
 		dy = ((texture->matrix ().yy / 2.1f) * blur) / 65535.0f;
 
-		(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-					      param, dx, dy, dx, -dy);
+		gWindow->vertexBuffer ()->addUniform4f ("focusblur_input_offset",
+							dx, dy, dx, -dy);
 
 		/* bi-linear filtering is required */
 		mask |= PAINT_WINDOW_ON_TRANSFORMED_SCREEN_MASK;
 	    }
 	}
 
+	/* We are drawing the scraped texture, blur it */
 	if (this->state[state].active)
 	{
-	    GLFragment::Attrib dstFa (fa);
-	    float	       threshold = (float) this->state[state].threshold;
-
-	    switch (bScreen->optionGetFilter ()) {
-		case BlurOptions::Filter4xbilinear:
-		    dx = bScreen->tx / 2.1f;
-		    dy = bScreen->ty / 2.1f;
-
-		    param = dstFa.allocParameters (3);
-		    unit  = dstFa.allocTextureUnits (1);
-
-		    function = bScreen->getDstBlurFragmentFunction (
-			texture, param, unit, 0, 0);
-		    if (function)
-		    {
-			dstFa.addFunction (function);
-
-			(*GL::activeTexture) (GL_TEXTURE0_ARB + unit);
-			glBindTexture (bScreen->target, bScreen->texture[0]);
-			(*GL::activeTexture) (GL_TEXTURE0_ARB);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param,
-						      bScreen->tx, bScreen->ty,
-						      0.0f, 0.0f);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param + 1,
-						      threshold, threshold,
-						      threshold, threshold);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param + 2,
-						      dx, dy, 0.0f, 0.0f);
-		    }
-		    break;
-		case BlurOptions::FilterGaussian:
-		    if (bScreen->optionGetIndependentTex ())
-		    {
-			/* leave one free texture unit for fragment position */
-			iTC = MAX (0, GL::maxTextureUnits -
-				   (gWindow->geometry ().texUnits + 1));
-			if (iTC)
-			    iTC = MIN (iTC / 2, bScreen->numTexop);
-		    }
-
-		    param = dstFa.allocParameters (2);
-		    unit  = dstFa.allocTextureUnits (2);
-
-		    function = bScreen->getDstBlurFragmentFunction (
-			texture, param, unit, iTC,
-			gWindow->geometry ().texUnits);
-
-		    if (function)
-		    {
-			dstFa.addFunction (function);
-
-			(*GL::activeTexture) (GL_TEXTURE0_ARB + unit);
-			glBindTexture (bScreen->target, bScreen->texture[0]);
-			(*GL::activeTexture) (GL_TEXTURE0_ARB + unit + 1);
-			glBindTexture (bScreen->target, bScreen->texture[1]);
-			(*GL::activeTexture) (GL_TEXTURE0_ARB);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param, bScreen->tx,
-						      bScreen->ty, 0.0f, 0.0f);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param + 1,
-						      threshold, threshold,
-						      threshold, threshold);
-
-			if (iTC)
-			{
-			    GLMatrix tm, rm;
-			    float s_gen[4], t_gen[4], q_gen[4];
-
-			    for (unsigned int i = 0; i < 16; i++)
-				tm[i] = 0;
-			    tm[0] = (bScreen->output->width () / 2.0) *
-				    bScreen->tx;
-			    tm[5] = (bScreen->output->height () / 2.0) *
-				    bScreen->ty;
-			    tm[10] = 1;
-
-			    tm[12] = (bScreen->output->width () / 2.0 +
-				     bScreen->output->x1 ()) * bScreen->tx;
-			    tm[13] = (bScreen->output->height () / 2.0 +
-				     screen->height () -
-				     bScreen->output->y2 ()) * bScreen->ty;
-			    tm[14] = 1;
-			    tm[15] = 1;
-
-			    tm *= bScreen->mvp;
-
-			    for (int i = 0; i < iTC; i++)
-			    {
-				(*GL::activeTexture) (GL_TEXTURE0_ARB +
-				    gWindow->geometry ().texUnits + (i * 2));
-
-				rm.reset ();
-				rm[13] = bScreen->ty * bScreen->pos[i];
-				rm *= tm;
-
-				s_gen[0] = rm[0];
-				s_gen[1] = rm[4];
-				s_gen[2] = rm[8];
-				s_gen[3] = rm[12];
-				t_gen[0] = rm[1];
-				t_gen[1] = rm[5];
-				t_gen[2] = rm[9];
-				t_gen[3] = rm[13];
-				q_gen[0] = rm[3];
-				q_gen[1] = rm[7];
-				q_gen[2] = rm[11];
-				q_gen[3] = rm[15];
-
-				glTexGenfv (GL_T, GL_OBJECT_PLANE, t_gen);
-				glTexGenfv (GL_S, GL_OBJECT_PLANE, s_gen);
-				glTexGenfv (GL_Q, GL_OBJECT_PLANE, q_gen);
-
-				glTexGeni (GL_S, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-				glTexGeni (GL_T, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-				glTexGeni (GL_Q, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-
-				glEnable (GL_TEXTURE_GEN_S);
-				glEnable (GL_TEXTURE_GEN_T);
-				glEnable (GL_TEXTURE_GEN_Q);
-
-				(*GL::activeTexture) (GL_TEXTURE0_ARB +
-				    gWindow->geometry ().texUnits +
-				    1 + (i * 2));
-
-				rm.reset ();
-
-				rm[13] = -bScreen->ty * bScreen->pos[i];
-				rm *= tm;
-
-				s_gen[0] = rm[0];
-				s_gen[1] = rm[4];
-				s_gen[2] = rm[8];
-				s_gen[3] = rm[12];
-				t_gen[0] = rm[1];
-				t_gen[1] = rm[5];
-				t_gen[2] = rm[9];
-				t_gen[3] = rm[13];
-				q_gen[0] = rm[3];
-				q_gen[1] = rm[7];
-				q_gen[2] = rm[11];
-				q_gen[3] = rm[15];
-
-				glTexGenfv (GL_T, GL_OBJECT_PLANE, t_gen);
-				glTexGenfv (GL_S, GL_OBJECT_PLANE, s_gen);
-				glTexGenfv (GL_Q, GL_OBJECT_PLANE, q_gen);
-
-				glTexGeni (GL_S, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-				glTexGeni (GL_T, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-				glTexGeni (GL_Q, GL_TEXTURE_GEN_MODE,
-					   GL_OBJECT_LINEAR);
-
-				glEnable (GL_TEXTURE_GEN_S);
-				glEnable (GL_TEXTURE_GEN_T);
-				glEnable (GL_TEXTURE_GEN_Q);
-			    }
-
-			    (*GL::activeTexture) (GL_TEXTURE0_ARB);
-			}
-
-		    }
-		    break;
-		case BlurOptions::FilterMipmap:
-		    param = dstFa.allocParameters (2);
-		    unit  = dstFa.allocTextureUnits (1);
-
-		    function =
-			bScreen->getDstBlurFragmentFunction (texture, param,
-							     unit, 0, 0);
-		    if (function)
-		    {
-			float lod =
-			    bScreen->optionGetMipmapLod ();
-
-			dstFa.addFunction (function);
-
-			(*GL::activeTexture) (GL_TEXTURE0_ARB + unit);
-			glBindTexture (bScreen->target, bScreen->texture[0]);
-			(*GL::activeTexture) (GL_TEXTURE0_ARB);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param,
-						      bScreen->tx, bScreen->ty,
-						      0.0f, lod);
-
-			(*GL::programEnvParameter4f) (GL_FRAGMENT_PROGRAM_ARB,
-						      param + 1,
-						      threshold, threshold,
-						      threshold, threshold);
-		    }
-		    break;
-	    }
+	    setupShadersAndUniformsForDstBlur (texture,
+					       gWindow,
+					       bScreen,
+					       unit,
+					       iTC,
+					       this->state[state].threshold);
 
 	    if (this->state[state].clipped ||
 		(!bScreen->blurOcclusion && !clip.isEmpty ()))
 	    {
 		glEnable (GL_STENCIL_TEST);
 
+		/* Don't touch the stencil buffer */
 		glStencilOp (GL_KEEP, GL_KEEP, GL_KEEP);
-		glStencilFunc (GL_EQUAL, 0x1, ~0);
 
-		/* draw region with destination blur */
-		gWindow->glDrawTexture (texture, dstFa, mask);
+		/* Draw region with blur only where the stencil test passes */
+		glStencilFunc (GL_EQUAL, 1, 1);
 
-		glStencilFunc (GL_EQUAL, 0, ~0);
+		/* draw region with destination blur - we are relying
+		 * on a fairly awkward side-effect here which clears our
+		 * active shader once this call is complete */
+		gWindow->glDrawTexture (texture, matrix, attrib, mask);
+
+		/* Allow drawing in everywhere but where we just drew */
+		glStencilFunc (GL_EQUAL, 0, 1);
 
 		/* draw region without destination blur */
-		gWindow->glDrawTexture (texture, fa, mask);
+		gWindow->glDrawTexture (texture, matrix, attrib, mask);
 
 		glDisable (GL_STENCIL_TEST);
 	    }
 	    else
 	    {
 		/* draw with destination blur */
-		gWindow->glDrawTexture (texture, dstFa, mask);
+		gWindow->glDrawTexture (texture, matrix, attrib, mask);
 	    }
 	}
 	else
 	{
-	    gWindow->glDrawTexture (texture, fa, mask);
+	    gWindow->glDrawTexture (texture, matrix, attrib, mask);
 	}
 
 	if (unit)
 	{
-	    (*GL::activeTexture) (GL_TEXTURE0_ARB + unit);
-	    glBindTexture (bScreen->target, 0);
-	    (*GL::activeTexture) (GL_TEXTURE0_ARB + unit + 1);
-	    glBindTexture (bScreen->target, 0);
-	    (*GL::activeTexture) (GL_TEXTURE0_ARB);
+	    (*GL::activeTexture) (GL_TEXTURE0 + unit);
+	    bScreen->texture[0]->disable ();
+	    (*GL::activeTexture) (GL_TEXTURE0 + unit + 1);
+	    if (bScreen->fbo &&
+		bScreen->fbo->tex ())
+		bScreen->fbo->tex ()->disable ();
+	    (*GL::activeTexture) (GL_TEXTURE0);
 	}
 
+#if INDEPENDENT_TEX_SUPPORTED
 	if (iTC)
 	{
 	    int i;
 	    for (i = gWindow->geometry ().texUnits;
 		 i < gWindow->geometry ().texUnits + (2 * iTC); i++)
 	    {
-		(*GL::activeTexture) (GL_TEXTURE0_ARB + i);
+		(*GL::activeTexture) (GL_TEXTURE0 + i);
 		glDisable (GL_TEXTURE_GEN_S);
 		glDisable (GL_TEXTURE_GEN_T);
 		glDisable (GL_TEXTURE_GEN_Q);
 	    }
-	    (*GL::activeTexture) (GL_TEXTURE0_ARB);
+	    (*GL::activeTexture) (GL_TEXTURE0);
 	}
+#endif
     }
     else
     {
-	gWindow->glDrawTexture (texture, attrib, mask);
+	gWindow->glDrawTexture (texture, matrix, attrib, mask);
     }
 }
 
@@ -2115,7 +2134,7 @@ blurPulse (CompAction         *action,
 					 screen->activeWindow ());
 
     w = screen->findWindow (xid);
-    if (w && GL::fragmentProgram)
+    if (w && GL::shaders)
     {
 	BLUR_SCREEN (screen);
 	BLUR_WINDOW (w);
@@ -2175,7 +2194,7 @@ BlurScreen::setOption (const CompString &name, CompOption::Value &value)
 	    cScreen->damageScreen ();
 	    break;
 	case BlurOptions::AlphaBlur:
-	    if (GL::fragmentProgram && optionGetAlphaBlur ())
+	    if (GL::shaders && optionGetAlphaBlur ())
 		alphaBlur = true;
 	    else
 		alphaBlur = false;
@@ -2228,12 +2247,15 @@ BlurScreen::BlurScreen (CompScreen *screen) :
     dstBlurFunctions (0),
     output (NULL),
     count (0),
-    program (0),
     maxTemp (32),
-    fbo (0),
-    fboStatus (0)
+    fbo (new GLFramebufferObject ()),
+    oldDrawFramebuffer (NULL),
+    determineProjectedBlurRegionsPass (false),
+    damageQuery (cScreen->getDamageQuery (boost::bind (
+					      &BlurScreen::markAreaDirty,
+					      this,
+					      _1)))
 {
-
     blurAtom[BLUR_STATE_CLIENT] =
 	XInternAtom (screen->dpy (), "_COMPIZ_WM_WINDOW_BLUR", 0);
     blurAtom[BLUR_STATE_DECOR] =
@@ -2242,27 +2264,20 @@ BlurScreen::BlurScreen (CompScreen *screen) :
     blurTime = 1000.0f / optionGetBlurSpeed ();
     blurOcclusion = optionGetOcclusion ();
 
-    for (int i = 0; i < 2; i++)
-	texture[i] = 0;
-
     glGetIntegerv (GL_STENCIL_BITS, &stencilBits);
     if (!stencilBits)
 	compLogMessage ("blur", CompLogLevelWarn,
 			"No stencil buffer. Region based blur disabled");
 
-    /* We need GL_ARB_fragment_program for blur */
-    if (GL::fragmentProgram)
+    /* We need GL_ARB_shading_language_100 for blur */
+    if (GL::shaders)
 	alphaBlur = optionGetAlphaBlur ();
     else
 	alphaBlur = false;
 
-    if (GL::fragmentProgram)
+    if (GL::shaders)
     {
-	int tmp[4];
-	GL::getProgramiv (GL_FRAGMENT_PROGRAM_ARB,
-			  GL_MAX_PROGRAM_NATIVE_TEMPORARIES_ARB,
-			  tmp);
-	maxTemp = tmp[0];
+	maxTemp = 1024; // FIXME!!!!!!!
     }
 
     updateFilterRadius ();
@@ -2277,20 +2292,7 @@ BlurScreen::BlurScreen (CompScreen *screen) :
 
 BlurScreen::~BlurScreen ()
 {
-    foreach (BlurFunction &bf, srcBlurFunctions)
-	GLFragment::destroyFragmentFunction (bf.id);
-    foreach (BlurFunction &bf, dstBlurFunctions)
-	GLFragment::destroyFragmentFunction (bf.id);
-
     cScreen->damageScreen ();
-
-    if (fbo)
-	(*GL::deleteFramebuffers) (1, &fbo);
-
-    for (int i = 0; i < 2; i++)
-	if (texture[i])
-	    glDeleteTextures (1, &texture[i]);
-
 }
 
 BlurWindow::BlurWindow (CompWindow *w) :
@@ -2329,10 +2331,11 @@ BlurWindow::~BlurWindow ()
 bool
 BlurPluginVTable::init ()
 {
-    if (CompPlugin::checkPluginABI ("core", CORE_ABIVERSION)		&&
-	CompPlugin::checkPluginABI ("composite", COMPIZ_COMPOSITE_ABI)	&&
-	CompPlugin::checkPluginABI ("opengl", COMPIZ_OPENGL_ABI))
-	return true;
+    if (!CompPlugin::checkPluginABI ("core", CORE_ABIVERSION) |
+        !CompPlugin::checkPluginABI ("composite", COMPIZ_COMPOSITE_ABI) |
+        !CompPlugin::checkPluginABI ("opengl", COMPIZ_OPENGL_ABI))
+	 return false;
 
-    return false;
+    return true;
 }
+
