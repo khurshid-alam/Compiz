@@ -345,6 +345,10 @@ class BufferAgeFrameProvider :
 	    return age;
 	}
 
+	void useCurrentFrame ()
+	{
+	}
+
 	void endFrame ()
 	{
 	}
@@ -436,6 +440,10 @@ class UndefinedFrameProvider :
 	    return 0;
 	}
 
+	void useCurrentFrame ()
+	{
+	}
+
 	void endFrame ()
 	{
 	}
@@ -468,12 +476,14 @@ class PostprocessFrameProvider :
 
 	unsigned int getCurrentFrame ()
 	{
+	    return mAge;
+	}
+
+	void useCurrentFrame ()
+	{
 	    /* We are now using this buffer, reset
 	     * age back to zero */
-	    unsigned int lastAge = mAge;
 	    mAge = 0;
-
-	    return lastAge;
 	}
 
 	void endFrame ()
@@ -524,6 +534,14 @@ class OptionalPostprocessFrameProvider :
 		return mScratchbuffer->getCurrentFrame ();
 	    else
 		return mBackbuffer->getCurrentFrame ();
+	}
+
+	void useCurrentFrame ()
+	{
+	    if (mPPRequired ())
+		mScratchbuffer->useCurrentFrame ();
+	    else
+		mBackbuffer->useCurrentFrame ();
 	}
 
 	void endFrame ()
@@ -2629,6 +2647,7 @@ void
 PrivateGLScreen::damageCutoff ()
 {
     cScreen->applyDamageForFrameAge (frameProvider->getCurrentFrame ());
+    frameProvider->useCurrentFrame ();
     cScreen->damageCutoff ();
 }
 

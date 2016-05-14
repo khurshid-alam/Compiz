@@ -131,6 +131,7 @@ class FrameProvider
 	virtual ~FrameProvider () {}
 
 	virtual GLuint getCurrentFrame () = 0;
+	virtual void useCurrentFrame () = 0;
 	virtual void endFrame () = 0;
 
 	virtual bool providesPersistence () = 0;
