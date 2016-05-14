@@ -24,8 +24,8 @@
 
 #include "gwd-settings.h"
 #include "gwd-settings-interface.h"
+#include "gwd-settings-notified.h"
 #include "gwd-settings-writable-interface.h"
-#include "gwd-settings-notified-interface.h"
 #include "decoration.h"
 
 #define GWD_SETTINGS_IMPL(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GWD_TYPE_SETTINGS_IMPL, GWDSettingsImpl))

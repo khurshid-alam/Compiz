@@ -103,7 +103,6 @@ unsigned long decorations;
 
 extern gboolean minimal;
 
-extern GWDSettingsNotified *notified;
 extern GWDSettings *settings;
 extern GWDSettingsWritable *writable;
 

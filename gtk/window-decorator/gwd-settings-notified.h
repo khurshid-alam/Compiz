@@ -17,8 +17,9 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifndef _COMPIZ_GWD_SETTINGS_NOTIFIED_H
-#define _COMPIZ_GWD_SETTINGS_NOTIFIED_H
+
+#ifndef GWD_SETTINGS_NOTIFIED_H
+#define GWD_SETTINGS_NOTIFIED_H
 
 #include <glib-object.h>
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
@@ -27,11 +28,24 @@
 
 G_BEGIN_DECLS
 
-#define GWD_TYPE_SETTINGS_NOTIFIED (gwd_settings_notified_impl_get_type ())
-GType gwd_settings_notified_impl_get_type ();
+#define GWD_TYPE_SETTINGS_NOTIFIED gwd_settings_notified_get_type ()
+G_DECLARE_FINAL_TYPE (GWDSettingsNotified, gwd_settings_notified,
+                      GWD, SETTINGS_NOTIFIED, GObject)
 
 GWDSettingsNotified *
-gwd_settings_notified_impl_new (WnckScreen *screen);
+gwd_settings_notified_new                    (WnckScreen          *screen);
+
+gboolean
+gwd_settings_notified_update_decorations     (GWDSettingsNotified *notified);
+
+gboolean
+gwd_settings_notified_update_frames          (GWDSettingsNotified *notified);
+
+gboolean
+gwd_settings_notified_update_metacity_theme  (GWDSettingsNotified *notified);
+
+gboolean
+gwd_settings_notified_metacity_button_layout (GWDSettingsNotified *notified);
 
 G_END_DECLS
 

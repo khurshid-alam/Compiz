@@ -27,7 +27,6 @@
 #include "gwd-settings-writable-interface.h"
 #include "gwd-settings.h"
 #include "gwd-settings-interface.h"
-#include "gwd-settings-notified-interface.h"
 #include "gwd-settings-notified.h"
 
 GWDSettingsNotified *notified;
@@ -285,7 +284,7 @@ main (int argc, char *argv[])
 
     initialize_decorations ();
 
-    notified = gwd_settings_notified_impl_new (screen);
+    notified = gwd_settings_notified_new (screen);
 
     if (!notified)
 	return 1;
