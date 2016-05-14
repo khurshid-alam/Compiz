@@ -22,8 +22,6 @@
 #define GWD_SETTINGS_NOTIFIED_H
 
 #include <glib-object.h>
-#define WNCK_I_KNOW_THIS_IS_UNSTABLE
-#include <libwnck/libwnck.h>
 #include <gwd-fwd.h>
 
 G_BEGIN_DECLS
@@ -33,7 +31,7 @@ G_DECLARE_FINAL_TYPE (GWDSettingsNotified, gwd_settings_notified,
                       GWD, SETTINGS_NOTIFIED, GObject)
 
 GWDSettingsNotified *
-gwd_settings_notified_new                    (WnckScreen          *screen);
+gwd_settings_notified_new                    (void);
 
 gboolean
 gwd_settings_notified_update_decorations     (GWDSettingsNotified *notified);

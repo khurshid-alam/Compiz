@@ -284,7 +284,7 @@ main (int argc, char *argv[])
 
     initialize_decorations ();
 
-    notified = gwd_settings_notified_new (screen);
+    notified = gwd_settings_notified_new ();
 
     if (!notified)
 	return 1;

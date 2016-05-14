@@ -20,27 +20,17 @@
 
 #include <glib-object.h>
 
+#define WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libwnck/libwnck.h>
+
 #include "gwd-settings-notified.h"
 #include "gwd-metacity-window-decoration-util.h"
 #include "gtk-window-decorator.h"
 
 struct _GWDSettingsNotified
 {
-    GObject     parent;
-
-    WnckScreen *screen;
+    GObject parent;
 };
-
-enum
-{
-    PROP_0,
-
-    PROP_WNCK_SCREEN,
-
-    LAST_PROP
-};
-
-static GParamSpec *properties[LAST_PROP] = { NULL };
 
 G_DEFINE_TYPE (GWDSettingsNotified, gwd_settings_notified, G_TYPE_OBJECT)
 
@@ -89,42 +79,8 @@ set_frames_scales (gpointer key,
 }
 
 static void
-gwd_settings_notified_set_property (GObject      *object,
-                                    guint         property_id,
-                                    const GValue *value,
-                                    GParamSpec   *pspec)
-{
-    GWDSettingsNotified *notified;
-
-    notified = GWD_SETTINGS_NOTIFIED (object);
-
-    switch (property_id) {
-        case PROP_WNCK_SCREEN:
-            notified->screen = g_value_get_object (value);
-            break;
-
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-            break;
-    }
-}
-
-static void
 gwd_settings_notified_class_init (GWDSettingsNotifiedClass *notified_class)
 {
-    GObjectClass *object_class;
-
-    object_class = G_OBJECT_CLASS (notified_class);
-
-    object_class->set_property = gwd_settings_notified_set_property;
-
-    properties[PROP_WNCK_SCREEN] =
-        g_param_spec_object ("wnck-screen", "WnckScreen", "A WnckScreen",
-                             WNCK_TYPE_SCREEN,
-                             G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE |
-                             G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_properties (object_class, LAST_PROP, properties);
 }
 
 static void
@@ -133,17 +89,15 @@ gwd_settings_notified_init (GWDSettingsNotified *notified)
 }
 
 GWDSettingsNotified *
-gwd_settings_notified_new (WnckScreen *screen)
+gwd_settings_notified_new (void)
 {
-    return g_object_new (GWD_TYPE_SETTINGS_NOTIFIED,
-                         "wnck-screen", screen,
-                         NULL);
+    return g_object_new (GWD_TYPE_SETTINGS_NOTIFIED, NULL);
 }
 
 gboolean
 gwd_settings_notified_update_decorations (GWDSettingsNotified *notified)
 {
-    decorations_changed (notified->screen);
+    decorations_changed (wnck_screen_get_default ());
 
     return TRUE;
 }
