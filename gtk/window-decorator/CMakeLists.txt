@@ -93,7 +93,6 @@ if (USE_GTK)
 		    wnck.c
 		    decorator.c
 		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-xproperty-storage.c
-		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-notified.c
 		    ${gwd_schema}
     )
 

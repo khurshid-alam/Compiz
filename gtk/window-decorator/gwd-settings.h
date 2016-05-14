@@ -17,8 +17,9 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifndef _COMPIZ_GWD_SETTINGS_H
-#define _COMPIZ_GWD_SETTINGS_H
+
+#ifndef GWD_SETTINGS_H
+#define GWD_SETTINGS_H
 
 #include <glib-object.h>
 #include <gwd-fwd.h>
@@ -29,9 +30,8 @@ G_BEGIN_DECLS
 GType gwd_settings_impl_get_type ();
 
 GWDSettings *
-gwd_settings_impl_new (gint                *blur,
-		       const gchar         **metacity_theme,
-		       GWDSettingsNotified *notified);
+gwd_settings_impl_new (gint         *blur,
+                       const gchar **metacity_theme);
 
 G_END_DECLS
 
