@@ -303,13 +303,7 @@ main (int argc, char *argv[])
 
     gwd_settings_writable_freeze_updates (writable);
 
-    if (!init_settings (writable,
-			screen))
-    {
-	g_object_unref (writable);
-	fprintf (stderr, "%s: Failed to get necessary gtk settings\n", argv[0]);
-	return 1;
-    }
+    init_settings (writable);
 
     for (i = 0; i < 3; ++i)
     {
