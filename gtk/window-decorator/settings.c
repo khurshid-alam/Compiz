@@ -27,9 +27,8 @@
 GWDSettingsStorage *storage = NULL;
 GWDSettingsXPropertyStorage *xprop_storage = NULL;
 
-gboolean
-init_settings (GWDSettingsWritable *writable,
-               WnckScreen          *screen)
+void
+init_settings (GWDSettingsWritable *writable)
 {
     storage = gwd_settings_storage_new (writable, TRUE);
     xprop_storage = gwd_settings_xproperty_storage_new (writable);
@@ -43,8 +42,6 @@ init_settings (GWDSettingsWritable *writable,
     gwd_settings_storage_update_use_tooltips (storage);
 
     gwd_process_decor_shadow_property_update ();
-
-    return TRUE;
 }
 
 void

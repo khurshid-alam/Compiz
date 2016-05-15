@@ -44,12 +44,10 @@
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 #include "gwd-settings-writable-interface.h"
-#include "gwd-settings-notified-interface.h"
 
 #include "decoration.h"
 
 #include "compiz_gwd_mock_settings_writable.h"
-#include "compiz_gwd_mock_settings_notified.h"
 
 using ::testing::TestWithParam;
 using ::testing::Eq;
@@ -269,9 +267,9 @@ namespace
 	g_object_unref (G_OBJECT (settings));
     }
 
-    void gwd_settings_notified_do_nothing (GWDSettingsNotified *notified)
+    /*void gwd_settings_notified_do_nothing (GWDSettingsNotified *notified)
     {
-    }
+    }*/
 
     class AutoUnsetGValue
     {
@@ -376,7 +374,7 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 								 testing_values::TITLEBAR_ACTION_SHADE.c_str ()), IsTrue ());
 }
 
-namespace
+/*namespace
 {
     void ExpectAllNotificationsOnce (boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > &gmockNotified,
 				     boost::shared_ptr <GWDSettings> &settings)
@@ -390,7 +388,7 @@ namespace
 
 	gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (settings.get ()));
     }
-}
+}*/
 
 class GWDSettingsTest :
     public GWDSettingsTestCommon
@@ -400,24 +398,24 @@ class GWDSettingsTest :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> ());
+	    /*mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> ());
 	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
-				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_new (NULL, NULL, mMockNotified.get ()),
+				 boost::bind (gwd_settings_notified_do_nothing, _1));*/
+	    mSettings.reset (gwd_settings_new (NULL, NULL),
 			     boost::bind (gwd_settings_unref, _1));
-	    ExpectAllNotificationsOnce (mGMockNotified, mSettings);
+	    /*ExpectAllNotificationsOnce (mGMockNotified, mSettings);*/
 	}
 
 	virtual void TearDown ()
 	{
-	    EXPECT_CALL (*mGMockNotified, dispose ());
-	    EXPECT_CALL (*mGMockNotified, finalize ());
+	    /*EXPECT_CALL (*mGMockNotified, dispose ());
+	    EXPECT_CALL (*mGMockNotified, finalize ());*/
 	}
 
     protected:
 
-	boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
-	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
+	/*boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
+	boost::shared_ptr <GWDSettingsNotified> mMockNotified;*/
 	boost::shared_ptr <GWDSettings> mSettings;
 };
 
@@ -445,7 +443,7 @@ TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdates)
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
 }
 
@@ -460,13 +458,13 @@ TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdatesNoDupes)
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
-    EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);*/
     gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
 }
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_shadow_property_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 								testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
 								testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
@@ -536,7 +534,7 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
@@ -559,7 +557,7 @@ TEST_F(GWDSettingsTest, TestUseTooltipsChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 {
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
 
@@ -576,7 +574,7 @@ TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 
 TEST_F(GWDSettingsTest, TestBlurChangedAll)
 {
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::BLUR_TYPE_ALL_VALUE.c_str ()), IsTrue ());
 
@@ -611,10 +609,7 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
 {
     gint blurType = testing_values::BLUR_TYPE_ALL_INT_VALUE;
 
-    /* We need to increment the reference count so that it doesn't
-     * go away when we create a new GWDSettings */
-    g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_new (&blurType, NULL, mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (&blurType, NULL),
 		     boost::bind (gwd_settings_unref, _1));
 
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
@@ -633,8 +628,8 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							       testing_values::USE_METACITY_THEME_VALUE,
 							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
@@ -652,8 +647,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 {
-    EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							       testing_values::NO_USE_METACITY_THEME_VALUE,
 							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
@@ -680,8 +675,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 {
     const gchar *metacityTheme = "Ambiance";
 
-    g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_new (NULL, &metacityTheme, mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (NULL, &metacityTheme),
 		     boost::bind (gwd_settings_unref, _1));
 
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
@@ -701,7 +695,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 
 TEST_F(GWDSettingsTest, TestMetacityOpacityChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_opacity_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							testing_values::ACTIVE_OPACITY_VALUE,
 							testing_values::INACTIVE_OPACITY_VALUE,
@@ -752,8 +746,8 @@ TEST_F(GWDSettingsTest, TestMetacityOpacityChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ());
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_button_layout_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							      testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
 
@@ -776,8 +770,8 @@ TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::NO_USE_SYSTEM_FONT_VALUE,
 						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
@@ -795,8 +789,8 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
-    EXPECT_CALL (*mGMockNotified, updateDecorations ());
+    /*EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());*/
     EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::USE_SYSTEM_FONT_VALUE,
 						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
@@ -860,25 +854,25 @@ class GWDSettingsTestClickActions :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    mGMockNotified.reset (new GWDMockSettingsNotifiedGMock ());
+	    /*mGMockNotified.reset (new GWDMockSettingsNotifiedGMock ());
 	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
-				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_new (NULL, NULL, mMockNotified.get ()),
+				 boost::bind (gwd_settings_notified_do_nothing, _1));*/
+	    mSettings.reset (gwd_settings_new (NULL, NULL),
 			     boost::bind (gwd_settings_unref, _1));
 	}
 
 	virtual void TearDown ()
 	{
-	    EXPECT_CALL (*mGMockNotified, dispose ());
-	    EXPECT_CALL (*mGMockNotified, finalize ());
+	    /*EXPECT_CALL (*mGMockNotified, dispose ());
+	    EXPECT_CALL (*mGMockNotified, finalize ());*/
 
 	    GWDSettingsTestCommon::TearDown ();
 	}
 
     protected:
 
-	boost::shared_ptr <GWDMockSettingsNotifiedGMock> mGMockNotified;
-	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
+	/*boost::shared_ptr <GWDMockSettingsNotifiedGMock> mGMockNotified;
+	boost::shared_ptr <GWDSettingsNotified> mMockNotified;*/
 	boost::shared_ptr <GWDSettings> mSettings;
 };
 

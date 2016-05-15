@@ -103,7 +103,6 @@ unsigned long decorations;
 
 extern gboolean minimal;
 
-extern GWDSettingsNotified *notified;
 extern GWDSettings *settings;
 extern GWDSettingsWritable *writable;
 
@@ -871,8 +870,8 @@ set_frames_scales (gpointer key,
 		   gpointer value,
 		   gpointer user_data);
 
-gboolean
-init_settings (GWDSettingsWritable *writable, WnckScreen *screen);
+void
+init_settings (GWDSettingsWritable *writable);
 
 void
 fini_settings ();

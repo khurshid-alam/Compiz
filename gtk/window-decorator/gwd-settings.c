@@ -23,9 +23,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libwnck/libwnck.h>
+
+#include "gtk-window-decorator.h"
+#include "gwd-metacity-window-decoration-util.h"
 #include "gwd-settings.h"
 #include "gwd-settings-writable-interface.h"
-#include "gwd-settings-notified-interface.h"
 #include "decoration.h"
 
 const gboolean  USE_TOOLTIPS_DEFAULT = FALSE;
@@ -65,7 +69,7 @@ enum
     CMDLINE_THEME = (1 << 1)
 };
 
-typedef gboolean (*NotifyFunc) (GWDSettingsNotified *);
+typedef void (*NotifyFunc) (GWDSettings *settings);
 
 struct _GWDSettings
 {
@@ -88,7 +92,6 @@ struct _GWDSettings
     gchar                  *titlebar_font;
 
     guint                   cmdline_opts;
-    GWDSettingsNotified    *notified;
 
     guint                   freeze_count;
     GList                  *notify_funcs;
@@ -114,7 +117,6 @@ enum
     PROP_MOUSE_WHEEL_ACTION,
     PROP_TITLEBAR_FONT,
     PROP_CMDLINE_OPTIONS,
-    PROP_SETTINGS_NOTIFIED,
 
     LAST_PROP
 };
@@ -126,6 +128,68 @@ static void gwd_settings_writable_interface_init (GWDSettingsWritableInterface *
 G_DEFINE_TYPE_WITH_CODE (GWDSettings, gwd_settings, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (GWD_TYPE_WRITABLE_SETTINGS_INTERFACE,
                                                 gwd_settings_writable_interface_init))
+
+static void
+update_decorations (GWDSettings *settings)
+{
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+update_frames (GWDSettings *settings)
+{
+    gwd_frames_foreach (set_frames_scales, settings->titlebar_font);
+}
+
+static void
+update_metacity_theme (GWDSettings *settings)
+{
+#ifdef USE_METACITY
+    if (gwd_metacity_window_decoration_update_meta_theme (settings->metacity_theme,
+                                                          meta_theme_get_current,
+                                                          meta_theme_set_current)) {
+        theme_draw_window_decoration = meta_draw_window_decoration;
+        theme_calc_decoration_size = meta_calc_decoration_size;
+        theme_update_border_extents = meta_update_border_extents;
+        theme_get_event_window_position = meta_get_event_window_position;
+        theme_get_button_position = meta_get_button_position;
+        theme_get_title_scale = meta_get_title_scale;
+        theme_get_shadow = meta_get_shadow;
+    } else {
+        g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
+
+        theme_draw_window_decoration = draw_window_decoration;
+        theme_calc_decoration_size = calc_decoration_size;
+        theme_update_border_extents = update_border_extents;
+        theme_get_event_window_position = get_event_window_position;
+        theme_get_button_position = get_button_position;
+        theme_get_title_scale = get_title_scale;
+        theme_get_shadow = cairo_get_shadow;
+    }
+#else
+    theme_draw_window_decoration = draw_window_decoration;
+    theme_calc_decoration_size = calc_decoration_size;
+    theme_update_border_extents = update_border_extents;
+    theme_get_event_window_position = get_event_window_position;
+    theme_get_button_position = get_button_position;
+    theme_get_title_scale = get_title_scale;
+    theme_get_shadow = cairo_get_shadow;
+#endif
+}
+
+static void
+update_metacity_button_layout (GWDSettings *settings)
+{
+#ifdef USE_METACITY
+    if (settings->metacity_button_layout) {
+        meta_update_button_layout (settings->metacity_button_layout);
+
+        meta_button_layout_set = TRUE;
+    } else {
+        meta_button_layout_set = FALSE;
+    }
+#endif
+}
 
 static void
 append_to_notify_funcs (GWDSettings *settings,
@@ -144,12 +208,15 @@ append_to_notify_funcs (GWDSettings *settings,
 
 static void
 invoke_notify_func (gpointer data,
-		    gpointer user_data)
+                    gpointer user_data)
 {
-    GWDSettingsNotified *notified = (GWDSettingsNotified *) user_data;
-    NotifyFunc	        func = (NotifyFunc) data;
+    NotifyFunc func;
+    GWDSettings *settings;
 
-    (*func) (notified);
+    func = (NotifyFunc) data;
+    settings = GWD_SETTINGS (user_data);
+
+    (*func) (settings);
 }
 
 static void
@@ -158,7 +225,7 @@ release_notify_funcs (GWDSettings *settings)
     if (settings->freeze_count)
         return;
 
-    g_list_foreach (settings->notify_funcs, invoke_notify_func, settings->notified);
+    g_list_foreach (settings->notify_funcs, invoke_notify_func, settings);
     g_list_free (settings->notify_funcs);
     settings->notify_funcs = NULL;
 }
@@ -230,7 +297,7 @@ gwd_settings_shadow_property_changed (GWDSettingsWritable *writable,
 
     if (changed)
     {
-	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	append_to_notify_funcs (settings, update_decorations);
 	release_notify_funcs (settings);
     }
 
@@ -246,7 +313,7 @@ gwd_settings_use_tooltips_changed (GWDSettingsWritable *writable,
     if (settings->use_tooltips != use_tooltips)
     {
 	settings->use_tooltips = use_tooltips;
-	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	append_to_notify_funcs (settings, update_decorations);
 	release_notify_funcs (settings);
 	return TRUE;
     }
@@ -278,7 +345,7 @@ gwd_settings_blur_changed (GWDSettingsWritable *writable,
     if (settings->blur_type != new_type)
     {
 	settings->blur_type = new_type;
-	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	append_to_notify_funcs (settings, update_decorations);
 	release_notify_funcs (settings);
 	return TRUE;
     }
@@ -317,8 +384,8 @@ gwd_settings_metacity_theme_changed (GWDSettingsWritable *writable,
     else
 	free_and_set_metacity_theme (settings, "");
 
-    append_to_notify_funcs (settings, gwd_settings_notified_update_metacity_theme);
-    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, update_metacity_theme);
+    append_to_notify_funcs (settings, update_decorations);
     release_notify_funcs (settings);
 
     return TRUE;
@@ -344,7 +411,7 @@ gwd_settings_opacity_changed (GWDSettingsWritable *writable,
     settings->metacity_active_shade_opacity = active_shade_opacity;
     settings->metacity_inactive_shade_opacity = inactive_shade_opacity;
 
-    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, update_decorations);
     release_notify_funcs (settings);
 
     return TRUE;
@@ -365,8 +432,8 @@ gwd_settings_button_layout_changed (GWDSettingsWritable *writable,
     g_free (settings->metacity_button_layout);
     settings->metacity_button_layout = g_strdup (button_layout);
 
-    append_to_notify_funcs (settings, gwd_settings_notified_metacity_button_layout);
-    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, update_metacity_button_layout);
+    append_to_notify_funcs (settings, update_decorations);
     release_notify_funcs (settings);
 
     return TRUE;
@@ -396,8 +463,8 @@ gwd_settings_font_changed (GWDSettingsWritable *writable,
     g_free (settings->titlebar_font);
     settings->titlebar_font = use_font ? g_strdup (use_font) : NULL;
 
-    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
-    append_to_notify_funcs (settings, gwd_settings_notified_update_frames);
+    append_to_notify_funcs (settings, update_decorations);
+    append_to_notify_funcs (settings, update_frames);
     release_notify_funcs (settings);
 
     return TRUE;
@@ -523,18 +590,6 @@ gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface)
 }
 
 static void
-gwd_settings_dispose (GObject *object)
-{
-    GWDSettings *settings;
-
-    settings = GWD_SETTINGS (object);
-
-    g_clear_object (&settings->notified);
-
-    G_OBJECT_CLASS (gwd_settings_parent_class)->dispose (object);
-}
-
-static void
 gwd_settings_finalize (GObject *object)
 {
     GWDSettings *settings;
@@ -550,9 +605,9 @@ gwd_settings_finalize (GObject *object)
 
 static void
 gwd_settings_set_property (GObject      *object,
-			   guint        property_id,
-			   const GValue *value,
-			   GParamSpec   *pspec)
+                           guint         property_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
     GWDSettings *settings;
 
@@ -572,11 +627,6 @@ gwd_settings_set_property (GObject      *object,
             settings->metacity_theme = g_value_dup_string (value);
             break;
 
-        case PROP_SETTINGS_NOTIFIED:
-            g_return_if_fail (!settings->notified);
-            settings->notified = (GWDSettingsNotified *) g_value_get_pointer (value);
-            break;
-
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -585,9 +635,9 @@ gwd_settings_set_property (GObject      *object,
 
 static void
 gwd_settings_get_property (GObject    *object,
-			   guint      property_id,
-			   GValue     *value,
-			   GParamSpec *pspec)
+                           guint       property_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
     GWDSettings *settings;
 
@@ -667,7 +717,6 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
 
     object_class = G_OBJECT_CLASS (settings_class);
 
-    object_class->dispose = gwd_settings_dispose;
     object_class->finalize = gwd_settings_finalize;
     object_class->get_property = gwd_settings_get_property;
     object_class->set_property = gwd_settings_set_property;
@@ -796,12 +845,6 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
                           0, G_MAXINT32, 0,
                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
-    settings_properties[PROP_SETTINGS_NOTIFIED] =
-        g_param_spec_pointer ("settings-notified",
-                              "GWDSettingsNotified",
-                              "A GWDSettingsNotified which will be updated",
-                              G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
-
     g_object_class_install_properties (object_class, LAST_PROP,
                                        settings_properties);
 }
@@ -837,15 +880,14 @@ gwd_settings_init (GWDSettings *settings)
     settings->mouse_wheel_action = WHEEL_ACTION_DEFAULT;
     settings->titlebar_font = g_strdup (TITLEBAR_FONT_DEFAULT);
     settings->cmdline_opts = 0;
-    settings->notified = NULL;
     settings->freeze_count = 0;
 
     /* Append all notify funcs so that external state can be updated in case
      * the settings backend can't do it itself */
-    append_to_notify_funcs (settings, gwd_settings_notified_update_metacity_theme);
-    append_to_notify_funcs (settings, gwd_settings_notified_metacity_button_layout);
-    append_to_notify_funcs (settings, gwd_settings_notified_update_frames);
-    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, update_metacity_theme);
+    append_to_notify_funcs (settings, update_metacity_button_layout);
+    append_to_notify_funcs (settings, update_frames);
+    append_to_notify_funcs (settings, update_decorations);
 }
 
 static gboolean
@@ -897,12 +939,10 @@ set_flag_and_increment (guint n_param,
 }
 
 GWDSettings *
-gwd_settings_new (gint                 *blur,
-                  const gchar         **metacity_theme,
-                  GWDSettingsNotified  *notified)
+gwd_settings_new (gint         *blur,
+                  const gchar **metacity_theme)
 {
-    /* Always N command line parameters + 2 for command line
-     * options enum & notified */
+    /* Always N command line parameters + 2 for command line options enum */
     const guint     gwd_settings_impl_n_construction_params = 4;
     GParameter      param[gwd_settings_impl_n_construction_params];
     GWDSettings     *settings = NULL;
@@ -913,12 +953,10 @@ gwd_settings_new (gint                 *blur,
     GValue blur_value = G_VALUE_INIT;
     GValue metacity_theme_value = G_VALUE_INIT;
     GValue cmdline_opts_value = G_VALUE_INIT;
-    GValue settings_notified_value = G_VALUE_INIT;
 
     g_value_init (&blur_value, G_TYPE_INT);
     g_value_init (&metacity_theme_value, G_TYPE_STRING);
     g_value_init (&cmdline_opts_value, G_TYPE_INT);
-    g_value_init (&settings_notified_value, G_TYPE_POINTER);
 
     if (set_blur_construction_value (blur, &param[n_param], &blur_value))
 	n_param = set_flag_and_increment (n_param, &cmdline_opts, CMDLINE_BLUR);
@@ -930,13 +968,6 @@ gwd_settings_new (gint                 *blur,
 
     param[n_param].name = "cmdline-options";
     param[n_param].value = cmdline_opts_value;
-
-    ++n_param;
-
-    g_value_set_pointer (&settings_notified_value, notified);
-
-    param[n_param].name = "settings-notified";
-    param[n_param].value = settings_notified_value;
 
     ++n_param;
 

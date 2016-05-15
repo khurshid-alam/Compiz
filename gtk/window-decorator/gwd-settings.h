@@ -85,9 +85,8 @@ extern const gchar    *TITLEBAR_FONT_DEFAULT;
 G_DECLARE_FINAL_TYPE (GWDSettings, gwd_settings, GWD, SETTINGS, GObject)
 
 GWDSettings *
-gwd_settings_new (gint                 *blur,
-                  const gchar         **metacity_theme,
-                  GWDSettingsNotified  *notified);
+gwd_settings_new (gint         *blur,
+                  const gchar **metacity_theme);
 
 G_END_DECLS
 

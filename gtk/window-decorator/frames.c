@@ -542,3 +542,47 @@ initialize_decorations ()
 
     frames_table = g_hash_table_new (g_str_hash, g_str_equal);
 }
+
+void
+set_frame_scale (decor_frame_t *frame,
+                 const gchar   *font_str)
+{
+    gfloat scale = 1.0f;
+
+    gwd_decor_frame_ref (frame);
+
+    if (frame->titlebar_font)
+    {
+        pango_font_description_free (frame->titlebar_font);
+        frame->titlebar_font = NULL;
+    }
+
+    if (font_str)
+    {
+        gint size;
+
+        frame->titlebar_font = pango_font_description_from_string (font_str);
+
+        scale = (*theme_get_title_scale) (frame);
+        size = MAX (pango_font_description_get_size (frame->titlebar_font) * scale, 1);
+
+        pango_font_description_set_size (frame->titlebar_font, size);
+    }
+
+    gwd_decor_frame_unref (frame);
+}
+
+void
+set_frames_scales (gpointer key,
+                   gpointer value,
+                   gpointer user_data)
+{
+    decor_frame_t *frame = (decor_frame_t *) value;
+    gchar *font_str = (gchar *) user_data;
+
+    gwd_decor_frame_ref (frame);
+
+    set_frame_scale (frame, font_str);
+
+    gwd_decor_frame_unref (frame);
+}
