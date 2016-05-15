@@ -17,64 +17,47 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
+
 #include <glib-object.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "gwd-settings.h"
-#include "gwd-settings-interface.h"
 #include "gwd-settings-writable-interface.h"
 #include "gwd-settings-notified-interface.h"
 #include "decoration.h"
 
-#define GWD_SETTINGS_IMPL(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GWD_TYPE_SETTINGS_IMPL, GWDSettingsImpl))
-#define GWD_SETTINGS_IMPL_CLASS(obj) (G_TYPE_CHECK_CLASS_CAST ((obj), GWD_TYPE_SETTINGS_IMPL, GWDSettingsImplClass))
-#define GWD_IS_SETTINGS_IMPL(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GWD_TYPE_SETTINGS_IMPL))
-#define GWD_IS_SETTINGS_IMPL_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE ((obj), GWD_TYPE_SETTINGS_IMPL))
-#define GWD_SETTINGS_IMPL_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GWD_TYPE_SETTINGS_IMPL, GWDSettingsImplClass))
+const gboolean  USE_TOOLTIPS_DEFAULT = FALSE;
 
-typedef struct _GWDSettingsImpl
-{
-    GObject parent;
-} GWDSettingsImpl;
+const gdouble   ACTIVE_SHADOW_RADIUS_DEFAULT = 8.0;
+const gdouble   ACTIVE_SHADOW_OPACITY_DEFAULT = 0.5;
+const gint      ACTIVE_SHADOW_OFFSET_X_DEFAULT = 1;
+const gint      ACTIVE_SHADOW_OFFSET_Y_DEFAULT = 1;
+const gchar    *ACTIVE_SHADOW_COLOR_DEFAULT = "#00000000";
 
-typedef struct _GWDSettingsImplClass
-{
-    GObjectClass parent_class;
-} GWDSettingsImplClass;
+const gdouble   INACTIVE_SHADOW_RADIUS_DEFAULT = 8.0;
+const gdouble   INACTIVE_SHADOW_OPACITY_DEFAULT = 0.5;
+const gint      INACTIVE_SHADOW_OFFSET_X_DEFAULT = 1;
+const gint      INACTIVE_SHADOW_OFFSET_Y_DEFAULT = 1;
+const gchar    *INACTIVE_SHADOW_COLOR_DEFAULT = "#00000000";
 
-static void gwd_settings_interface_init (GWDSettingsInterface *interface);
-static void gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface);
+const gint      BLUR_TYPE_DEFAULT = BLUR_TYPE_NONE;
 
-G_DEFINE_TYPE_WITH_CODE (GWDSettingsImpl, gwd_settings_impl, G_TYPE_OBJECT,
-			 G_IMPLEMENT_INTERFACE (GWD_TYPE_SETTINGS_INTERFACE,
-						gwd_settings_interface_init)
-			 G_IMPLEMENT_INTERFACE (GWD_TYPE_WRITABLE_SETTINGS_INTERFACE,
-						gwd_settings_writable_interface_init))
+const gchar    *METACITY_THEME_DEFAULT = "Adwaita";
+const gdouble   METACITY_ACTIVE_OPACITY_DEFAULT = 1.0;
+const gdouble   METACITY_INACTIVE_OPACITY_DEFAULT = 0.75;
+const gboolean  METACITY_ACTIVE_SHADE_OPACITY_DEFAULT = TRUE;
+const gboolean  METACITY_INACTIVE_SHADE_OPACITY_DEFAULT = TRUE;
 
-#define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GWD_TYPE_SETTINGS_IMPL, GWDSettingsImplPrivate))
+const gchar    *METACITY_BUTTON_LAYOUT_DEFAULT = ":minimize,maximize,close";
 
-enum
-{
-    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADOW = 1,
-    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADOW = 2,
-    GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS = 3,
-    GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED = 4,
-    GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME = 5,
-    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_OPACITY = 6,
-    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_OPACITY = 7,
-    GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADE_OPACITY = 8,
-    GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADE_OPACITY = 9,
-    GWD_SETTINGS_IMPL_PROPERTY_BUTTON_LAYOUT = 10,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK = 11,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK = 12,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK = 13,
-    GWD_SETTINGS_IMPL_PROPERTY_MOUSE_WHEEL_ACTION = 14,
-    GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_FONT = 15,
-    GWD_SETTINGS_IMPL_PROPERTY_CMDLINE_OPTIONS = 16,
-    GWD_SETTINGS_IMPL_PROPERTY_SETTINGS_NOTIFIED = 17
-};
+const guint     DOUBLE_CLICK_ACTION_DEFAULT = CLICK_ACTION_MAXIMIZE;
+const guint     MIDDLE_CLICK_ACTION_DEFAULT = CLICK_ACTION_LOWER;
+const guint     RIGHT_CLICK_ACTION_DEFAULT = CLICK_ACTION_MENU;
+const guint     WHEEL_ACTION_DEFAULT = WHEEL_ACTION_SHADE;
+
+const gchar    *TITLEBAR_FONT_DEFAULT = "Sans 12";
 
 enum
 {
@@ -84,42 +67,79 @@ enum
 
 typedef gboolean (*NotifyFunc) (GWDSettingsNotified *);
 
-typedef struct _GWDSettingsImplPrivate
+struct _GWDSettings
 {
-    decor_shadow_options_t active_shadow;
-    decor_shadow_options_t inactive_shadow;
-    gboolean		   use_tooltips;
-    gint		   blur_type;
-    gchar		   *metacity_theme;
-    gdouble		   metacity_active_opacity;
-    gdouble		   metacity_inactive_opacity;
-    gboolean		   metacity_active_shade_opacity;
-    gboolean		   metacity_inactive_shade_opacity;
-    gchar		   *metacity_button_layout;
-    gint		   titlebar_double_click_action;
-    gint		   titlebar_middle_click_action;
-    gint		   titlebar_right_click_action;
-    gint		   mouse_wheel_action;
-    gchar		   *titlebar_font;
-    guint		   cmdline_opts;
+    GObject                 parent;
+
+    decor_shadow_options_t  active_shadow;
+    decor_shadow_options_t  inactive_shadow;
+    gboolean                use_tooltips;
+    gint                    blur_type;
+    gchar                  *metacity_theme;
+    gdouble                 metacity_active_opacity;
+    gdouble                 metacity_inactive_opacity;
+    gboolean                metacity_active_shade_opacity;
+    gboolean                metacity_inactive_shade_opacity;
+    gchar                  *metacity_button_layout;
+    gint                    titlebar_double_click_action;
+    gint                    titlebar_middle_click_action;
+    gint                    titlebar_right_click_action;
+    gint                    mouse_wheel_action;
+    gchar                  *titlebar_font;
+
+    guint                   cmdline_opts;
     GWDSettingsNotified    *notified;
-    guint		   freeze_count;
-    GList		   *notify_funcs;
-} GWDSettingsImplPrivate;
+
+    guint                   freeze_count;
+    GList                  *notify_funcs;
+};
+
+enum
+{
+    PROP_0,
+
+    PROP_ACTIVE_SHADOW,
+    PROP_INACTIVE_SHADOW,
+    PROP_USE_TOOLTIPS,
+    PROP_BLUR,
+    PROP_METACITY_THEME,
+    PROP_ACTIVE_OPACITY,
+    PROP_INACTIVE_OPACITY,
+    PROP_ACTIVE_SHADE_OPACITY,
+    PROP_INACTIVE_SHADE_OPACITY,
+    PROP_BUTTON_LAYOUT,
+    PROP_TITLEBAR_ACTION_DOUBLE_CLICK,
+    PROP_TITLEBAR_ACTION_MIDDLE_CLICK,
+    PROP_TITLEBAR_ACTION_RIGHT_CLICK,
+    PROP_MOUSE_WHEEL_ACTION,
+    PROP_TITLEBAR_FONT,
+    PROP_CMDLINE_OPTIONS,
+    PROP_SETTINGS_NOTIFIED,
+
+    LAST_PROP
+};
+
+static GParamSpec *settings_properties[LAST_PROP] = { NULL };
+
+static void gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface);
+
+G_DEFINE_TYPE_WITH_CODE (GWDSettings, gwd_settings, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (GWD_TYPE_WRITABLE_SETTINGS_INTERFACE,
+                                                gwd_settings_writable_interface_init))
 
 static void
-append_to_notify_funcs (GWDSettingsImpl *settings,
-			NotifyFunc	func)
+append_to_notify_funcs (GWDSettings *settings,
+                        NotifyFunc   func)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings);
+    GList *link;
 
     /* Remove if found, the new one will replace the old one */
-    GList *link = g_list_find (priv->notify_funcs, func);
+    link = g_list_find (settings->notify_funcs, func);
 
     if (link)
-	priv->notify_funcs = g_list_remove_link (priv->notify_funcs, link);
+      settings->notify_funcs = g_list_remove_link (settings->notify_funcs, link);
 
-    priv->notify_funcs = g_list_append (priv->notify_funcs, (gpointer) func);
+    settings->notify_funcs = g_list_append (settings->notify_funcs, (gpointer) func);
 }
 
 static void
@@ -133,20 +153,18 @@ invoke_notify_func (gpointer data,
 }
 
 static void
-release_notify_funcs (GWDSettingsImpl *settings)
+release_notify_funcs (GWDSettings *settings)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings);
+    if (settings->freeze_count)
+        return;
 
-    if (priv->freeze_count)
-	return;
-
-    g_list_foreach (priv->notify_funcs, invoke_notify_func, priv->notified);
-    g_list_free (priv->notify_funcs);
-    priv->notify_funcs = NULL;
+    g_list_foreach (settings->notify_funcs, invoke_notify_func, settings->notified);
+    g_list_free (settings->notify_funcs);
+    settings->notify_funcs = NULL;
 }
 
 gboolean
-gwd_settings_shadow_property_changed (GWDSettingsWritable *settings,
+gwd_settings_shadow_property_changed (GWDSettingsWritable *writable,
 				      gdouble     active_shadow_radius,
 				      gdouble     active_shadow_opacity,
 				      gdouble     active_shadow_offset_x,
@@ -158,8 +176,7 @@ gwd_settings_shadow_property_changed (GWDSettingsWritable *settings,
 				      gdouble     inactive_shadow_offset_y,
 				      const gchar *inactive_shadow_color)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
     decor_shadow_options_t active_shadow, inactive_shadow;
     unsigned int           c[4];
@@ -197,41 +214,40 @@ gwd_settings_shadow_property_changed (GWDSettingsWritable *settings,
     inactive_shadow.shadow_offset_x = inactive_shadow_offset_x;
     inactive_shadow.shadow_offset_y = inactive_shadow_offset_y;
 
-    if (decor_shadow_options_cmp (&priv->inactive_shadow,
+    if (decor_shadow_options_cmp (&settings->inactive_shadow,
 				  &inactive_shadow))
     {
 	changed |= TRUE;
-	priv->inactive_shadow = inactive_shadow;
+	settings->inactive_shadow = inactive_shadow;
     }
 
-    if (decor_shadow_options_cmp (&priv->active_shadow,
+    if (decor_shadow_options_cmp (&settings->active_shadow,
 				  &active_shadow))
     {
 	changed |= TRUE;
-	priv->active_shadow = active_shadow;
+	settings->active_shadow = active_shadow;
     }
 
     if (changed)
     {
-	append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-	release_notify_funcs (settings_impl);
+	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	release_notify_funcs (settings);
     }
 
     return changed;
 }
 
 static gboolean
-gwd_settings_use_tooltips_changed (GWDSettingsWritable *settings,
+gwd_settings_use_tooltips_changed (GWDSettingsWritable *writable,
 				   gboolean            use_tooltips)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
-    if (priv->use_tooltips != use_tooltips)
+    if (settings->use_tooltips != use_tooltips)
     {
-	priv->use_tooltips = use_tooltips;
-	append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-	release_notify_funcs (settings_impl);
+	settings->use_tooltips = use_tooltips;
+	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	release_notify_funcs (settings);
 	return TRUE;
     }
 
@@ -239,15 +255,14 @@ gwd_settings_use_tooltips_changed (GWDSettingsWritable *settings,
 }
 
 static gboolean
-gwd_settings_blur_changed (GWDSettingsWritable *settings,
+gwd_settings_blur_changed (GWDSettingsWritable *writable,
 			   const gchar         *type)
 
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
     gint new_type = -1;
 
-    if (priv->cmdline_opts & CMDLINE_BLUR)
+    if (settings->cmdline_opts & CMDLINE_BLUR)
 	return FALSE;
 
     if (strcmp (type, "titlebar") == 0)
@@ -260,11 +275,11 @@ gwd_settings_blur_changed (GWDSettingsWritable *settings,
     if (new_type == -1)
 	return FALSE;
 
-    if (priv->blur_type != new_type)
+    if (settings->blur_type != new_type)
     {
-	priv->blur_type = new_type;
-	append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-	release_notify_funcs (settings_impl);
+	settings->blur_type = new_type;
+	append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+	release_notify_funcs (settings);
 	return TRUE;
     }
     else
@@ -272,27 +287,21 @@ gwd_settings_blur_changed (GWDSettingsWritable *settings,
 }
 
 static void
-free_and_set_metacity_theme (GWDSettingsWritable *settings,
-			     const gchar	 *metacity_theme)
+free_and_set_metacity_theme (GWDSettings *settings,
+                             const gchar *metacity_theme)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
-
-    if (priv->metacity_theme)
-	g_free (priv->metacity_theme);
-
-    priv->metacity_theme = g_strdup (metacity_theme);
+    g_free (settings->metacity_theme);
+    settings->metacity_theme = g_strdup (metacity_theme);
 }
 
 static gboolean
-gwd_settings_metacity_theme_changed (GWDSettingsWritable *settings,
+gwd_settings_metacity_theme_changed (GWDSettingsWritable *writable,
 				     gboolean	         use_metacity_theme,
 				     const gchar         *metacity_theme)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
-    if (priv->cmdline_opts & CMDLINE_THEME)
+    if (settings->cmdline_opts & CMDLINE_THEME)
 	return FALSE;
 
     if (!metacity_theme)
@@ -300,7 +309,7 @@ gwd_settings_metacity_theme_changed (GWDSettingsWritable *settings,
 
     if (use_metacity_theme)
     {
-	if (g_strcmp0 (metacity_theme, priv->metacity_theme) == 0)
+	if (g_strcmp0 (metacity_theme, settings->metacity_theme) == 0)
 	    return FALSE;
 
 	free_and_set_metacity_theme (settings, metacity_theme);
@@ -308,72 +317,67 @@ gwd_settings_metacity_theme_changed (GWDSettingsWritable *settings,
     else
 	free_and_set_metacity_theme (settings, "");
 
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_metacity_theme);
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-    release_notify_funcs (settings_impl);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_metacity_theme);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    release_notify_funcs (settings);
 
     return TRUE;
 }
 
 static gboolean
-gwd_settings_opacity_changed (GWDSettingsWritable *settings,
+gwd_settings_opacity_changed (GWDSettingsWritable *writable,
 			      gdouble             active_opacity,
 			      gdouble             inactive_opacity,
 			      gboolean            active_shade_opacity,
 			      gboolean            inactive_shade_opacity)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
-    if (priv->metacity_active_opacity == active_opacity &&
-	priv->metacity_inactive_opacity == inactive_opacity &&
-	priv->metacity_active_shade_opacity == active_shade_opacity &&
-	priv->metacity_inactive_shade_opacity == inactive_shade_opacity)
+    if (settings->metacity_active_opacity == active_opacity &&
+	settings->metacity_inactive_opacity == inactive_opacity &&
+	settings->metacity_active_shade_opacity == active_shade_opacity &&
+	settings->metacity_inactive_shade_opacity == inactive_shade_opacity)
 	return FALSE;
 
-    priv->metacity_active_opacity = active_opacity;
-    priv->metacity_inactive_opacity = inactive_opacity;
-    priv->metacity_active_shade_opacity = active_shade_opacity;
-    priv->metacity_inactive_shade_opacity = inactive_shade_opacity;
+    settings->metacity_active_opacity = active_opacity;
+    settings->metacity_inactive_opacity = inactive_opacity;
+    settings->metacity_active_shade_opacity = active_shade_opacity;
+    settings->metacity_inactive_shade_opacity = inactive_shade_opacity;
 
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-    release_notify_funcs (settings_impl);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    release_notify_funcs (settings);
 
     return TRUE;
 }
 
 static gboolean
-gwd_settings_button_layout_changed (GWDSettingsWritable *settings,
+gwd_settings_button_layout_changed (GWDSettingsWritable *writable,
 				    const gchar         *button_layout)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
     if (!button_layout)
 	return FALSE;
 
-    if (g_strcmp0 (priv->metacity_button_layout, button_layout) == 0)
+    if (g_strcmp0 (settings->metacity_button_layout, button_layout) == 0)
 	return FALSE;
 
-    if (priv->metacity_button_layout)
-	g_free (priv->metacity_button_layout);
+    g_free (settings->metacity_button_layout);
+    settings->metacity_button_layout = g_strdup (button_layout);
 
-    priv->metacity_button_layout = g_strdup (button_layout);
-
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_metacity_button_layout);
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-    release_notify_funcs (settings_impl);
+    append_to_notify_funcs (settings, gwd_settings_notified_metacity_button_layout);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    release_notify_funcs (settings);
 
     return TRUE;
 }
 
 static gboolean
-gwd_settings_font_changed (GWDSettingsWritable *settings,
+gwd_settings_font_changed (GWDSettingsWritable *writable,
 			   gboolean            titlebar_uses_system_font,
 			   const gchar         *titlebar_font)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
     const gchar *no_font = NULL;
     const gchar *use_font = NULL;
@@ -386,20 +390,15 @@ gwd_settings_font_changed (GWDSettingsWritable *settings,
     else
 	use_font = titlebar_font;
 
-    if (g_strcmp0 (priv->titlebar_font, use_font) == 0)
+    if (g_strcmp0 (settings->titlebar_font, use_font) == 0)
 	return FALSE;
 
-    if (priv->titlebar_font)
-    {
-	g_free (priv->titlebar_font);
-	priv->titlebar_font = NULL;
-    }
+    g_free (settings->titlebar_font);
+    settings->titlebar_font = use_font ? g_strdup (use_font) : NULL;
 
-    priv->titlebar_font = use_font ? g_strdup (use_font) : NULL;
-
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_decorations);
-    append_to_notify_funcs (settings_impl, gwd_settings_notified_update_frames);
-    release_notify_funcs (settings_impl);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_frames);
+    release_notify_funcs (settings);
 
     return TRUE;
 }
@@ -463,28 +462,27 @@ get_wheel_action_value (const gchar *action,
 }
 
 static gboolean
-gwd_settings_actions_changed (GWDSettingsWritable *settings,
+gwd_settings_actions_changed (GWDSettingsWritable *writable,
 			      const gchar	  *action_double_click_titlebar,
 			      const gchar	  *action_middle_click_titlebar,
 			      const gchar	  *action_right_click_titlebar,
 			      const gchar	  *mouse_wheel_action)
 {
-    GWDSettingsImpl        *settings_impl = GWD_SETTINGS_IMPL (settings);
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (settings_impl);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
     gboolean ret = FALSE;
 
     ret |= get_click_action_value (action_double_click_titlebar,
-				   &priv->titlebar_double_click_action,
+				   &settings->titlebar_double_click_action,
 				   DOUBLE_CLICK_ACTION_DEFAULT);
     ret |= get_click_action_value (action_middle_click_titlebar,
-				   &priv->titlebar_middle_click_action,
+				   &settings->titlebar_middle_click_action,
 				   MIDDLE_CLICK_ACTION_DEFAULT);
     ret |= get_click_action_value (action_right_click_titlebar,
-				   &priv->titlebar_right_click_action,
+				   &settings->titlebar_right_click_action,
 				   RIGHT_CLICK_ACTION_DEFAULT);
     ret |= get_wheel_action_value (mouse_wheel_action,
-				   &priv->mouse_wheel_action,
+				   &settings->mouse_wheel_action,
 				   WHEEL_ACTION_DEFAULT);
 
     return ret;
@@ -493,19 +491,20 @@ gwd_settings_actions_changed (GWDSettingsWritable *settings,
 static void
 gwd_settings_freeze_updates (GWDSettingsWritable *writable)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (writable);
-    ++priv->freeze_count;
+    GWDSettings *settings = GWD_SETTINGS (writable);
+
+    ++settings->freeze_count;
 }
 
 static void
 gwd_settings_thaw_updates (GWDSettingsWritable *writable)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (writable);
+    GWDSettings *settings = GWD_SETTINGS (writable);
 
-    if (priv->freeze_count)
-	--priv->freeze_count;
+    if (settings->freeze_count)
+      --settings->freeze_count;
 
-    release_notify_funcs (GWD_SETTINGS_IMPL (writable));
+    release_notify_funcs (settings);
 }
 
 static void
@@ -524,45 +523,29 @@ gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface)
 }
 
 static void
-gwd_settings_interface_init (GWDSettingsInterface *interface)
-{
-}
-
-static void
 gwd_settings_dispose (GObject *object)
 {
-    G_OBJECT_CLASS (gwd_settings_impl_parent_class)->dispose (object);
+    GWDSettings *settings;
+
+    settings = GWD_SETTINGS (object);
+
+    g_clear_object (&settings->notified);
+
+    G_OBJECT_CLASS (gwd_settings_parent_class)->dispose (object);
 }
 
 static void
 gwd_settings_finalize (GObject *object)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (object);
-    G_OBJECT_CLASS (gwd_settings_impl_parent_class)->finalize (object);
+    GWDSettings *settings;
 
-    if (priv->metacity_theme)
-    {
-	g_free (priv->metacity_theme);
-	priv->metacity_theme = NULL;
-    }
+    settings = GWD_SETTINGS (object);
 
-    if (priv->metacity_button_layout)
-    {
-	g_free (priv->metacity_button_layout);
-	priv->metacity_button_layout = NULL;
-    }
+    g_free (settings->metacity_theme);
+    g_free (settings->metacity_button_layout);
+    g_free (settings->titlebar_font);
 
-    if (priv->titlebar_font)
-    {
-	g_free (priv->titlebar_font);
-	priv->titlebar_font = NULL;
-    }
-
-    if (priv->notified)
-    {
-	g_object_unref (priv->notified);
-	priv->notified = NULL;
-    }
+    G_OBJECT_CLASS (gwd_settings_parent_class)->finalize (object);
 }
 
 static void
@@ -571,27 +554,32 @@ gwd_settings_set_property (GObject      *object,
 			   const GValue *value,
 			   GParamSpec   *pspec)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (object);
+    GWDSettings *settings;
 
-    switch (property_id)
-    {
-	case GWD_SETTINGS_IMPL_PROPERTY_CMDLINE_OPTIONS:
-	    priv->cmdline_opts = g_value_get_int (value);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED:
-	    priv->blur_type = g_value_get_int (value);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME:
-	    if (priv->metacity_theme)
-		g_free (priv->metacity_theme);
+    settings = GWD_SETTINGS (object);
 
-	    priv->metacity_theme = g_value_dup_string (value);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_SETTINGS_NOTIFIED:
-	    g_return_if_fail (!priv->notified);
-	    priv->notified = (GWDSettingsNotified *) g_value_get_pointer (value);
-	default:
-	    break;
+    switch (property_id) {
+        case PROP_CMDLINE_OPTIONS:
+            settings->cmdline_opts = g_value_get_int (value);
+            break;
+
+        case PROP_BLUR:
+            settings->blur_type = g_value_get_int (value);
+            break;
+
+        case PROP_METACITY_THEME:
+            g_free (settings->metacity_theme);
+            settings->metacity_theme = g_value_dup_string (value);
+            break;
+
+        case PROP_SETTINGS_NOTIFIED:
+            g_return_if_fail (!settings->notified);
+            settings->notified = (GWDSettingsNotified *) g_value_get_pointer (value);
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            break;
     }
 }
 
@@ -601,179 +589,263 @@ gwd_settings_get_property (GObject    *object,
 			   GValue     *value,
 			   GParamSpec *pspec)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (object);
+    GWDSettings *settings;
 
-    switch (property_id)
-    {
-	case GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADOW:
-	    g_value_set_pointer (value, &priv->active_shadow);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADOW:
-	    g_value_set_pointer (value, &priv->inactive_shadow);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS:
-	    g_value_set_boolean (value, priv->use_tooltips);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED:
-	    g_value_set_int (value, priv->blur_type);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME:
-	    g_value_set_string (value, priv->metacity_theme);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_OPACITY:
-	    g_value_set_double (value, priv->metacity_active_opacity);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_OPACITY:
-	    g_value_set_double (value, priv->metacity_inactive_opacity);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADE_OPACITY:
-	    g_value_set_boolean (value, priv->metacity_active_shade_opacity);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADE_OPACITY:
-	    g_value_set_boolean (value, priv->metacity_inactive_shade_opacity);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_BUTTON_LAYOUT:
-	    g_value_set_string (value, priv->metacity_button_layout);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK:
-	    g_value_set_int (value, priv->titlebar_double_click_action);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK:
-	    g_value_set_int (value, priv->titlebar_middle_click_action);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK:
-	    g_value_set_int (value, priv->titlebar_right_click_action);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_MOUSE_WHEEL_ACTION:
-	    g_value_set_int (value, priv->mouse_wheel_action);
-	    break;
-	case GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_FONT:
-	    g_value_set_string (value, priv->titlebar_font);
-	    break;
-	default:
-	    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-	    break;
+    settings = GWD_SETTINGS (object);
+
+    switch (property_id) {
+        case PROP_ACTIVE_SHADOW:
+            g_value_set_pointer (value, &settings->active_shadow);
+            break;
+
+        case PROP_INACTIVE_SHADOW:
+            g_value_set_pointer (value, &settings->inactive_shadow);
+            break;
+
+        case PROP_USE_TOOLTIPS:
+            g_value_set_boolean (value, settings->use_tooltips);
+            break;
+
+        case PROP_BLUR:
+            g_value_set_int (value, settings->blur_type);
+            break;
+
+        case PROP_METACITY_THEME:
+            g_value_set_string (value, settings->metacity_theme);
+            break;
+
+        case PROP_ACTIVE_OPACITY:
+            g_value_set_double (value, settings->metacity_active_opacity);
+            break;
+
+        case PROP_INACTIVE_OPACITY:
+            g_value_set_double (value, settings->metacity_inactive_opacity);
+            break;
+
+        case PROP_ACTIVE_SHADE_OPACITY:
+            g_value_set_boolean (value, settings->metacity_active_shade_opacity);
+            break;
+
+        case PROP_INACTIVE_SHADE_OPACITY:
+            g_value_set_boolean (value, settings->metacity_inactive_shade_opacity);
+            break;
+
+        case PROP_BUTTON_LAYOUT:
+            g_value_set_string (value, settings->metacity_button_layout);
+            break;
+
+        case PROP_TITLEBAR_ACTION_DOUBLE_CLICK:
+            g_value_set_int (value, settings->titlebar_double_click_action);
+            break;
+
+        case PROP_TITLEBAR_ACTION_MIDDLE_CLICK:
+            g_value_set_int (value, settings->titlebar_middle_click_action);
+            break;
+
+        case PROP_TITLEBAR_ACTION_RIGHT_CLICK:
+            g_value_set_int (value, settings->titlebar_right_click_action);
+            break;
+
+        case PROP_MOUSE_WHEEL_ACTION:
+            g_value_set_int (value, settings->mouse_wheel_action);
+            break;
+
+        case PROP_TITLEBAR_FONT:
+            g_value_set_string (value, settings->titlebar_font);
+            break;
+
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            break;
     }
 }
 
 static void
-gwd_settings_impl_class_init (GWDSettingsImplClass *klass)
+gwd_settings_class_init (GWDSettingsClass *settings_class)
 {
-    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GObjectClass *object_class;
 
-    g_type_class_add_private (klass, sizeof (GWDSettingsImplPrivate));
+    object_class = G_OBJECT_CLASS (settings_class);
 
     object_class->dispose = gwd_settings_dispose;
     object_class->finalize = gwd_settings_finalize;
     object_class->get_property = gwd_settings_get_property;
     object_class->set_property = gwd_settings_set_property;
 
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADOW,
-				      "active-shadow");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADOW,
-				      "inactive-shadow");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_USE_TOOLTIPS,
-				      "use-tooltips");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_BLUR_CHANGED,
-				      "blur");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_METACITY_THEME,
-				      "metacity-theme");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_OPACITY,
-				      "metacity-active-opacity");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_OPACITY,
-				      "metacity-inactive-opacity");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_ACTIVE_SHADE_OPACITY,
-				      "metacity-active-shade-opacity");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_INACTIVE_SHADE_OPACITY,
-				      "metacity-inactive-shade-opacity");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_BUTTON_LAYOUT,
-				      "metacity-button-layout");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK,
-				      "titlebar-double-click-action");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK,
-				      "titlebar-middle-click-action");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK,
-				      "titlebar-right-click-action");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_MOUSE_WHEEL_ACTION,
-				      "mouse-wheel-action");
-    g_object_class_override_property (object_class,
-				      GWD_SETTINGS_IMPL_PROPERTY_TITLEBAR_FONT,
-				      "titlebar-font");
-    g_object_class_install_property (object_class,
-				     GWD_SETTINGS_IMPL_PROPERTY_CMDLINE_OPTIONS,
-				     g_param_spec_int ("cmdline-options",
-						       "Command line options",
-						       "Which options were specified on the command line",
-						       0,
-						       G_MAXINT32,
-						       0,
-						       G_PARAM_READABLE |
-						       G_PARAM_WRITABLE |
-						       G_PARAM_CONSTRUCT_ONLY));
-    g_object_class_install_property (object_class,
-				     GWD_SETTINGS_IMPL_PROPERTY_SETTINGS_NOTIFIED,
-				     g_param_spec_pointer ("settings-notified",
-							   "GWDSettingsNotified",
-							   "A GWDSettingsNotified which will be updated",
-							   G_PARAM_WRITABLE |
-							   G_PARAM_CONSTRUCT_ONLY));
+    settings_properties[PROP_ACTIVE_SHADOW] =
+        g_param_spec_pointer ("active-shadow",
+                              "Active Shadow",
+                              "Active Shadow Settings",
+                              G_PARAM_READABLE);
+
+    settings_properties[PROP_INACTIVE_SHADOW] =
+        g_param_spec_pointer ("inactive-shadow",
+                              "Inactive Shadow",
+                              "Inactive Shadow",
+                              G_PARAM_READABLE);
+
+    settings_properties[PROP_USE_TOOLTIPS] =
+        g_param_spec_boolean ("use-tooltips",
+                              "Use Tooltips",
+                              "Use Tooltips Setting",
+                              USE_TOOLTIPS_DEFAULT,
+                              G_PARAM_READABLE);
+
+    settings_properties[PROP_BLUR] =
+        g_param_spec_int ("blur",
+                          "Blur Type",
+                          "Blur type property",
+                          BLUR_TYPE_NONE,
+                          BLUR_TYPE_ALL,
+                          BLUR_TYPE_NONE,
+                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+    settings_properties[PROP_METACITY_THEME] =
+        g_param_spec_string ("metacity-theme",
+                             "Metacity Theme",
+                             "Metacity Theme Setting",
+                             METACITY_THEME_DEFAULT,
+                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+    settings_properties[PROP_ACTIVE_OPACITY] =
+        g_param_spec_double ("metacity-active-opacity",
+                             "Metacity Active Opacity",
+                             "Metacity Active Opacity",
+                             0.0,
+                             1.0,
+                             METACITY_ACTIVE_OPACITY_DEFAULT,
+                             G_PARAM_READABLE);
+
+    settings_properties[PROP_INACTIVE_OPACITY] =
+        g_param_spec_double ("metacity-inactive-opacity",
+                             "Metacity Inactive Opacity",
+                             "Metacity Inactive Opacity",
+                             0.0,
+                             1.0,
+                             METACITY_INACTIVE_OPACITY_DEFAULT,
+                             G_PARAM_READABLE);
+
+    settings_properties[PROP_ACTIVE_SHADE_OPACITY] =
+        g_param_spec_boolean ("metacity-active-shade-opacity",
+                              "Metacity Active Shade Opacity",
+                              "Metacity Active Shade Opacity",
+                              METACITY_ACTIVE_SHADE_OPACITY_DEFAULT,
+                              G_PARAM_READABLE);
+
+    settings_properties[PROP_INACTIVE_SHADE_OPACITY] =
+        g_param_spec_boolean ("metacity-inactive-shade-opacity",
+                              "Metacity Inactive Shade Opacity",
+                              "Metacity Inactive Shade Opacity",
+                              METACITY_INACTIVE_SHADE_OPACITY_DEFAULT,
+                              G_PARAM_READABLE);
+
+    settings_properties[PROP_BUTTON_LAYOUT] =
+        g_param_spec_string ("metacity-button-layout",
+                             "Metacity Button Layout",
+                             "Metacity Button Layout",
+                             METACITY_BUTTON_LAYOUT_DEFAULT,
+                             G_PARAM_READABLE);
+
+    settings_properties[PROP_TITLEBAR_ACTION_DOUBLE_CLICK] =
+        g_param_spec_int ("titlebar-double-click-action",
+                          "Titlebar Action Double Click",
+                          "Titlebar Action Double Click",
+                          CLICK_ACTION_NONE,
+                          CLICK_ACTION_MENU,
+                          DOUBLE_CLICK_ACTION_DEFAULT,
+                          G_PARAM_READABLE);
+
+    settings_properties[PROP_TITLEBAR_ACTION_MIDDLE_CLICK] =
+        g_param_spec_int ("titlebar-middle-click-action",
+                          "Titlebar Action Middle Click",
+                          "Titlebar Action Middle Click",
+                          CLICK_ACTION_NONE,
+                          CLICK_ACTION_MENU,
+                          MIDDLE_CLICK_ACTION_DEFAULT,
+                          G_PARAM_READABLE);
+
+    settings_properties[PROP_TITLEBAR_ACTION_RIGHT_CLICK] =
+        g_param_spec_int ("titlebar-right-click-action",
+                          "Titlebar Action Right Click",
+                          "Titlebar Action Right Click",
+                          CLICK_ACTION_NONE,
+                          CLICK_ACTION_MENU,
+                          RIGHT_CLICK_ACTION_DEFAULT,
+                          G_PARAM_READABLE);
+
+    settings_properties[PROP_MOUSE_WHEEL_ACTION] =
+        g_param_spec_int ("mouse-wheel-action",
+                          "Mouse Wheel Action",
+                          "Mouse Wheel Action",
+                          WHEEL_ACTION_NONE,
+                          WHEEL_ACTION_SHADE,
+                          WHEEL_ACTION_DEFAULT,
+                          G_PARAM_READABLE);
+
+    settings_properties[PROP_TITLEBAR_FONT] =
+        g_param_spec_string ("titlebar-font",
+                             "Titlebar Font",
+                             "Titlebar Font",
+                             TITLEBAR_FONT_DEFAULT,
+                             G_PARAM_READABLE);
+
+    settings_properties[PROP_CMDLINE_OPTIONS] =
+        g_param_spec_int ("cmdline-options",
+                          "Command line options",
+                          "Which options were specified on the command line",
+                          0, G_MAXINT32, 0,
+                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+    settings_properties[PROP_SETTINGS_NOTIFIED] =
+        g_param_spec_pointer ("settings-notified",
+                              "GWDSettingsNotified",
+                              "A GWDSettingsNotified which will be updated",
+                              G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
+
+    g_object_class_install_properties (object_class, LAST_PROP,
+                                       settings_properties);
 }
 
-static void gwd_settings_impl_init (GWDSettingsImpl *self)
+static void
+gwd_settings_init (GWDSettings *settings)
 {
-    GWDSettingsImplPrivate *priv = GET_PRIVATE (self);
-
-    priv->use_tooltips = USE_TOOLTIPS_DEFAULT;
-    priv->active_shadow.shadow_radius = ACTIVE_SHADOW_RADIUS_DEFAULT;
-    priv->active_shadow.shadow_opacity = ACTIVE_SHADOW_OPACITY_DEFAULT;
-    priv->active_shadow.shadow_offset_x = ACTIVE_SHADOW_OFFSET_X_DEFAULT;
-    priv->active_shadow.shadow_offset_y = ACTIVE_SHADOW_OFFSET_Y_DEFAULT;
-    priv->active_shadow.shadow_color[0] = 0;
-    priv->active_shadow.shadow_color[1] = 0;
-    priv->active_shadow.shadow_color[2] = 0;
-    priv->inactive_shadow.shadow_radius = INACTIVE_SHADOW_RADIUS_DEFAULT;
-    priv->inactive_shadow.shadow_opacity = INACTIVE_SHADOW_OPACITY_DEFAULT;
-    priv->inactive_shadow.shadow_offset_x = INACTIVE_SHADOW_OFFSET_X_DEFAULT;
-    priv->inactive_shadow.shadow_offset_y = INACTIVE_SHADOW_OFFSET_Y_DEFAULT;
-    priv->inactive_shadow.shadow_color[0] = 0;
-    priv->inactive_shadow.shadow_color[1] = 0;
-    priv->inactive_shadow.shadow_color[2] = 0;
-    priv->blur_type = BLUR_TYPE_DEFAULT;
-    priv->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
-    priv->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
-    priv->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
-    priv->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
-    priv->metacity_inactive_shade_opacity = METACITY_INACTIVE_SHADE_OPACITY_DEFAULT;
-    priv->metacity_button_layout = g_strdup (METACITY_BUTTON_LAYOUT_DEFAULT);
-    priv->titlebar_double_click_action = DOUBLE_CLICK_ACTION_DEFAULT;
-    priv->titlebar_middle_click_action = MIDDLE_CLICK_ACTION_DEFAULT;
-    priv->titlebar_right_click_action = RIGHT_CLICK_ACTION_DEFAULT;
-    priv->mouse_wheel_action = WHEEL_ACTION_DEFAULT;
-    priv->titlebar_font = g_strdup (TITLEBAR_FONT_DEFAULT);
-    priv->cmdline_opts = 0;
-    priv->notified = NULL;
-    priv->freeze_count = 0;
+    settings->use_tooltips = USE_TOOLTIPS_DEFAULT;
+    settings->active_shadow.shadow_radius = ACTIVE_SHADOW_RADIUS_DEFAULT;
+    settings->active_shadow.shadow_opacity = ACTIVE_SHADOW_OPACITY_DEFAULT;
+    settings->active_shadow.shadow_offset_x = ACTIVE_SHADOW_OFFSET_X_DEFAULT;
+    settings->active_shadow.shadow_offset_y = ACTIVE_SHADOW_OFFSET_Y_DEFAULT;
+    settings->active_shadow.shadow_color[0] = 0;
+    settings->active_shadow.shadow_color[1] = 0;
+    settings->active_shadow.shadow_color[2] = 0;
+    settings->inactive_shadow.shadow_radius = INACTIVE_SHADOW_RADIUS_DEFAULT;
+    settings->inactive_shadow.shadow_opacity = INACTIVE_SHADOW_OPACITY_DEFAULT;
+    settings->inactive_shadow.shadow_offset_x = INACTIVE_SHADOW_OFFSET_X_DEFAULT;
+    settings->inactive_shadow.shadow_offset_y = INACTIVE_SHADOW_OFFSET_Y_DEFAULT;
+    settings->inactive_shadow.shadow_color[0] = 0;
+    settings->inactive_shadow.shadow_color[1] = 0;
+    settings->inactive_shadow.shadow_color[2] = 0;
+    settings->blur_type = BLUR_TYPE_DEFAULT;
+    settings->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
+    settings->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
+    settings->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
+    settings->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
+    settings->metacity_inactive_shade_opacity = METACITY_INACTIVE_SHADE_OPACITY_DEFAULT;
+    settings->metacity_button_layout = g_strdup (METACITY_BUTTON_LAYOUT_DEFAULT);
+    settings->titlebar_double_click_action = DOUBLE_CLICK_ACTION_DEFAULT;
+    settings->titlebar_middle_click_action = MIDDLE_CLICK_ACTION_DEFAULT;
+    settings->titlebar_right_click_action = RIGHT_CLICK_ACTION_DEFAULT;
+    settings->mouse_wheel_action = WHEEL_ACTION_DEFAULT;
+    settings->titlebar_font = g_strdup (TITLEBAR_FONT_DEFAULT);
+    settings->cmdline_opts = 0;
+    settings->notified = NULL;
+    settings->freeze_count = 0;
 
     /* Append all notify funcs so that external state can be updated in case
      * the settings backend can't do it itself */
-    append_to_notify_funcs (self, gwd_settings_notified_update_metacity_theme);
-    append_to_notify_funcs (self, gwd_settings_notified_metacity_button_layout);
-    append_to_notify_funcs (self, gwd_settings_notified_update_frames);
-    append_to_notify_funcs (self, gwd_settings_notified_update_decorations);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_metacity_theme);
+    append_to_notify_funcs (settings, gwd_settings_notified_metacity_button_layout);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_frames);
+    append_to_notify_funcs (settings, gwd_settings_notified_update_decorations);
 }
 
 static gboolean
@@ -825,9 +897,9 @@ set_flag_and_increment (guint n_param,
 }
 
 GWDSettings *
-gwd_settings_impl_new (gint                *blur,
-		       const gchar         **metacity_theme,
-		       GWDSettingsNotified *notified)
+gwd_settings_new (gint                 *blur,
+                  const gchar         **metacity_theme,
+                  GWDSettingsNotified  *notified)
 {
     /* Always N command line parameters + 2 for command line
      * options enum & notified */
@@ -868,7 +940,7 @@ gwd_settings_impl_new (gint                *blur,
 
     ++n_param;
 
-    settings = GWD_SETTINGS_INTERFACE (g_object_newv (GWD_TYPE_SETTINGS_IMPL, n_param, param));
+    settings = g_object_newv (GWD_TYPE_SETTINGS, n_param, param);
 
     g_value_unset (&blur_value);
     g_value_unset (&metacity_theme_value);

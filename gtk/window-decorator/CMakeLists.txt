@@ -29,9 +29,6 @@ if (USE_GTK)
     add_library (gtk_window_decorator_cairo_window_decoration_util
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-cairo-window-decoration-util.c)
 
-    add_library (gtk_window_decorator_settings_interface STATIC
-		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-interface.c)
-
     add_library (gtk_window_decorator_settings STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings.c)
 
@@ -43,7 +40,6 @@ if (USE_GTK)
 
     set (GTK_WINDOW_DECORATOR_ADDITIONAL_LIBRARIES
 	 gtk_window_decorator_settings_notified_interface
-	 gtk_window_decorator_settings_interface
 	 gtk_window_decorator_settings_writable_interface
 	 gtk_window_decorator_settings
 	 gtk_window_decorator_metacity_window_decoration_util

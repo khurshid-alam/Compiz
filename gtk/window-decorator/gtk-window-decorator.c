@@ -26,7 +26,6 @@
 #include "gtk-window-decorator.h"
 #include "gwd-settings-writable-interface.h"
 #include "gwd-settings.h"
-#include "gwd-settings-interface.h"
 #include "gwd-settings-notified-interface.h"
 #include "gwd-settings-notified.h"
 
@@ -290,9 +289,9 @@ main (int argc, char *argv[])
     if (!notified)
 	return 1;
 
-    writable = GWD_SETTINGS_WRITABLE_INTERFACE (gwd_settings_impl_new (option_blur_type != BLUR_TYPE_NONE ? &option_blur_type : NULL,
-								       option_meta_theme ? &option_meta_theme : NULL,
-								       notified));
+    writable = GWD_SETTINGS_WRITABLE_INTERFACE (gwd_settings_new (option_blur_type != BLUR_TYPE_NONE ? &option_blur_type : NULL,
+                                                                  option_meta_theme ? &option_meta_theme : NULL,
+                                                                  notified));
 
     if (!writable)
     {
@@ -300,7 +299,7 @@ main (int argc, char *argv[])
 	return 1;
     }
 
-    settings = GWD_SETTINGS_INTERFACE (writable);
+    settings = GWD_SETTINGS (writable);
 
     gwd_settings_writable_freeze_updates (writable);
 

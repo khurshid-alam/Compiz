@@ -24,7 +24,7 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-interface.h"
+#include "gwd-settings.h"
 
 #define DOUBLE_CLICK_DISTANCE 8.0f
 
