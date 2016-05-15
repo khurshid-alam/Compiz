@@ -1,3 +1,9 @@
+compiz (1:0.9.12.2+16.04.20160415-0ubuntu2) yakkety; urgency=medium
+
+  * No-change rebuild for libpng soname change.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 23 Apr 2016 00:01:37 +0000
+
 compiz (1:0.9.12.2+16.04.20160415-0ubuntu1) xenial; urgency=medium
 
   [ Martin Wimpress ]
