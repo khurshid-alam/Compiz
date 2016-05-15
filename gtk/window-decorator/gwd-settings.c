@@ -137,7 +137,7 @@ append_to_notify_funcs (GWDSettings *settings,
     link = g_list_find (settings->notify_funcs, func);
 
     if (link)
-      settings->notify_funcs = g_list_remove_link (settings->notify_funcs, link);
+        settings->notify_funcs = g_list_remove_link (settings->notify_funcs, link);
 
     settings->notify_funcs = g_list_append (settings->notify_funcs, (gpointer) func);
 }
@@ -502,7 +502,7 @@ gwd_settings_thaw_updates (GWDSettingsWritable *writable)
     GWDSettings *settings = GWD_SETTINGS (writable);
 
     if (settings->freeze_count)
-      --settings->freeze_count;
+        --settings->freeze_count;
 
     release_notify_funcs (settings);
 }
