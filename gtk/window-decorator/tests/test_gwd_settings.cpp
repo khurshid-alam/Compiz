@@ -854,25 +854,12 @@ class GWDSettingsTestClickActions :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    /*mGMockNotified.reset (new GWDMockSettingsNotifiedGMock ());
-	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
-				 boost::bind (gwd_settings_notified_do_nothing, _1));*/
 	    mSettings.reset (gwd_settings_new (NULL, NULL),
 			     boost::bind (gwd_settings_unref, _1));
 	}
 
-	virtual void TearDown ()
-	{
-	    /*EXPECT_CALL (*mGMockNotified, dispose ());
-	    EXPECT_CALL (*mGMockNotified, finalize ());*/
-
-	    GWDSettingsTestCommon::TearDown ();
-	}
-
     protected:
 
-	/*boost::shared_ptr <GWDMockSettingsNotifiedGMock> mGMockNotified;
-	boost::shared_ptr <GWDSettingsNotified> mMockNotified;*/
 	boost::shared_ptr <GWDSettings> mSettings;
 };
 

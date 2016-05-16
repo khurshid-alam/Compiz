@@ -24,6 +24,7 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-metacity-window-decoration-util.h"
 #include "gwd-settings-writable-interface.h"
 #include "gwd-settings.h"
 
@@ -135,6 +136,84 @@ XRenderPictFormat *xformat_rgb;
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM] = {
     "normal", "modal_dialog", "dialog", "menu", "utility"
 };
+
+static void
+update_decorations_cb (GWDSettings *settings,
+                       gpointer     user_data)
+{
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+update_frames_cb (GWDSettings *settings,
+                  gpointer     user_data)
+{
+    const gchar *titlebar_font;
+
+    titlebar_font = gwd_settings_get_titlebar_font (settings);
+
+    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+}
+
+static void
+update_metacity_theme_cb (GWDSettings *settings,
+                          gpointer     user_data)
+{
+#ifdef USE_METACITY
+    const gchar *metacity_theme;
+
+    metacity_theme = gwd_settings_get_metacity_theme (settings);
+
+    if (gwd_metacity_window_decoration_update_meta_theme (metacity_theme,
+                                                          meta_theme_get_current,
+                                                          meta_theme_set_current)) {
+        theme_draw_window_decoration = meta_draw_window_decoration;
+        theme_calc_decoration_size = meta_calc_decoration_size;
+        theme_update_border_extents = meta_update_border_extents;
+        theme_get_event_window_position = meta_get_event_window_position;
+        theme_get_button_position = meta_get_button_position;
+        theme_get_title_scale = meta_get_title_scale;
+        theme_get_shadow = meta_get_shadow;
+    } else {
+        g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
+
+        theme_draw_window_decoration = draw_window_decoration;
+        theme_calc_decoration_size = calc_decoration_size;
+        theme_update_border_extents = update_border_extents;
+        theme_get_event_window_position = get_event_window_position;
+        theme_get_button_position = get_button_position;
+        theme_get_title_scale = get_title_scale;
+        theme_get_shadow = cairo_get_shadow;
+    }
+#else
+    theme_draw_window_decoration = draw_window_decoration;
+    theme_calc_decoration_size = calc_decoration_size;
+    theme_update_border_extents = update_border_extents;
+    theme_get_event_window_position = get_event_window_position;
+    theme_get_button_position = get_button_position;
+    theme_get_title_scale = get_title_scale;
+    theme_get_shadow = cairo_get_shadow;
+#endif
+}
+
+static void
+update_metacity_button_layout_cb (GWDSettings *settings,
+                                  gpointer     user_data)
+{
+#ifdef USE_METACITY
+    const gchar *button_layout;
+
+    button_layout = gwd_settings_get_metacity_button_layout (settings);
+
+    if (button_layout) {
+        meta_update_button_layout (button_layout);
+
+        meta_button_layout_set = TRUE;
+    } else {
+        meta_button_layout_set = FALSE;
+    }
+#endif
+}
 
 int
 main (int argc, char *argv[])
@@ -288,6 +367,15 @@ main (int argc, char *argv[])
         return 1;
 
     settings = GWD_SETTINGS (writable);
+
+    g_signal_connect (settings, "update-decorations",
+                      G_CALLBACK (update_decorations_cb), NULL);
+    g_signal_connect (settings, "update-frames",
+                      G_CALLBACK (update_frames_cb), NULL);
+    g_signal_connect (settings, "update-metacity-theme",
+                      G_CALLBACK (update_metacity_theme_cb), NULL);
+    g_signal_connect (settings, "update-metacity-button-layout",
+                      G_CALLBACK (update_metacity_button_layout_cb), NULL);
 
     gwd_settings_writable_freeze_updates (writable);
 

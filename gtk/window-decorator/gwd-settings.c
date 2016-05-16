@@ -23,11 +23,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define WNCK_I_KNOW_THIS_IS_UNSTABLE
-#include <libwnck/libwnck.h>
-
 #include "gtk-window-decorator.h"
-#include "gwd-metacity-window-decoration-util.h"
 #include "gwd-settings.h"
 #include "gwd-settings-writable-interface.h"
 #include "decoration.h"
@@ -123,6 +119,18 @@ enum
 
 static GParamSpec *settings_properties[LAST_PROP] = { NULL };
 
+enum
+{
+  UPDATE_DECORATIONS,
+  UPDATE_FRAMES,
+  UPDATE_METACITY_THEME,
+  UPDATE_METACITY_BUTTON_LAYOUT,
+
+  LAST_SIGNAL
+};
+
+static guint settings_signals[LAST_SIGNAL] = { 0 };
+
 static void gwd_settings_writable_interface_init (GWDSettingsWritableInterface *interface);
 
 G_DEFINE_TYPE_WITH_CODE (GWDSettings, gwd_settings, G_TYPE_OBJECT,
@@ -132,63 +140,25 @@ G_DEFINE_TYPE_WITH_CODE (GWDSettings, gwd_settings, G_TYPE_OBJECT,
 static void
 update_decorations (GWDSettings *settings)
 {
-    decorations_changed (wnck_screen_get_default ());
+    g_signal_emit (settings, settings_signals[UPDATE_DECORATIONS], 0);
 }
 
 static void
 update_frames (GWDSettings *settings)
 {
-    gwd_frames_foreach (set_frames_scales, settings->titlebar_font);
+    g_signal_emit (settings, settings_signals[UPDATE_FRAMES], 0);
 }
 
 static void
 update_metacity_theme (GWDSettings *settings)
 {
-#ifdef USE_METACITY
-    if (gwd_metacity_window_decoration_update_meta_theme (settings->metacity_theme,
-                                                          meta_theme_get_current,
-                                                          meta_theme_set_current)) {
-        theme_draw_window_decoration = meta_draw_window_decoration;
-        theme_calc_decoration_size = meta_calc_decoration_size;
-        theme_update_border_extents = meta_update_border_extents;
-        theme_get_event_window_position = meta_get_event_window_position;
-        theme_get_button_position = meta_get_button_position;
-        theme_get_title_scale = meta_get_title_scale;
-        theme_get_shadow = meta_get_shadow;
-    } else {
-        g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
-
-        theme_draw_window_decoration = draw_window_decoration;
-        theme_calc_decoration_size = calc_decoration_size;
-        theme_update_border_extents = update_border_extents;
-        theme_get_event_window_position = get_event_window_position;
-        theme_get_button_position = get_button_position;
-        theme_get_title_scale = get_title_scale;
-        theme_get_shadow = cairo_get_shadow;
-    }
-#else
-    theme_draw_window_decoration = draw_window_decoration;
-    theme_calc_decoration_size = calc_decoration_size;
-    theme_update_border_extents = update_border_extents;
-    theme_get_event_window_position = get_event_window_position;
-    theme_get_button_position = get_button_position;
-    theme_get_title_scale = get_title_scale;
-    theme_get_shadow = cairo_get_shadow;
-#endif
+    g_signal_emit (settings, settings_signals[UPDATE_METACITY_THEME], 0);
 }
 
 static void
 update_metacity_button_layout (GWDSettings *settings)
 {
-#ifdef USE_METACITY
-    if (settings->metacity_button_layout) {
-        meta_update_button_layout (settings->metacity_button_layout);
-
-        meta_button_layout_set = TRUE;
-    } else {
-        meta_button_layout_set = FALSE;
-    }
-#endif
+    g_signal_emit (settings, settings_signals[UPDATE_METACITY_BUTTON_LAYOUT], 0);
 }
 
 static void
@@ -847,6 +817,26 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
 
     g_object_class_install_properties (object_class, LAST_PROP,
                                        settings_properties);
+
+    settings_signals[UPDATE_DECORATIONS] =
+        g_signal_new ("update-decorations",
+                      GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+    settings_signals[UPDATE_FRAMES] =
+        g_signal_new ("update-frames",
+                      GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+    settings_signals[UPDATE_METACITY_THEME] =
+        g_signal_new ("update-metacity-theme",
+                      GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+    settings_signals[UPDATE_METACITY_BUTTON_LAYOUT] =
+        g_signal_new ("update-metacity-button-layout",
+                      GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
@@ -978,4 +968,22 @@ gwd_settings_new (gint         *blur,
     g_value_unset (&cmdline_opts_value);
 
     return settings;
+}
+
+const gchar *
+gwd_settings_get_metacity_button_layout (GWDSettings *settings)
+{
+    return settings->metacity_button_layout;
+}
+
+const gchar *
+gwd_settings_get_metacity_theme (GWDSettings *settings)
+{
+    return settings->metacity_theme;
+}
+
+const gchar *
+gwd_settings_get_titlebar_font (GWDSettings *settings)
+{
+    return settings->titlebar_font;
 }
