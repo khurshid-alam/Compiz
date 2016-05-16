@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "gtk-window-decorator.h"
 #include "gwd-settings.h"
 #include "gwd-settings-writable-interface.h"
 #include "decoration.h"
