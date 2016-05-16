@@ -1752,7 +1752,7 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 		    CompRect  workArea (screen->currentOutputDev ().workArea ());
 		    workArea.setX (workArea.x() + optionGetXOffset ());
 		    workArea.setY (workArea.y() + optionGetYOffset ());
-		    workArea.setBottom (optionGetYBottomOffset ());
+		    workArea.setBottom (workArea.bottom () + optionGetYBottomOffset ());
 
 		    if (workArea.contains (pointer))
 		    {
