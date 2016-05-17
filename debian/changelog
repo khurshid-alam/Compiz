@@ -1,3 +1,35 @@
+compiz (1:0.9.12.2+16.10.20160517-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * CMake: Remove USE_GSETTINGS option.
+  * Fix memory leaks in GWDSettingsStorage.
+  * OpenGL: use the number of Opaque windows around to decide whether
+    paint the bg or not (LP: #1574866)
+  * Remove GWDSettingsStorageInterface.
+
+  [ Andrea Azzarone ]
+  * Add an option to notify that a key press is actually an "auto
+    repeat" one. (LP: #1572241)
+
+  [ Eleni Maria Stea ]
+  * Expo, Scale: add support for bottom offsets (LP: #1573897, #1562346)
+
+  [ Marco Trevisan (Treviño) ]
+  * Scale: allow to iterate through windows using Tab key
+  * Scale: use the selectedWindow as starting point when focusing a
+    window (LP: #1575168)
+  * Window: call stateChangeNotify when compiz state changed but before
+    changing the WM state (LP: #1521302)
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * Blur: port the plugin to modern OpenGL
+
+  [ handsome_feng ]
+  * Add a YBottomOffset value when stretch maximized windows。 (LP:
+    #1562348)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 17 May 2016 02:53:09 +0000
+
 compiz (1:0.9.12.2+16.04.20160415-0ubuntu2) yakkety; urgency=medium
 
   * No-change rebuild for libpng soname change.
