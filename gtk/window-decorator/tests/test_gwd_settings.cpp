@@ -43,16 +43,14 @@
 
 #include "gwd-settings-interface.h"
 #include "gwd-settings.h"
-#include "gwd-settings-storage-gsettings.h"
+#include "gwd-settings-storage.h"
 #include "gwd-settings-writable-interface.h"
-#include "gwd-settings-storage-interface.h"
 #include "gwd-settings-notified-interface.h"
 
 #include "decoration.h"
 
 #include "compiz_gwd_mock_settings.h"
 #include "compiz_gwd_mock_settings_writable.h"
-#include "compiz_gwd_mock_settings_storage.h"
 #include "compiz_gwd_mock_settings_notified.h"
 
 using ::testing::TestWithParam;
@@ -1288,152 +1286,6 @@ TEST_P (GWDSettingsTestStorageUpdates, TestSetTitlebarActions)
     gwd_settings_storage_update_titlebar_actions (storage);
 }
 
-class GWDMockSettingsStorageFactoryWrapper :
-    public GWDSettingsStorageFactoryWrapperInterface
-{
-    public:
-
-	virtual void SetUp (GWDSettingsWritable *writable)
-	{
-	    mWritable = writable;
-	    mStorageMock.reset (new GWDMockSettingsStorageGMock ());
-	    mStorage.reset (gwd_mock_settings_storage_new (mStorageMock.get ()),
-			    boost::bind (gwd_settings_storage_unref, _1));
-	}
-
-	virtual GWDSettingsStorage * GetStorage ()
-	{
-	    return mStorage.get ();
-	}
-
-	virtual void SetUseTooltips (gboolean useTooltips)
-	{
-	    EXPECT_CALL (*mStorageMock, updateUseTooltips ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_use_tooltips_changed, mWritable, useTooltips)));
-	}
-
-	virtual void SetBlur (const std::string &blurType)
-	{
-	    EXPECT_CALL (*mStorageMock, updateBlur ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_blur_changed, mWritable, blurType.c_str ())));
-	}
-
-	virtual void SetOpacity (gdouble activeOpacity,
-				 gdouble inactiveOpacity,
-				 gboolean activeShadeOpacity,
-				 gboolean inactiveShadeOpacity)
-	{
-	    EXPECT_CALL (*mStorageMock, updateOpacity ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_opacity_changed,
-				mWritable,
-				activeOpacity,
-				inactiveOpacity,
-				activeShadeOpacity,
-				inactiveShadeOpacity)));
-	}
-
-	virtual void SetMetacityTheme (gboolean useMetacityTheme,
-				       const std::string &metacityTheme)
-	{
-	    EXPECT_CALL (*mStorageMock, updateMetacityTheme ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_metacity_theme_changed,
-				mWritable,
-				useMetacityTheme,
-				metacityTheme.c_str ())));
-	}
-
-	virtual void SetButtonLayout (const std::string &buttonLayout)
-	{
-	    EXPECT_CALL (*mStorageMock, updateButtonLayout ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_button_layout_changed, mWritable, buttonLayout.c_str ())));
-	}
-
-	virtual void SetFont (gboolean useSystemFont, const std::string &titlebarFont)
-	{
-	    EXPECT_CALL (*mStorageMock, updateFont ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_font_changed,
-				mWritable,
-				useSystemFont,
-				titlebarFont.c_str ())));
-	}
-
-	virtual void SetTitlebarActions (const std::string &doubleClickAction,
-					 const std::string &middleClickAction,
-					 const std::string &rightClickAction,
-					 const std::string &mouseWheelAction)
-	{
-	    EXPECT_CALL (*mStorageMock, updateTitlebarActions ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_titlebar_actions_changed,
-				mWritable,
-				doubleClickAction.c_str (),
-				middleClickAction.c_str (),
-				rightClickAction.c_str (),
-				mouseWheelAction.c_str ())));
-	}
-
-	virtual void TearDown ()
-	{
-	    if (mStorage)
-	    {
-		EXPECT_CALL (*mStorageMock, dispose ());
-		EXPECT_CALL (*mStorageMock, finalize ());
-	    }
-
-	    mStorage.reset ();
-	    mStorageMock.reset ();
-	}
-
-    private:
-
-	GWDSettingsWritable *mWritable;
-	boost::shared_ptr <GWDMockSettingsStorageGMock> mStorageMock;
-	boost::shared_ptr <GWDSettingsStorage> mStorage;
-};
-
-INSTANTIATE_TEST_CASE_P (MockStorageUpdates, GWDSettingsTestStorageUpdates,
-			 ::testing::Values (boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> (new GWDMockSettingsStorageFactoryWrapper ())));
-
-class GWDSettingsStorageGSettingsTest :
-    public GWDSettingsTestCommon
-{
-};
-
-TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObject)
-{
-    boost::shared_ptr <GWDMockSettingsStorageGMock> mStorageMock (new GWDMockSettingsStorageGMock ());
-    boost::shared_ptr <GWDSettingsStorage>          mStorage (gwd_mock_settings_storage_new  (mStorageMock.get ()),
-							      boost::bind (gwd_settings_storage_unref, _1));
-
-    gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
-    gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
-    gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
-    gwd_connect_org_mate_marco_general_settings (NULL, mStorage.get ());
-
-    EXPECT_CALL (*mStorageMock, dispose ());
-    EXPECT_CALL (*mStorageMock, finalize ());
-}
-
 class GWDSettingsStorageGSettingsFactoryWrapper :
     public GWDSettingsStorageFactoryWrapperInterface
 {
@@ -1444,18 +1296,14 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 	    gsliceEnv.SetUpEnv ();
 	    gsettingsEnv.SetUpEnv (MOCK_PATH);
 
-	    /* We do not need to keep a reference to these */
-	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
-	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
-	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
-	    mMarcoSettings = gwd_get_org_mate_marco_general_settings ();
-
-	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
-								mMetacitySettings,
-								mMarcoSettings,
-								mGWDSettings,
-								writable),
+	    mStorage.reset (gwd_settings_storage_new (writable, FALSE),
 			    boost::bind (gwd_settings_storage_unref, _1));
+
+	    /* We do not need to keep a reference to these */
+	    mGWDSettings = gwd_get_org_compiz_gwd_settings (GetStorage ());
+	    mMetacitySettings = gwd_get_org_gnome_metacity_settings (GetStorage ());
+	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings (GetStorage ());
+	    mMarcoSettings = gwd_get_org_mate_marco_general_settings (GetStorage ());
 	}
 
 	virtual GWDSettingsStorage * GetStorage ()
