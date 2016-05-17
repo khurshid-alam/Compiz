@@ -921,6 +921,8 @@ ExpoScreen::paintWall (const GLScreenPaintAttrib &attrib,
     /* translate expo to center */
     sTransform.translate (vpSize.x () * sx * -0.5 + offsetInWorldCoordX,
 			  vpSize.y () * sy *  0.5 - offsetInWorldCoordY, 0.0f);
+
+    worldScaleFactorY -= (float)optionGetYBottomOffset () / (float)output->height ();
     sTransform.scale (worldScaleFactorX, worldScaleFactorY, 1.0f);
 
 

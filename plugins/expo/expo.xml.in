@@ -149,6 +149,12 @@
 		    <_long>Vertical offset (in pixels).</_long>
 		    <default>24</default>
 		</option>
+		<option name="y_bottom_offset" type="int">
+		    <_short>Y Bottom Offset</_short>
+		    <_long>Vertical offset from the bottom (in pixels).</_long>
+		    <default>0</default>
+		    <min>0</min>
+		</option>
 		<option name="distance" type="float">
 		    <_short>Camera Distance</_short>
 		    <_long>The distance between the camera and the exposed viewports.</_long>
