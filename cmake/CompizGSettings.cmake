@@ -1,10 +1,4 @@
 option (
-    USE_GSETTINGS
-    "Generate GSettings schemas"
-    ON
-)
-
-option (
     COMPIZ_DISABLE_GS_SCHEMAS_INSTALL
     "Disables gsettings schema installation"
     OFF
@@ -74,8 +68,7 @@ function (compiz_install_gsettings_schema _src _dst)
 
     if (PKG_CONFIG_TOOL AND
 	GLIB_COMPILE_SCHEMAS AND NOT
-	COMPIZ_DISABLE_SCHEMAS_INSTALL AND
-	USE_GSETTINGS)
+	COMPIZ_DISABLE_SCHEMAS_INSTALL)
 
 	# Install schema file
 	install (CODE "
@@ -111,8 +104,7 @@ function (compiz_install_gsettings_schema _src _dst)
 
     endif (PKG_CONFIG_TOOL AND
 	   GLIB_COMPILE_SCHEMAS AND NOT
-	   COMPIZ_DISABLE_SCHEMAS_INSTALL AND
-	   USE_GSETTINGS)
+	   COMPIZ_DISABLE_SCHEMAS_INSTALL)
 endfunction ()
 
 function (add_gsettings_local_recompilation_rule _schemas)
@@ -195,13 +187,13 @@ function (add_gsettings_schema_to_recompilation_list _schema_file_name)
 
 endfunction ()
 
-# generate gconf schema
+# generate gsettings schema
 function (compiz_gsettings_schema _name _src _dst _inst)
     find_program (XSLTPROC_EXECUTABLE xsltproc)
     find_program (GLIB_COMPILE_SCHEMAS glib-compile-schemas)
     mark_as_advanced (FORCE XSLTPROC_EXECUTABLE)
 
-    if (XSLTPROC_EXECUTABLE AND GLIB_COMPILE_SCHEMAS AND USE_GSETTINGS)
+    if (XSLTPROC_EXECUTABLE AND GLIB_COMPILE_SCHEMAS)
 	add_custom_command (
 	    OUTPUT ${_dst}
 	    COMMAND ${XSLTPROC_EXECUTABLE}

@@ -20,10 +20,7 @@ add_subdirectory (libcompizconfig)
 add_subdirectory (compizconfig-python)
 add_subdirectory (integration)
 add_subdirectory (ccsm)
-
-if (USE_GSETTINGS)
-    add_subdirectory (gsettings)
-endif (USE_GSETTINGS)
+add_subdirectory (gsettings)
 
 if (COMPIZ_BUILD_TESTING)
     add_subdirectory (mocks)

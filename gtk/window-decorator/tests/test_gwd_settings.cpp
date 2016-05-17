@@ -1414,7 +1414,6 @@ class GWDMockSettingsStorageFactoryWrapper :
 INSTANTIATE_TEST_CASE_P (MockStorageUpdates, GWDSettingsTestStorageUpdates,
 			 ::testing::Values (boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> (new GWDMockSettingsStorageFactoryWrapper ())));
 
-#ifdef USE_GSETTINGS
 class GWDSettingsStorageGSettingsTest :
     public GWDSettingsTestCommon
 {
@@ -1579,5 +1578,3 @@ class GWDSettingsStorageGSettingsFactoryWrapper :
 
 INSTANTIATE_TEST_CASE_P (GSettingsStorageUpdates, GWDSettingsTestStorageUpdates,
 			 ::testing::Values (boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> (new GWDSettingsStorageGSettingsFactoryWrapper ())));
-
-#endif
