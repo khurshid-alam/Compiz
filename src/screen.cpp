@@ -5451,7 +5451,8 @@ PrivateScreen::PrivateScreen (CompScreen *screen, cps::WindowManager& windowMana
     edgeWindow (None),
     edgeDelayTimer (),
     xdndWindow (None),
-    windowManager(windowManager)
+    windowManager(windowManager),
+    nextKeyPressIsRepeated_(false)
 {
     for (int i = 0; i < SCREEN_EDGE_NUM; i++)
     {

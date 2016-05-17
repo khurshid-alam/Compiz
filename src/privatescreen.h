@@ -818,6 +818,8 @@ private:
     compiz::private_screen::PluginManager pluginManager;
     compiz::private_screen::WindowManager& windowManager;
     CompOption::Vector resourceManager;
+
+    bool nextKeyPressIsRepeated_;
 };
 
 class CompManager
