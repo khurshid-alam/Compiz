@@ -1372,7 +1372,11 @@ CompWindow::map ()
 	screen->updateClientList ();
 
 	if (priv->type & CompWindowTypeDesktopMask)
-	    screen->incrementDesktopWindowCount();
+	{
+	    screen->incrementDesktopWindowCount ();
+	    if (!alpha ())
+	        screen->incrementOpaqueDesktopWindowCount ();
+	}
 
 	if (priv->protocols & CompWindowProtocolSyncRequestMask)
 	{
@@ -1456,7 +1460,11 @@ CompWindow::unmap ()
 	return;
 
     if (priv->type == CompWindowTypeDesktopMask)
-	screen->decrementDesktopWindowCount();
+    {
+	screen->decrementDesktopWindowCount ();
+	if (!alpha ())
+	    screen->decrementOpaqueDesktopWindowCount ();
+    }
 
     priv->attrib.map_state = IsUnmapped;
     priv->invisible        = true;
@@ -6333,7 +6341,11 @@ CompWindow::~CompWindow ()
     if (priv->attrib.map_state == IsViewable)
     {
 	if (priv->type == CompWindowTypeDesktopMask)
+	{
 	    screen->decrementDesktopWindowCount ();
+	    if (!alpha ())
+	        screen->decrementOpaqueDesktopWindowCount ();
+	}
 
 	if (priv->destroyed && priv->struts)
 	    screen->updateWorkarea ();
