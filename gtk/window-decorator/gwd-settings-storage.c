@@ -100,21 +100,15 @@ get_settings_no_abort (const gchar *schema)
     return settings;
 }
 
-static inline gchar *
-translate_dashes_to_underscores (const gchar *original)
+static void
+translate_dashes_to_underscores (gchar *original)
 {
     gint i = 0;
-    gchar *copy = g_strdup (original);
 
-    if (!copy)
-        return NULL;
-
-    for (; i < strlen (copy); ++i) {
-        if (copy[i] == '-')
-            copy[i] = '_';
+    for (i = 0; i < strlen (original); ++i) {
+        if (original[i] == '-')
+            original[i] = '_';
     }
-
-    return copy;
 }
 
 static void
@@ -348,13 +342,16 @@ gboolean
 gwd_settings_storage_update_blur (GWDSettingsStorage *storage)
 {
     gchar *blur_type;
+    gboolean retval;
 
     if (!storage->gwd)
         return FALSE;
 
     blur_type = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_BLUR_TYPE);
+    retval = gwd_settings_writable_blur_changed (storage->writable, blur_type);
+    g_free (blur_type);
 
-    return gwd_settings_writable_blur_changed (storage->writable, blur_type);
+    return retval;
 }
 
 gboolean
@@ -362,6 +359,7 @@ gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
     gchar *theme;
+    gboolean retval;
 
     if (!storage->gwd)
         return FALSE;
@@ -375,9 +373,10 @@ gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *storage)
     else
         return FALSE;
 
-    return gwd_settings_writable_metacity_theme_changed (storage->writable,
-                                                         use_metacity_theme,
-                                                         theme);
+    retval = gwd_settings_writable_metacity_theme_changed (storage->writable, use_metacity_theme, theme);
+    g_free (theme);
+
+    return retval;
 }
 
 gboolean
@@ -404,6 +403,7 @@ gboolean
 gwd_settings_storage_update_button_layout (GWDSettingsStorage *storage)
 {
     gchar *button_layout;
+    gboolean retval;
 
     if (storage->is_mate_desktop)
         button_layout = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
@@ -412,7 +412,10 @@ gwd_settings_storage_update_button_layout (GWDSettingsStorage *storage)
     else
         return FALSE;
 
-    return gwd_settings_writable_button_layout_changed (storage->writable, button_layout);
+    retval = gwd_settings_writable_button_layout_changed (storage->writable, button_layout);
+    g_free (button_layout);
+
+    return retval;
 }
 
 gboolean
@@ -420,6 +423,7 @@ gwd_settings_storage_update_font (GWDSettingsStorage *storage)
 {
     gchar *titlebar_font;
     gboolean titlebar_system_font;
+    gboolean retval;
 
     if (storage->is_mate_desktop) {
         titlebar_font = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
@@ -430,9 +434,10 @@ gwd_settings_storage_update_font (GWDSettingsStorage *storage)
     } else
         return FALSE;
 
-    return gwd_settings_writable_font_changed (storage->writable,
-                                               titlebar_system_font,
-                                               titlebar_font);
+    retval = gwd_settings_writable_font_changed (storage->writable, titlebar_system_font, titlebar_font);
+    g_free (titlebar_font);
+
+    return retval;
 }
 
 gboolean
@@ -441,42 +446,39 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
     gchar *double_click_action;
     gchar *middle_click_action;
     gchar *right_click_action;
+    gchar *mouse_wheel_action;
+    gboolean retval;
 
     if (!storage->gwd)
         return FALSE;
 
     if (storage->is_mate_desktop) {
-        double_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->marco,
-										      ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR));
-        middle_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->marco,
-										      ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR));
-        right_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->marco,
-										      ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR));
+        double_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR);
+        middle_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR);
+        right_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR);
     } else if (storage->desktop) {
-        double_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->desktop,
-											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR));
-        middle_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->desktop,
-											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR));
-        right_click_action = translate_dashes_to_underscores (g_settings_get_string (storage->desktop,
-											 ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR));
+        double_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR);
+        middle_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR);
+        right_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR);
     } else
         return FALSE;
 
-    return gwd_settings_writable_titlebar_actions_changed (storage->writable,
-							   double_click_action,
-							   middle_click_action,
-							   right_click_action,
-							   g_settings_get_string (storage->gwd,
-										  ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION));
+    translate_dashes_to_underscores (double_click_action);
+    translate_dashes_to_underscores (middle_click_action);
+    translate_dashes_to_underscores (right_click_action);
 
-    if (double_click_action)
-        g_free (double_click_action);
+    mouse_wheel_action = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION);
 
-    if (middle_click_action)
-        g_free (middle_click_action);
+    retval = gwd_settings_writable_titlebar_actions_changed (storage->writable, double_click_action,
+                                                             middle_click_action, right_click_action,
+                                                             mouse_wheel_action);
 
-    if (right_click_action)
-        g_free (right_click_action);
+    g_free (double_click_action);
+    g_free (middle_click_action);
+    g_free (right_click_action);
+    g_free (mouse_wheel_action);
+
+    return retval;
 }
 
 GSettings *
