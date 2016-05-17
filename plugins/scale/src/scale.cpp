@@ -1534,7 +1534,7 @@ PrivateScaleScreen::moveFocusWindow (int dx,
     CompWindow *active;
     CompWindow *focus = NULL;
 
-    active = screen->findWindow (screen->activeWindow ());
+    active = screen->findWindow (selectedWindow ? selectedWindow : screen->activeWindow ());
     if (active)
     {
 	SCALE_WINDOW (active);
