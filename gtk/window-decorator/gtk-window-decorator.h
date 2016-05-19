@@ -113,6 +113,7 @@ extern GWDTheme *gwd_theme;
 extern gdouble decoration_alpha;
 #ifdef USE_METACITY
 extern gboolean meta_button_layout_set;
+extern MetaButtonLayout meta_button_layout;
 #endif
 
 extern Atom frame_input_window_atom;

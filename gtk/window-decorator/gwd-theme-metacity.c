@@ -17,8 +17,6 @@
 
 #include "config.h"
 
-#include <metacity-private/theme.h>
-
 #include "gtk-window-decorator.h"
 #include "gwd-theme-metacity.h"
 
@@ -30,6 +28,106 @@ struct _GWDThemeMetacity
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
+
+void
+gwd_theme_metacity_get_decoration_geometry (GWDThemeMetacity  *metacity,
+                                            decor_t           *decor,
+                                            MetaFrameFlags    *flags,
+                                            MetaFrameGeometry *fgeom,
+                                            MetaButtonLayout  *button_layout,
+                                            MetaFrameType      frame_type)
+{
+    GdkScreen *screen;
+    MetaStyleInfo *style_info;
+    gint client_width;
+    gint client_height;
+
+    if (!(frame_type < META_FRAME_TYPE_LAST))
+        frame_type = META_FRAME_TYPE_NORMAL;
+
+    if (meta_button_layout_set) {
+        *button_layout = meta_button_layout;
+    } else {
+        gint i;
+
+        button_layout->left_buttons[0] = META_BUTTON_FUNCTION_MENU;
+
+        for (i = 1; i < MAX_BUTTONS_PER_CORNER; ++i)
+            button_layout->left_buttons[i] = META_BUTTON_FUNCTION_LAST;
+
+        button_layout->right_buttons[0] = META_BUTTON_FUNCTION_MINIMIZE;
+        button_layout->right_buttons[1] = META_BUTTON_FUNCTION_MAXIMIZE;
+        button_layout->right_buttons[2] = META_BUTTON_FUNCTION_CLOSE;
+
+        for (i = 3; i < MAX_BUTTONS_PER_CORNER; ++i)
+            button_layout->right_buttons[i] = META_BUTTON_FUNCTION_LAST;
+    }
+
+    *flags = 0;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_CLOSE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_DELETE;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_MINIMIZE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_MINIMIZE;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_MAXIMIZE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_MAXIMIZE;
+
+    *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_MENU;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_RESIZE) {
+        if (!(decor->state & WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY))
+            *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_VERTICAL_RESIZE;
+
+        if (!(decor->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY))
+            *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_HORIZONTAL_RESIZE;
+    }
+
+    if (decor->actions & WNCK_WINDOW_ACTION_MOVE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_MOVE;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_MAXIMIZE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_MAXIMIZE;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_SHADE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ALLOWS_SHADE;
+
+    if (decor->active)
+        *flags |= (MetaFrameFlags ) META_FRAME_HAS_FOCUS;
+
+    if ((decor->state & META_MAXIMIZED) == META_MAXIMIZED)
+        *flags |= (MetaFrameFlags ) META_FRAME_MAXIMIZED;
+
+    if (decor->state & WNCK_WINDOW_STATE_STICKY)
+        *flags |= (MetaFrameFlags ) META_FRAME_STUCK;
+
+    if (decor->state & WNCK_WINDOW_STATE_FULLSCREEN)
+        *flags |= (MetaFrameFlags ) META_FRAME_FULLSCREEN;
+
+    if (decor->state & WNCK_WINDOW_STATE_SHADED)
+        *flags |= (MetaFrameFlags ) META_FRAME_SHADED;
+
+    if (decor->state & WNCK_WINDOW_STATE_ABOVE)
+        *flags |= (MetaFrameFlags ) META_FRAME_ABOVE;
+
+    client_width = decor->border_layout.top.x2 - decor->border_layout.top.x1;
+    client_width -= decor->context->right_space + decor->context->left_space;
+
+    if (decor->border_layout.rotation)
+        client_height = decor->border_layout.left.x2 - decor->border_layout.left.x1;
+    else
+        client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
+
+    screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
+
+    meta_theme_calc_geometry (metacity->theme, style_info, frame_type,
+                              decor->frame->text_height, *flags, client_width,
+                              client_height, button_layout, fgeom);
+
+    meta_style_info_unref (style_info);
+}
 
 static GObject *
 gwd_theme_metacity_constructor (GType                  type,

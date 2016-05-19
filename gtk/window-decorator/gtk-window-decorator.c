@@ -35,6 +35,7 @@ GWDTheme *gwd_theme;
 gdouble decoration_alpha = 0.5;
 #ifdef USE_METACITY
 gboolean	 meta_button_layout_set = FALSE;
+MetaButtonLayout meta_button_layout;
 #endif
 
 gboolean minimal = FALSE;
