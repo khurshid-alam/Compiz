@@ -27,6 +27,29 @@ struct _GWDThemeCairo
 
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
 
+static void
+calc_button_size (decor_t *decor)
+{
+    gint button_width = 0;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_CLOSE)
+        button_width += 17;
+
+    if (decor->actions & (WNCK_WINDOW_ACTION_MAXIMIZE_HORIZONTALLY |
+                          WNCK_WINDOW_ACTION_MAXIMIZE_VERTICALLY |
+                          WNCK_WINDOW_ACTION_UNMAXIMIZE_HORIZONTALLY |
+                          WNCK_WINDOW_ACTION_UNMAXIMIZE_VERTICALLY))
+        button_width += 17;
+
+    if (decor->actions & WNCK_WINDOW_ACTION_MINIMIZE)
+        button_width += 17;
+
+    if (button_width)
+        ++button_width;
+
+    decor->button_width = button_width;
+}
+
 static gboolean
 button_present (decor_t *decor,
                 gint     i)
@@ -58,6 +81,87 @@ button_present (decor_t *decor,
 
         default:
             break;
+    }
+
+    return FALSE;
+}
+
+static gboolean
+gwd_theme_cairo_calc_decoration_size (GWDTheme *theme,
+                                      decor_t  *decor,
+                                      gint      w,
+                                      gint      h,
+                                      gint      name_width,
+                                      gint     *width,
+                                      gint     *height)
+{
+    decor_layout_t layout;
+    gint top_width;
+
+    if (!decor->decorated)
+        return FALSE;
+
+    /* To avoid wasting texture memory, we only calculate the minimal
+     * required decoration size then clip and stretch the texture where
+     * appropriate
+     */
+
+    if (!decor->frame_window) {
+        calc_button_size (decor);
+
+        if (w < ICON_SPACE + decor->button_width)
+            return FALSE;
+
+        top_width = name_width + decor->button_width + ICON_SPACE;
+        if (w < top_width)
+            top_width = MAX (ICON_SPACE + decor->button_width, w);
+
+        if (decor->active)
+            decor_get_default_layout (&decor->frame->window_context_active, top_width, 1, &layout);
+        else
+            decor_get_default_layout (&decor->frame->window_context_inactive, top_width, 1, &layout);
+
+        if (!decor->context || memcmp (&layout, &decor->border_layout, sizeof (layout))) {
+            *width  = layout.width;
+            *height = layout.height;
+
+            decor->border_layout = layout;
+            if (decor->active) {
+                decor->context = &decor->frame->window_context_active;
+                decor->shadow = decor->frame->border_shadow_active;
+            } else {
+                decor->context = &decor->frame->window_context_inactive;
+                decor->shadow = decor->frame->border_shadow_inactive;
+            }
+
+            return TRUE;
+        }
+    } else {
+        calc_button_size (decor);
+
+        /* _default_win_extents + top height */
+
+        top_width = name_width + decor->button_width + ICON_SPACE;
+        if (w < top_width)
+            top_width = MAX (ICON_SPACE + decor->button_width, w);
+
+        decor_get_default_layout (&decor->frame->window_context_no_shadow,
+                                  decor->client_width, decor->client_height,
+                                  &layout);
+
+        *width = layout.width;
+        *height = layout.height;
+
+        decor->border_layout = layout;
+        if (decor->active) {
+            decor->context = &decor->frame->window_context_active;
+            decor->shadow = decor->frame->border_shadow_active;
+        } else {
+            decor->context = &decor->frame->window_context_inactive;
+            decor->shadow = decor->frame->border_shadow_inactive;
+        }
+
+        return TRUE;
     }
 
     return FALSE;
@@ -171,6 +275,7 @@ gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
 
     theme_class = GWD_THEME_CLASS (cairo_class);
 
+    theme_class->calc_decoration_size = gwd_theme_cairo_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_cairo_get_event_window_position;
     theme_class->get_button_position = gwd_theme_cairo_get_button_position;

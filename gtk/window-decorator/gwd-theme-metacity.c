@@ -29,6 +29,54 @@ struct _GWDThemeMetacity
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
+static void
+calc_button_size (GWDTheme *theme,
+                  decor_t  *decor)
+{
+    MetaFrameType frame_type;
+    MetaFrameFlags flags;
+    MetaFrameGeometry fgeom;
+    MetaButtonLayout button_layout;
+    gint i, min_x, x, y, w, h, width;
+
+    if (!decor->context) {
+        decor->button_width = 0;
+        return;
+    }
+
+    frame_type = meta_frame_type_from_string (decor->frame->type);
+    if (!(frame_type < META_FRAME_TYPE_LAST))
+        frame_type = META_FRAME_TYPE_NORMAL;
+
+    gwd_theme_metacity_get_decoration_geometry (GWD_THEME_METACITY (theme),
+                                                decor, &flags, &fgeom,
+                                                &button_layout, frame_type);
+
+    width = decor->border_layout.top.x2 - decor->border_layout.top.x1 -
+            decor->context->left_space - decor->context->right_space +
+            fgeom.borders.total.left + fgeom.borders.total.right;
+
+    min_x = width;
+
+    for (i = 0; i < 3; ++i) {
+        static guint button_actions[3] = {
+            WNCK_WINDOW_ACTION_CLOSE,
+            WNCK_WINDOW_ACTION_MAXIMIZE,
+            WNCK_WINDOW_ACTION_MINIMIZE
+        };
+
+        if (decor->actions & button_actions[i]) {
+            if (gwd_theme_get_button_position (theme, decor, i, width, 256,
+                                               &x, &y, &w, &h)) {
+                if (x > width / 2 && x < min_x)
+                    min_x = x;
+            }
+        }
+    }
+
+    decor->button_width = width - min_x;
+}
+
 static gboolean
 button_present (MetaButtonLayout   *button_layout,
                 MetaButtonFunction  function)
@@ -191,6 +239,90 @@ gwd_theme_metacity_constructor (GType                  type,
     metacity->theme = meta_theme_get_current ();
 
     return object;
+}
+
+static gboolean
+gwd_theme_metacity_calc_decoration_size (GWDTheme *theme,
+                                         decor_t  *decor,
+                                         gint      w,
+                                         gint      h,
+                                         gint      name_width,
+                                         gint     *width,
+                                         gint     *height)
+{
+    decor_layout_t layout;
+    decor_context_t *context;
+    decor_shadow_t *shadow;
+
+    if (!decor->decorated)
+        return FALSE;
+
+    if ((decor->state & META_MAXIMIZED) == META_MAXIMIZED) {
+        if (!decor->frame_window) {
+            if (decor->active) {
+                context = &decor->frame->max_window_context_active;
+                shadow = decor->frame->max_border_shadow_active;
+            } else {
+                context = &decor->frame->max_window_context_inactive;
+                shadow = decor->frame->max_border_shadow_inactive;
+            }
+        } else {
+            context = &decor->frame->max_window_context_no_shadow;
+            shadow = decor->frame->max_border_no_shadow;
+        }
+    } else {
+        if (!decor->frame_window) {
+            if (decor->active) {
+                context = &decor->frame->window_context_active;
+                shadow = decor->frame->border_shadow_active;
+            } else {
+                context = &decor->frame->window_context_inactive;
+                shadow = decor->frame->border_shadow_inactive;
+            }
+        } else {
+            context = &decor->frame->window_context_no_shadow;
+            shadow = decor->frame->border_no_shadow;
+        }
+    }
+
+    if (!decor->frame_window) {
+        decor_get_best_layout (context, w, h, &layout);
+
+        if (context != decor->context ||
+            memcmp (&layout, &decor->border_layout, sizeof (layout))) {
+            *width = layout.width;
+            *height = layout.height;
+
+            decor->border_layout = layout;
+            decor->context = context;
+            decor->shadow = shadow;
+
+            calc_button_size (theme, decor);
+
+            return TRUE;
+        }
+    } else {
+        if ((decor->state & META_MAXIMIZED) == META_MAXIMIZED)
+            decor_get_default_layout (context, decor->client_width,
+                                      decor->client_height - decor->frame->titlebar_height,
+                                      &layout);
+        else
+            decor_get_default_layout (context, decor->client_width,
+                                      decor->client_height, &layout);
+
+        *width = layout.width;
+        *height = layout.height;
+
+        decor->border_layout = layout;
+        decor->shadow = shadow;
+        decor->context = context;
+
+        calc_button_size (theme, decor);
+
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static void
@@ -515,6 +647,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 
     object_class->constructor = gwd_theme_metacity_constructor;
 
+    theme_class->calc_decoration_size = gwd_theme_metacity_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;

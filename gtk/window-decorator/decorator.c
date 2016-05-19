@@ -531,7 +531,7 @@ request_update_window_decoration_size (WnckWindow *win)
 
     /* Ask the theme to tell us how much space it needs. If this is not successful
      * update the decoration name and return false */
-    if (!(*theme_calc_decoration_size) (d, w, h, name_width, &width, &height))
+    if (!gwd_theme_calc_decoration_size (gwd_theme, d, w, h, name_width, &width, &height))
     {
 	update_window_decoration_name (win);
 	return FALSE;
