@@ -102,7 +102,6 @@ unsigned long decorations;
 extern gboolean minimal;
 
 extern GWDSettings *settings;
-extern GWDSettingsWritable *writable;
 
 extern GWDTheme *gwd_theme;
 
@@ -742,7 +741,7 @@ set_frames_scales (gpointer key,
 		   gpointer user_data);
 
 void
-init_settings (GWDSettingsWritable *writable);
+init_settings (GWDSettings *settings);
 
 void
 fini_settings ();

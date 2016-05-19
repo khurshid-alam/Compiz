@@ -24,7 +24,7 @@
 
 #include <string.h>
 
-#include "gwd-settings-writable-interface.h"
+#include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 
 const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
@@ -58,24 +58,24 @@ const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT = "button-layout";
 
 struct _GWDSettingsStorage
 {
-    GObject              parent;
+    GObject      parent;
 
-    GWDSettingsWritable *writable;
-    gboolean             connect;
+    GWDSettings *settings;
+    gboolean     connect;
 
-    GSettings           *gwd;
-    GSettings           *desktop;
-    GSettings           *metacity;
-    GSettings           *marco;
+    GSettings   *gwd;
+    GSettings   *desktop;
+    GSettings   *metacity;
+    GSettings   *marco;
 
-    gboolean             is_mate_desktop;
+    gboolean     is_mate_desktop;
 };
 
 enum
 {
     PROP_0,
 
-    PROP_WRITABLE,
+    PROP_SETTINGS,
     PROP_CONNECT,
 
     LAST_PROP
@@ -221,7 +221,7 @@ gwd_settings_storage_dispose (GObject *object)
 
     storage = GWD_SETTINGS_STORAGE (object);
 
-    g_clear_object (&storage->writable);
+    g_clear_object (&storage->settings);
 
     g_clear_object (&storage->gwd);
     g_clear_object (&storage->desktop);
@@ -242,8 +242,8 @@ gwd_settings_storage_set_property (GObject      *object,
     storage = GWD_SETTINGS_STORAGE (object);
 
     switch (property_id) {
-        case PROP_WRITABLE:
-            storage->writable = g_value_dup_object (value);
+        case PROP_SETTINGS:
+            storage->settings = g_value_dup_object (value);
             break;
 
         case PROP_CONNECT:
@@ -267,10 +267,9 @@ gwd_settings_storage_class_init (GWDSettingsStorageClass *storage_class)
     object_class->dispose = gwd_settings_storage_dispose;
     object_class->set_property = gwd_settings_storage_set_property;
 
-    storage_properties[PROP_WRITABLE] =
-        g_param_spec_object ("writable", "GWDWritableSettings",
-                             "A GWDWritableSettings object",
-                             GWD_TYPE_WRITABLE_SETTINGS_INTERFACE,
+    storage_properties[PROP_SETTINGS] =
+        g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
+                             GWD_TYPE_SETTINGS,
                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE |
                              G_PARAM_STATIC_STRINGS);
 
@@ -316,11 +315,11 @@ gwd_settings_storage_init (GWDSettingsStorage *storage)
 }
 
 GWDSettingsStorage *
-gwd_settings_storage_new (GWDSettingsWritable *writable,
-                          gboolean             connect)
+gwd_settings_storage_new (GWDSettings *settings,
+                          gboolean     connect)
 {
     return g_object_new (GWD_TYPE_SETTINGS_STORAGE,
-                         "writable", writable,
+                         "settings", settings,
                          "connect", connect,
                          NULL);
 }
@@ -335,7 +334,7 @@ gwd_settings_storage_update_use_tooltips (GWDSettingsStorage *storage)
 
     use_tooltips = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS);
 
-    return gwd_settings_writable_use_tooltips_changed (storage->writable, use_tooltips);
+    return gwd_settings_use_tooltips_changed (storage->settings, use_tooltips);
 }
 
 gboolean
@@ -348,7 +347,7 @@ gwd_settings_storage_update_blur (GWDSettingsStorage *storage)
         return FALSE;
 
     blur_type = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_BLUR_TYPE);
-    retval = gwd_settings_writable_blur_changed (storage->writable, blur_type);
+    retval = gwd_settings_blur_changed (storage->settings, blur_type);
     g_free (blur_type);
 
     return retval;
@@ -373,7 +372,7 @@ gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *storage)
     else
         return FALSE;
 
-    retval = gwd_settings_writable_metacity_theme_changed (storage->writable, use_metacity_theme, theme);
+    retval = gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
     g_free (theme);
 
     return retval;
@@ -395,8 +394,8 @@ gwd_settings_storage_update_opacity (GWDSettingsStorage *storage)
     active_shade = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY);
     inactive_shade = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY);
 
-    return gwd_settings_writable_opacity_changed (storage->writable, active, inactive,
-                                                  active_shade, inactive_shade);
+    return gwd_settings_opacity_changed (storage->settings, active, inactive,
+                                         active_shade, inactive_shade);
 }
 
 gboolean
@@ -412,7 +411,7 @@ gwd_settings_storage_update_button_layout (GWDSettingsStorage *storage)
     else
         return FALSE;
 
-    retval = gwd_settings_writable_button_layout_changed (storage->writable, button_layout);
+    retval = gwd_settings_button_layout_changed (storage->settings, button_layout);
     g_free (button_layout);
 
     return retval;
@@ -434,7 +433,7 @@ gwd_settings_storage_update_font (GWDSettingsStorage *storage)
     } else
         return FALSE;
 
-    retval = gwd_settings_writable_font_changed (storage->writable, titlebar_system_font, titlebar_font);
+    retval = gwd_settings_font_changed (storage->settings, titlebar_system_font, titlebar_font);
     g_free (titlebar_font);
 
     return retval;
@@ -469,9 +468,9 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
 
     mouse_wheel_action = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION);
 
-    retval = gwd_settings_writable_titlebar_actions_changed (storage->writable, double_click_action,
-                                                             middle_click_action, right_click_action,
-                                                             mouse_wheel_action);
+    retval = gwd_settings_titlebar_actions_changed (storage->settings, double_click_action,
+                                                    middle_click_action, right_click_action,
+                                                    mouse_wheel_action);
 
     g_free (double_click_action);
     g_free (middle_click_action);

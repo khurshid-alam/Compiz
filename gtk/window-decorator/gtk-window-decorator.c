@@ -25,10 +25,8 @@
 
 #include "gtk-window-decorator.h"
 #include "gwd-metacity-window-decoration-util.h"
-#include "gwd-settings-writable-interface.h"
 #include "gwd-settings.h"
 
-GWDSettingsWritable *writable;
 GWDSettings	    *settings;
 GWDTheme *gwd_theme;
 
@@ -195,7 +193,7 @@ main (int argc, char *argv[])
     decor_frame_t *bare_p, *switcher_p;
 
     const char *option_meta_theme = NULL;
-    gint       option_blur_type = 0;
+    gint       option_blur_type = -1;
 
     program_name = argv[0];
 
@@ -324,13 +322,10 @@ main (int argc, char *argv[])
 
     initialize_decorations ();
 
-    writable = GWD_SETTINGS_WRITABLE_INTERFACE (gwd_settings_new (option_blur_type != BLUR_TYPE_NONE ? &option_blur_type : NULL,
-                                                                  option_meta_theme ? &option_meta_theme : NULL));
+    settings = gwd_settings_new (option_blur_type, option_meta_theme);
 
-    if (!writable)
+    if (!settings)
         return 1;
-
-    settings = GWD_SETTINGS (writable);
 
     g_signal_connect (settings, "update-decorations",
                       G_CALLBACK (update_decorations_cb), NULL);
@@ -339,9 +334,9 @@ main (int argc, char *argv[])
     g_signal_connect (settings, "update-metacity-theme",
                       G_CALLBACK (update_metacity_theme_cb), NULL);
 
-    gwd_settings_writable_freeze_updates (writable);
+    gwd_settings_freeze_updates (settings);
 
-    init_settings (writable);
+    init_settings (settings);
 
     for (i = 0; i < 3; ++i)
     {
@@ -360,9 +355,8 @@ main (int argc, char *argv[])
 
     if (!create_tooltip_window ())
     {
-	g_object_unref (writable);
+	g_object_unref (settings);
 
-	free (settings);
 	fprintf (stderr, "%s, Couldn't create tooltip window\n", argv[0]);
 	return 1;
     }
@@ -410,7 +404,7 @@ main (int argc, char *argv[])
 			     WINDOW_DECORATION_TYPE_WINDOW);
 
     /* Update the decorations based on the settings */
-    gwd_settings_writable_thaw_updates (writable);
+    gwd_settings_thaw_updates (settings);
 
     /* Keep the default, bare and switcher decorations around
      * since otherwise they will be spuriously recreated */

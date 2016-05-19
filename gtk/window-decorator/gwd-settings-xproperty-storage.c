@@ -22,24 +22,24 @@
 #include <string.h>
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-writable-interface.h"
+#include "gwd-settings.h"
 #include "gwd-settings-xproperty-storage.h"
 
 struct _GWDSettingsXPropertyStorage
 {
-    GObject              parent;
+    GObject      parent;
 
-    GWDSettingsWritable *writable;
+    GWDSettings *settings;
 
-    Display             *xdpy;
-    Window               root;
+    Display     *xdpy;
+    Window       root;
 };
 
 enum
 {
     PROP_0,
 
-    PROP_WRITABLE_SETTINGS,
+    PROP_SETTINGS,
 
     LAST_PROP
 };
@@ -56,7 +56,7 @@ gwd_settings_xproperty_storage_dispose (GObject *object)
 
     storage = GWD_SETTINGS_XPROPERTY_STORAGE (object);
 
-    g_clear_object (&storage->writable);
+    g_clear_object (&storage->settings);
 
     G_OBJECT_CLASS (gwd_settings_xproperty_storage_parent_class)->dispose (object);
 }
@@ -72,9 +72,9 @@ gwd_settings_xproperty_storage_set_property (GObject      *object,
     storage = GWD_SETTINGS_XPROPERTY_STORAGE (object);
 
     switch (property_id) {
-        case PROP_WRITABLE_SETTINGS:
-            g_return_if_fail (!storage->writable);
-            storage->writable = g_value_dup_object (value);
+        case PROP_SETTINGS:
+            g_return_if_fail (!storage->settings);
+            storage->settings = g_value_dup_object (value);
             break;
 
         default:
@@ -93,10 +93,9 @@ gwd_settings_xproperty_storage_class_init (GWDSettingsXPropertyStorageClass *kla
     object_class->dispose = gwd_settings_xproperty_storage_dispose;
     object_class->set_property = gwd_settings_xproperty_storage_set_property;
 
-    storage_properties[PROP_WRITABLE_SETTINGS] =
-        g_param_spec_object ("writable-settings", "GWDSettingsWritable",
-                             "An object that implements GWDSettingsWritable",
-                             GWD_TYPE_WRITABLE_SETTINGS_INTERFACE,
+    storage_properties[PROP_SETTINGS] =
+        g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
+                             GWD_TYPE_SETTINGS,
                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE |
                              G_PARAM_STATIC_STRINGS);
 
@@ -116,10 +115,10 @@ gwd_settings_xproperty_storage_init (GWDSettingsXPropertyStorage *storage)
 }
 
 GWDSettingsXPropertyStorage *
-gwd_settings_xproperty_storage_new (GWDSettingsWritable *writable)
+gwd_settings_xproperty_storage_new (GWDSettings *settings)
 {
     return g_object_new (GWD_TYPE_SETTINGS_XPROPERTY_STORAGE,
-                         "writable-settings", writable,
+                         "settings", settings,
                          NULL);
 }
 
@@ -201,15 +200,15 @@ gwd_settings_xproperty_storage_update_all (GWDSettingsXPropertyStorage *storage)
         }
     }
 
-    return gwd_settings_writable_shadow_property_changed (storage->writable,
-                                                          (gdouble) MAX (0.0, MIN (aradius, 48.0)),
-                                                          (gdouble) MAX (0.0, MIN (aopacity, 6.0)),
-                                                          (gdouble) MAX (-16, MIN (ax_off, 16)),
-                                                          (gdouble) MAX (-16, MIN (ay_off, 16)),
-                                                          active_shadow_color,
-                                                          (gdouble) MAX (0.0, MIN (iradius, 48.0)),
-                                                          (gdouble) MAX (0.0, MIN (iopacity, 6.0)),
-                                                          (gdouble) MAX (-16, MIN (ix_off, 16)),
-                                                          (gdouble) MAX (-16, MIN (iy_off, 16)),
-                                                          inactive_shadow_color);
+    return gwd_settings_shadow_property_changed (storage->settings,
+                                                 (gdouble) MAX (0.0, MIN (aradius, 48.0)),
+                                                 (gdouble) MAX (0.0, MIN (aopacity, 6.0)),
+                                                 (gdouble) MAX (-16, MIN (ax_off, 16)),
+                                                 (gdouble) MAX (-16, MIN (ay_off, 16)),
+                                                 active_shadow_color,
+                                                 (gdouble) MAX (0.0, MIN (iradius, 48.0)),
+                                                 (gdouble) MAX (0.0, MIN (iopacity, 6.0)),
+                                                 (gdouble) MAX (-16, MIN (ix_off, 16)),
+                                                 (gdouble) MAX (-16, MIN (iy_off, 16)),
+                                                 inactive_shadow_color);
 }

@@ -20,7 +20,6 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-writable-interface.h"
 #include "gwd-settings-storage.h"
 #include "gwd-settings-xproperty-storage.h"
 
@@ -28,10 +27,10 @@ GWDSettingsStorage *storage = NULL;
 GWDSettingsXPropertyStorage *xprop_storage = NULL;
 
 void
-init_settings (GWDSettingsWritable *writable)
+init_settings (GWDSettings *settings)
 {
-    storage = gwd_settings_storage_new (writable, TRUE);
-    xprop_storage = gwd_settings_xproperty_storage_new (writable);
+    storage = gwd_settings_storage_new (settings, TRUE);
+    xprop_storage = gwd_settings_xproperty_storage_new (settings);
 
     gwd_settings_storage_update_metacity_theme (storage);
     gwd_settings_storage_update_opacity (storage);

@@ -32,11 +32,7 @@ if (USE_GTK)
     add_library (gtk_window_decorator_settings STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings.c)
 
-    add_library (gtk_window_decorator_settings_writable_interface STATIC
-		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-writable-interface.c)
-
     set (GTK_WINDOW_DECORATOR_ADDITIONAL_LIBRARIES
-	 gtk_window_decorator_settings_writable_interface
 	 gtk_window_decorator_settings
 	 gtk_window_decorator_metacity_window_decoration_util
 	 gtk_window_decorator_cairo_window_decoration_util)
