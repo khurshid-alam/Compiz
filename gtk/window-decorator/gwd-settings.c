@@ -131,10 +131,8 @@ static void
 append_to_notify_funcs (GWDSettings *settings,
                         NotifyFunc   func)
 {
-    GList *link;
-
     /* Remove if found, the new one will replace the old one */
-    link = g_list_find (settings->notify_funcs, func);
+    GList *link = g_list_find (settings->notify_funcs, func);
 
     if (link)
         settings->notify_funcs = g_list_remove_link (settings->notify_funcs, link);
