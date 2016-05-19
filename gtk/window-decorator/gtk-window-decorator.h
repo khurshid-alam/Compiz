@@ -314,7 +314,6 @@ gboolean (*theme_calc_decoration_size)      (decor_t *d,
 					     int     text_width,
 					     int     *width,
 					     int     *height);
-void     (*theme_update_border_extents)     (decor_frame_t *frame);
 void     (*theme_get_event_window_position) (decor_t *d,
 
 					     gint    i,
@@ -565,9 +564,6 @@ calc_decoration_size (decor_t *d,
 		      gint    *width,
 		      gint    *height);
 
-void
-update_border_extents ();
-
 gboolean
 get_button_position (decor_t *d,
 		     gint    i,
@@ -654,9 +650,6 @@ meta_get_event_window_position (decor_t *d,
 
 gfloat
 meta_get_title_scale (decor_frame_t *);
-
-void
-meta_update_border_extents ();
 
 void
 meta_update_button_layout (const char *value);

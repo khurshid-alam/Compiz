@@ -173,7 +173,6 @@ update_metacity_theme_cb (GWDSettings *settings,
 
         theme_draw_window_decoration = meta_draw_window_decoration;
         theme_calc_decoration_size = meta_calc_decoration_size;
-        theme_update_border_extents = meta_update_border_extents;
         theme_get_event_window_position = meta_get_event_window_position;
         theme_get_button_position = meta_get_button_position;
         theme_get_title_scale = meta_get_title_scale;
@@ -184,7 +183,6 @@ update_metacity_theme_cb (GWDSettings *settings,
 
         theme_draw_window_decoration = draw_window_decoration;
         theme_calc_decoration_size = calc_decoration_size;
-        theme_update_border_extents = update_border_extents;
         theme_get_event_window_position = get_event_window_position;
         theme_get_button_position = get_button_position;
         theme_get_title_scale = get_title_scale;
@@ -194,7 +192,6 @@ update_metacity_theme_cb (GWDSettings *settings,
 
     theme_draw_window_decoration = draw_window_decoration;
     theme_calc_decoration_size = calc_decoration_size;
-    theme_update_border_extents = update_border_extents;
     theme_get_event_window_position = get_event_window_position;
     theme_get_button_position = get_button_position;
     theme_get_title_scale = get_title_scale;

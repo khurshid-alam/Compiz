@@ -16,18 +16,110 @@
  */
 
 #include "config.h"
+
+#include <metacity-private/theme.h>
+
+#include "gtk-window-decorator.h"
 #include "gwd-theme-metacity.h"
 
 struct _GWDThemeMetacity
 {
-    GObject parent;
+    GObject    parent;
+
+    MetaTheme *theme;
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
+static GObject *
+gwd_theme_metacity_constructor (GType                  type,
+                                guint                  n_properties,
+                                GObjectConstructParam *properties)
+{
+    GObject *object;
+    GWDThemeMetacity *metacity;
+
+    object = G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructor (type, n_properties, properties);
+    metacity = GWD_THEME_METACITY (object);
+
+    metacity->theme = meta_theme_get_current ();
+
+    return object;
+}
+
+static void
+gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
+                                          decor_frame_t *frame)
+{
+    GWDThemeMetacity *metacity;
+    GdkScreen *screen;
+    MetaStyleInfo *style_info;
+    MetaFrameBorders borders;
+    MetaFrameType frame_type;
+    gint top_height;
+    gint bottom_height;
+    gint left_width;
+    gint right_width;
+
+    metacity = GWD_THEME_METACITY (theme);
+
+    gwd_decor_frame_ref (frame);
+
+    frame_type = meta_frame_type_from_string (frame->type);
+    if (!(frame_type < META_FRAME_TYPE_LAST))
+        frame_type = META_FRAME_TYPE_NORMAL;
+
+    screen = gtk_widget_get_screen (frame->style_window_rgba);
+    style_info = meta_theme_create_style_info (screen, NULL);
+
+    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
+                                  frame->text_height, 0, &borders);
+
+    top_height = borders.visible.top;
+    bottom_height = borders.visible.bottom;
+    left_width = borders.visible.left;
+    right_width = borders.visible.right;
+
+    frame->win_extents.top = frame->win_extents.top;
+    frame->win_extents.bottom = bottom_height;
+    frame->win_extents.left = left_width;
+    frame->win_extents.right = right_width;
+
+    frame->titlebar_height = top_height - frame->win_extents.top;
+
+    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
+                                  frame->text_height, META_FRAME_MAXIMIZED,
+                                  &borders);
+
+    top_height = borders.visible.top;
+    bottom_height = borders.visible.bottom;
+    left_width = borders.visible.left;
+    right_width = borders.visible.right;
+
+    frame->max_win_extents.top = frame->win_extents.top;
+    frame->max_win_extents.bottom = bottom_height;
+    frame->max_win_extents.left = left_width;
+    frame->max_win_extents.right = right_width;
+
+    frame->max_titlebar_height = top_height - frame->max_win_extents.top;
+
+    meta_style_info_unref (style_info);
+
+    gwd_decor_frame_unref (frame);
+}
+
 static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
+    GObjectClass *object_class;
+    GWDThemeClass *theme_class;
+
+    object_class = G_OBJECT_CLASS (metacity_class);
+    theme_class = GWD_THEME_CLASS (metacity_class);
+
+    object_class->constructor = gwd_theme_metacity_constructor;
+
+    theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
 }
 
 static void
