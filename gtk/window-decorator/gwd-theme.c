@@ -108,6 +108,19 @@ gwd_theme_real_get_shadow (GWDTheme               *theme,
                            decor_shadow_options_t *options,
                            gboolean                active)
 {
+    GWDThemePrivate *priv;
+    decor_shadow_options_t *shadow;
+
+    priv = gwd_theme_get_instance_private (theme);
+    shadow = NULL;
+
+    if (active)
+        g_object_get (priv->settings, "active-shadow", &shadow, NULL);
+    else
+        g_object_get (priv->settings, "inactive-shadow", &shadow, NULL);
+
+    if (shadow)
+        memcpy (options, shadow, sizeof (decor_shadow_options_t));
 }
 
 static void
