@@ -412,6 +412,7 @@ class GWDMockSettingsNotifiedGMock
         }
 
         static void updateMetacityButtonLayoutCb (GWDSettings                  *settings,
+                                                  const gchar                  *button_layout,
                                                   GWDMockSettingsNotifiedGMock *gmock)
         {
             gmock->updateMetacityButtonLayout ();

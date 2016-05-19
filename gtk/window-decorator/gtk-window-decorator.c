@@ -33,10 +33,6 @@ GWDSettings	    *settings;
 GWDTheme *gwd_theme;
 
 gdouble decoration_alpha = 0.5;
-#ifdef USE_METACITY
-gboolean	 meta_button_layout_set = FALSE;
-MetaButtonLayout meta_button_layout;
-#endif
 
 gboolean minimal = FALSE;
 
@@ -181,25 +177,6 @@ update_metacity_theme_cb (GWDSettings *settings,
 #endif
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));
-}
-
-static void
-update_metacity_button_layout_cb (GWDSettings *settings,
-                                  gpointer     user_data)
-{
-#ifdef USE_METACITY
-    const gchar *button_layout;
-
-    button_layout = gwd_settings_get_metacity_button_layout (settings);
-
-    if (button_layout) {
-        meta_update_button_layout (button_layout);
-
-        meta_button_layout_set = TRUE;
-    } else {
-        meta_button_layout_set = FALSE;
-    }
-#endif
 }
 
 int
@@ -361,8 +338,6 @@ main (int argc, char *argv[])
                       G_CALLBACK (update_frames_cb), NULL);
     g_signal_connect (settings, "update-metacity-theme",
                       G_CALLBACK (update_metacity_theme_cb), NULL);
-    g_signal_connect (settings, "update-metacity-button-layout",
-                      G_CALLBACK (update_metacity_button_layout_cb), NULL);
 
     gwd_settings_writable_freeze_updates (writable);
 

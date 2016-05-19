@@ -72,10 +72,6 @@
 #define _(x)  gettext (x)
 #define N_(x) x
 
-#ifdef USE_METACITY
-#include <metacity-private/theme.h>
-#endif
-
 #include <gwd-fwd.h>
 
 #include "gwd-theme.h"
@@ -111,10 +107,6 @@ extern GWDSettingsWritable *writable;
 extern GWDTheme *gwd_theme;
 
 extern gdouble decoration_alpha;
-#ifdef USE_METACITY
-extern gboolean meta_button_layout_set;
-extern MetaButtonLayout meta_button_layout;
-#endif
 
 extern Atom frame_input_window_atom;
 extern Atom frame_output_window_atom;
@@ -547,18 +539,6 @@ create_native_surface_and_wrap (int	  w,
 
 cairo_surface_t *
 surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
-
-/* metacity.c */
-
-#ifdef USE_METACITY
-
-MetaFrameType
-meta_get_frame_type_for_decor_type (const gchar *frame_type);
-
-void
-meta_update_button_layout (const char *value);
-
-#endif
 
 /* switcher.c */
 

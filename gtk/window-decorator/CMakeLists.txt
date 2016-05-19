@@ -83,7 +83,6 @@ if (USE_GTK)
 		    frames.c
 		    gdk.c
 		    switcher.c
-		    metacity.c
 		    events.c
 		    forcequit.c
 		    tooltip.c

@@ -233,6 +233,16 @@ gwd_theme_new (GWDThemeType  type,
                          NULL);
 }
 
+GWDSettings *
+gwd_theme_get_settings (GWDTheme *theme)
+{
+    GWDThemePrivate *priv;
+
+    priv = gwd_theme_get_instance_private (theme);
+
+    return priv->settings;
+}
+
 void
 gwd_theme_get_shadow (GWDTheme               *theme,
                       decor_frame_t          *frame,

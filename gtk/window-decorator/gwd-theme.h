@@ -88,6 +88,9 @@ GWDTheme *
 gwd_theme_new                       (GWDThemeType            type,
                                      GWDSettings            *settings);
 
+GWDSettings *
+gwd_theme_get_settings              (GWDTheme               *theme);
+
 void
 gwd_theme_get_shadow                (GWDTheme               *theme,
                                      decor_frame_t          *frame,
