@@ -325,14 +325,6 @@ void     (*theme_get_event_window_position) (decor_t *d,
 					     gint    *y,
 					     gint    *w,
 					     gint    *h);
-gboolean (*theme_get_button_position)       (decor_t *d,
-					     gint    i,
-					     gint    width,
-					     gint    height,
-					     gint    *x,
-					     gint    *y,
-					     gint    *w,
-					     gint    *h);
 
 extern char *program_name;
 
@@ -564,16 +556,6 @@ calc_decoration_size (decor_t *d,
 		      gint    *width,
 		      gint    *height);
 
-gboolean
-get_button_position (decor_t *d,
-		     gint    i,
-		     gint    width,
-		     gint    height,
-		     gint    *x,
-		     gint    *y,
-		     gint    *w,
-		     gint    *h);
-
 void
 get_event_window_position (decor_t *d,
 			   gint    i,
@@ -623,16 +605,6 @@ meta_calc_decoration_size (decor_t *d,
 			   gint    name_width,
 			   gint    *width,
 			   gint    *height);
-
-gboolean
-meta_get_button_position (decor_t *d,
-			  gint    i,
-			  gint	  width,
-			  gint	  height,
-			  gint    *x,
-			  gint    *y,
-			  gint    *w,
-			  gint    *h);
 
 void
 meta_get_event_window_position (decor_t *d,

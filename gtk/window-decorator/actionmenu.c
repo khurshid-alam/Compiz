@@ -51,11 +51,11 @@ position_action_menu (GtkMenu  *menu,
 
     wnck_window_get_client_window_geometry (win, x, y, &width, &height);
 
-    if (d->decorated)
-    {
-	if ((*theme_get_button_position) (d, BUTTON_MENU, width, height,
-				      &bx, &by, &width, &height))
-	    *x = *x - frame->win_extents.left + bx;
+    if (d->decorated) {
+        if (gwd_theme_get_button_position (gwd_theme, d, BUTTON_MENU,
+                                           width, height, &bx, &by,
+                                           &width, &height))
+            *x = *x - frame->win_extents.left + bx;
     }
 
     gwd_decor_frame_unref (frame);

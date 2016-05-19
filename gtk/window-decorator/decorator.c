@@ -294,7 +294,8 @@ update_event_windows (WnckWindow *win)
 	/* Reparenting mode - if there is a button position for this
 	 * button then set the geometry */
 	if (d->frame_window &&
-	    (*theme_get_button_position) (d, i, width, height, &x, &y, &w, &h))
+	    gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+	                                   &x, &y, &w, &h))
 	{
 	    BoxPtr box = &d->button_windows[i].pos;
 	    box->x1 = x;
@@ -305,8 +306,8 @@ update_event_windows (WnckWindow *win)
 	/* Pixmap mode - if there is a button position for this button then map the window
 	 * and resize it to this position */
 	else if (!d->frame_window &&
-		 (*theme_get_button_position) (d, i, width, height,
-					       &x, &y, &w, &h))
+		 gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+		                                &x, &y, &w, &h))
 	{
 	    Window x11_win = d->button_windows[i].window;
 	    XMapWindow (xdisplay, x11_win);

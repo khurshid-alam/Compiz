@@ -28,23 +28,6 @@
 
 #ifdef USE_METACITY
 
-static gboolean
-meta_button_present (MetaButtonLayout   *button_layout,
-                     MetaButtonFunction  function)
-{
-    int i;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-        if (button_layout->left_buttons[i] == function)
-            return TRUE;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-        if (button_layout->right_buttons[i] == function)
-            return TRUE;
-
-    return FALSE;
-}
-
 static void
 decor_update_meta_window_property (decor_t        *d,
                                    MetaTheme      *theme,
@@ -753,7 +736,8 @@ meta_calc_button_size (decor_t *d)
 
         if (d->actions & button_actions[i])
         {
-            if (meta_get_button_position (d, i, width, 256, &x, &y, &w, &h))
+            if (gwd_theme_get_button_position (gwd_theme, d, i, width, 256,
+                                               &x, &y, &w, &h))
             {
                 if (x > width / 2 && x < min_x)
                     min_x = x;
@@ -762,126 +746,6 @@ meta_calc_button_size (decor_t *d)
     }
 
     d->button_width = width - min_x;
-}
-
-static MetaButtonFunction
-button_to_meta_button_function (gint i)
-{
-    switch (i)
-    {
-    case BUTTON_MENU:
-        return META_BUTTON_FUNCTION_MENU;
-    case BUTTON_MIN:
-        return META_BUTTON_FUNCTION_MINIMIZE;
-    case BUTTON_MAX:
-        return META_BUTTON_FUNCTION_MAXIMIZE;
-    case BUTTON_CLOSE:
-        return META_BUTTON_FUNCTION_CLOSE;
-    case BUTTON_SHADE:
-        return META_BUTTON_FUNCTION_SHADE;
-    case BUTTON_ABOVE:
-        return META_BUTTON_FUNCTION_ABOVE;
-    case BUTTON_STICK:
-        return META_BUTTON_FUNCTION_STICK;
-    case BUTTON_UNSHADE:
-        return META_BUTTON_FUNCTION_UNSHADE;
-    case BUTTON_UNABOVE:
-        return META_BUTTON_FUNCTION_UNABOVE;
-    case BUTTON_UNSTICK:
-        return META_BUTTON_FUNCTION_UNSTICK;
-    default:
-        break;
-    }
-
-    return META_BUTTON_FUNCTION_LAST;
-}
-
-gboolean
-meta_get_button_position (decor_t *d,
-                          gint     i,
-                          gint     width,
-                          gint     height,
-                          gint    *x,
-                          gint    *y,
-                          gint    *w,
-                          gint    *h)
-{
-    MetaButtonLayout button_layout;
-    MetaFrameGeometry fgeom;
-    MetaFrameType frame_type;
-    MetaFrameFlags flags;
-    MetaButtonFunction button_function;
-    MetaButtonSpace *space;
-
-    if (!d->context)
-    {
-        /* undecorated windows implicitly have no buttons */
-        return FALSE;
-    }
-
-    frame_type = meta_frame_type_from_string (d->frame->type);
-    if (!(frame_type < META_FRAME_TYPE_LAST))
-        frame_type = META_FRAME_TYPE_NORMAL;
-
-    gwd_theme_metacity_get_decoration_geometry (GWD_THEME_METACITY (gwd_theme),
-                                                d, &flags, &fgeom,
-                                                &button_layout, frame_type);
-
-    button_function = button_to_meta_button_function (i);
-    if (!meta_button_present (&button_layout, button_function))
-        return FALSE;
-
-    switch (i)
-    {
-    case BUTTON_MENU:
-        space = &fgeom.menu_rect;
-        break;
-    case BUTTON_MIN:
-        space = &fgeom.min_rect;
-        break;
-    case BUTTON_MAX:
-        space = &fgeom.max_rect;
-        break;
-    case BUTTON_CLOSE:
-        space = &fgeom.close_rect;
-        break;
-    case BUTTON_SHADE:
-        space = &fgeom.shade_rect;
-        break;
-    case BUTTON_ABOVE:
-        space = &fgeom.above_rect;
-        break;
-    case BUTTON_STICK:
-        space = &fgeom.stick_rect;
-        break;
-    case BUTTON_UNSHADE:
-        space = &fgeom.unshade_rect;
-        break;
-    case BUTTON_UNABOVE:
-        space = &fgeom.unabove_rect;
-        break;
-    case BUTTON_UNSTICK:
-        space = &fgeom.unstick_rect;
-        break;
-    default:
-        return FALSE;
-    }
-
-    if (!space->clickable.width && !space->clickable.height)
-        return FALSE;
-
-    *x = space->clickable.x;
-    *y = space->clickable.y;
-    *w = space->clickable.width;
-    *h = space->clickable.height;
-
-    if (d->frame_window)
-    {
-        *x += d->frame->win_extents.left + 4;
-        *y += d->frame->win_extents.top + 2;
-    }
-
-    return TRUE;
 }
 
 gboolean
