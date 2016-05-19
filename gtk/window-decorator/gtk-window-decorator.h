@@ -308,8 +308,6 @@ typedef struct _default_frame_references
 extern default_frame_references_t default_frames[WINDOW_TYPE_FRAMES_NUM * 2];
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM];
 
-void     (*theme_draw_window_decoration)    (decor_t *d);
-
 extern char *program_name;
 
 /* list of all decorations */
@@ -507,9 +505,6 @@ draw_shadow_background (decor_t		*d,
 			decor_context_t *c);
 
 void
-draw_window_decoration (decor_t *d);
-
-void
 fill_rounded_rectangle (cairo_t       *cr,
 			double        x,
 			double        y,
@@ -559,9 +554,6 @@ surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 MetaFrameType
 meta_get_frame_type_for_decor_type (const gchar *frame_type);
-
-void
-meta_draw_window_decoration (decor_t *d);
 
 void
 meta_update_button_layout (const char *value);
