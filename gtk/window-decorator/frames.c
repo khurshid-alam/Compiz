@@ -284,8 +284,8 @@ decor_frame_refresh (decor_frame_t *frame)
 	strcmp (frame->type, "bare") != 0)
 	(*theme_update_border_extents) (frame);
 
-    gwd_theme_get_shadow (gwd_theme,frame, &active_o, TRUE);
-    gwd_theme_get_shadow (gwd_theme,frame, &inactive_o, FALSE);
+    gwd_theme_get_shadow (gwd_theme, frame, &active_o, TRUE);
+    gwd_theme_get_shadow (gwd_theme, frame, &inactive_o, FALSE);
 
     info = malloc (sizeof (decor_shadow_info_t));
 
