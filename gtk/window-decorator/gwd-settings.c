@@ -539,9 +539,9 @@ gwd_settings_finalize (GObject *object)
 
     settings = GWD_SETTINGS (object);
 
-    g_free (settings->metacity_theme);
-    g_free (settings->metacity_button_layout);
-    g_free (settings->titlebar_font);
+    g_clear_pointer (&settings->metacity_theme, g_free);
+    g_clear_pointer (&settings->metacity_button_layout, g_free);
+    g_clear_pointer (&settings->titlebar_font, g_free);
 
     G_OBJECT_CLASS (gwd_settings_parent_class)->finalize (object);
 }
