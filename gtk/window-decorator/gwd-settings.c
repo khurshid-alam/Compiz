@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*- */
+
 /*
  * Copyright © 2012 Canonical Ltd
  *
@@ -164,10 +166,8 @@ static void
 append_to_notify_funcs (GWDSettings *settings,
                         NotifyFunc   func)
 {
-    GList *link;
-
     /* Remove if found, the new one will replace the old one */
-    link = g_list_find (settings->notify_funcs, func);
+    GList *link = g_list_find (settings->notify_funcs, func);
 
     if (link)
         settings->notify_funcs = g_list_remove_link (settings->notify_funcs, link);
@@ -201,16 +201,16 @@ release_notify_funcs (GWDSettings *settings)
 
 gboolean
 gwd_settings_shadow_property_changed (GWDSettingsWritable *writable,
-				      gdouble     active_shadow_radius,
-				      gdouble     active_shadow_opacity,
-				      gdouble     active_shadow_offset_x,
-				      gdouble     active_shadow_offset_y,
-				      const gchar *active_shadow_color,
-				      gdouble     inactive_shadow_radius,
-				      gdouble     inactive_shadow_opacity,
-				      gdouble     inactive_shadow_offset_x,
-				      gdouble     inactive_shadow_offset_y,
-				      const gchar *inactive_shadow_color)
+                                      gdouble              active_shadow_radius,
+                                      gdouble              active_shadow_opacity,
+                                      gdouble              active_shadow_offset_x,
+                                      gdouble              active_shadow_offset_y,
+                                      const gchar         *active_shadow_color,
+                                      gdouble              inactive_shadow_radius,
+                                      gdouble              inactive_shadow_opacity,
+                                      gdouble              inactive_shadow_offset_x,
+                                      gdouble              inactive_shadow_offset_y,
+                                      const gchar         *inactive_shadow_color)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
 
@@ -223,51 +223,42 @@ gwd_settings_shadow_property_changed (GWDSettingsWritable *writable,
     active_shadow.shadow_offset_x = active_shadow_offset_x;
     active_shadow.shadow_offset_y = active_shadow_offset_y;
 
-    if (sscanf (active_shadow_color,
-		"#%2x%2x%2x%2x",
-		&c[0], &c[1], &c[2], &c[3]) == 4)
-    {
-	active_shadow.shadow_color[0] = c[0] << 8 | c[0];
-	active_shadow.shadow_color[1] = c[1] << 8 | c[1];
-	active_shadow.shadow_color[2] = c[2] << 8 | c[2];
+    if (sscanf (active_shadow_color, "#%2x%2x%2x%2x",
+                &c[0], &c[1], &c[2], &c[3]) == 4) {
+        active_shadow.shadow_color[0] = c[0] << 8 | c[0];
+        active_shadow.shadow_color[1] = c[1] << 8 | c[1];
+        active_shadow.shadow_color[2] = c[2] << 8 | c[2];
+    } else {
+        return FALSE;
     }
-    else
-	return FALSE;
 
-    if (sscanf (inactive_shadow_color,
-		"#%2x%2x%2x%2x",
-		&c[0], &c[1], &c[2], &c[3]) == 4)
-    {
-	inactive_shadow.shadow_color[0] = c[0] << 8 | c[0];
-	inactive_shadow.shadow_color[1] = c[1] << 8 | c[1];
-	inactive_shadow.shadow_color[2] = c[2] << 8 | c[2];
+    if (sscanf (inactive_shadow_color, "#%2x%2x%2x%2x",
+                &c[0], &c[1], &c[2], &c[3]) == 4) {
+        inactive_shadow.shadow_color[0] = c[0] << 8 | c[0];
+        inactive_shadow.shadow_color[1] = c[1] << 8 | c[1];
+        inactive_shadow.shadow_color[2] = c[2] << 8 | c[2];
+    } else {
+        return FALSE;
     }
-    else
-	return FALSE;
 
     inactive_shadow.shadow_radius = inactive_shadow_radius;
     inactive_shadow.shadow_opacity = inactive_shadow_opacity;
     inactive_shadow.shadow_offset_x = inactive_shadow_offset_x;
     inactive_shadow.shadow_offset_y = inactive_shadow_offset_y;
 
-    if (decor_shadow_options_cmp (&settings->inactive_shadow,
-				  &inactive_shadow))
-    {
-	changed |= TRUE;
-	settings->inactive_shadow = inactive_shadow;
+    if (decor_shadow_options_cmp (&settings->inactive_shadow, &inactive_shadow)) {
+        changed |= TRUE;
+        settings->inactive_shadow = inactive_shadow;
     }
 
-    if (decor_shadow_options_cmp (&settings->active_shadow,
-				  &active_shadow))
-    {
-	changed |= TRUE;
-	settings->active_shadow = active_shadow;
+    if (decor_shadow_options_cmp (&settings->active_shadow, &active_shadow)) {
+        changed |= TRUE;
+        settings->active_shadow = active_shadow;
     }
 
-    if (changed)
-    {
-	append_to_notify_funcs (settings, update_decorations);
-	release_notify_funcs (settings);
+    if (changed) {
+        append_to_notify_funcs (settings, update_decorations);
+        release_notify_funcs (settings);
     }
 
     return changed;
@@ -275,83 +266,76 @@ gwd_settings_shadow_property_changed (GWDSettingsWritable *writable,
 
 static gboolean
 gwd_settings_use_tooltips_changed (GWDSettingsWritable *writable,
-				   gboolean            use_tooltips)
+                                   gboolean             use_tooltips)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
 
-    if (settings->use_tooltips != use_tooltips)
-    {
-	settings->use_tooltips = use_tooltips;
-	append_to_notify_funcs (settings, update_decorations);
-	release_notify_funcs (settings);
-	return TRUE;
-    }
+    if (settings->use_tooltips == use_tooltips)
+        return FALSE;
 
-    return FALSE;
+    settings->use_tooltips = use_tooltips;
+
+    append_to_notify_funcs (settings, update_decorations);
+    release_notify_funcs (settings);
+
+    return TRUE;
 }
 
 static gboolean
 gwd_settings_blur_changed (GWDSettingsWritable *writable,
-			   const gchar         *type)
+                           const gchar         *type)
 
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
     gint new_type = -1;
 
     if (settings->cmdline_opts & CMDLINE_BLUR)
-	return FALSE;
+        return FALSE;
 
     if (strcmp (type, "titlebar") == 0)
-	new_type = BLUR_TYPE_TITLEBAR;
+        new_type = BLUR_TYPE_TITLEBAR;
     else if (strcmp (type, "all") == 0)
-	new_type = BLUR_TYPE_ALL;
+        new_type = BLUR_TYPE_ALL;
     else if (strcmp (type, "none") == 0)
-	new_type = BLUR_TYPE_NONE;
+        new_type = BLUR_TYPE_NONE;
 
     if (new_type == -1)
-	return FALSE;
+        return FALSE;
 
-    if (settings->blur_type != new_type)
-    {
-	settings->blur_type = new_type;
-	append_to_notify_funcs (settings, update_decorations);
-	release_notify_funcs (settings);
-	return TRUE;
-    }
-    else
-	return FALSE;
-}
+    if (settings->blur_type == new_type)
+        return FALSE;
 
-static void
-free_and_set_metacity_theme (GWDSettings *settings,
-                             const gchar *metacity_theme)
-{
-    g_free (settings->metacity_theme);
-    settings->metacity_theme = g_strdup (metacity_theme);
+    settings->blur_type = new_type;
+
+    append_to_notify_funcs (settings, update_decorations);
+    release_notify_funcs (settings);
+
+    return TRUE;
 }
 
 static gboolean
 gwd_settings_metacity_theme_changed (GWDSettingsWritable *writable,
-				     gboolean	         use_metacity_theme,
-				     const gchar         *metacity_theme)
+                                     gboolean             use_metacity_theme,
+                                     const gchar         *metacity_theme)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
 
     if (settings->cmdline_opts & CMDLINE_THEME)
-	return FALSE;
+        return FALSE;
 
     if (!metacity_theme)
-	return FALSE;
+        return FALSE;
 
-    if (use_metacity_theme)
-    {
-	if (g_strcmp0 (metacity_theme, settings->metacity_theme) == 0)
-	    return FALSE;
+    if (use_metacity_theme) {
+        if (g_strcmp0 (metacity_theme, settings->metacity_theme) == 0)
+            return FALSE;
 
-	free_and_set_metacity_theme (settings, metacity_theme);
+        g_free (settings->metacity_theme);
+        settings->metacity_theme = g_strdup (metacity_theme);
+    } else {
+        g_free (settings->metacity_theme);
+        settings->metacity_theme = g_strdup ("");
     }
-    else
-	free_and_set_metacity_theme (settings, "");
 
     append_to_notify_funcs (settings, update_metacity_theme);
     append_to_notify_funcs (settings, update_decorations);
@@ -362,18 +346,18 @@ gwd_settings_metacity_theme_changed (GWDSettingsWritable *writable,
 
 static gboolean
 gwd_settings_opacity_changed (GWDSettingsWritable *writable,
-			      gdouble             active_opacity,
-			      gdouble             inactive_opacity,
-			      gboolean            active_shade_opacity,
-			      gboolean            inactive_shade_opacity)
+                              gdouble              active_opacity,
+                              gdouble              inactive_opacity,
+                              gboolean             active_shade_opacity,
+                              gboolean             inactive_shade_opacity)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
 
     if (settings->metacity_active_opacity == active_opacity &&
-	settings->metacity_inactive_opacity == inactive_opacity &&
-	settings->metacity_active_shade_opacity == active_shade_opacity &&
-	settings->metacity_inactive_shade_opacity == inactive_shade_opacity)
-	return FALSE;
+        settings->metacity_inactive_opacity == inactive_opacity &&
+        settings->metacity_active_shade_opacity == active_shade_opacity &&
+        settings->metacity_inactive_shade_opacity == inactive_shade_opacity)
+        return FALSE;
 
     settings->metacity_active_opacity = active_opacity;
     settings->metacity_inactive_opacity = inactive_opacity;
@@ -388,15 +372,15 @@ gwd_settings_opacity_changed (GWDSettingsWritable *writable,
 
 static gboolean
 gwd_settings_button_layout_changed (GWDSettingsWritable *writable,
-				    const gchar         *button_layout)
+                                    const gchar         *button_layout)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
 
     if (!button_layout)
-	return FALSE;
+        return FALSE;
 
     if (g_strcmp0 (settings->metacity_button_layout, button_layout) == 0)
-	return FALSE;
+        return FALSE;
 
     g_free (settings->metacity_button_layout);
     settings->metacity_button_layout = g_strdup (button_layout);
@@ -410,24 +394,23 @@ gwd_settings_button_layout_changed (GWDSettingsWritable *writable,
 
 static gboolean
 gwd_settings_font_changed (GWDSettingsWritable *writable,
-			   gboolean            titlebar_uses_system_font,
-			   const gchar         *titlebar_font)
+                           gboolean             titlebar_uses_system_font,
+                           const gchar         *titlebar_font)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
-
     const gchar *no_font = NULL;
     const gchar *use_font = NULL;
 
     if (!titlebar_font)
-	return FALSE;
+        return FALSE;
 
     if (titlebar_uses_system_font)
-	use_font = no_font;
+        use_font = no_font;
     else
-	use_font = titlebar_font;
+        use_font = titlebar_font;
 
     if (g_strcmp0 (settings->titlebar_font, use_font) == 0)
-	return FALSE;
+        return FALSE;
 
     g_free (settings->titlebar_font);
     settings->titlebar_font = use_font ? g_strdup (use_font) : NULL;
@@ -441,33 +424,32 @@ gwd_settings_font_changed (GWDSettingsWritable *writable,
 
 static gboolean
 get_click_action_value (const gchar *action,
-			gint	    *action_value,
-			gint	    default_value)
+                        gint        *action_value,
+                        gint         default_value)
 {
     if (!action_value)
-	return FALSE;
+        return FALSE;
 
     *action_value = -1;
 
     if (strcmp (action, "toggle_shade") == 0)
-	*action_value = CLICK_ACTION_SHADE;
+        *action_value = CLICK_ACTION_SHADE;
     else if (strcmp (action, "toggle_maximize") == 0)
-	*action_value = CLICK_ACTION_MAXIMIZE;
+        *action_value = CLICK_ACTION_MAXIMIZE;
     else if (strcmp (action, "minimize") == 0)
-	*action_value = CLICK_ACTION_MINIMIZE;
+        *action_value = CLICK_ACTION_MINIMIZE;
     else if (strcmp (action, "raise") == 0)
-	*action_value = CLICK_ACTION_RAISE;
+        *action_value = CLICK_ACTION_RAISE;
     else if (strcmp (action, "lower") == 0)
-	*action_value = CLICK_ACTION_LOWER;
+        *action_value = CLICK_ACTION_LOWER;
     else if (strcmp (action, "menu") == 0)
-	*action_value = CLICK_ACTION_MENU;
+        *action_value = CLICK_ACTION_MENU;
     else if (strcmp (action, "none") == 0)
-	*action_value = CLICK_ACTION_NONE;
+        *action_value = CLICK_ACTION_NONE;
 
-    if (*action_value == -1)
-    {
-	*action_value = default_value;
-	return FALSE;
+    if (*action_value == -1) {
+        *action_value = default_value;
+        return FALSE;
     }
 
     return TRUE;
@@ -475,23 +457,22 @@ get_click_action_value (const gchar *action,
 
 static gboolean
 get_wheel_action_value (const gchar *action,
-			gint	    *action_value,
-			gint	    default_value)
+                        gint        *action_value,
+                        gint         default_value)
 {
     if (!action_value)
-	return FALSE;
+        return FALSE;
 
     *action_value = -1;
 
     if (strcmp (action, "shade") == 0)
-	*action_value = WHEEL_ACTION_SHADE;
+        *action_value = WHEEL_ACTION_SHADE;
     else if (strcmp (action, "none") == 0)
-	*action_value = WHEEL_ACTION_NONE;
+        *action_value = WHEEL_ACTION_NONE;
 
-    if (*action_value == -1)
-    {
-	*action_value = default_value;
-	return FALSE;
+    if (*action_value == -1) {
+        *action_value = default_value;
+        return FALSE;
     }
 
     return TRUE;
@@ -499,27 +480,26 @@ get_wheel_action_value (const gchar *action,
 
 static gboolean
 gwd_settings_actions_changed (GWDSettingsWritable *writable,
-			      const gchar	  *action_double_click_titlebar,
-			      const gchar	  *action_middle_click_titlebar,
-			      const gchar	  *action_right_click_titlebar,
-			      const gchar	  *mouse_wheel_action)
+                              const gchar         *action_double_click_titlebar,
+                              const gchar         *action_middle_click_titlebar,
+                              const gchar         *action_right_click_titlebar,
+                              const gchar         *mouse_wheel_action)
 {
     GWDSettings *settings = GWD_SETTINGS (writable);
-
     gboolean ret = FALSE;
 
     ret |= get_click_action_value (action_double_click_titlebar,
-				   &settings->titlebar_double_click_action,
-				   DOUBLE_CLICK_ACTION_DEFAULT);
+                                   &settings->titlebar_double_click_action,
+                                   DOUBLE_CLICK_ACTION_DEFAULT);
     ret |= get_click_action_value (action_middle_click_titlebar,
-				   &settings->titlebar_middle_click_action,
-				   MIDDLE_CLICK_ACTION_DEFAULT);
+                                   &settings->titlebar_middle_click_action,
+                                   MIDDLE_CLICK_ACTION_DEFAULT);
     ret |= get_click_action_value (action_right_click_titlebar,
-				   &settings->titlebar_right_click_action,
-				   RIGHT_CLICK_ACTION_DEFAULT);
+                                   &settings->titlebar_right_click_action,
+                                   RIGHT_CLICK_ACTION_DEFAULT);
     ret |= get_wheel_action_value (mouse_wheel_action,
-				   &settings->mouse_wheel_action,
-				   WHEEL_ACTION_DEFAULT);
+                                   &settings->mouse_wheel_action,
+                                   WHEEL_ACTION_DEFAULT);
 
     return ret;
 }
@@ -565,9 +545,9 @@ gwd_settings_finalize (GObject *object)
 
     settings = GWD_SETTINGS (object);
 
-    g_free (settings->metacity_theme);
-    g_free (settings->metacity_button_layout);
-    g_free (settings->titlebar_font);
+    g_clear_pointer (&settings->metacity_theme, g_free);
+    g_clear_pointer (&settings->metacity_button_layout, g_free);
+    g_clear_pointer (&settings->titlebar_font, g_free);
 
     G_OBJECT_CLASS (gwd_settings_parent_class)->finalize (object);
 }
@@ -880,18 +860,17 @@ gwd_settings_init (GWDSettings *settings)
 }
 
 static gboolean
-set_blur_construction_value (gint	*blur,
-			     GParameter *params,
-			     GValue	*blur_value)
+set_blur_construction_value (gint       *blur,
+                             GParameter *params,
+                             GValue     *blur_value)
 {
-    if (blur)
-    {
-	g_value_set_int (blur_value, *blur);
+    if (blur) {
+        g_value_set_int (blur_value, *blur);
 
-	params->name = "blur";
-	params->value = *blur_value;
+        params->name = "blur";
+        params->value = *blur_value;
 
-	return TRUE;
+        return TRUE;
     }
 
     return FALSE;
@@ -899,29 +878,28 @@ set_blur_construction_value (gint	*blur,
 
 static gboolean
 set_metacity_theme_construction_value (const gchar **metacity_theme,
-				       GParameter  *params,
-				       GValue	   *metacity_theme_value)
+                                       GParameter   *params,
+                                       GValue       *metacity_theme_value)
 {
-    if (metacity_theme)
-    {
-	g_value_set_string (metacity_theme_value, *metacity_theme);
+    if (metacity_theme) {
+        g_value_set_string (metacity_theme_value, *metacity_theme);
 
-	params->name = "metacity-theme";
-	params->value = *metacity_theme_value;
+        params->name = "metacity-theme";
+        params->value = *metacity_theme_value;
 
-	return TRUE;
+        return TRUE;
     }
 
     return FALSE;
 }
 
 static guint
-set_flag_and_increment (guint n_param,
-			guint *flags,
-			guint flag)
+set_flag_and_increment (guint  n_param,
+                        guint *flags,
+                        guint  flag)
 {
     if (!flags)
-	return n_param;
+        return n_param;
 
     *flags |= flag;
     return n_param + 1;
@@ -948,10 +926,10 @@ gwd_settings_new (gint         *blur,
     g_value_init (&cmdline_opts_value, G_TYPE_INT);
 
     if (set_blur_construction_value (blur, &param[n_param], &blur_value))
-	n_param = set_flag_and_increment (n_param, &cmdline_opts, CMDLINE_BLUR);
+        n_param = set_flag_and_increment (n_param, &cmdline_opts, CMDLINE_BLUR);
 
     if (set_metacity_theme_construction_value (metacity_theme, &param[n_param], &metacity_theme_value))
-	n_param = set_flag_and_increment (n_param, &cmdline_opts, CMDLINE_THEME);
+        n_param = set_flag_and_increment (n_param, &cmdline_opts, CMDLINE_THEME);
 
     g_value_set_int (&cmdline_opts_value, cmdline_opts);
 
