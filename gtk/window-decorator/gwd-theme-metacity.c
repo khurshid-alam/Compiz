@@ -85,25 +85,24 @@ meta_button_function_from_string (const char *str)
 static MetaButtonFunction
 meta_button_opposite_function (MetaButtonFunction ofwhat)
 {
-    switch (ofwhat)
-    {
-    case META_BUTTON_FUNCTION_SHADE:
-        return META_BUTTON_FUNCTION_UNSHADE;
-    case META_BUTTON_FUNCTION_UNSHADE:
-        return META_BUTTON_FUNCTION_SHADE;
+    switch (ofwhat) {
+        case META_BUTTON_FUNCTION_SHADE:
+            return META_BUTTON_FUNCTION_UNSHADE;
+        case META_BUTTON_FUNCTION_UNSHADE:
+            return META_BUTTON_FUNCTION_SHADE;
 
-    case META_BUTTON_FUNCTION_ABOVE:
-        return META_BUTTON_FUNCTION_UNABOVE;
-    case META_BUTTON_FUNCTION_UNABOVE:
-        return META_BUTTON_FUNCTION_ABOVE;
+        case META_BUTTON_FUNCTION_ABOVE:
+            return META_BUTTON_FUNCTION_UNABOVE;
+        case META_BUTTON_FUNCTION_UNABOVE:
+            return META_BUTTON_FUNCTION_ABOVE;
 
-    case META_BUTTON_FUNCTION_STICK:
-        return META_BUTTON_FUNCTION_UNSTICK;
-    case META_BUTTON_FUNCTION_UNSTICK:
-        return META_BUTTON_FUNCTION_STICK;
+        case META_BUTTON_FUNCTION_STICK:
+            return META_BUTTON_FUNCTION_UNSTICK;
+        case META_BUTTON_FUNCTION_UNSTICK:
+            return META_BUTTON_FUNCTION_STICK;
 
-    default:
-        return META_BUTTON_FUNCTION_LAST;
+        default:
+            return META_BUTTON_FUNCTION_LAST;
     }
 }
 
