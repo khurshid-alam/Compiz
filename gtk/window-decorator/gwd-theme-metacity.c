@@ -56,10 +56,6 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     MetaStyleInfo *style_info;
     MetaFrameBorders borders;
     MetaFrameType frame_type;
-    gint top_height;
-    gint bottom_height;
-    gint left_width;
-    gint right_width;
 
     metacity = GWD_THEME_METACITY (theme);
 
@@ -75,33 +71,23 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, 0, &borders);
 
-    top_height = borders.visible.top;
-    bottom_height = borders.visible.bottom;
-    left_width = borders.visible.left;
-    right_width = borders.visible.right;
-
     frame->win_extents.top = frame->win_extents.top;
-    frame->win_extents.bottom = bottom_height;
-    frame->win_extents.left = left_width;
-    frame->win_extents.right = right_width;
+    frame->win_extents.bottom = borders.visible.bottom;
+    frame->win_extents.left = borders.visible.left;
+    frame->win_extents.right = borders.visible.right;
 
-    frame->titlebar_height = top_height - frame->win_extents.top;
+    frame->titlebar_height = borders.visible.top - frame->win_extents.top;
 
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, META_FRAME_MAXIMIZED,
                                   &borders);
 
-    top_height = borders.visible.top;
-    bottom_height = borders.visible.bottom;
-    left_width = borders.visible.left;
-    right_width = borders.visible.right;
-
     frame->max_win_extents.top = frame->win_extents.top;
-    frame->max_win_extents.bottom = bottom_height;
-    frame->max_win_extents.left = left_width;
-    frame->max_win_extents.right = right_width;
+    frame->max_win_extents.bottom = borders.visible.bottom;
+    frame->max_win_extents.left = borders.visible.left;
+    frame->max_win_extents.right = borders.visible.right;
 
-    frame->max_titlebar_height = top_height - frame->max_win_extents.top;
+    frame->max_titlebar_height = borders.visible.top - frame->max_win_extents.top;
 
     meta_style_info_unref (style_info);
 
