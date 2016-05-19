@@ -370,6 +370,55 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 								 testing_values::TITLEBAR_ACTION_SHADE.c_str ()), IsTrue ());
 }
 
+class GWDMockSettingsNotifiedGMock
+{
+    public:
+
+        GWDMockSettingsNotifiedGMock (boost::shared_ptr <GWDSettings> settings)
+        {
+            g_signal_connect (settings.get (), "update-decorations",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateDecorationsCb), this);
+            g_signal_connect (settings.get (), "update-frames",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateFramesCb), this);
+            g_signal_connect (settings.get (), "update-metacity-theme",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityThemeCb), this);
+            g_signal_connect (settings.get (), "update-metacity-button-layout",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityButtonLayoutCb), this);
+        }
+
+        MOCK_METHOD0 (updateDecorations, void ());
+        MOCK_METHOD0 (updateFrames, void ());
+        MOCK_METHOD0 (updateMetacityTheme, void ());
+        MOCK_METHOD0 (updateMetacityButtonLayout, void ());
+
+    private:
+
+        static void updateDecorationsCb (GWDSettings                  *settings,
+                                         GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateDecorations ();
+        }
+
+        static void updateFramesCb (GWDSettings                  *settings,
+                                    GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateFrames ();
+        }
+
+        static void updateMetacityThemeCb (GWDSettings                  *settings,
+                                           GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateMetacityTheme ();
+        }
+
+        static void updateMetacityButtonLayoutCb (GWDSettings                  *settings,
+                                                  GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateMetacityButtonLayout ();
+        }
+
+};
+
 class GWDSettingsTest :
     public GWDSettingsTestCommon
 {
@@ -378,65 +427,30 @@ class GWDSettingsTest :
         virtual void SetUp ()
         {
             GWDSettingsTestCommon::SetUp ();
-            mSettings.reset (gwd_settings_new (NULL, NULL),
-		             boost::bind (gwd_settings_unref, _1));
 
-            g_signal_connect (mSettings.get (), "update-decorations",
-                              G_CALLBACK (GWDSettingsTest::updateDecorationsCb), this);
-            g_signal_connect (mSettings.get (), "update-frames",
-                              G_CALLBACK (GWDSettingsTest::updateFramesCb), this);
-            g_signal_connect (mSettings.get (), "update-metacity-theme",
-                              G_CALLBACK (GWDSettingsTest::updateMetacityThemeCb), this);
-            g_signal_connect (mSettings.get (), "update-metacity-button-layout",
-                              G_CALLBACK (GWDSettingsTest::updateMetacityButtonLayoutCb), this);
+            mSettings.reset (gwd_settings_new (NULL, NULL), boost::bind (gwd_settings_unref, _1));
+            mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> (mSettings));
 
             ExpectAllNotificationsOnce ();
         }
 
-        MOCK_METHOD0 (updateDecorations, void ());
-        MOCK_METHOD0 (updateFrames, void ());
-        MOCK_METHOD0 (updateMetacityTheme, void ());
-        MOCK_METHOD0 (updateMetacityButtonLayout, void ());
-
     protected:
 
+        boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
         boost::shared_ptr <GWDSettings> mSettings;
 
     private:
 
         void ExpectAllNotificationsOnce ()
         {
-            EXPECT_CALL (*this, updateMetacityTheme ()).Times (1);
-            EXPECT_CALL (*this, updateMetacityButtonLayout ()).Times (1);
-            EXPECT_CALL (*this, updateFrames ()).Times (1);
-            EXPECT_CALL (*this, updateDecorations ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateMetacityTheme ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateFrames ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
 
             gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
         }
 
-        static void updateDecorationsCb (GWDSettings     *settings,
-                                         GWDSettingsTest *test)
-        {
-            test->updateDecorations ();
-        }
-
-        static void updateFramesCb (GWDSettings     *settings,
-                                    GWDSettingsTest *test)
-        {
-            test->updateFrames ();
-        }
-
-        static void updateMetacityThemeCb (GWDSettings     *settings,
-                                           GWDSettingsTest *test)
-        {
-            test->updateMetacityTheme ();
-        }
-
-        static void updateMetacityButtonLayoutCb (GWDSettings     *settings,
-                                                  GWDSettingsTest *test)
-        {
-            test->updateMetacityButtonLayout ();
-        }
 };
 
 TEST_F(GWDSettingsTest, TestGWDSettingsInstantiation)
@@ -463,7 +477,7 @@ TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdates)
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
 }
 
@@ -478,13 +492,13 @@ TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdatesNoDupes)
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
-    EXPECT_CALL (*this, updateDecorations ()).Times (1);
+    EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
     gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
 }
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 {
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_shadow_property_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 								testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
 								testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
@@ -554,7 +568,7 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
 {
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
@@ -577,7 +591,7 @@ TEST_F(GWDSettingsTest, TestUseTooltipsChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 {
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
 
@@ -594,7 +608,7 @@ TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 
 TEST_F(GWDSettingsTest, TestBlurChangedAll)
 {
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::BLUR_TYPE_ALL_VALUE.c_str ()), IsTrue ());
 
@@ -648,8 +662,8 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 {
-    EXPECT_CALL (*this, updateMetacityTheme ());
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							       testing_values::USE_METACITY_THEME_VALUE,
 							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
@@ -667,8 +681,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 {
-    EXPECT_CALL (*this, updateMetacityTheme ());
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							       testing_values::NO_USE_METACITY_THEME_VALUE,
 							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
@@ -715,7 +729,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 
 TEST_F(GWDSettingsTest, TestMetacityOpacityChanged)
 {
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_opacity_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							testing_values::ACTIVE_OPACITY_VALUE,
 							testing_values::INACTIVE_OPACITY_VALUE,
@@ -766,8 +780,8 @@ TEST_F(GWDSettingsTest, TestMetacityOpacityChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChanged)
 {
-    EXPECT_CALL (*this, updateMetacityButtonLayout ());
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_button_layout_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 							      testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
 
@@ -790,8 +804,8 @@ TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
-    EXPECT_CALL (*this, updateFrames ());
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::NO_USE_SYSTEM_FONT_VALUE,
 						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
@@ -809,8 +823,8 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
-    EXPECT_CALL (*this, updateFrames ());
-    EXPECT_CALL (*this, updateDecorations ());
+    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
 						     testing_values::USE_SYSTEM_FONT_VALUE,
 						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
