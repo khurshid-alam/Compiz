@@ -281,7 +281,7 @@ decor_frame_refresh (decor_frame_t *frame)
     frame_update_titlebar_font (frame);
 
     if (strcmp (frame->type, "switcher") != 0 && strcmp (frame->type, "bare") != 0)
-        gwd_theme_update_border_extents (gwd_theme,frame);
+        gwd_theme_update_border_extents (gwd_theme, frame);
 
     gwd_theme_get_shadow (gwd_theme, frame, &active_o, TRUE);
     gwd_theme_get_shadow (gwd_theme, frame, &inactive_o, FALSE);
