@@ -948,9 +948,3 @@ get_event_window_position (decor_t *d,
 	     pos[i][j].hh * height + pos[i][j].hth * (d->frame->titlebar_height - 17);
     }
 }
-
-gfloat
-get_title_scale (decor_frame_t *frame)
-{
-    return 1.0f;
-}

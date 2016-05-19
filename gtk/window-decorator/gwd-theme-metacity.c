@@ -94,6 +94,24 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     gwd_decor_frame_unref (frame);
 }
 
+static gfloat
+gwd_theme_metacity_get_title_scale (GWDTheme      *theme,
+                                    decor_frame_t *frame)
+{
+    GWDThemeMetacity *metacity;
+    MetaFrameType type;
+    MetaFrameFlags flags; 
+
+    metacity = GWD_THEME_METACITY (theme);
+    type = meta_frame_type_from_string (frame->type);
+    flags = 0xc33; /* FIXME */
+
+    if (type == META_FRAME_TYPE_LAST)
+        return 1.0f;
+
+    return meta_theme_get_title_scale (metacity->theme, type, flags);
+}
+
 static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
@@ -106,6 +124,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     object_class->constructor = gwd_theme_metacity_constructor;
 
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
+    theme_class->get_title_scale = gwd_theme_metacity_get_title_scale;
 }
 
 static void

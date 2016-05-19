@@ -560,7 +560,7 @@ set_frame_scale (decor_frame_t *frame,
 
         frame->titlebar_font = pango_font_description_from_string (font_str);
 
-        scale = (*theme_get_title_scale) (frame);
+        scale = gwd_theme_get_title_scale (gwd_theme, frame);
         size = MAX (pango_font_description_get_size (frame->titlebar_font) * scale, 1);
 
         pango_font_description_set_size (frame->titlebar_font, size);
