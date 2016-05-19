@@ -240,6 +240,164 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     gwd_decor_frame_unref (frame);
 }
 
+static void
+gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
+                                              decor_t  *decor,
+                                              gint      i,
+                                              gint      j,
+                                              gint      width,
+                                              gint      height,
+                                              gint     *x,
+                                              gint     *y,
+                                              gint     *w,
+                                              gint     *h)
+{
+    GWDThemeMetacity *metacity;
+    MetaButtonLayout button_layout;
+    MetaFrameGeometry fgeom;
+    MetaFrameFlags flags;
+
+    metacity = GWD_THEME_METACITY (theme);
+
+    gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags,
+                                                &fgeom,  &button_layout,
+                                                meta_frame_type_from_string (decor->frame->type));
+
+    width += fgeom.borders.total.right + fgeom.borders.total.left;
+    height += fgeom.borders.total.top  + fgeom.borders.total.bottom;
+
+#define TOP_RESIZE_HEIGHT 2
+#define RESIZE_EXTENDS 15
+
+    switch (i) {
+        case 2: /* bottom */
+            switch (j) {
+                case 2: /* bottom right */
+                    *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
+                    *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
+
+                    if (decor->frame_window) {
+                        *x += decor->frame->win_extents.left + 2;
+                        *y += decor->frame->win_extents.top + 2;
+                    }
+
+                    *w = fgeom.borders.total.right + RESIZE_EXTENDS;
+                    *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
+                    break;
+                case 1: /* bottom */
+                    *x = fgeom.borders.total.left + RESIZE_EXTENDS;
+                    *y = height - fgeom.borders.total.bottom;
+
+                    if (decor->frame_window)
+                        *y += decor->frame->win_extents.top + 2;
+
+                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
+                    *h = fgeom.borders.total.bottom;
+                    break;
+                case 0: /* bottom left */
+                default:
+                    *x = 0;
+                    *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
+
+                    if (decor->frame_window) {
+                        *x += decor->frame->win_extents.left + 4;
+                        *y += decor->frame->win_extents.bottom + 2;
+                    }
+
+                    *w = fgeom.borders.total.left + RESIZE_EXTENDS;
+                    *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
+                    break;
+            }
+            break;
+        case 1: /* middle */
+            switch (j) {
+                case 2: /* right */
+                    *x = width - fgeom.borders.total.right;
+                    *y = fgeom.borders.total.top + RESIZE_EXTENDS;
+
+                    if (decor->frame_window)
+                        *x += decor->frame->win_extents.left + 2;
+
+                    *w = fgeom.borders.total.right;
+                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
+                    break;
+                case 1: /* middle */
+                    *x = fgeom.borders.total.left;
+                    *y = fgeom.title_rect.y + TOP_RESIZE_HEIGHT;
+                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right;
+                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom;
+                    break;
+                case 0: /* left */
+                default:
+                    *x = 0;
+                    *y = fgeom.borders.total.top + RESIZE_EXTENDS;
+
+                    if (decor->frame_window)
+                        *x += decor->frame->win_extents.left + 4;
+
+                    *w = fgeom.borders.total.left;
+                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
+                    break;
+            }
+            break;
+        case 0: /* top */
+        default:
+            switch (j) {
+                case 2: /* top right */
+                    *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
+                    *y = 0;
+
+                    if (decor->frame_window) {
+                        *x += decor->frame->win_extents.left + 2;
+                        *y += decor->frame->win_extents.top + 2 - fgeom.title_rect.height;
+                    }
+
+                    *w = fgeom.borders.total.right + RESIZE_EXTENDS;
+                    *h = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    break;
+                case 1: /* top */
+                    *x = fgeom.borders.total.left + RESIZE_EXTENDS;
+                    *y = 0;
+
+                    if (decor->frame_window)
+                        *y += decor->frame->win_extents.top + 2;
+
+                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
+                    *h = fgeom.borders.total.top - fgeom.title_rect.height;
+                    break;
+                case 0: /* top left */
+                default:
+                    *x = 0;
+                    *y = 0;
+
+                    if (decor->frame_window) {
+                        *x += decor->frame->win_extents.left + 4;
+                        *y += decor->frame->win_extents.top + 2 - fgeom.title_rect.height;
+                    }
+
+                    *w = fgeom.borders.total.left + RESIZE_EXTENDS;
+                    *h = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    break;
+            }
+            break;
+    }
+
+    if (!(flags & META_FRAME_ALLOWS_VERTICAL_RESIZE)) {
+        /* turn off top and bottom event windows */
+        if (i == 0 || i == 2)
+            *w = *h = 0;
+    }
+
+    if (!(flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE)) {
+        /* turn off left and right event windows */
+        if (j == 0 || j == 2)
+            *w = *h = 0;
+    }
+
+#undef TOP_RESIZE_HEIGHT
+#undef RESIZE_EXTENDS
+}
+
 static gboolean
 gwd_theme_metacity_get_button_position (GWDTheme *theme,
                                         decor_t  *decor,
@@ -358,6 +516,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     object_class->constructor = gwd_theme_metacity_constructor;
 
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
+    theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
     theme_class->get_title_scale = gwd_theme_metacity_get_title_scale;
 }
