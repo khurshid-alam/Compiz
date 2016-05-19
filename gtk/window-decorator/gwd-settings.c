@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*- */
+
 /*
  * Copyright © 2012 Canonical Ltd
  *
