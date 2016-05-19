@@ -459,108 +459,12 @@ decor_update_meta_window_property (decor_t        *d,
 }
 
 static void
-calc_button_size (GWDTheme *theme,
-                  decor_t  *decor)
-{
-    MetaFrameType frame_type;
-    MetaFrameFlags flags;
-    MetaFrameGeometry fgeom;
-    MetaButtonLayout button_layout;
-    gint i, min_x, x, y, w, h, width;
-
-    if (!decor->context) {
-        decor->button_width = 0;
-        return;
-    }
-
-    frame_type = meta_frame_type_from_string (decor->frame->type);
-    if (!(frame_type < META_FRAME_TYPE_LAST))
-        frame_type = META_FRAME_TYPE_NORMAL;
-
-    gwd_theme_metacity_get_decoration_geometry (GWD_THEME_METACITY (theme),
-                                                decor, &flags, &fgeom,
-                                                &button_layout, frame_type);
-
-    width = decor->border_layout.top.x2 - decor->border_layout.top.x1 -
-            decor->context->left_space - decor->context->right_space +
-            fgeom.borders.total.left + fgeom.borders.total.right;
-
-    min_x = width;
-
-    for (i = 0; i < 3; ++i) {
-        static guint button_actions[3] = {
-            WNCK_WINDOW_ACTION_CLOSE,
-            WNCK_WINDOW_ACTION_MAXIMIZE,
-            WNCK_WINDOW_ACTION_MINIMIZE
-        };
-
-        if (decor->actions & button_actions[i]) {
-            if (gwd_theme_get_button_position (theme, decor, i, width, 256,
-                                               &x, &y, &w, &h)) {
-                if (x > width / 2 && x < min_x)
-                    min_x = x;
-            }
-        }
-    }
-
-    decor->button_width = width - min_x;
-}
-
-static gboolean
-button_present (MetaButtonLayout   *button_layout,
-                MetaButtonFunction  function)
-{
-    int i;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-        if (button_layout->left_buttons[i] == function)
-            return TRUE;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
-        if (button_layout->right_buttons[i] == function)
-            return TRUE;
-
-    return FALSE;
-}
-
-static MetaButtonFunction
-button_to_meta_button_function (gint i)
-{
-    switch (i) {
-        case BUTTON_MENU:
-            return META_BUTTON_FUNCTION_MENU;
-        case BUTTON_MIN:
-            return META_BUTTON_FUNCTION_MINIMIZE;
-        case BUTTON_MAX:
-            return META_BUTTON_FUNCTION_MAXIMIZE;
-        case BUTTON_CLOSE:
-            return META_BUTTON_FUNCTION_CLOSE;
-        case BUTTON_SHADE:
-            return META_BUTTON_FUNCTION_SHADE;
-        case BUTTON_ABOVE:
-            return META_BUTTON_FUNCTION_ABOVE;
-        case BUTTON_STICK:
-            return META_BUTTON_FUNCTION_STICK;
-        case BUTTON_UNSHADE:
-            return META_BUTTON_FUNCTION_UNSHADE;
-        case BUTTON_UNABOVE:
-            return META_BUTTON_FUNCTION_UNABOVE;
-        case BUTTON_UNSTICK:
-            return META_BUTTON_FUNCTION_UNSTICK;
-        default:
-            break;
-    }
-
-    return META_BUTTON_FUNCTION_LAST;
-}
-
-void
-gwd_theme_metacity_get_decoration_geometry (GWDThemeMetacity  *metacity,
-                                            decor_t           *decor,
-                                            MetaFrameFlags    *flags,
-                                            MetaFrameGeometry *fgeom,
-                                            MetaButtonLayout  *button_layout,
-                                            MetaFrameType      frame_type)
+get_decoration_geometry (GWDThemeMetacity  *metacity,
+                         decor_t           *decor,
+                         MetaFrameFlags    *flags,
+                         MetaFrameGeometry *fgeom,
+                         MetaButtonLayout  *button_layout,
+                         MetaFrameType      frame_type)
 {
     GdkScreen *screen;
     MetaStyleInfo *style_info;
@@ -654,6 +558,101 @@ gwd_theme_metacity_get_decoration_geometry (GWDThemeMetacity  *metacity,
     meta_style_info_unref (style_info);
 }
 
+static void
+calc_button_size (GWDTheme *theme,
+                  decor_t  *decor)
+{
+    MetaFrameType frame_type;
+    MetaFrameFlags flags;
+    MetaFrameGeometry fgeom;
+    MetaButtonLayout button_layout;
+    gint i, min_x, x, y, w, h, width;
+
+    if (!decor->context) {
+        decor->button_width = 0;
+        return;
+    }
+
+    frame_type = meta_frame_type_from_string (decor->frame->type);
+    if (!(frame_type < META_FRAME_TYPE_LAST))
+        frame_type = META_FRAME_TYPE_NORMAL;
+
+    get_decoration_geometry (GWD_THEME_METACITY (theme), decor, &flags,
+                             &fgeom, &button_layout, frame_type);
+
+    width = decor->border_layout.top.x2 - decor->border_layout.top.x1 -
+            decor->context->left_space - decor->context->right_space +
+            fgeom.borders.total.left + fgeom.borders.total.right;
+
+    min_x = width;
+
+    for (i = 0; i < 3; ++i) {
+        static guint button_actions[3] = {
+            WNCK_WINDOW_ACTION_CLOSE,
+            WNCK_WINDOW_ACTION_MAXIMIZE,
+            WNCK_WINDOW_ACTION_MINIMIZE
+        };
+
+        if (decor->actions & button_actions[i]) {
+            if (gwd_theme_get_button_position (theme, decor, i, width, 256,
+                                               &x, &y, &w, &h)) {
+                if (x > width / 2 && x < min_x)
+                    min_x = x;
+            }
+        }
+    }
+
+    decor->button_width = width - min_x;
+}
+
+static gboolean
+button_present (MetaButtonLayout   *button_layout,
+                MetaButtonFunction  function)
+{
+    int i;
+
+    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+        if (button_layout->left_buttons[i] == function)
+            return TRUE;
+
+    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+        if (button_layout->right_buttons[i] == function)
+            return TRUE;
+
+    return FALSE;
+}
+
+static MetaButtonFunction
+button_to_meta_button_function (gint i)
+{
+    switch (i) {
+        case BUTTON_MENU:
+            return META_BUTTON_FUNCTION_MENU;
+        case BUTTON_MIN:
+            return META_BUTTON_FUNCTION_MINIMIZE;
+        case BUTTON_MAX:
+            return META_BUTTON_FUNCTION_MAXIMIZE;
+        case BUTTON_CLOSE:
+            return META_BUTTON_FUNCTION_CLOSE;
+        case BUTTON_SHADE:
+            return META_BUTTON_FUNCTION_SHADE;
+        case BUTTON_ABOVE:
+            return META_BUTTON_FUNCTION_ABOVE;
+        case BUTTON_STICK:
+            return META_BUTTON_FUNCTION_STICK;
+        case BUTTON_UNSHADE:
+            return META_BUTTON_FUNCTION_UNSHADE;
+        case BUTTON_UNABOVE:
+            return META_BUTTON_FUNCTION_UNABOVE;
+        case BUTTON_UNSTICK:
+            return META_BUTTON_FUNCTION_UNSTICK;
+        default:
+            break;
+    }
+
+    return META_BUTTON_FUNCTION_LAST;
+}
+
 static GObject *
 gwd_theme_metacity_constructor (GType                  type,
                                 guint                  n_properties,
@@ -743,8 +742,8 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     if (frame_type == META_FRAME_TYPE_LAST)
         frame_type = META_FRAME_TYPE_NORMAL;
 
-    gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags, &fgeom,
-                                                &button_layout, frame_type);
+    get_decoration_geometry (metacity, decor, &flags, &fgeom,
+                             &button_layout, frame_type);
 
     if ((decor->prop_xid || !decor->buffer_surface) && !decor->frame_window)
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
@@ -1043,9 +1042,8 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
 
     metacity = GWD_THEME_METACITY (theme);
 
-    gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags,
-                                                &fgeom,  &button_layout,
-                                                meta_frame_type_from_string (decor->frame->type));
+    get_decoration_geometry (metacity, decor, &flags, &fgeom,  &button_layout,
+                             meta_frame_type_from_string (decor->frame->type));
 
     width += fgeom.borders.total.right + fgeom.borders.total.left;
     height += fgeom.borders.total.top  + fgeom.borders.total.bottom;
@@ -1212,8 +1210,8 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
 
-    gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags, &fgeom,
-                                                &button_layout, frame_type);
+    get_decoration_geometry (metacity, decor, &flags, &fgeom,
+                             &button_layout, frame_type);
 
     button_function = button_to_meta_button_function (i);
     if (!button_present (&button_layout, button_function))
