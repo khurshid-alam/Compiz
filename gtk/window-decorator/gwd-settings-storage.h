@@ -31,8 +31,7 @@ G_DECLARE_FINAL_TYPE (GWDSettingsStorage, gwd_settings_storage,
                       GWD, SETTINGS_STORAGE, GObject)
 
 GWDSettingsStorage *
-gwd_settings_storage_new                          (GWDSettings        *settings,
-                                                   gboolean            connect);
+gwd_settings_storage_new (GWDSettings *settings);
 
 G_END_DECLS
 

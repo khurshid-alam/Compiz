@@ -29,7 +29,7 @@ GWDSettingsXPropertyStorage *xprop_storage = NULL;
 void
 init_settings (GWDSettings *settings)
 {
-    storage = gwd_settings_storage_new (settings, TRUE);
+    storage = gwd_settings_storage_new (settings);
     xprop_storage = gwd_settings_xproperty_storage_new (settings);
 
     gwd_process_decor_shadow_property_update ();

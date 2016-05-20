@@ -59,7 +59,6 @@ struct _GWDSettingsStorage
     GObject      parent;
 
     GWDSettings *settings;
-    gboolean     connect;
 
     GSettings   *gwd;
     GSettings   *desktop;
@@ -74,7 +73,6 @@ enum
     PROP_0,
 
     PROP_SETTINGS,
-    PROP_CONNECT,
 
     LAST_PROP
 };
@@ -328,25 +326,25 @@ gwd_settings_storage_constructed (GObject *object)
 
     G_OBJECT_CLASS (gwd_settings_storage_parent_class)->constructed (object);
 
-    if (storage->gwd && storage->connect) {
+    if (storage->gwd) {
         g_signal_connect (storage->gwd, "changed",
                           G_CALLBACK (org_compiz_gwd_settings_changed),
                           storage);
     }
 
-    if (storage->desktop && storage->connect) {
+    if (storage->desktop) {
         g_signal_connect (storage->desktop, "changed",
                           G_CALLBACK (org_gnome_desktop_wm_preferences_settings_changed),
                           storage);
     }
 
-    if (storage->metacity && storage->connect) {
+    if (storage->metacity) {
         g_signal_connect (storage->metacity, "changed",
                           G_CALLBACK (org_gnome_metacity_settings_changed),
                           storage);
     }
 
-    if (storage->marco && storage->connect) {
+    if (storage->marco) {
         g_signal_connect (storage->marco, "changed",
                           G_CALLBACK (org_mate_marco_general_settings_changed),
                           storage);
@@ -393,10 +391,6 @@ gwd_settings_storage_set_property (GObject      *object,
             storage->settings = g_value_dup_object (value);
             break;
 
-        case PROP_CONNECT:
-            storage->connect = g_value_get_boolean (value);
-            break;
-
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -419,12 +413,6 @@ gwd_settings_storage_class_init (GWDSettingsStorageClass *storage_class)
                              GWD_TYPE_SETTINGS,
                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE |
                              G_PARAM_STATIC_STRINGS);
-
-    storage_properties[PROP_CONNECT] =
-        g_param_spec_boolean ("connect", "Connect", "Connect",
-                              TRUE,
-                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE |
-                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, LAST_PROP,
                                        storage_properties);
@@ -462,11 +450,9 @@ gwd_settings_storage_init (GWDSettingsStorage *storage)
 }
 
 GWDSettingsStorage *
-gwd_settings_storage_new (GWDSettings *settings,
-                          gboolean     connect)
+gwd_settings_storage_new (GWDSettings *settings)
 {
     return g_object_new (GWD_TYPE_SETTINGS_STORAGE,
                          "settings", settings,
-                         "connect", connect,
                          NULL);
 }
