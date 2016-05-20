@@ -35,8 +35,6 @@ gboolean minimal = FALSE;
 
 const unsigned short ICON_SPACE = 20;
 
-guint cmdline_options = 0;
-
 Atom frame_input_window_atom;
 Atom frame_output_window_atom;
 Atom win_decor_atom;
