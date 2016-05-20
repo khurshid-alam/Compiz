@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*- */
+
 /*
  * Copyright (C) 2016 Alberts Muktupāvels
  *
@@ -67,15 +69,13 @@ static void
 gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
                                        decor_frame_t *frame)
 {
-    gint height;
-
     frame = gwd_decor_frame_ref (frame);
 
     gwd_cairo_window_decoration_get_extents (&frame->win_extents,
                                              &frame->max_win_extents);
 
-    height = (frame->text_height < 17) ? 17 : frame->text_height;
-    frame->titlebar_height = frame->max_titlebar_height = height;
+    frame->titlebar_height = frame->max_titlebar_height =
+        (frame->text_height < 17) ? 17 : frame->text_height;
 
     gwd_decor_frame_unref (frame);
 }
@@ -167,9 +167,7 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
 static void
 gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
 {
-    GWDThemeClass *theme_class;
-
-    theme_class = GWD_THEME_CLASS (cairo_class);
+    GWDThemeClass *theme_class = GWD_THEME_CLASS (cairo_class);
 
     theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_cairo_get_event_window_position;
