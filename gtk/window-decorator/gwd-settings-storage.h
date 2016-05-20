@@ -63,25 +63,25 @@ GWDSettingsStorage *
 gwd_settings_storage_new                          (GWDSettings        *settings,
                                                    gboolean            connect);
 
-gboolean
+void
 gwd_settings_storage_update_use_tooltips          (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_blur                  (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_metacity_theme        (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_opacity               (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_button_layout         (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_font                  (GWDSettingsStorage *storage);
 
-gboolean
+void
 gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage *storage);
 
 GSettings *

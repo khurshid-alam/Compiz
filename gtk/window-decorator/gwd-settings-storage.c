@@ -324,44 +324,40 @@ gwd_settings_storage_new (GWDSettings *settings,
                          NULL);
 }
 
-gboolean
+void
 gwd_settings_storage_update_use_tooltips (GWDSettingsStorage *storage)
 {
     gboolean use_tooltips;
 
     if (!storage->gwd)
-        return FALSE;
+        return;
 
     use_tooltips = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS);
 
-    return gwd_settings_use_tooltips_changed (storage->settings, use_tooltips);
+    gwd_settings_use_tooltips_changed (storage->settings, use_tooltips);
 }
 
-gboolean
+void
 gwd_settings_storage_update_blur (GWDSettingsStorage *storage)
 {
     gchar *blur_type;
-    gboolean retval;
 
     if (!storage->gwd)
-        return FALSE;
+        return;
 
     blur_type = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_BLUR_TYPE);
-    retval = gwd_settings_blur_changed (storage->settings, blur_type);
+    gwd_settings_blur_changed (storage->settings, blur_type);
     g_free (blur_type);
-
-    return retval;
 }
 
-gboolean
+void
 gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
     gchar *theme;
-    gboolean retval;
 
     if (!storage->gwd)
-        return FALSE;
+        return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
 
@@ -370,15 +366,13 @@ gwd_settings_storage_update_metacity_theme (GWDSettingsStorage *storage)
     else if (storage->metacity)
         theme = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
     else
-        return FALSE;
+        return;
 
-    retval = gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
+    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
     g_free (theme);
-
-    return retval;
 }
 
-gboolean
+void
 gwd_settings_storage_update_opacity (GWDSettingsStorage *storage)
 {
     gdouble active;
@@ -387,42 +381,38 @@ gwd_settings_storage_update_opacity (GWDSettingsStorage *storage)
     gboolean inactive_shade;
 
     if (!storage->gwd)
-        return FALSE;
+        return;
 
     active = g_settings_get_double (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY);
     inactive = g_settings_get_double (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY);
     active_shade = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY);
     inactive_shade = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY);
 
-    return gwd_settings_opacity_changed (storage->settings, active, inactive,
-                                         active_shade, inactive_shade);
+    gwd_settings_opacity_changed (storage->settings, active, inactive,
+                                  active_shade, inactive_shade);
 }
 
-gboolean
+void
 gwd_settings_storage_update_button_layout (GWDSettingsStorage *storage)
 {
     gchar *button_layout;
-    gboolean retval;
 
     if (storage->is_mate_desktop)
         button_layout = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
     else if (storage->desktop)
         button_layout = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT);
     else
-        return FALSE;
+        return;
 
-    retval = gwd_settings_button_layout_changed (storage->settings, button_layout);
+    gwd_settings_button_layout_changed (storage->settings, button_layout);
     g_free (button_layout);
-
-    return retval;
 }
 
-gboolean
+void
 gwd_settings_storage_update_font (GWDSettingsStorage *storage)
 {
     gchar *titlebar_font;
     gboolean titlebar_system_font;
-    gboolean retval;
 
     if (storage->is_mate_desktop) {
         titlebar_font = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
@@ -431,25 +421,22 @@ gwd_settings_storage_update_font (GWDSettingsStorage *storage)
         titlebar_font = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT);
         titlebar_system_font = g_settings_get_boolean (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT);
     } else
-        return FALSE;
+        return;
 
-    retval = gwd_settings_font_changed (storage->settings, titlebar_system_font, titlebar_font);
+    gwd_settings_font_changed (storage->settings, titlebar_system_font, titlebar_font);
     g_free (titlebar_font);
-
-    return retval;
 }
 
-gboolean
+void
 gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
 {
     gchar *double_click_action;
     gchar *middle_click_action;
     gchar *right_click_action;
     gchar *mouse_wheel_action;
-    gboolean retval;
 
     if (!storage->gwd)
-        return FALSE;
+        return;
 
     if (storage->is_mate_desktop) {
         double_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR);
@@ -460,7 +447,7 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
         middle_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR);
         right_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR);
     } else
-        return FALSE;
+        return;
 
     translate_dashes_to_underscores (double_click_action);
     translate_dashes_to_underscores (middle_click_action);
@@ -468,16 +455,14 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
 
     mouse_wheel_action = g_settings_get_string (storage->gwd, ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION);
 
-    retval = gwd_settings_titlebar_actions_changed (storage->settings, double_click_action,
-                                                    middle_click_action, right_click_action,
-                                                    mouse_wheel_action);
+    gwd_settings_titlebar_actions_changed (storage->settings, double_click_action,
+                                           middle_click_action, right_click_action,
+                                           mouse_wheel_action);
 
     g_free (double_click_action);
     g_free (middle_click_action);
     g_free (right_click_action);
     g_free (mouse_wheel_action);
-
-    return retval;
 }
 
 GSettings *
