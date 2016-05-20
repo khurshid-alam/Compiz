@@ -253,7 +253,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
                                         gint     *w,
                                         gint     *h)
 {
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
@@ -265,8 +265,6 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
         /* undecorated windows implicitly have no buttons */
         return FALSE;
     }
-
-    metacity = GWD_THEME_METACITY (theme);
 
     frame_type = meta_frame_type_from_string (decor->frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
