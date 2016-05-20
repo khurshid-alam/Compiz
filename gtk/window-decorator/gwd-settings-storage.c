@@ -464,27 +464,3 @@ gwd_settings_storage_update_titlebar_actions (GWDSettingsStorage *storage)
     g_free (right_click_action);
     g_free (mouse_wheel_action);
 }
-
-GSettings *
-gwd_get_org_compiz_gwd_settings (GWDSettingsStorage *storage)
-{
-    return storage->gwd;
-}
-
-GSettings *
-gwd_get_org_gnome_desktop_wm_preferences_settings (GWDSettingsStorage *storage)
-{
-    return storage->desktop;
-}
-
-GSettings *
-gwd_get_org_gnome_metacity_settings (GWDSettingsStorage *storage)
-{
-    return storage->metacity;
-}
-
-GSettings *
-gwd_get_org_mate_marco_general_settings (GWDSettingsStorage *storage)
-{
-    return storage->marco;
-}

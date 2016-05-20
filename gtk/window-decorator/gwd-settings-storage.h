@@ -84,18 +84,6 @@ gwd_settings_storage_update_font                  (GWDSettingsStorage *storage);
 void
 gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage *storage);
 
-GSettings *
-gwd_get_org_compiz_gwd_settings                   (GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_gnome_desktop_wm_preferences_settings (GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_gnome_metacity_settings               (GWDSettingsStorage *storage);
-
-GSettings *
-gwd_get_org_mate_marco_general_settings           (GWDSettingsStorage *storage);
-
 G_END_DECLS
 
 #endif
