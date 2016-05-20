@@ -46,7 +46,7 @@ button_state_offsets (gdouble  x,
                       gdouble *return_x,
                       gdouble *return_y)
 {
-    static gdouble off[]	= { 0.0, 0.0, 0.0, 0.5 };
+    static gdouble off[] = { 0.0, 0.0, 0.0, 0.5 };
 
     *return_x  = x + off[state];
     *return_y  = y + off[state];
