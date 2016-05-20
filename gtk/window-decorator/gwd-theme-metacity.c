@@ -44,6 +44,11 @@ gwd_theme_metacity_constructor (GType                  type,
     object = G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructor (type, n_properties, properties);
     metacity = GWD_THEME_METACITY (object);
 
+    /* Always valid and current MetaTheme! On theme change new GWDThemeMetacity
+     * object will be created and old one destroyed. If Metacity theme is not
+     * valid (gwd_metacity_window_decoration_update_meta_theme returns FALSE)
+     * then GWDThemeCairo will be created.
+     */
     metacity->theme = meta_theme_get_current ();
 
     return object;
