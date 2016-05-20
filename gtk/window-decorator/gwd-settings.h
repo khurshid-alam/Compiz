@@ -87,69 +87,72 @@ extern const gchar    *TITLEBAR_FONT_DEFAULT;
 G_DECLARE_FINAL_TYPE (GWDSettings, gwd_settings, GWD, SETTINGS, GObject)
 
 GWDSettings *
-gwd_settings_new                      (gint                 blur,
-                                       const gchar         *metacity_theme);
+gwd_settings_new                        (gint                 blur,
+                                         const gchar         *metacity_theme);
 
 const gchar *
-gwd_settings_get_metacity_theme       (GWDSettings         *settings);
+gwd_settings_get_metacity_button_layout (GWDSettings         *settings);
 
 const gchar *
-gwd_settings_get_titlebar_font        (GWDSettings         *settings);
+gwd_settings_get_metacity_theme         (GWDSettings         *settings);
+
+const gchar *
+gwd_settings_get_titlebar_font          (GWDSettings         *settings);
 
 void
-gwd_settings_freeze_updates           (GWDSettings         *settings);
+gwd_settings_freeze_updates             (GWDSettings         *settings);
 
 void
-gwd_settings_thaw_updates             (GWDSettings         *settings);
+gwd_settings_thaw_updates               (GWDSettings         *settings);
 
 gboolean
-gwd_settings_shadow_property_changed  (GWDSettings         *settings,
-                                       gdouble              active_shadow_radius,
-                                       gdouble              active_shadow_opacity,
-                                       gdouble              active_shadow_offset_x,
-                                       gdouble              active_shadow_offset_y,
-                                       const gchar         *active_shadow_color,
-                                       gdouble              inactive_shadow_radius,
-                                       gdouble              inactive_shadow_opacity,
-                                       gdouble              inactive_shadow_offset_x,
-                                       gdouble              inactive_shadow_offset_y,
-                                       const gchar         *inactive_shadow_color);
+gwd_settings_shadow_property_changed    (GWDSettings         *settings,
+                                         gdouble              active_shadow_radius,
+                                         gdouble              active_shadow_opacity,
+                                         gdouble              active_shadow_offset_x,
+                                         gdouble              active_shadow_offset_y,
+                                         const gchar         *active_shadow_color,
+                                         gdouble              inactive_shadow_radius,
+                                         gdouble              inactive_shadow_opacity,
+                                         gdouble              inactive_shadow_offset_x,
+                                         gdouble              inactive_shadow_offset_y,
+                                         const gchar         *inactive_shadow_color);
 
 gboolean
-gwd_settings_use_tooltips_changed     (GWDSettings         *settings,
-                                       gboolean             use_tooltips);
+gwd_settings_use_tooltips_changed       (GWDSettings         *settings,
+                                         gboolean             use_tooltips);
 
 gboolean
-gwd_settings_blur_changed             (GWDSettings         *settings,
-                                       const gchar         *blur_type);
+gwd_settings_blur_changed               (GWDSettings         *settings,
+                                         const gchar         *blur_type);
 
 gboolean
-gwd_settings_metacity_theme_changed   (GWDSettings         *settings,
-                                       gboolean             use_metacity_theme,
-                                       const gchar         *metacity_theme);
+gwd_settings_metacity_theme_changed     (GWDSettings         *settings,
+                                         gboolean             use_metacity_theme,
+                                         const gchar         *metacity_theme);
 
 gboolean
-gwd_settings_opacity_changed          (GWDSettings         *settings,
-                                       gdouble              active_opacity,
-                                       gdouble              inactive_opacity,
-                                       gboolean             active_shade_opacity,
-                                       gboolean             inactive_shade_opacity);
+gwd_settings_opacity_changed            (GWDSettings         *settings,
+                                         gdouble              active_opacity,
+                                         gdouble              inactive_opacity,
+                                         gboolean             active_shade_opacity,
+                                         gboolean             inactive_shade_opacity);
 
 gboolean
-gwd_settings_button_layout_changed    (GWDSettings         *settings,
-                                       const gchar         *button_layout);
+gwd_settings_button_layout_changed      (GWDSettings         *settings,
+                                         const gchar         *button_layout);
 
 gboolean
-gwd_settings_font_changed             (GWDSettings         *settings,
-                                       gboolean             titlebar_uses_system_font,
-                                       const gchar         *titlebar_font);
+gwd_settings_font_changed               (GWDSettings         *settings,
+                                         gboolean             titlebar_uses_system_font,
+                                         const gchar         *titlebar_font);
 
 gboolean
-gwd_settings_titlebar_actions_changed (GWDSettings         *settings,
-                                       const gchar         *action_double_click_titlebar,
-                                       const gchar         *action_middle_click_titlebar,
-                                       const gchar         *action_right_click_titlebar,
-                                       const gchar         *mouse_wheel_action);
+gwd_settings_titlebar_actions_changed   (GWDSettings         *settings,
+                                         const gchar         *action_double_click_titlebar,
+                                         const gchar         *action_middle_click_titlebar,
+                                         const gchar         *action_right_click_titlebar,
+                                         const gchar         *mouse_wheel_action);
 
 G_END_DECLS
 

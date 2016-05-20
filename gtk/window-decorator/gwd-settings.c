@@ -594,6 +594,12 @@ gwd_settings_new (gint         blur,
 }
 
 const gchar *
+gwd_settings_get_metacity_button_layout (GWDSettings *settings)
+{
+    return settings->metacity_button_layout;
+}
+
+const gchar *
 gwd_settings_get_metacity_theme (GWDSettings *settings)
 {
     return settings->metacity_theme;
