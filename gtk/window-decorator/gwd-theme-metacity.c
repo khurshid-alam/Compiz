@@ -254,12 +254,10 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                                               gint     *w,
                                               gint     *h)
 {
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaButtonLayout button_layout;
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
-
-    metacity = GWD_THEME_METACITY (theme);
 
     gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags,
                                                 &fgeom,  &button_layout,
