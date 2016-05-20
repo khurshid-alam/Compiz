@@ -41,19 +41,10 @@
 
 #include "compiz_gwd_tests.h"
 
-#include "gwd-settings-interface.h"
 #include "gwd-settings.h"
-#include "gwd-settings-storage-gsettings.h"
-#include "gwd-settings-writable-interface.h"
-#include "gwd-settings-storage-interface.h"
-#include "gwd-settings-notified-interface.h"
+#include "gwd-settings-storage.h"
 
 #include "decoration.h"
-
-#include "compiz_gwd_mock_settings.h"
-#include "compiz_gwd_mock_settings_writable.h"
-#include "compiz_gwd_mock_settings_storage.h"
-#include "compiz_gwd_mock_settings_notified.h"
 
 using ::testing::TestWithParam;
 using ::testing::Eq;
@@ -205,8 +196,6 @@ namespace testing_values
     const gint BLUR_TYPE_NONE_INT_VALUE = BLUR_TYPE_NONE;
     const gboolean USE_METACITY_THEME_VALUE  = TRUE;
     const std::string METACITY_THEME_VALUE ("metacity_theme");
-    const gboolean NO_USE_METACITY_THEME_VALUE  = FALSE;
-    const std::string NO_METACITY_THEME_VALUE ("");
     const gdouble ACTIVE_OPACITY_VALUE = 0.9;
     const gdouble INACTIVE_OPACITY_VALUE = 0.8;
     const gboolean ACTIVE_SHADE_OPACITY_VALUE = !METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -251,30 +240,11 @@ class GWDSettingsTestCommon :
 	CompizGLibGSliceOffEnv env;
 };
 
-class GWDMockSettingsWritableTest :
-    public GWDSettingsTestCommon
-{
-};
-
 namespace
 {
-    void gwd_settings_storage_unref (GWDSettingsStorage *storage)
-    {
-	g_object_unref (G_OBJECT (storage));
-    }
-
-    void gwd_settings_writable_unref (GWDSettingsWritable *writable)
-    {
-	g_object_unref (G_OBJECT (writable));
-    }
-
-    void gwd_settings_unref (GWDSettingsImpl *settings)
+    void gwd_settings_unref (GWDSettings *settings)
     {
 	g_object_unref (G_OBJECT (settings));
-    }
-
-    void gwd_settings_notified_do_nothing (GWDSettingsNotified *notified)
-    {
     }
 
     class AutoUnsetGValue
@@ -307,299 +277,89 @@ namespace
     };
 }
 
-TEST_F(GWDMockSettingsWritableTest, TestMock)
+class GWDMockSettingsNotifiedGMock
 {
-    GWDMockSettingsWritableGMock writableGMock;
-    boost::shared_ptr <GWDSettingsWritable> writableMock (gwd_mock_settings_writable_new (&writableGMock),
-							  boost::bind (gwd_settings_writable_unref, _1));
+    public:
 
+        GWDMockSettingsNotifiedGMock (boost::shared_ptr <GWDSettings> settings)
+        {
+            g_signal_connect (settings.get (), "update-decorations",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateDecorationsCb), this);
+            g_signal_connect (settings.get (), "update-frames",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateFramesCb), this);
+            g_signal_connect (settings.get (), "update-metacity-theme",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityThemeCb), this);
+            g_signal_connect (settings.get (), "update-metacity-button-layout",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityButtonLayoutCb), this);
+        }
 
-    EXPECT_CALL (writableGMock, freezeUpdates ());
-    EXPECT_CALL (writableGMock, thawUpdates ());
-    EXPECT_CALL (writableGMock, shadowPropertyChanged (testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
-						       testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
-						       testing_values::ACTIVE_SHADOW_OFFSET_X_VALUE,
-						       testing_values::ACTIVE_SHADOW_OFFSET_Y_VALUE,
-						       Eq (testing_values::ACTIVE_SHADOW_COLOR_STR_VALUE),
-						       testing_values::INACTIVE_SHADOW_RADIUS_VALUE,
-						       testing_values::INACTIVE_SHADOW_OPACITY_VALUE,
-						       testing_values::INACTIVE_SHADOW_OFFSET_X_VALUE,
-						       testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
-						       Eq (testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE))).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, useTooltipsChanged (testing_values::USE_TOOLTIPS_VALUE)).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, blurChanged (Eq (testing_values::BLUR_TYPE_TITLEBAR_VALUE))).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, metacityThemeChanged (TRUE, Eq (testing_values::METACITY_THEME_VALUE))).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, opacityChanged (testing_values::ACTIVE_OPACITY_VALUE,
-						testing_values::INACTIVE_OPACITY_VALUE,
-						testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-						testing_values::INACTIVE_SHADE_OPACITY_VALUE)).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, buttonLayoutChanged (Eq (testing_values::BUTTON_LAYOUT_VALUE))).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, fontChanged (testing_values::USE_SYSTEM_FONT_VALUE,
-					     testing_values::TITLEBAR_FONT_VALUE.c_str ())).WillOnce (Return (TRUE));
-    EXPECT_CALL (writableGMock, titlebarActionsChanged (Eq (testing_values::TITLEBAR_ACTION_MAX),
-							Eq (testing_values::TITLEBAR_ACTION_MENU),
-							Eq (testing_values::TITLEBAR_ACTION_LOWER),
-							Eq (testing_values::TITLEBAR_ACTION_SHADE))).WillOnce (Return (TRUE));
+        MOCK_METHOD0 (updateDecorations, void ());
+        MOCK_METHOD0 (updateFrames, void ());
+        MOCK_METHOD0 (updateMetacityTheme, void ());
+        MOCK_METHOD0 (updateMetacityButtonLayout, void ());
 
-    EXPECT_CALL (writableGMock, dispose ());
-    EXPECT_CALL (writableGMock, finalize ());
+    private:
 
-    gwd_settings_writable_freeze_updates (writableMock.get ());
-    gwd_settings_writable_thaw_updates (writableMock.get ());
+        static void updateDecorationsCb (GWDSettings                  *settings,
+                                         GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateDecorations ();
+        }
 
-    EXPECT_THAT (gwd_settings_writable_shadow_property_changed (writableMock.get (),
-								testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
-								testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
-								testing_values::ACTIVE_SHADOW_OFFSET_X_VALUE,
-								testing_values::ACTIVE_SHADOW_OFFSET_Y_VALUE,
-								testing_values::ACTIVE_SHADOW_COLOR_STR_VALUE.c_str (),
-								testing_values::INACTIVE_SHADOW_RADIUS_VALUE,
-								testing_values::INACTIVE_SHADOW_OPACITY_VALUE,
-								testing_values::INACTIVE_SHADOW_OFFSET_X_VALUE,
-								testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
-								testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (writableMock.get (), testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_blur_changed (writableMock.get (), testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (writableMock.get (),
-							       testing_values::USE_METACITY_THEME_VALUE,
-							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_opacity_changed (writableMock.get (),
-							testing_values::ACTIVE_OPACITY_VALUE,
-							testing_values::INACTIVE_OPACITY_VALUE,
-							testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-							testing_values::INACTIVE_SHADE_OPACITY_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_button_layout_changed (writableMock.get (),
-							      testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_font_changed (writableMock.get (),
-						     testing_values::USE_SYSTEM_FONT_VALUE,
-						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_titlebar_actions_changed (writableMock.get (),
-								 testing_values::TITLEBAR_ACTION_MAX.c_str (),
-								 testing_values::TITLEBAR_ACTION_MENU.c_str (),
-								 testing_values::TITLEBAR_ACTION_LOWER.c_str (),
-								 testing_values::TITLEBAR_ACTION_SHADE.c_str ()), IsTrue ());
-}
+        static void updateFramesCb (GWDSettings                  *settings,
+                                    GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateFrames ();
+        }
 
-class GWDMockSettingsTest :
-    public GWDSettingsTestCommon
-{
+        static void updateMetacityThemeCb (GWDSettings                  *settings,
+                                           const gchar                  *metacity_theme,
+                                           GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateMetacityTheme ();
+        }
+
+        static void updateMetacityButtonLayoutCb (GWDSettings                  *settings,
+                                                  const gchar                  *button_layout,
+                                                  GWDMockSettingsNotifiedGMock *gmock)
+        {
+            gmock->updateMetacityButtonLayout ();
+        }
+
 };
-
-TEST_F(GWDMockSettingsTest, TestMock)
-{
-    GWDMockSettingsGMock settingsGMock;
-    boost::shared_ptr <GWDSettingsImpl> settingsMock (gwd_mock_settings_new (&settingsGMock),
-						  boost::bind (gwd_settings_unref, _1));
-
-    AutoUnsetGValue pointerValue (G_TYPE_POINTER);
-    AutoUnsetGValue booleanValue (G_TYPE_BOOLEAN);
-    AutoUnsetGValue stringValue (G_TYPE_STRING);
-    AutoUnsetGValue integerValue (G_TYPE_INT);
-    AutoUnsetGValue doubleValue (G_TYPE_DOUBLE);
-
-    GValue &pointerGValue = pointerValue;
-    GValue &booleanGValue = booleanValue;
-    GValue &stringGValue = stringValue;
-    GValue &integerGValue = integerValue;
-    GValue &doubleGValue  = doubleValue;
-
-    int	  POINTEE_VALUE = 1;
-    gpointer POINTER_VALUE = &POINTEE_VALUE;
-    const std::string STRING_VALUE ("test");
-    const int INTEGER_VALUE = 2;
-    const gboolean BOOLEAN_VALUE = TRUE;
-    const gdouble DOUBLE_VALUE = 2.0;
-
-    g_value_set_pointer (&pointerGValue, POINTER_VALUE);
-    g_value_set_boolean (&booleanGValue, BOOLEAN_VALUE);
-    g_value_set_string (&stringGValue, STRING_VALUE.c_str ());
-    g_value_set_int (&integerGValue, INTEGER_VALUE);
-    g_value_set_double (&doubleGValue, DOUBLE_VALUE);
-
-    EXPECT_CALL (settingsGMock, dispose ());
-    EXPECT_CALL (settingsGMock, finalize ());
-
-    /* The order of evaluation of matchers in Google Mock appears to be undefined and
-     * the way GValueMatch is written makes it particularly unsafe when used with
-     * matchers of multiple types on the same function, since there's no guaruntee
-     * that the matchers will be traversed in any order. If a type is passed to
-     * any of the matchers that it doesn't know how to handle then it will
-     * call directly through to GValueCmp which will run into undefined behaviour
-     * in itself.
-     *
-     * In reality, the API for GValueMatch is probably a little bit broken in this
-     * sense, but just satisfying each expectation as soon as its set seems to do
-     * the job here
-     */
-
-    /* calling g_object_get_property actually resets
-     * the value so expecting 0x0 is correct */
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_SHADOW,
-					     GValueMatch <gpointer> (0x0, g_value_get_pointer),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "active-shadow",
-			   &pointerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_SHADOW,
-					     GValueMatch <gpointer> (0x0, g_value_get_pointer),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "inactive-shadow",
-			   &pointerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_USE_TOOLTIPS,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "use-tooltips",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BLUR_CHANGED,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "blur",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_METACITY_THEME,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-theme",
-			   &stringGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_OPACITY,
-					     GValueMatch <gdouble> (0.0, g_value_get_double),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-active-opacity",
-			   &doubleGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_OPACITY,
-					     GValueMatch <gdouble> (0.0, g_value_get_double),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-inactive-opacity",
-			   &doubleGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_SHADE_OPACITY,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-active-shade-opacity",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_SHADE_OPACITY,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-inactive-shade-opacity",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BUTTON_LAYOUT,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-button-layout",
-			   &stringGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-double-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-middle-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-right-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_MOUSE_WHEEL_ACTION,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "mouse-wheel-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_FONT,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-font",
-			   &stringGValue);
-}
-
-namespace
-{
-    void ExpectAllNotificationsOnce (boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > &gmockNotified,
-				     boost::shared_ptr <GWDSettingsImpl>	      &settings)
-    {
-	InSequence s;
-
-	EXPECT_CALL (*gmockNotified, updateMetacityTheme ()).Times (1);
-	EXPECT_CALL (*gmockNotified, updateMetacityButtonLayout ()).Times (1);
-	EXPECT_CALL (*gmockNotified, updateFrames ()).Times (1);
-	EXPECT_CALL (*gmockNotified, updateDecorations ()).Times (1);
-
-	gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (settings.get ()));
-    }
-}
 
 class GWDSettingsTest :
     public GWDSettingsTestCommon
 {
     public:
 
-	virtual void SetUp ()
-	{
-	    GWDSettingsTestCommon::SetUp ();
-	    mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> ());
-	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
-				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_impl_new (NULL,
-						    NULL,
-						    mMockNotified.get ()),
-			     boost::bind (gwd_settings_unref, _1));
-	    ExpectAllNotificationsOnce (mGMockNotified, mSettings);
-	}
+        virtual void SetUp ()
+        {
+            GWDSettingsTestCommon::SetUp ();
 
-	virtual void TearDown ()
-	{
-	    EXPECT_CALL (*mGMockNotified, dispose ());
-	    EXPECT_CALL (*mGMockNotified, finalize ());
-	}
+            mSettings.reset (gwd_settings_new (-1, NULL), boost::bind (gwd_settings_unref, _1));
+            mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> (mSettings));
+
+            ExpectAllNotificationsOnce ();
+        }
 
     protected:
 
-	boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
-	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
-	boost::shared_ptr <GWDSettingsImpl> mSettings;
+        boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
+        boost::shared_ptr <GWDSettings> mSettings;
+
+    private:
+
+        void ExpectAllNotificationsOnce ()
+        {
+            EXPECT_CALL (*mGMockNotified, updateMetacityTheme ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateFrames ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
+
+            gwd_settings_thaw_updates (mSettings.get ());
+        }
+
 };
 
 TEST_F(GWDSettingsTest, TestGWDSettingsInstantiation)
@@ -614,51 +374,51 @@ TEST_F(GWDSettingsTest, TestUpdateAllOnInstantiation)
 /* We're just using use_tooltips here as an example */
 TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdates)
 {
-    gwd_settings_writable_freeze_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    gwd_settings_freeze_updates (mSettings.get ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 }
 
 /* We're just using use_tooltips here as an example */
 TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdates)
 {
-    gwd_settings_writable_freeze_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    gwd_settings_freeze_updates (mSettings.get ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
+    gwd_settings_thaw_updates (mSettings.get ());
 }
 
 /* We're just using use_tooltips here as an example */
 TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdatesNoDupes)
 {
-    gwd_settings_writable_freeze_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     !testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    gwd_settings_freeze_updates (mSettings.get ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    !testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
     EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
-    gwd_settings_writable_thaw_updates (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()));
+    gwd_settings_thaw_updates (mSettings.get ());
 }
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_shadow_property_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-								testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
-								testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
-								testing_values::ACTIVE_SHADOW_OFFSET_X_VALUE,
-								testing_values::ACTIVE_SHADOW_OFFSET_Y_VALUE,
-								testing_values::ACTIVE_SHADOW_COLOR_STR_VALUE.c_str (),
-								testing_values::INACTIVE_SHADOW_OPACITY_VALUE,
-								testing_values::INACTIVE_SHADOW_RADIUS_VALUE,
-								testing_values::INACTIVE_SHADOW_OFFSET_X_VALUE,
-								testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
-								testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_shadow_property_changed (mSettings.get (),
+                                                       testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
+                                                       testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
+                                                       testing_values::ACTIVE_SHADOW_OFFSET_X_VALUE,
+                                                       testing_values::ACTIVE_SHADOW_OFFSET_Y_VALUE,
+                                                       testing_values::ACTIVE_SHADOW_COLOR_STR_VALUE.c_str (),
+                                                       testing_values::INACTIVE_SHADOW_OPACITY_VALUE,
+                                                       testing_values::INACTIVE_SHADOW_RADIUS_VALUE,
+                                                       testing_values::INACTIVE_SHADOW_OFFSET_X_VALUE,
+                                                       testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
+                                                       testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue activeShadowValue (G_TYPE_POINTER);
     AutoUnsetGValue inactiveShadowValue (G_TYPE_POINTER);
@@ -702,7 +462,7 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_shadow_property_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
+    EXPECT_THAT (gwd_settings_shadow_property_changed (mSettings.get (),
 								ACTIVE_SHADOW_RADIUS_DEFAULT,
 								ACTIVE_SHADOW_OPACITY_DEFAULT,
 								ACTIVE_SHADOW_OFFSET_X_DEFAULT,
@@ -718,8 +478,8 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
 
     AutoUnsetGValue useTooltipsValue (G_TYPE_BOOLEAN);
     GValue &useTooltipsGValue = useTooltipsValue;
@@ -734,15 +494,15 @@ TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_use_tooltips_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							     USE_TOOLTIPS_DEFAULT), IsFalse ());
+    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    USE_TOOLTIPS_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue blurValue (G_TYPE_INT);
     GValue &blurGValue = blurValue;
@@ -758,8 +518,8 @@ TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 TEST_F(GWDSettingsTest, TestBlurChangedAll)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::BLUR_TYPE_ALL_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_ALL_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue blurValue (G_TYPE_INT);
     GValue &blurGValue = blurValue;
@@ -774,8 +534,8 @@ TEST_F(GWDSettingsTest, TestBlurChangedAll)
 
 TEST_F(GWDSettingsTest, TestBlurChangedNone)
 {
-    EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
+    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
 
     AutoUnsetGValue blurValue (G_TYPE_INT);
     GValue &blurGValue = blurValue;
@@ -792,16 +552,11 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
 {
     gint blurType = testing_values::BLUR_TYPE_ALL_INT_VALUE;
 
-    /* We need to increment the reference count so that it doesn't
-     * go away when we create a new GWDSettingsImpl */
-    g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_impl_new (&blurType,
-					    NULL,
-					    mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (blurType, NULL),
 		     boost::bind (gwd_settings_unref, _1));
 
-    EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
+    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
 
     AutoUnsetGValue blurValue (G_TYPE_INT);
     GValue &blurGValue = blurValue;
@@ -818,9 +573,9 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							       testing_values::USE_METACITY_THEME_VALUE,
-							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
+                                                      testing_values::USE_METACITY_THEME_VALUE,
+                                                      testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
     GValue &metacityThemeGValue = metacityThemeValue;
@@ -837,9 +592,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							       testing_values::NO_USE_METACITY_THEME_VALUE,
-							       testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE, NULL), IsTrue ());
 
     AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
     GValue &metacityThemeGValue = metacityThemeValue;
@@ -848,30 +601,26 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 			   "metacity-theme",
 			   &metacityThemeGValue);
 
-    EXPECT_THAT (&metacityThemeGValue, GValueMatch <std::string> (testing_values::NO_METACITY_THEME_VALUE,
-								  g_value_get_string));
+    EXPECT_THAT (&metacityThemeGValue, GValueMatch <const gchar *> (NULL, g_value_get_string));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							       testing_values::USE_METACITY_THEME_VALUE,
-							       METACITY_THEME_DEFAULT), IsFalse ());
+    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
+                                                      testing_values::USE_METACITY_THEME_VALUE,
+                                                      METACITY_THEME_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 {
     const gchar *metacityTheme = "Ambiance";
 
-    g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_impl_new (NULL,
-					    &metacityTheme,
-					    mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (-1, metacityTheme),
 		     boost::bind (gwd_settings_unref, _1));
 
-    EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							       testing_values::USE_METACITY_THEME_VALUE,
-							       testing_values::METACITY_THEME_VALUE.c_str ()), IsFalse ());
+    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
+                                                      testing_values::USE_METACITY_THEME_VALUE,
+                                                      testing_values::METACITY_THEME_VALUE.c_str ()), IsFalse ());
 
     AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
     GValue &metacityThemeGValue = metacityThemeValue;
@@ -887,11 +636,11 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 TEST_F(GWDSettingsTest, TestMetacityOpacityChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_opacity_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							testing_values::ACTIVE_OPACITY_VALUE,
-							testing_values::INACTIVE_OPACITY_VALUE,
-							testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-							testing_values::INACTIVE_SHADE_OPACITY_VALUE), IsTrue ());
+    EXPECT_THAT (gwd_settings_opacity_changed (mSettings.get (),
+                                               testing_values::ACTIVE_OPACITY_VALUE,
+                                               testing_values::INACTIVE_OPACITY_VALUE,
+                                               testing_values::ACTIVE_SHADE_OPACITY_VALUE,
+                                               testing_values::INACTIVE_SHADE_OPACITY_VALUE), IsTrue ());
 
     AutoUnsetGValue metacityInactiveOpacityValue (G_TYPE_DOUBLE);
     AutoUnsetGValue metacityActiveOpacityValue (G_TYPE_DOUBLE);
@@ -928,19 +677,19 @@ TEST_F(GWDSettingsTest, TestMetacityOpacityChanged)
 
 TEST_F(GWDSettingsTest, TestMetacityOpacityChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_opacity_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							METACITY_ACTIVE_OPACITY_DEFAULT,
-							METACITY_INACTIVE_OPACITY_DEFAULT,
-							METACITY_ACTIVE_SHADE_OPACITY_DEFAULT,
-							METACITY_INACTIVE_SHADE_OPACITY_DEFAULT), IsFalse ());
+    EXPECT_THAT (gwd_settings_opacity_changed (mSettings.get (),
+                                               METACITY_ACTIVE_OPACITY_DEFAULT,
+                                               METACITY_INACTIVE_OPACITY_DEFAULT,
+                                               METACITY_ACTIVE_SHADE_OPACITY_DEFAULT,
+                                               METACITY_INACTIVE_SHADE_OPACITY_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_button_layout_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							      testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_button_layout_changed (mSettings.get (),
+                                                     testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue buttonLayoutValue (G_TYPE_STRING);
     GValue &buttonLayoutGValue = buttonLayoutValue;
@@ -955,17 +704,17 @@ TEST_F(GWDSettingsTest, TestButtonLayoutChanged)
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_button_layout_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-							      METACITY_BUTTON_LAYOUT_DEFAULT), IsFalse ());
+    EXPECT_THAT (gwd_settings_button_layout_changed (mSettings.get (),
+                                                     METACITY_BUTTON_LAYOUT_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateFrames ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::NO_USE_SYSTEM_FONT_VALUE,
-						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
+                                            testing_values::NO_USE_SYSTEM_FONT_VALUE,
+                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue fontValue (G_TYPE_STRING);
     GValue	    &fontGValue = fontValue;
@@ -982,9 +731,9 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
     EXPECT_CALL (*mGMockNotified, updateFrames ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::USE_SYSTEM_FONT_VALUE,
-						     testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
+                                            testing_values::USE_SYSTEM_FONT_VALUE,
+                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
 
     AutoUnsetGValue fontValue (G_TYPE_STRING);
     GValue	    &fontGValue = fontValue;
@@ -1000,9 +749,9 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_writable_font_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						     testing_values::NO_USE_SYSTEM_FONT_VALUE,
-						     TITLEBAR_FONT_DEFAULT), IsFalse ());
+    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
+                                            testing_values::NO_USE_SYSTEM_FONT_VALUE,
+                                            TITLEBAR_FONT_DEFAULT), IsFalse ());
 }
 
 namespace
@@ -1045,37 +794,22 @@ class GWDSettingsTestClickActions :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    mGMockNotified.reset (new GWDMockSettingsNotifiedGMock ());
-	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
-				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_impl_new (NULL,
-						    NULL,
-						    mMockNotified.get ()),
+	    mSettings.reset (gwd_settings_new (-1, NULL),
 			     boost::bind (gwd_settings_unref, _1));
-	}
-
-	virtual void TearDown ()
-	{
-	    EXPECT_CALL (*mGMockNotified, dispose ());
-	    EXPECT_CALL (*mGMockNotified, finalize ());
-
-	    GWDSettingsTestCommon::TearDown ();
 	}
 
     protected:
 
-	boost::shared_ptr <GWDMockSettingsNotifiedGMock> mGMockNotified;
-	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
-	boost::shared_ptr <GWDSettingsImpl> mSettings;
+	boost::shared_ptr <GWDSettings> mSettings;
 };
 
 TEST_P(GWDSettingsTestClickActions, TestClickActionsAndMouseActions)
 {
-    gwd_settings_writable_titlebar_actions_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
-						    GetParam ().titlebarAction ().c_str (),
-						    GetParam ().titlebarAction ().c_str (),
-						    GetParam ().titlebarAction ().c_str (),
-						    GetParam ().mouseWheelAction ().c_str ());
+    gwd_settings_titlebar_actions_changed (mSettings.get (),
+                                           GetParam ().titlebarAction ().c_str (),
+                                           GetParam ().titlebarAction ().c_str (),
+                                           GetParam ().titlebarAction ().c_str (),
+                                           GetParam ().mouseWheelAction ().c_str ());
 
     AutoUnsetGValue doubleClickActionValue (G_TYPE_INT);
     AutoUnsetGValue middleClickActionValue (G_TYPE_INT);
@@ -1138,446 +872,3 @@ INSTANTIATE_TEST_CASE_P (MouseActions, GWDSettingsTestClickActions,
 								   testing_values::MOUSE_WHEEL_ACTION_SHADE,
 								   CLICK_ACTION_MENU,
 								   WHEEL_ACTION_SHADE)));
-
-class GWDSettingsStorageFactoryWrapperInterface
-{
-    public:
-
-	typedef boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> Ptr;
-	virtual ~GWDSettingsStorageFactoryWrapperInterface () {}
-
-	virtual void SetUp (GWDSettingsWritable *writable) = 0;
-	virtual GWDSettingsStorage * GetStorage () = 0;
-	virtual void SetUseTooltips (gboolean useTooltips) = 0;
-	virtual void SetBlur (const std::string &blurType) = 0;
-	virtual void SetOpacity (gdouble activeOpacity,
-				 gdouble inactiveOpacity,
-				 gboolean activeShadeOpacity,
-				 gboolean inactiveShadeOpacity) = 0;
-	virtual void SetMetacityTheme (gboolean useMetacityTheme,
-					  const std::string &metacityTheme) = 0;
-	virtual void SetButtonLayout (const std::string &buttonLayout) = 0;
-	virtual void SetFont (gboolean useSystemFont, const std::string &titlebarFont) = 0;
-	virtual void SetTitlebarActions (const std::string &doubleClickAction,
-					 const std::string &middleClickAction,
-					 const std::string &rightClickAction,
-					 const std::string &mouseWheelAction) = 0;
-	virtual void TearDown () = 0;
-};
-
-class GWDSettingsTestStorageUpdates :
-    public GWDSettingsTestCommon,
-    public ::testing::WithParamInterface <GWDSettingsStorageFactoryWrapperInterface::Ptr>
-{
-    public:
-
-	virtual void SetUp ()
-	{
-	    GWDSettingsTestCommon::SetUp ();
-	    mSettingsMock.reset (new GWDMockSettingsWritableGMock ());
-	    mSettings.reset (gwd_mock_settings_writable_new (mSettingsMock.get ()),
-			     boost::bind (gwd_settings_writable_unref, _1));
-
-	    GetParam ()->SetUp (mSettings.get ());
-	}
-
-	virtual void TearDown ()
-	{
-	    EXPECT_CALL (*mSettingsMock, dispose ());
-	    EXPECT_CALL (*mSettingsMock, finalize ());
-
-	    GetParam ()->TearDown ();
-	    GWDSettingsTestCommon::TearDown ();
-	}
-
-    protected:
-
-	boost::shared_ptr <GWDMockSettingsWritableGMock> mSettingsMock;
-	boost::shared_ptr <GWDSettingsWritable> mSettings;
-};
-
-ACTION_P (InvokeFunctor, p) { return p (); }
-
-TEST_P (GWDSettingsTestStorageUpdates, TestInstantiation)
-{
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetUseTooltips)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetUseTooltips (testing_values::USE_TOOLTIPS_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, useTooltipsChanged (testing_values::USE_TOOLTIPS_VALUE));
-
-    gwd_settings_storage_update_use_tooltips (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetBlur)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetBlur (testing_values::BLUR_TYPE_ALL_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, blurChanged (Eq (testing_values::BLUR_TYPE_ALL_VALUE)));
-
-    gwd_settings_storage_update_blur (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetButtonLayout)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetButtonLayout (testing_values::BUTTON_LAYOUT_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, buttonLayoutChanged (Eq (testing_values::BUTTON_LAYOUT_VALUE)));
-
-    gwd_settings_storage_update_button_layout (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetOpacity)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetOpacity (testing_values::ACTIVE_OPACITY_VALUE,
-			     testing_values::INACTIVE_OPACITY_VALUE,
-			     testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-			     testing_values::INACTIVE_SHADE_OPACITY_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, opacityChanged (testing_values::ACTIVE_OPACITY_VALUE,
-						 testing_values::INACTIVE_OPACITY_VALUE,
-						 testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-						 testing_values::INACTIVE_SHADE_OPACITY_VALUE));
-
-    gwd_settings_storage_update_opacity (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetMetacityTheme)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetMetacityTheme (testing_values::USE_METACITY_THEME_VALUE,
-				   testing_values::METACITY_THEME_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, metacityThemeChanged (testing_values::USE_METACITY_THEME_VALUE,
-						       Eq (testing_values::METACITY_THEME_VALUE)));
-
-    gwd_settings_storage_update_metacity_theme (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetFont)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetFont (testing_values::USE_SYSTEM_FONT_VALUE,
-			  testing_values::TITLEBAR_FONT_VALUE);
-
-    EXPECT_CALL (*mSettingsMock, fontChanged (testing_values::USE_SYSTEM_FONT_VALUE,
-					      Eq (testing_values::TITLEBAR_FONT_VALUE)));
-
-    gwd_settings_storage_update_font (storage);
-}
-
-TEST_P (GWDSettingsTestStorageUpdates, TestSetTitlebarActions)
-{
-    GWDSettingsStorage *storage = GetParam ()->GetStorage ();
-    GetParam ()->SetTitlebarActions (testing_values::TITLEBAR_ACTION_LOWER,
-				     testing_values::TITLEBAR_ACTION_MAX,
-				     testing_values::TITLEBAR_ACTION_MENU,
-				     testing_values::TITLEBAR_ACTION_SHADE);
-
-    EXPECT_CALL (*mSettingsMock, titlebarActionsChanged (Eq (testing_values::TITLEBAR_ACTION_LOWER),
-							 Eq (testing_values::TITLEBAR_ACTION_MAX),
-							 Eq (testing_values::TITLEBAR_ACTION_MENU),
-							 Eq (testing_values::TITLEBAR_ACTION_SHADE)));
-
-    gwd_settings_storage_update_titlebar_actions (storage);
-}
-
-class GWDMockSettingsStorageFactoryWrapper :
-    public GWDSettingsStorageFactoryWrapperInterface
-{
-    public:
-
-	virtual void SetUp (GWDSettingsWritable *writable)
-	{
-	    mWritable = writable;
-	    mStorageMock.reset (new GWDMockSettingsStorageGMock ());
-	    mStorage.reset (gwd_mock_settings_storage_new (mStorageMock.get ()),
-			    boost::bind (gwd_settings_storage_unref, _1));
-	}
-
-	virtual GWDSettingsStorage * GetStorage ()
-	{
-	    return mStorage.get ();
-	}
-
-	virtual void SetUseTooltips (gboolean useTooltips)
-	{
-	    EXPECT_CALL (*mStorageMock, updateUseTooltips ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_use_tooltips_changed, mWritable, useTooltips)));
-	}
-
-	virtual void SetBlur (const std::string &blurType)
-	{
-	    EXPECT_CALL (*mStorageMock, updateBlur ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_blur_changed, mWritable, blurType.c_str ())));
-	}
-
-	virtual void SetOpacity (gdouble activeOpacity,
-				 gdouble inactiveOpacity,
-				 gboolean activeShadeOpacity,
-				 gboolean inactiveShadeOpacity)
-	{
-	    EXPECT_CALL (*mStorageMock, updateOpacity ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_opacity_changed,
-				mWritable,
-				activeOpacity,
-				inactiveOpacity,
-				activeShadeOpacity,
-				inactiveShadeOpacity)));
-	}
-
-	virtual void SetMetacityTheme (gboolean useMetacityTheme,
-				       const std::string &metacityTheme)
-	{
-	    EXPECT_CALL (*mStorageMock, updateMetacityTheme ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_metacity_theme_changed,
-				mWritable,
-				useMetacityTheme,
-				metacityTheme.c_str ())));
-	}
-
-	virtual void SetButtonLayout (const std::string &buttonLayout)
-	{
-	    EXPECT_CALL (*mStorageMock, updateButtonLayout ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_button_layout_changed, mWritable, buttonLayout.c_str ())));
-	}
-
-	virtual void SetFont (gboolean useSystemFont, const std::string &titlebarFont)
-	{
-	    EXPECT_CALL (*mStorageMock, updateFont ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_font_changed,
-				mWritable,
-				useSystemFont,
-				titlebarFont.c_str ())));
-	}
-
-	virtual void SetTitlebarActions (const std::string &doubleClickAction,
-					 const std::string &middleClickAction,
-					 const std::string &rightClickAction,
-					 const std::string &mouseWheelAction)
-	{
-	    EXPECT_CALL (*mStorageMock, updateTitlebarActions ())
-		    .WillOnce (
-			InvokeFunctor (
-			    boost::bind (
-				gwd_settings_writable_titlebar_actions_changed,
-				mWritable,
-				doubleClickAction.c_str (),
-				middleClickAction.c_str (),
-				rightClickAction.c_str (),
-				mouseWheelAction.c_str ())));
-	}
-
-	virtual void TearDown ()
-	{
-	    if (mStorage)
-	    {
-		EXPECT_CALL (*mStorageMock, dispose ());
-		EXPECT_CALL (*mStorageMock, finalize ());
-	    }
-
-	    mStorage.reset ();
-	    mStorageMock.reset ();
-	}
-
-    private:
-
-	GWDSettingsWritable *mWritable;
-	boost::shared_ptr <GWDMockSettingsStorageGMock> mStorageMock;
-	boost::shared_ptr <GWDSettingsStorage> mStorage;
-};
-
-INSTANTIATE_TEST_CASE_P (MockStorageUpdates, GWDSettingsTestStorageUpdates,
-			 ::testing::Values (boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> (new GWDMockSettingsStorageFactoryWrapper ())));
-
-#ifdef USE_GSETTINGS
-class GWDSettingsStorageGSettingsTest :
-    public GWDSettingsTestCommon
-{
-};
-
-TEST_F (GWDSettingsStorageGSettingsTest, TestNoDeathOnConnectingSignalToNULLObject)
-{
-    boost::shared_ptr <GWDMockSettingsStorageGMock> mStorageMock (new GWDMockSettingsStorageGMock ());
-    boost::shared_ptr <GWDSettingsStorage>          mStorage (gwd_mock_settings_storage_new  (mStorageMock.get ()),
-							      boost::bind (gwd_settings_storage_unref, _1));
-
-    gwd_connect_org_compiz_gwd_settings (NULL, mStorage.get ());
-    gwd_connect_org_gnome_metacity_settings (NULL, mStorage.get ());
-    gwd_connect_org_gnome_desktop_wm_preferences_settings (NULL, mStorage.get ());
-    gwd_connect_org_mate_marco_general_settings (NULL, mStorage.get ());
-
-    EXPECT_CALL (*mStorageMock, dispose ());
-    EXPECT_CALL (*mStorageMock, finalize ());
-}
-
-class GWDSettingsStorageGSettingsFactoryWrapper :
-    public GWDSettingsStorageFactoryWrapperInterface
-{
-    public:
-
-	virtual void SetUp (GWDSettingsWritable *writable)
-	{
-	    gsliceEnv.SetUpEnv ();
-	    gsettingsEnv.SetUpEnv (MOCK_PATH);
-
-	    /* We do not need to keep a reference to these */
-	    mGWDSettings = gwd_get_org_compiz_gwd_settings ();
-	    mMetacitySettings = gwd_get_org_gnome_metacity_settings ();
-	    mDesktopSettings = gwd_get_org_gnome_desktop_wm_preferences_settings ();
-	    mMarcoSettings = gwd_get_org_mate_marco_general_settings ();
-
-	    mStorage.reset (gwd_settings_storage_gsettings_new (mDesktopSettings,
-								mMetacitySettings,
-								mMarcoSettings,
-								mGWDSettings,
-								writable),
-			    boost::bind (gwd_settings_storage_unref, _1));
-	}
-
-	virtual GWDSettingsStorage * GetStorage ()
-	{
-	    return mStorage.get ();
-	}
-
-	virtual void SetUseTooltips (gboolean useTooltips)
-	{
-	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS, useTooltips);
-	}
-
-	virtual void SetBlur (const std::string &blurType)
-	{
-	    g_settings_set_string (mGWDSettings, ORG_COMPIZ_GWD_KEY_BLUR_TYPE, blurType.c_str ());
-	}
-
-	virtual void SetOpacity (gdouble activeOpacity,
-				 gdouble inactiveOpacity,
-				 gboolean activeShadeOpacity,
-				 gboolean inactiveShadeOpacity)
-	{
-	    g_settings_set_double (mGWDSettings, ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY, activeOpacity);
-	    g_settings_set_double (mGWDSettings, ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY, inactiveOpacity);
-	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY, activeShadeOpacity);
-	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY, inactiveShadeOpacity);
-	}
-
-	virtual void SetMetacityTheme (gboolean useMetacityTheme,
-				       const std::string &metacityTheme)
-	{
-	    g_settings_set_boolean (mGWDSettings, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME, useMetacityTheme);
-	    g_settings_set_string (mDesktopSettings, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME, metacityTheme.c_str ());
-	    g_settings_set_string (mMarcoSettings, ORG_MATE_MARCO_GENERAL_THEME, metacityTheme.c_str ());
-	}
-
-	virtual void SetButtonLayout (const std::string &buttonLayout)
-	{
-	    g_settings_set_string (mDesktopSettings,
-				   ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT,
-				   buttonLayout.c_str ());
-	    g_settings_set_string (mMarcoSettings,
-				   ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT,
-				   buttonLayout.c_str ());
-	}
-
-	virtual void SetFont (gboolean useSystemFont, const std::string &titlebarFont)
-	{
-	    g_settings_set_boolean (mDesktopSettings,
-				    ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT,
-				    useSystemFont);
-	    g_settings_set_string (mDesktopSettings,
-				   ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT,
-				   titlebarFont.c_str ());
-	    g_settings_set_boolean (mMarcoSettings,
-				    ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT,
-				    useSystemFont);
-	    g_settings_set_string (mMarcoSettings,
-				   ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT,
-				   titlebarFont.c_str ());
-	}
-
-	virtual void SetTitlebarActions (const std::string &doubleClickAction,
-					 const std::string &middleClickAction,
-					 const std::string &rightClickAction,
-					 const std::string &mouseWheelAction)
-	{
-	    std::string translatedDC (doubleClickAction);
-	    std::string translatedMC (middleClickAction);
-	    std::string translatedRC (rightClickAction);
-
-	    boost::replace_all (translatedDC, "_", "-");
-	    boost::replace_all (translatedMC, "_", "-");
-	    boost::replace_all (translatedRC, "_", "-");
-
-	    g_settings_set_string (mDesktopSettings,
-				   ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR,
-				   translatedDC.c_str ());
-	    g_settings_set_string (mDesktopSettings,
-				   ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR,
-				   translatedMC.c_str ());
-	    g_settings_set_string (mDesktopSettings,
-				   ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR,
-				   translatedRC.c_str ());
-	    g_settings_set_string (mMarcoSettings,
-				   ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR,
-				   translatedDC.c_str ());
-	    g_settings_set_string (mMarcoSettings,
-				   ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR,
-				   translatedMC.c_str ());
-	    g_settings_set_string (mMarcoSettings,
-				   ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR,
-				   translatedRC.c_str ());
-	    g_settings_set_string (mGWDSettings,
-				   ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION,
-				   mouseWheelAction.c_str ());
-	}
-
-	virtual void TearDown ()
-	{
-	    mStorage.reset ();
-	    mGWDSettings = NULL;
-	    mMetacitySettings = NULL;
-	    mDesktopSettings = NULL;
-	    mMarcoSettings = NULL;
-	    gsettingsEnv.TearDownEnv ();
-	    gsliceEnv.TearDownEnv ();
-	}
-
-    private:
-
-	GSettings			       *mGWDSettings;
-	GSettings			       *mMetacitySettings;
-	GSettings			       *mDesktopSettings;
-	GSettings			       *mMarcoSettings;
-	boost::shared_ptr <GWDSettingsStorage> mStorage;
-	CompizGLibGSliceOffEnv                 gsliceEnv;
-	CompizGLibGSettingsMemoryBackendTestingEnv gsettingsEnv;
-};
-
-INSTANTIATE_TEST_CASE_P (GSettingsStorageUpdates, GWDSettingsTestStorageUpdates,
-			 ::testing::Values (boost::shared_ptr <GWDSettingsStorageFactoryWrapperInterface> (new GWDSettingsStorageGSettingsFactoryWrapper ())));
-
-#endif

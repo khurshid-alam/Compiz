@@ -72,11 +72,9 @@
 #define _(x)  gettext (x)
 #define N_(x) x
 
-#ifdef USE_METACITY
-#include <libmetacity/meta-theme.h>
-#endif
-
 #include <gwd-fwd.h>
+
+#include "gwd-theme.h"
 
 extern const unsigned short ICON_SPACE;
 
@@ -103,15 +101,9 @@ unsigned long decorations;
 
 extern gboolean minimal;
 
-extern GWDSettingsNotified *notified;
-extern GWDSettings *settings;
-extern GWDSettingsWritable *writable;
+extern GWDTheme *gwd_theme;
 
 extern gdouble decoration_alpha;
-#ifdef USE_METACITY
-extern MetaTheme *meta_theme_current;
-extern gboolean meta_button_layout_set;
-#endif
 
 extern Atom frame_input_window_atom;
 extern Atom frame_output_window_atom;
@@ -304,38 +296,6 @@ typedef struct _default_frame_references
 
 extern default_frame_references_t default_frames[WINDOW_TYPE_FRAMES_NUM * 2];
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM];
-
-void     (*theme_get_shadow)		    (decor_frame_t *d,
-					     decor_shadow_options_t *,
-					     gboolean);
-
-void     (*theme_draw_window_decoration)    (decor_t *d);
-gboolean (*theme_calc_decoration_size)      (decor_t *d,
-					     int     client_width,
-					     int     client_height,
-					     int     text_width,
-					     int     *width,
-					     int     *height);
-void     (*theme_update_border_extents)     (decor_frame_t *frame);
-void     (*theme_get_event_window_position) (decor_t *d,
-
-					     gint    i,
-					     gint    j,
-					     gint    width,
-					     gint    height,
-					     gint    *x,
-					     gint    *y,
-					     gint    *w,
-					     gint    *h);
-gboolean (*theme_get_button_position)       (decor_t *d,
-					     gint    i,
-					     gint    width,
-					     gint    height,
-					     gint    *x,
-					     gint    *y,
-					     gint    *w,
-					     gint    *h);
-gfloat (*theme_get_title_scale)		    (decor_frame_t *frame);
 
 extern char *program_name;
 
@@ -534,9 +494,6 @@ draw_shadow_background (decor_t		*d,
 			decor_context_t *c);
 
 void
-draw_window_decoration (decor_t *d);
-
-void
 fill_rounded_rectangle (cairo_t       *cr,
 			double        x,
 			double        y,
@@ -559,44 +516,6 @@ rounded_rectangle (cairo_t *cr,
 		   double  radius,
 		   int	   corner);
 
-gboolean
-calc_decoration_size (decor_t *d,
-		      gint    w,
-		      gint    h,
-		      gint    name_width,
-		      gint    *width,
-		      gint    *height);
-
-void
-update_border_extents ();
-
-gboolean
-get_button_position (decor_t *d,
-		     gint    i,
-		     gint    width,
-		     gint    height,
-		     gint    *x,
-		     gint    *y,
-		     gint    *w,
-		     gint    *h);
-
-void
-get_event_window_position (decor_t *d,
-			   gint    i,
-			   gint    j,
-			   gint    width,
-			   gint    height,
-			   gint    *x,
-			   gint    *y,
-			   gint    *w,
-			   gint    *h);
-
-gfloat
-get_title_scale (decor_frame_t *frame);
-
-void
-cairo_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active);
-
 /* gdk.c */
 
 GdkWindow *
@@ -617,59 +536,6 @@ create_native_surface_and_wrap (int	  w,
 
 cairo_surface_t *
 surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
-
-/* metacity.c */
-
-#ifdef USE_METACITY
-
-MetaFrameType
-meta_get_frame_type_for_decor_type (const gchar *frame_type);
-
-void
-meta_draw_window_decoration (decor_t *d);
-
-gboolean
-meta_calc_decoration_size (decor_t *d,
-			   gint    w,
-			   gint    h,
-			   gint    name_width,
-			   gint    *width,
-			   gint    *height);
-
-gboolean
-meta_get_button_position (decor_t *d,
-			  gint    i,
-			  gint	  width,
-			  gint	  height,
-			  gint    *x,
-			  gint    *y,
-			  gint    *w,
-			  gint    *h);
-
-void
-meta_get_event_window_position (decor_t *d,
-				gint    i,
-				gint    j,
-				gint	width,
-				gint	height,
-				gint    *x,
-				gint    *y,
-				gint    *w,
-				gint    *h);
-
-gfloat
-meta_get_title_scale (decor_frame_t *);
-
-void
-meta_update_border_extents ();
-
-void
-meta_update_button_layout (const char *value);
-
-void
-meta_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active);
-
-#endif
 
 /* switcher.c */
 
@@ -872,8 +738,8 @@ set_frames_scales (gpointer key,
 		   gpointer value,
 		   gpointer user_data);
 
-gboolean
-init_settings (GWDSettingsWritable *writable, WnckScreen *screen);
+void
+init_settings (GWDSettings *settings);
 
 void
 fini_settings ();

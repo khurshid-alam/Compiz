@@ -20,7 +20,7 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-interface.h"
+#include "gwd-settings.h"
 
 void
 decor_update_blur_property (decor_t *d,
@@ -35,6 +35,7 @@ decor_update_blur_property (decor_t *d,
 			    Region  right_region,
 			    int     right_offset)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     long    *data = NULL;
     int     size = 0;

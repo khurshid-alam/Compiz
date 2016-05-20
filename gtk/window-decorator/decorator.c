@@ -24,6 +24,13 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-theme-cairo.h"
+
+static void
+draw_window_decoration (decor_t *decor)
+{
+    gwd_theme_draw_window_decoration (gwd_theme, decor);
+}
 
 void
 destroy_normal_frame (decor_frame_t *frame)
@@ -47,6 +54,7 @@ destroy_bare_frame (decor_frame_t *frame)
 static const PangoFontDescription *
 get_titlebar_font (decor_frame_t *frame)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     const gchar *titlebar_font;
     g_object_get (settings, "titlebar-font", &titlebar_font, NULL);
 
@@ -230,8 +238,8 @@ update_event_windows (WnckWindow *win)
 	    h = 0;
 
 	    if (actions & event_window_actions[i][j] && i >= k && i <= l)
-		(*theme_get_event_window_position) (d, i, j, width, height,
-						    &x, &y, &w, &h);
+		gwd_theme_get_event_window_position (gwd_theme, d, i, j, width, height,
+		                                     &x, &y, &w, &h);
 
 	    /* Reparenting mode - create boxes which we monitor motionnotify on */
 	    if (d->frame_window)
@@ -294,7 +302,8 @@ update_event_windows (WnckWindow *win)
 	/* Reparenting mode - if there is a button position for this
 	 * button then set the geometry */
 	if (d->frame_window &&
-	    (*theme_get_button_position) (d, i, width, height, &x, &y, &w, &h))
+	    gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+	                                   &x, &y, &w, &h))
 	{
 	    BoxPtr box = &d->button_windows[i].pos;
 	    box->x1 = x;
@@ -305,8 +314,8 @@ update_event_windows (WnckWindow *win)
 	/* Pixmap mode - if there is a button position for this button then map the window
 	 * and resize it to this position */
 	else if (!d->frame_window &&
-		 (*theme_get_button_position) (d, i, width, height,
-					       &x, &y, &w, &h))
+		 gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+		                                &x, &y, &w, &h))
 	{
 	    Window x11_win = d->button_windows[i].window;
 	    XMapWindow (xdisplay, x11_win);
@@ -407,7 +416,7 @@ update_window_decoration_name (WnckWindow *win)
 	gint w;
 
 	/* Cairo mode: w = SHRT_MAX */
-	if (theme_draw_window_decoration != draw_window_decoration)
+	if (!GWD_IS_THEME_CAIRO (gwd_theme))
 	{
 	    w = SHRT_MAX;
 	}
@@ -530,7 +539,7 @@ request_update_window_decoration_size (WnckWindow *win)
 
     /* Ask the theme to tell us how much space it needs. If this is not successful
      * update the decoration name and return false */
-    if (!(*theme_calc_decoration_size) (d, w, h, name_width, &width, &height))
+    if (!gwd_theme_calc_decoration_size (gwd_theme, d, w, h, name_width, &width, &height))
     {
 	update_window_decoration_name (win);
 	return FALSE;
@@ -705,7 +714,7 @@ draw_border_shape (Display	   *xdisplay,
     d.width   = width;
     d.height  = height;
     d.active  = TRUE;
-    d.draw    = theme_draw_window_decoration;
+    d.draw    = draw_window_decoration;
     d.picture = picture;
     d.context = c;
 
@@ -959,8 +968,8 @@ update_frames_shadows (gpointer key,
     opts->active_shadow = &active_o;
     opts->inactive_shadow = &inactive_o;
 
-    (*theme_get_shadow) (frame, opts->active_shadow, TRUE);
-    (*theme_get_shadow) (frame, opts->inactive_shadow, FALSE);
+    gwd_theme_get_shadow (gwd_theme, frame, opts->active_shadow, TRUE);
+    gwd_theme_get_shadow (gwd_theme, frame, opts->inactive_shadow, FALSE);
 
     gwd_decor_frame_ref (frame);
 
@@ -985,34 +994,6 @@ update_frames_shadows (gpointer key,
     free (opts);
     opts = NULL;
 
-}
-
-static void
-get_shadow_common (decor_frame_t *d, decor_shadow_options_t *opts, gboolean active)
-{
-    decor_shadow_options_t *setting_opts = NULL;
-
-    if (active)
-	g_object_get (settings, "active-shadow", &setting_opts, NULL);
-    else
-	g_object_get (settings, "inactive-shadow", &setting_opts, NULL);
-
-    if (setting_opts)
-    {
-	memcpy (opts, setting_opts, sizeof (decor_shadow_options_t));
-    }
-}
-
-void
-cairo_get_shadow (decor_frame_t *frame, decor_shadow_options_t *opts, gboolean active)
-{
-    get_shadow_common (frame, opts, active);
-}
-
-void
-meta_get_shadow (decor_frame_t *frame, decor_shadow_options_t *opts, gboolean active)
-{
-    get_shadow_common (frame, opts, active);
 }
 
 int
@@ -1368,7 +1349,7 @@ update_default_decorations (GdkScreen *screen)
 
         extents.top += frame->titlebar_height;
 
-        default_frames[i].d->draw = theme_draw_window_decoration;
+        default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
 	                                                               default_frames[i].d->height,
 	                                                               frame->style_window_rgba);

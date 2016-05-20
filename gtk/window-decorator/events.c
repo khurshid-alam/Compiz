@@ -24,7 +24,7 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-interface.h"
+#include "gwd-settings.h"
 
 #define DOUBLE_CLICK_DISTANCE 8.0f
 
@@ -109,6 +109,7 @@ common_button_event (WnckWindow *win,
 		     int	max,
 		     char	*tooltip)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
     guint   state = d->button_states[button];
     gboolean use_tooltips = FALSE;
@@ -457,6 +458,7 @@ static void
 handle_mouse_wheel_title_event (WnckWindow   *win,
 				unsigned int button)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     gint wheel_action = WHEEL_ACTION_NONE;
 
     g_object_get (settings, "mouse-wheel-action", &wheel_action, NULL);
@@ -484,6 +486,7 @@ title_event (WnckWindow       *win,
 	     decor_event      *gtkwd_event,
 	     decor_event_type gtkwd_type)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     static Window last_button_xwindow = None;
     static Time	  last_button_time = 0;
     gint	  titlebar_action = 0;
@@ -559,6 +562,7 @@ frame_common_event (WnckWindow       *win,
 		    decor_event      *gtkwd_event,
 		    decor_event_type gtkwd_type)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     gint    titlebar_action = 0;
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
 

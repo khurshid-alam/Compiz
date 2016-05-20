@@ -24,27 +24,15 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-writable-interface.h"
 #include "gwd-settings.h"
-#include "gwd-settings-interface.h"
-#include "gwd-settings-notified-interface.h"
-#include "gwd-settings-notified.h"
 
-GWDSettingsNotified *notified;
-GWDSettingsWritable *writable;
-GWDSettings	    *settings;
+GWDTheme *gwd_theme;
 
 gdouble decoration_alpha = 0.5;
-#ifdef USE_METACITY
-MetaTheme *meta_theme_current = NULL;
-gboolean	 meta_button_layout_set = FALSE;
-#endif
 
 gboolean minimal = FALSE;
 
 const unsigned short ICON_SPACE = 20;
-
-guint cmdline_options = 0;
 
 Atom frame_input_window_atom;
 Atom frame_output_window_atom;
@@ -141,6 +129,38 @@ const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM] = {
     "normal", "modal_dialog", "dialog", "menu", "utility"
 };
 
+static void
+update_decorations_cb (GWDSettings *settings,
+                       gpointer     user_data)
+{
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+update_frames_cb (GWDSettings *settings,
+                  gpointer     user_data)
+{
+    const gchar *titlebar_font;
+
+    titlebar_font = gwd_settings_get_titlebar_font (settings);
+
+    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+}
+
+static void
+update_metacity_theme_cb (GWDSettings *settings,
+                          const gchar *metacity_theme,
+                          gpointer     user_data)
+{
+    GWDThemeType type;
+
+    type = GWD_THEME_TYPE_CAIRO;
+    if (metacity_theme != NULL)
+        type = GWD_THEME_TYPE_METACITY;
+
+    g_set_object (&gwd_theme, gwd_theme_new (type, settings));
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -148,6 +168,7 @@ main (int argc, char *argv[])
     Display       *xdisplay;
     GdkScreen     *gdkscreen;
     WnckScreen    *screen;
+    GWDSettings   *settings;
     gint          i, j, status;
     gboolean      replace = FALSE;
     unsigned int  nchildren;
@@ -157,7 +178,7 @@ main (int argc, char *argv[])
     decor_frame_t *bare_p, *switcher_p;
 
     const char *option_meta_theme = NULL;
-    gint       option_blur_type = 0;
+    gint       option_blur_type = -1;
 
     program_name = argv[0];
 
@@ -286,32 +307,21 @@ main (int argc, char *argv[])
 
     initialize_decorations ();
 
-    notified = gwd_settings_notified_impl_new (screen);
+    settings = gwd_settings_new (option_blur_type, option_meta_theme);
 
-    if (!notified)
-	return 1;
+    if (!settings)
+        return 1;
 
-    writable = GWD_SETTINGS_WRITABLE_INTERFACE (gwd_settings_impl_new (option_blur_type != BLUR_TYPE_NONE ? &option_blur_type : NULL,
-								       option_meta_theme ? &option_meta_theme : NULL,
-								       notified));
+    g_signal_connect (settings, "update-decorations",
+                      G_CALLBACK (update_decorations_cb), NULL);
+    g_signal_connect (settings, "update-frames",
+                      G_CALLBACK (update_frames_cb), NULL);
+    g_signal_connect (settings, "update-metacity-theme",
+                      G_CALLBACK (update_metacity_theme_cb), NULL);
 
-    if (!writable)
-    {
-	g_object_unref (notified);
-	return 1;
-    }
+    gwd_settings_freeze_updates (settings);
 
-    settings = GWD_SETTINGS_INTERFACE (writable);
-
-    gwd_settings_writable_freeze_updates (writable);
-
-    if (!init_settings (writable,
-			screen))
-    {
-	g_object_unref (writable);
-	fprintf (stderr, "%s: Failed to get necessary gtk settings\n", argv[0]);
-	return 1;
-    }
+    init_settings (settings);
 
     for (i = 0; i < 3; ++i)
     {
@@ -330,9 +340,8 @@ main (int argc, char *argv[])
 
     if (!create_tooltip_window ())
     {
-	g_object_unref (writable);
+	g_object_unref (settings);
 
-	free (settings);
 	fprintf (stderr, "%s, Couldn't create tooltip window\n", argv[0]);
 	return 1;
     }
@@ -380,7 +389,7 @@ main (int argc, char *argv[])
 			     WINDOW_DECORATION_TYPE_WINDOW);
 
     /* Update the decorations based on the settings */
-    gwd_settings_writable_thaw_updates (writable);
+    gwd_settings_thaw_updates (settings);
 
     /* Keep the default, bare and switcher decorations around
      * since otherwise they will be spuriously recreated */
@@ -414,7 +423,9 @@ main (int argc, char *argv[])
     gwd_decor_frame_unref (bare_p);
     gwd_decor_frame_unref (switcher_p);
 
+    g_clear_object (&gwd_theme);
     fini_settings ();
+    g_clear_object (&settings);
 
     return 0;
 }
