@@ -100,13 +100,9 @@ static gfloat
 gwd_theme_metacity_get_title_scale (GWDTheme      *theme,
                                     decor_frame_t *frame)
 {
-    GWDThemeMetacity *metacity;
-    MetaFrameType type;
-    MetaFrameFlags flags; 
-
-    metacity = GWD_THEME_METACITY (theme);
-    type = meta_frame_type_from_string (frame->type);
-    flags = 0xc33; /* FIXME */
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    MetaFrameType type = meta_frame_type_from_string (frame->type);
+    MetaFrameFlags flags = 0xc33; /* FIXME */ 
 
     if (type == META_FRAME_TYPE_LAST)
         return 1.0f;
