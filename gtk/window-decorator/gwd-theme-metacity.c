@@ -902,7 +902,8 @@ static void
 gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                                            decor_t  *decor)
 {
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     GdkDisplay *display;
     GdkScreen *screen;
     Display *xdisplay;
@@ -932,8 +933,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     if (!decor->surface || !decor->picture)
         return;
-
-    metacity = GWD_THEME_METACITY (theme);
 
     display = gdk_display_get_default ();
     xdisplay = gdk_x11_display_get_xdisplay (display);
