@@ -221,16 +221,22 @@ GWDTheme *
 gwd_theme_new (GWDThemeType  type,
                GWDSettings  *settings)
 {
-    GType object_type;
-
-    object_type = GWD_TYPE_THEME_CAIRO;
-
 #ifdef USE_METACITY
-    if (type == GWD_THEME_TYPE_METACITY)
-        object_type = GWD_TYPE_THEME_METACITY;
+    if (type == GWD_THEME_TYPE_METACITY) {
+        GWDTheme *theme;
+
+        theme = g_object_new (GWD_TYPE_THEME_METACITY,
+                              "settings", settings,
+                              NULL);
+
+        if (gwd_theme_metacity_is_valid (GWD_THEME_METACITY (theme)))
+            return theme;
+        else
+            g_object_unref (theme);
+    }
 #endif
 
-    return g_object_new (object_type,
+    return g_object_new (GWD_TYPE_THEME_CAIRO,
                          "settings", settings,
                          NULL);
 }

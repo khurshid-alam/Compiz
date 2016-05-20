@@ -24,7 +24,6 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-metacity-window-decoration-util.h"
 #include "gwd-settings.h"
 
 GWDTheme *gwd_theme;
@@ -150,26 +149,14 @@ update_frames_cb (GWDSettings *settings,
 
 static void
 update_metacity_theme_cb (GWDSettings *settings,
+                          const gchar *metacity_theme,
                           gpointer     user_data)
 {
     GWDThemeType type;
-#ifdef USE_METACITY
-    const gchar *metacity_theme;
 
-    metacity_theme = gwd_settings_get_metacity_theme (settings);
-
-    if (gwd_metacity_window_decoration_update_meta_theme (metacity_theme,
-                                                          meta_theme_get_current,
-                                                          meta_theme_set_current)) {
-        type = GWD_THEME_TYPE_METACITY;
-    } else {
-        g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
-
-        type = GWD_THEME_TYPE_CAIRO;
-    }
-#else
     type = GWD_THEME_TYPE_CAIRO;
-#endif
+    if (metacity_theme != NULL)
+        type = GWD_THEME_TYPE_METACITY;
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));
 }

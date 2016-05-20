@@ -27,6 +27,8 @@
 
 #include "config.h"
 
+#include <metacity-private/theme-parser.h>
+
 #include "gtk-window-decorator.h"
 #include "gwd-settings.h"
 #include "gwd-theme-metacity.h"
@@ -858,44 +860,62 @@ button_to_meta_button_function (gint i)
     return META_BUTTON_FUNCTION_LAST;
 }
 
-static void
-gwd_theme_metacity_constructed (GObject *object)
+static gboolean
+setup_theme (GWDThemeMetacity *metacity)
 {
-    GWDTheme *theme = GWD_THEME (object);
-    GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
-    GWDSettings *settings;
-    const gchar *button_layout;
+    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
+    const gchar *metacity_theme = gwd_settings_get_metacity_theme (settings);
+    MetaTheme *theme;
 
-    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
+    /* metacity_theme can be NULL only in one case - if user has disabled
+     * metacity theme with use-metacity-theme setting. In that case
+     * GWDThemeCairo will be created / should be created.
+     */
+    g_assert (metacity_theme != NULL);
 
-    settings = gwd_theme_get_settings (theme);
-    button_layout = gwd_settings_get_metacity_button_layout (settings);
+    /* meta_theme_get_current returns the last good theme, so we will try to
+     * load theme manually to know that theme is 100% valid.
+     */
+    theme = meta_theme_load (metacity_theme, NULL);
+    if (theme == NULL)
+        return FALSE;
 
+    /* We can not use this manually loaded theme because Metacity internaly
+     * also use meta_theme_get_current wich in this case will return NULL,
+     * boom - segfault...
+     */
+    meta_theme_free (theme);
+
+    /* If we are here then we know that this will not fail. */
+    meta_theme_set_current (metacity_theme, TRUE);
+    metacity->theme = meta_theme_get_current ();
+
+    return TRUE;
+}
+
+static void
+setup_button_layout (GWDThemeMetacity *metacity)
+{
+    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
+    const gchar *button_layout = gwd_settings_get_metacity_button_layout (settings);
+ 
     g_signal_connect (settings, "update-metacity-button-layout",
                       G_CALLBACK (update_metacity_button_layout_cb), metacity);
 
     update_metacity_button_layout_cb (settings, button_layout, metacity);
 }
 
-static GObject *
-gwd_theme_metacity_constructor (GType                  type,
-                                guint                  n_properties,
-                                GObjectConstructParam *properties)
+static void
+gwd_theme_metacity_constructed (GObject *object)
 {
-    GObject *object;
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-    object = G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructor (type, n_properties, properties);
-    metacity = GWD_THEME_METACITY (object);
+    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
 
-    /* Always valid and current MetaTheme! On theme change new GWDThemeMetacity
-     * object will be created and old one destroyed. If Metacity theme is not
-     * valid (gwd_metacity_window_decoration_update_meta_theme returns FALSE)
-     * then GWDThemeCairo will be created.
-     */
-    metacity->theme = meta_theme_get_current ();
+    if (!setup_theme (metacity))
+        return;
 
-    return object;
+    setup_button_layout (metacity);
 }
 
 static void
@@ -1503,7 +1523,6 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     GWDThemeClass *theme_class = GWD_THEME_CLASS (metacity_class);
 
     object_class->constructed = gwd_theme_metacity_constructed;
-    object_class->constructor = gwd_theme_metacity_constructor;
 
     theme_class->draw_window_decoration = gwd_theme_metacity_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_metacity_calc_decoration_size;
@@ -1516,4 +1535,10 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
+}
+
+gboolean
+gwd_theme_metacity_is_valid (GWDThemeMetacity *metacity)
+{
+    return metacity->theme != NULL;
 }

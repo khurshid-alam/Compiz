@@ -148,7 +148,8 @@ update_frames (GWDSettings *settings)
 static void
 update_metacity_theme (GWDSettings *settings)
 {
-    g_signal_emit (settings, settings_signals[UPDATE_METACITY_THEME], 0);
+    g_signal_emit (settings, settings_signals[UPDATE_METACITY_THEME],
+                   0, settings->metacity_theme);
 }
 
 static void
@@ -523,7 +524,7 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
     settings_signals[UPDATE_METACITY_THEME] =
         g_signal_new ("update-metacity-theme",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
 
     settings_signals[UPDATE_METACITY_BUTTON_LAYOUT] =
         g_signal_new ("update-metacity-button-layout",
@@ -742,9 +743,6 @@ gwd_settings_metacity_theme_changed (GWDSettings *settings,
     if (settings->cmdline_opts & CMDLINE_THEME)
         return FALSE;
 
-    if (!metacity_theme)
-        return FALSE;
-
     if (use_metacity_theme) {
         if (g_strcmp0 (metacity_theme, settings->metacity_theme) == 0)
             return FALSE;
@@ -753,7 +751,7 @@ gwd_settings_metacity_theme_changed (GWDSettings *settings,
         settings->metacity_theme = g_strdup (metacity_theme);
     } else {
         g_free (settings->metacity_theme);
-        settings->metacity_theme = g_strdup ("");
+        settings->metacity_theme = NULL;
     }
 
     append_to_notify_funcs (settings, update_metacity_theme);

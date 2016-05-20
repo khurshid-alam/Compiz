@@ -30,6 +30,9 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GWDThemeMetacity, gwd_theme_metacity,
                       GWD, THEME_METACITY, GWDTheme)
 
+gboolean
+gwd_theme_metacity_is_valid (GWDThemeMetacity *metacity);
+
 G_END_DECLS
 
 #endif
