@@ -17,6 +17,7 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
+
 #include <glib-object.h>
 #include <glib.h>
 
