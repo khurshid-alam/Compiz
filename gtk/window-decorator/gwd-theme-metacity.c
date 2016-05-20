@@ -22,7 +22,6 @@
  * Authors:
  *     Alberts Muktupāvels <alberts.muktupavels@gmail.com>
  *     David Reveman <davidr@novell.com>
- *     Sam Spilsbury <sam.spilsbury@canonical.com>
  *     Sam Spilsbury <smspillaz@gmail.com>
  */
 
