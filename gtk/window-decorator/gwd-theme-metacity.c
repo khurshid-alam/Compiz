@@ -58,22 +58,17 @@ static void
 gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
-    GWDThemeMetacity *metacity;
-    GdkScreen *screen;
-    MetaStyleInfo *style_info;
-    MetaFrameBorders borders;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
     MetaFrameType frame_type;
-
-    metacity = GWD_THEME_METACITY (theme);
+    MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
     frame_type = meta_frame_type_from_string (frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
-
-    screen = gtk_widget_get_screen (frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, NULL);
 
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, 0, &borders);
@@ -104,11 +99,8 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
-    GObjectClass *object_class;
-    GWDThemeClass *theme_class;
-
-    object_class = G_OBJECT_CLASS (metacity_class);
-    theme_class = GWD_THEME_CLASS (metacity_class);
+    GObjectClass *object_class = G_OBJECT_CLASS (metacity_class);
+    GWDThemeClass *theme_class = GWD_THEME_CLASS (metacity_class);
 
     object_class->constructor = gwd_theme_metacity_constructor;
 
