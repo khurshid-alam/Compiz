@@ -91,6 +91,9 @@ gwd_settings_new                        (gint         *blur,
                                          const gchar **metacity_theme);
 
 const gchar *
+gwd_settings_get_metacity_button_layout (GWDSettings  *settings);
+
+const gchar *
 gwd_settings_get_metacity_theme         (GWDSettings  *settings);
 
 const gchar *

@@ -28,6 +28,7 @@
 #include "config.h"
 
 #include "gtk-window-decorator.h"
+#include "gwd-settings.h"
 #include "gwd-theme-metacity.h"
 
 struct _GWDThemeMetacity
@@ -860,18 +861,20 @@ button_to_meta_button_function (gint i)
 static void
 gwd_theme_metacity_constructed (GObject *object)
 {
-    GWDTheme *theme;
-    GWDThemeMetacity *metacity;
+    GWDTheme *theme = GWD_THEME (object);
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
     GWDSettings *settings;
+    const gchar *button_layout;
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
 
-    theme = GWD_THEME (object);
-    metacity = GWD_THEME_METACITY (object);
     settings = gwd_theme_get_settings (theme);
+    button_layout = gwd_settings_get_metacity_button_layout (settings);
 
     g_signal_connect (settings, "update-metacity-button-layout",
                       G_CALLBACK (update_metacity_button_layout_cb), metacity);
+
+    update_metacity_button_layout_cb (settings, button_layout, metacity);
 }
 
 static GObject *
