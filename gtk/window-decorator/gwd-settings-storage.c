@@ -27,34 +27,32 @@
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 
-const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
-const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
-const gchar * ORG_MATE_MARCO_GENERAL = "org.mate.Marco.general";
+#define ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS "use-tooltips"
+#define ORG_COMPIZ_GWD_KEY_BLUR_TYPE "blur-type"
+#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY "metacity-theme-active-opacity"
+#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY "metacity-theme-inactive-opacity"
+#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY "metacity-theme-active-shade-opacity"
+#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY "metacity-theme-inactive-shade-opacity"
+#define ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME "use-metacity-theme"
+#define ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION "mouse-wheel-action"
 
-const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
-const gchar * ORG_COMPIZ_GWD_KEY_BLUR_TYPE = "blur-type";
-const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY = "metacity-theme-active-opacity";
-const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY = "metacity-theme-inactive-opacity";
-const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY = "metacity-theme-active-shade-opacity";
-const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = "metacity-theme-inactive-shade-opacity";
-const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
-const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
-const gchar * ORG_GNOME_METACITY_THEME = "theme";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME = "theme";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT = "titlebar-font";
-const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT = "button-layout";
-const gchar * ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
-const gchar * ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
-const gchar * ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
-const gchar * ORG_MATE_MARCO_GENERAL_THEME = "theme";
-const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
-const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT = "titlebar-font";
-const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT = "button-layout";
+#define ORG_GNOME_METACITY_THEME "theme"
+
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR "action-double-click-titlebar"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR "action-middle-click-titlebar"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR "action-right-click-titlebar"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME "theme"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT "titlebar-uses-system-font"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT "titlebar-font"
+#define ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT "button-layout"
+
+#define ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR "action-double-click-titlebar"
+#define ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR "action-middle-click-titlebar"
+#define ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR "action-right-click-titlebar"
+#define ORG_MATE_MARCO_GENERAL_THEME "theme"
+#define ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT "titlebar-uses-system-font"
+#define ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT "titlebar-font"
+#define ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT "button-layout"
 
 struct _GWDSettingsStorage
 {
@@ -286,10 +284,10 @@ gwd_settings_storage_class_init (GWDSettingsStorageClass *storage_class)
 void
 gwd_settings_storage_init (GWDSettingsStorage *storage)
 {
-    storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
-    storage->desktop = get_settings_no_abort (ORG_GNOME_DESKTOP_WM_PREFERENCES);
-    storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY);
-    storage->marco = get_settings_no_abort (ORG_MATE_MARCO_GENERAL);
+    storage->gwd = get_settings_no_abort ("org.compiz.gwd");
+    storage->desktop = get_settings_no_abort ("org.gnome.desktop.wm.preferences");
+    storage->metacity = get_settings_no_abort ("org.gnome.metacity");
+    storage->marco = get_settings_no_abort ("org.mate.Marco.general");
 
     if (storage->marco) {
         const gchar *xdg_current_desktop;
