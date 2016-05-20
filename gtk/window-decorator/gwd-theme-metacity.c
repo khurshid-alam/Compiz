@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*- */
+
 /*
  * Copyright (C) 2006 Novell, Inc.
  * Copyright (C) 2010 Sam Spilsbury
@@ -665,6 +667,11 @@ gwd_theme_metacity_constructor (GType                  type,
     object = G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructor (type, n_properties, properties);
     metacity = GWD_THEME_METACITY (object);
 
+    /* Always valid and current MetaTheme! On theme change new GWDThemeMetacity
+     * object will be created and old one destroyed. If Metacity theme is not
+     * valid (gwd_metacity_window_decoration_update_meta_theme returns FALSE)
+     * then GWDThemeCairo will be created.
+     */
     metacity->theme = meta_theme_get_current ();
 
     return object;
@@ -981,22 +988,17 @@ static void
 gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
-    GWDThemeMetacity *metacity;
-    GdkScreen *screen;
-    MetaStyleInfo *style_info;
-    MetaFrameBorders borders;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
     MetaFrameType frame_type;
-
-    metacity = GWD_THEME_METACITY (theme);
+    MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
     frame_type = meta_frame_type_from_string (frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
         frame_type = META_FRAME_TYPE_NORMAL;
-
-    screen = gtk_widget_get_screen (frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, NULL);
 
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, 0, &borders);
@@ -1036,12 +1038,10 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                                               gint     *w,
                                               gint     *h)
 {
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaButtonLayout button_layout;
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
-
-    metacity = GWD_THEME_METACITY (theme);
 
     gwd_theme_metacity_get_decoration_geometry (metacity, decor, &flags,
                                                 &fgeom,  &button_layout,
@@ -1193,7 +1193,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
                                         gint     *w,
                                         gint     *h)
 {
-    GWDThemeMetacity *metacity;
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
@@ -1205,8 +1205,6 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
         /* undecorated windows implicitly have no buttons */
         return FALSE;
     }
-
-    metacity = GWD_THEME_METACITY (theme);
 
     frame_type = meta_frame_type_from_string (decor->frame->type);
     if (!(frame_type < META_FRAME_TYPE_LAST))
@@ -1274,13 +1272,9 @@ static gfloat
 gwd_theme_metacity_get_title_scale (GWDTheme      *theme,
                                     decor_frame_t *frame)
 {
-    GWDThemeMetacity *metacity;
-    MetaFrameType type;
-    MetaFrameFlags flags; 
-
-    metacity = GWD_THEME_METACITY (theme);
-    type = meta_frame_type_from_string (frame->type);
-    flags = 0xc33; /* FIXME */
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    MetaFrameType type = meta_frame_type_from_string (frame->type);
+    MetaFrameFlags flags = 0xc33; /* FIXME */ 
 
     if (type == META_FRAME_TYPE_LAST)
         return 1.0f;
@@ -1291,11 +1285,8 @@ gwd_theme_metacity_get_title_scale (GWDTheme      *theme,
 static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
-    GObjectClass *object_class;
-    GWDThemeClass *theme_class;
-
-    object_class = G_OBJECT_CLASS (metacity_class);
-    theme_class = GWD_THEME_CLASS (metacity_class);
+    GObjectClass *object_class = G_OBJECT_CLASS (metacity_class);
+    GWDThemeClass *theme_class = GWD_THEME_CLASS (metacity_class);
 
     object_class->constructor = gwd_theme_metacity_constructor;
 
