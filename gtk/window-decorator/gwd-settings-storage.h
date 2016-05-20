@@ -82,7 +82,7 @@ gboolean
 gwd_settings_storage_update_font                  (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage*storage);
+gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage *storage);
 
 GSettings *
 gwd_get_org_compiz_gwd_settings                   (GWDSettingsStorage *storage);
