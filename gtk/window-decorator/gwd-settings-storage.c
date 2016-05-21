@@ -28,32 +28,32 @@
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 
-#define ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS "use-tooltips"
-#define ORG_COMPIZ_GWD_KEY_BLUR_TYPE "blur-type"
-#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY "metacity-theme-active-opacity"
-#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY "metacity-theme-inactive-opacity"
-#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY "metacity-theme-active-shade-opacity"
-#define ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY "metacity-theme-inactive-shade-opacity"
-#define ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME "use-metacity-theme"
-#define ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION "mouse-wheel-action"
+static const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
+static const gchar * ORG_COMPIZ_GWD_KEY_BLUR_TYPE = "blur-type";
+static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_OPACITY = "metacity-theme-active-opacity";
+static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_OPACITY = "metacity-theme-inactive-opacity";
+static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_ACTIVE_SHADE_OPACITY = "metacity-theme-active-shade-opacity";
+static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = "metacity-theme-inactive-shade-opacity";
+static const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
+static const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
 
-#define ORG_GNOME_METACITY_THEME "theme"
+static const gchar * ORG_GNOME_METACITY_THEME = "theme";
 
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR "action-double-click-titlebar"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR "action-middle-click-titlebar"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR "action-right-click-titlebar"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME "theme"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT "titlebar-uses-system-font"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT "titlebar-font"
-#define ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT "button-layout"
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME = "theme";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT = "titlebar-font";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT = "button-layout";
 
-#define ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR "action-double-click-titlebar"
-#define ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR "action-middle-click-titlebar"
-#define ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR "action-right-click-titlebar"
-#define ORG_MATE_MARCO_GENERAL_THEME "theme"
-#define ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT "titlebar-uses-system-font"
-#define ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT "titlebar-font"
-#define ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT "button-layout"
+static const gchar * ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
+static const gchar * ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
+static const gchar * ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR = "action-right-click-titlebar";
+static const gchar * ORG_MATE_MARCO_GENERAL_THEME = "theme";
+static const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT = "titlebar-uses-system-font";
+static const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT = "titlebar-font";
+static const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT = "button-layout";
 
 struct _GWDSettingsStorage
 {
