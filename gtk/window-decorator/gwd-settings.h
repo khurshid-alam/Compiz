@@ -30,6 +30,7 @@ G_BEGIN_DECLS
 
 enum
 {
+    BLUR_TYPE_UNSET = -1,
     BLUR_TYPE_NONE = 0,
     BLUR_TYPE_TITLEBAR = 1,
     BLUR_TYPE_ALL = 2
