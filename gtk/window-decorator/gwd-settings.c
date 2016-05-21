@@ -580,14 +580,14 @@ gwd_settings_new (gint         blur,
 
     cmdline_opts = 0;
 
-    if (blur != -1)
+    if (blur != BLUR_TYPE_UNSET)
         cmdline_opts |= CMDLINE_BLUR;
 
     if (metacity_theme != NULL)
         cmdline_opts |= CMDLINE_THEME;
 
     return g_object_new (GWD_TYPE_SETTINGS,
-                         "blur", blur != -1 ? blur : BLUR_TYPE_DEFAULT,
+                         "blur", blur != BLUR_TYPE_UNSET ? blur : BLUR_TYPE_DEFAULT,
                          "metacity-theme", metacity_theme ? metacity_theme : METACITY_THEME_DEFAULT,
                          "cmdline-options", cmdline_opts,
                          NULL);
@@ -708,7 +708,7 @@ gboolean
 gwd_settings_blur_changed (GWDSettings *settings,
                            const gchar *type)
 {
-    gint new_type = -1;
+    gint new_type = BLUR_TYPE_UNSET;
 
     if (settings->cmdline_opts & CMDLINE_BLUR)
         return FALSE;
@@ -720,7 +720,7 @@ gwd_settings_blur_changed (GWDSettings *settings,
     else if (strcmp (type, "none") == 0)
         new_type = BLUR_TYPE_NONE;
 
-    if (new_type == -1)
+    if (new_type == BLUR_TYPE_UNSET)
         return FALSE;
 
     if (settings->blur_type == new_type)

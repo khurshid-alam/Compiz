@@ -338,7 +338,7 @@ class GWDSettingsTest :
         {
             GWDSettingsTestCommon::SetUp ();
 
-            mSettings.reset (gwd_settings_new (-1, NULL), boost::bind (gwd_settings_unref, _1));
+            mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, NULL), boost::bind (gwd_settings_unref, _1));
             mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> (mSettings));
 
             ExpectAllNotificationsOnce ();
@@ -464,16 +464,16 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 {
     EXPECT_THAT (gwd_settings_shadow_property_changed (mSettings.get (),
-								ACTIVE_SHADOW_RADIUS_DEFAULT,
-								ACTIVE_SHADOW_OPACITY_DEFAULT,
-								ACTIVE_SHADOW_OFFSET_X_DEFAULT,
-								ACTIVE_SHADOW_OFFSET_Y_DEFAULT,
-								ACTIVE_SHADOW_COLOR_DEFAULT,
-								INACTIVE_SHADOW_RADIUS_DEFAULT,
-								INACTIVE_SHADOW_OPACITY_DEFAULT,
-								INACTIVE_SHADOW_OFFSET_X_DEFAULT,
-								INACTIVE_SHADOW_OFFSET_Y_DEFAULT,
-								INACTIVE_SHADOW_COLOR_DEFAULT), IsFalse ());
+                                                       ACTIVE_SHADOW_RADIUS_DEFAULT,
+                                                       ACTIVE_SHADOW_OPACITY_DEFAULT,
+                                                       ACTIVE_SHADOW_OFFSET_X_DEFAULT,
+                                                       ACTIVE_SHADOW_OFFSET_Y_DEFAULT,
+                                                       ACTIVE_SHADOW_COLOR_DEFAULT,
+                                                       INACTIVE_SHADOW_RADIUS_DEFAULT,
+                                                       INACTIVE_SHADOW_OPACITY_DEFAULT,
+                                                       INACTIVE_SHADOW_OFFSET_X_DEFAULT,
+                                                       INACTIVE_SHADOW_OFFSET_Y_DEFAULT,
+                                                       INACTIVE_SHADOW_COLOR_DEFAULT), IsFalse ());
 }
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
@@ -619,7 +619,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 {
     const gchar *metacityTheme = "Ambiance";
 
-    mSettings.reset (gwd_settings_new (-1, metacityTheme),
+    mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, metacityTheme),
 		     boost::bind (gwd_settings_unref, _1));
 
     EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
@@ -798,7 +798,7 @@ class GWDSettingsTestClickActions :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    mSettings.reset (gwd_settings_new (-1, NULL),
+	    mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, NULL),
 			     boost::bind (gwd_settings_unref, _1));
 	}
 
