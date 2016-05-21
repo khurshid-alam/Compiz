@@ -286,7 +286,6 @@ gwd_settings_set_property (GObject      *object,
             break;
 
         case PROP_METACITY_THEME:
-            g_free (settings->metacity_theme);
             settings->metacity_theme = g_value_dup_string (value);
             break;
 
@@ -550,8 +549,6 @@ gwd_settings_init (GWDSettings *settings)
     settings->inactive_shadow.shadow_color[0] = 0;
     settings->inactive_shadow.shadow_color[1] = 0;
     settings->inactive_shadow.shadow_color[2] = 0;
-    settings->blur_type = BLUR_TYPE_DEFAULT;
-    settings->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
     settings->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
     settings->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
     settings->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -562,8 +559,6 @@ gwd_settings_init (GWDSettings *settings)
     settings->titlebar_right_click_action = RIGHT_CLICK_ACTION_DEFAULT;
     settings->mouse_wheel_action = WHEEL_ACTION_DEFAULT;
     settings->titlebar_font = g_strdup (TITLEBAR_FONT_DEFAULT);
-    settings->cmdline_opts = 0;
-    settings->freeze_count = 0;
 
     /* Append all notify funcs so that external state can be updated in case
      * the settings backend can't do it itself */
@@ -789,9 +784,6 @@ gboolean
 gwd_settings_button_layout_changed (GWDSettings *settings,
                                     const gchar *button_layout)
 {
-    if (!button_layout)
-        return FALSE;
-
     if (g_strcmp0 (settings->metacity_button_layout, button_layout) == 0)
         return FALSE;
 
@@ -810,22 +802,16 @@ gwd_settings_font_changed (GWDSettings *settings,
                            gboolean     titlebar_uses_system_font,
                            const gchar *titlebar_font)
 {
-    const gchar *no_font = NULL;
-    const gchar *use_font = NULL;
-
-    if (!titlebar_font)
-        return FALSE;
+    const gchar *use_font = titlebar_font;
 
     if (titlebar_uses_system_font)
-        use_font = no_font;
-    else
-        use_font = titlebar_font;
+        use_font = NULL;
 
     if (g_strcmp0 (settings->titlebar_font, use_font) == 0)
         return FALSE;
 
     g_free (settings->titlebar_font);
-    settings->titlebar_font = use_font ? g_strdup (use_font) : NULL;
+    settings->titlebar_font = g_strdup (use_font);
 
     append_to_notify_funcs (settings, update_decorations);
     append_to_notify_funcs (settings, update_frames);
