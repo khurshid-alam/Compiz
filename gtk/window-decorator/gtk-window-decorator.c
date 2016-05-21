@@ -178,7 +178,7 @@ main (int argc, char *argv[])
     decor_frame_t *bare_p, *switcher_p;
 
     const char *option_meta_theme = NULL;
-    gint       option_blur_type = -1;
+    gint       option_blur_type = BLUR_TYPE_UNSET;
 
     program_name = argv[0];
 
