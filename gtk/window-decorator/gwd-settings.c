@@ -272,6 +272,7 @@ gwd_settings_set_property (GObject      *object,
             break;
 
         case PROP_METACITY_THEME:
+            g_free (settings->metacity_theme);
             settings->metacity_theme = g_value_dup_string (value);
             break;
 
@@ -353,6 +354,8 @@ gwd_settings_init (GWDSettings *settings)
     settings->inactive_shadow.shadow_color[0] = 0;
     settings->inactive_shadow.shadow_color[1] = 0;
     settings->inactive_shadow.shadow_color[2] = 0;
+    settings->blur_type = BLUR_TYPE_DEFAULT;
+    settings->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
     settings->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
     settings->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
     settings->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -363,6 +366,8 @@ gwd_settings_init (GWDSettings *settings)
     settings->titlebar_right_click_action = RIGHT_CLICK_ACTION_DEFAULT;
     settings->mouse_wheel_action = WHEEL_ACTION_DEFAULT;
     settings->titlebar_font = g_strdup (TITLEBAR_FONT_DEFAULT);
+    settings->cmdline_opts = 0;
+    settings->freeze_count = 0;
 
     /* Append all notify funcs so that external state can be updated in case
      * the settings backend can't do it itself */

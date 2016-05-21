@@ -45,20 +45,10 @@
 #include "gwd-settings-storage.h"
 
 using ::testing::Eq;
-using ::testing::Return;
-using ::testing::InvokeWithoutArgs;
-using ::testing::IgnoreResult;
-using ::testing::MakeMatcher;
-using ::testing::MatchResultListener;
-using ::testing::Matcher;
 using ::testing::Action;
-using ::testing::ActionInterface;
-using ::testing::MakeAction;
-using ::testing::IsNull;
 using ::testing::Values;
 using ::testing::_;
 using ::testing::StrictMock;
-using ::testing::InSequence;
 
 MATCHER_P(IsShadowsEqual, element, "")
 {
