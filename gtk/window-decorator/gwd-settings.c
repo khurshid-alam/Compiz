@@ -100,7 +100,7 @@ enum
     PROP_ACTIVE_SHADOW,
     PROP_INACTIVE_SHADOW,
     PROP_USE_TOOLTIPS,
-    PROP_BLUR,
+    PROP_BLUR_TYPE,
     PROP_METACITY_THEME,
     PROP_ACTIVE_OPACITY,
     PROP_INACTIVE_OPACITY,
@@ -281,7 +281,7 @@ gwd_settings_set_property (GObject      *object,
             settings->cmdline_opts = g_value_get_int (value);
             break;
 
-        case PROP_BLUR:
+        case PROP_BLUR_TYPE:
             settings->blur_type = g_value_get_int (value);
             break;
 
@@ -318,7 +318,7 @@ gwd_settings_get_property (GObject    *object,
             g_value_set_boolean (value, settings->use_tooltips);
             break;
 
-        case PROP_BLUR:
+        case PROP_BLUR_TYPE:
             g_value_set_int (value, settings->blur_type);
             break;
 
@@ -402,8 +402,8 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
                               USE_TOOLTIPS_DEFAULT,
                               G_PARAM_READABLE);
 
-    settings_properties[PROP_BLUR] =
-        g_param_spec_int ("blur",
+    settings_properties[PROP_BLUR_TYPE] =
+        g_param_spec_int ("blur-type",
                           "Blur Type",
                           "Blur type property",
                           BLUR_TYPE_NONE,
@@ -583,7 +583,7 @@ gwd_settings_new (gint         blur,
         cmdline_opts |= CMDLINE_THEME;
 
     return g_object_new (GWD_TYPE_SETTINGS,
-                         "blur", blur != BLUR_TYPE_UNSET ? blur : BLUR_TYPE_DEFAULT,
+                         "blur-type", blur != BLUR_TYPE_UNSET ? blur : BLUR_TYPE_DEFAULT,
                          "metacity-theme", metacity_theme ? metacity_theme : METACITY_THEME_DEFAULT,
                          "cmdline-options", cmdline_opts,
                          NULL);

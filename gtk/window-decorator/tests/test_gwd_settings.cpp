@@ -508,7 +508,7 @@ TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
     GValue &blurGValue = blurValue;
 
     g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
+			   "blur-type",
 			   &blurGValue);
 
     EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_TITLEBAR_INT_VALUE,
@@ -525,7 +525,7 @@ TEST_F(GWDSettingsTest, TestBlurChangedAll)
     GValue &blurGValue = blurValue;
 
     g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
+			   "blur-type",
 			   &blurGValue);
 
     EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_ALL_INT_VALUE,
@@ -541,7 +541,7 @@ TEST_F(GWDSettingsTest, TestBlurChangedNone)
     GValue &blurGValue = blurValue;
 
     g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
+			   "blur-type",
 			   &blurGValue);
 
     EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_NONE_INT_VALUE,
@@ -562,7 +562,7 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
     GValue &blurGValue = blurValue;
 
     g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
+			   "blur-type",
 			   &blurGValue);
 
     EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_ALL_INT_VALUE,
