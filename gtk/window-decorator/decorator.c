@@ -24,6 +24,7 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-settings.h"
 #include "gwd-theme-cairo.h"
 
 static void
@@ -55,8 +56,7 @@ static const PangoFontDescription *
 get_titlebar_font (decor_frame_t *frame)
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font;
-    g_object_get (settings, "titlebar-font", &titlebar_font, NULL);
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
 
     /* Using system font */
     if (!titlebar_font)

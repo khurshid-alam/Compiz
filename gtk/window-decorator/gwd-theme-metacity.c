@@ -941,10 +941,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     Region bottom_region;
     Region left_region;
     Region right_region;
-    gdouble meta_active_opacity;
-    gdouble meta_inactive_opacity;
-    gboolean meta_active_shade_opacity;
-    gboolean meta_inactive_shade_opacity;
     double alpha;
     gboolean shade_alpha;
     MetaFrameStyle *frame_style;
@@ -962,13 +958,13 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     left_region = NULL;
     right_region = NULL;
 
-    g_object_get (settings, "metacity-active-opacity", &meta_active_opacity, NULL);
-    g_object_get (settings, "metacity-inactive-opacity", &meta_inactive_opacity, NULL);
-    g_object_get (settings, "metacity-active-shade-opacity", &meta_active_shade_opacity, NULL);
-    g_object_get (settings, "metacity-inactive-shade-opacity", &meta_inactive_shade_opacity, NULL);
-
-    alpha = (decor->active) ? meta_active_opacity : meta_inactive_opacity;
-    shade_alpha = (decor->active) ? meta_active_shade_opacity : meta_inactive_shade_opacity;
+    if (decor->active) {
+        alpha = gwd_settings_get_metacity_active_opacity (settings);
+        shade_alpha = gwd_settings_get_metacity_active_shade_opacity (settings);
+    } else {
+        alpha = gwd_settings_get_metacity_inactive_opacity (settings);
+        shade_alpha = gwd_settings_get_metacity_inactive_shade_opacity (settings);
+    }
 
     if (decoration_alpha == 1.0)
         alpha = 1.0;

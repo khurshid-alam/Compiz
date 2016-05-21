@@ -110,11 +110,9 @@ common_button_event (WnckWindow *win,
 		     char	*tooltip)
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    gboolean use_tooltips = gwd_settings_get_use_tooltips (settings);
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
     guint   state = d->button_states[button];
-    gboolean use_tooltips = FALSE;
-
-    g_object_get (settings, "use-tooltips", &use_tooltips, NULL);
 
     if (use_tooltips)
 	handle_tooltip_event (win, gtkwd_event, gtkwd_type, state, tooltip);
@@ -459,9 +457,7 @@ handle_mouse_wheel_title_event (WnckWindow   *win,
 				unsigned int button)
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    gint wheel_action = WHEEL_ACTION_NONE;
-
-    g_object_get (settings, "mouse-wheel-action", &wheel_action, NULL);
+    gint wheel_action = gwd_settings_get_mouse_wheel_action (settings);
 
     switch (wheel_action) {
     case WHEEL_ACTION_SHADE:
@@ -514,7 +510,7 @@ title_event (WnckWindow       *win,
 	    dist (gtkwd_event->x, gtkwd_event->y,
 		  last_button_x, last_button_y) < DOUBLE_CLICK_DISTANCE)
 	{
-	    g_object_get (settings, "titlebar-double-click-action", &titlebar_action, NULL);
+	    titlebar_action = gwd_settings_get_titlebar_double_click_action (settings);
 	    handle_title_button_event (win, titlebar_action,
 				       gtkwd_event);
 
@@ -539,13 +535,13 @@ title_event (WnckWindow       *win,
     }
     else if (gtkwd_event->button == 2)
     {
-	g_object_get (settings, "titlebar-middle-click-action", &titlebar_action, NULL);
+	titlebar_action = gwd_settings_get_titlebar_middle_click_action (settings);
 	handle_title_button_event (win, titlebar_action,
 				   gtkwd_event);
     }
     else if (gtkwd_event->button == 3)
     {
-	g_object_get (settings, "titlebar-right-click-action", &titlebar_action, NULL);
+	titlebar_action = gwd_settings_get_titlebar_right_click_action (settings);
 	handle_title_button_event (win, titlebar_action,
 				   gtkwd_event);
     }
@@ -616,12 +612,12 @@ frame_common_event (WnckWindow       *win,
 	restack_window (win, Above);
 	break;
     case 2:
-	g_object_get (settings, "titlebar-middle-click-action", &titlebar_action, NULL);
+	titlebar_action = gwd_settings_get_titlebar_middle_click_action (settings);
 	handle_title_button_event (win, titlebar_action,
 				   gtkwd_event);
 	break;
     case 3:
-	g_object_get (settings, "titlebar-right-click-action", &titlebar_action, NULL);
+	titlebar_action = gwd_settings_get_titlebar_right_click_action (settings);
 	handle_title_button_event (win, titlebar_action,
 				   gtkwd_event);
 	break;
