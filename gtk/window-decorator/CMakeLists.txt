@@ -23,15 +23,11 @@ if (USE_GTK)
 	${COMPIZ_LINK_DIRS}
     )
 
-    add_library (gtk_window_decorator_cairo_window_decoration_util
-		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-cairo-window-decoration-util.c)
-
     add_library (gtk_window_decorator_settings STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings.c)
 
     set (GTK_WINDOW_DECORATOR_ADDITIONAL_LIBRARIES
-	 gtk_window_decorator_settings
-	 gtk_window_decorator_cairo_window_decoration_util)
+	 gtk_window_decorator_settings)
 
     add_library (gtk_window_decorator_settings_storage_gsettings STATIC
                  ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-storage.c)
