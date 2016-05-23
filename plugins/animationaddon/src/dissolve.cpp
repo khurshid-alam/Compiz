@@ -33,7 +33,7 @@ DissolveSingleAnim::updateAttrib (GLWindowPaintAttrib &attrib)
     float o = 0.2;
     float factor = (4 - layer) * o;
     
-    attrib.opacity *= o / (1.0 - factor);
+    attrib.opacity *= (o / (1.0 - factor)) * (1.0 - getDissolveSingleProgress ());
 }
 
 void
