@@ -70,7 +70,7 @@ protected:
 };
 
 class AnimAddonWindow :
-    public PluginClassHandler<AnimAddonWindow, CompWindow>
+    public PluginClassHandler<AnimAddonWindow, CompWindow, ANIMATIONADDON_ABI>
 {
 public:
     AnimAddonWindow (CompWindow *);
