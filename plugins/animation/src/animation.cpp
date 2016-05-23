@@ -1632,20 +1632,20 @@ PrivateAnimWindow::glDrawTexture (GLTexture                 *texture,
     if (mCurAnimation)
 	mCurAnimation->setCurPaintAttrib (attrib);
 
-    gWindow->glDrawTexture (texture, transform, attrib, mask);
+    if (mCurAnimation)
+    {
+        if (mCurAnimation->initialized ())
+            mCurAnimation->drawGeometry (texture, transform, attrib, mask);
+    }
+    else
+        gWindow->glDrawTexture (texture, transform, attrib, mask);
 }
 
 #if 0 // Not ported yet
 void
 PrivateAnimWindow::glDrawGeometry ()
 {
-    if (mCurAnimation)
-    {
-	if (mCurAnimation->initialized ())
-	    mCurAnimation->drawGeometry ();
-    }
-    else
-	gWindow->glDrawGeometry ();
+
 }
 #endif
 
@@ -1658,11 +1658,15 @@ Animation::drawTexture (GLTexture                 *texture,
 }
 
 void
-Animation::drawGeometry ()
+Animation::drawGeometry (GLTexture                 *texture,
+			 const GLMatrix            &transform,
+			 const GLWindowPaintAttrib &attrib,
+			 unsigned int              mask)
 {
-#if 0 // Not ported yet
-    mAWindow->priv->gWindow->glDrawGeometry ();
-#endif
+    GLWindow::get (mAWindow->mWindow)->glDrawTexture (texture,
+						      transform,
+						      attrib,
+						      mask);
 }
 
 bool
