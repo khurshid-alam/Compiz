@@ -142,9 +142,8 @@ public:
 	    foreach (SingleAnim *a, animList)
 	    {
 		setCurrAnimNumber (mAWindow, count);
-		GLWindowPaintAttrib attr (attrib);
-		a->updateAttrib (attr);
-		mGlPaintAttribs.at (count) = attr;
+		mGlPaintAttribs[count] = attrib;
+		a->updateAttrib (mGlPaintAttribs[count]);
 		++count;
 	    }
 	}
