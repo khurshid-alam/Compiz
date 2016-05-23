@@ -10,7 +10,6 @@ add_definitions ( -DHAVE_CONFIG_H)
 include_directories (${COMPIZ_INTERNAL_INCLUDES})
 
 # temporarily disable plugins that aren't ported yet
-set (COMPIZ_DISABLE_PLUGIN_ANIMATIONADDON ON)
 set (COMPIZ_DISABLE_PLUGIN_BICUBIC ON)
 set (COMPIZ_DISABLE_PLUGIN_BLUR ON)
 set (COMPIZ_DISABLE_PLUGIN_COLORFILTER ON)
