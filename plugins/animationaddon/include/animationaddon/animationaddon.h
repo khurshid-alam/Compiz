@@ -97,7 +97,7 @@ public:
 		    GLuint blendMode);
     ~ParticleSystem ();
 
-    void draw (int offsetX = 0, int offsetY = 0);
+    void draw (const GLMatrix &transform, int offsetX = 0, int offsetY = 0);
     void update (float time);
     vector<Particle> &particles () { return mParticles; }
     void activate () { mActive = true; }
@@ -120,8 +120,8 @@ protected:
 
     vector<GLfloat> mVerticesCache;
     vector<GLfloat> mCoordsCache;
-    vector<GLfloat> mColorsCache;
-    vector<GLfloat> mDColorsCache;
+    vector<GLushort> mColorsCache;
+    vector<GLushort> mDColorsCache;
 };
 
 class ParticleAnim :
@@ -135,7 +135,7 @@ public:
 		  const AnimEffect info,
 		  const CompRect &icon);
     ~ParticleAnim () {}
-    void postPaintWindow ();
+    void postPaintWindow (const GLMatrix &);
     bool postPaintWindowUsed () { return true; }
     void updateBB (CompOutput &output);
     bool updateBBUsed () { return true; }
@@ -259,14 +259,17 @@ public:
 
     void step ();
     void prePaintWindow ();
-    void postPaintWindow ();
+    void postPaintWindow (const GLMatrix &);
     bool postPaintWindowUsed () { return true; }
     void addGeometry (const GLTexture::MatrixList &matrix,
                       const CompRegion            &region,
                       const CompRegion            &clipRegion,
                       unsigned int                maxGridWidth,
                       unsigned int                maxGridHeight);
-    void drawGeometry ();
+    void drawGeometry (GLTexture                 *texture,
+		       const GLMatrix            &transform,
+		       const GLWindowPaintAttrib &attrib,
+		       unsigned int              mask);
     virtual void updateBB (CompOutput &output);
     bool updateBBUsed () { return true; }
     bool prePreparePaint (int msSinceLastPaint);
@@ -274,7 +277,8 @@ public:
 
     virtual void stepPolygon (PolygonObject *p,
 			      float forwardProgress);
-    virtual void transformPolygon (const PolygonObject *p) {}
+    virtual void transformPolygon (GLMatrix &matrix,
+				   const PolygonObject *p) {}
 
     /// For effects that have decel. motion
     virtual bool deceleratingMotion () { return false; }
@@ -301,7 +305,8 @@ protected:
     void processIntersectingPolygons ();
     virtual void freePolygonObjects ();
     void freeClipsPolygons ();
-    void prepareDrawingForAttrib (GLFragment::Attrib &attrib);
+    void prepareDrawingForAttrib (GLWindowPaintAttrib &attrib,
+				  GLVertexBuffer      &vertexBuffer);
 
     int mNumDrawGeometryCalls;
     int mNumClipsPassed;	 /**< # of clips passed to animAddWindowGeometry so far
@@ -327,7 +332,9 @@ protected:
     bool mIncludeShadows;        ///< Whether to include shadows in polygon
 
 private:
-    inline void drawPolygonClipIntersection (const PolygonObject *p,
+    inline void drawPolygonClipIntersection (GLTexture *texture,
+					     const GLMatrix &transform,
+					     const PolygonObject *p,
 					     const Clip4Polygons &c,
 					     const GLfloat *vertexTexCoords,
 					     int pass,
@@ -336,6 +343,6 @@ private:
 					     const CompOutput &output,
 					     float newOpacity,
 					     bool decelerates,
-					     GLfloat skewMat[16]);
+					     GLMatrix &skewMat);
 };
 #endif

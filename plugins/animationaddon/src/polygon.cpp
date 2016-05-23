@@ -256,8 +256,8 @@ PolygonAnim::tessellateIntoRectangles (int gridSizeX,
 	    pv[22] = -halfH;
 	    pv[23] = -halfThick;
 
-	    // 16 indices for 4 sides (for quads)
-	    p->sideIndices = (GLushort *)calloc (4 * 4, sizeof (GLushort));
+	    // 24 indices for 4 sides (for triangles)
+	    p->sideIndices = (GLushort *)calloc (6 * 4, sizeof (GLushort));
 	    if (!p->sideIndices)
 	    {
 		compLogMessage ("animationaddon", CompLogLevelError,
@@ -275,6 +275,8 @@ PolygonAnim::tessellateIntoRectangles (int gridSizeX,
 	    ind[id++] = 6; // First vertex
 	    ind[id++] = 1;
 	    ind[id++] = 0;
+	    ind[id++] = 6;
+	    ind[id++] = 0;
 	    ind[id++] = 7;
 	    nor[6 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
 	    nor[6 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
@@ -284,16 +286,20 @@ PolygonAnim::tessellateIntoRectangles (int gridSizeX,
 	    ind[id++] = 1;
 	    ind[id++] = 6;
 	    ind[id++] = 5;
+	    ind[id++] = 5;
 	    ind[id++] = 2;
+	    ind[id++] = 1;
 	    nor[1 * 3 + 0] = 0;
 	    nor[1 * 3 + 1] = 1;
 	    nor[1 * 3 + 2] = 0;
 
 	    // Right face
-	    ind[id++] = 2;
 	    ind[id++] = 5;
-	    ind[id++] = 4;
+	    ind[id++] = 2;
 	    ind[id++] = 3;
+	    ind[id++] = 5;
+	    ind[id++] = 3;
+	    ind[id++] = 4;
 	    nor[2 * 3 + 0] = 1;
 	    nor[2 * 3 + 1] = 0;
 	    nor[2 * 3 + 2] = 0;
@@ -302,7 +308,9 @@ PolygonAnim::tessellateIntoRectangles (int gridSizeX,
 	    ind[id++] = 7;
 	    ind[id++] = 0;
 	    ind[id++] = 3;
+	    ind[id++] = 3;
 	    ind[id++] = 4;
+	    ind[id++] = 7;
 	    nor[7 * 3 + 0] = 0;
 	    nor[7 * 3 + 1] = -1;
 	    nor[7 * 3 + 2] = 0;
@@ -541,8 +549,8 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    pv[34] = topY;
 	    pv[35] = -halfThick;
 
-	    // 24 indices per 6 sides (for quads)
-	    p->sideIndices = (GLushort *)calloc (4 * 6, sizeof (GLushort));
+	    // 36 indices per 6 sides (for triangles)
+	    p->sideIndices = (GLushort *)calloc (6 * 6, sizeof (GLushort));
 	    if (!p->sideIndices)
 	    {
 		compLogMessage ("animationaddon", CompLogLevelError,
@@ -562,7 +570,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 11; // First vertex
 	    ind[id++] = 10;
 	    ind[id++] = 1;
+	    ind[id++] = 1;
 	    ind[id++] = 0;
+	    ind[id++] = 11;
 	    nor[11 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
 	    nor[11 * 3 + 1] = -1; // in a polygon, vertex 11 for this face.
 	    nor[11 * 3 + 2] = 0;
@@ -573,7 +583,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 1;
 	    ind[id++] = 10;
 	    ind[id++] = 9;
+	    ind[id++] = 9;
 	    ind[id++] = 2;
+	    ind[id++] = 1;
 	    nor[1 * 3 + 0] = -1;
 	    nor[1 * 3 + 1] = 0;
 	    nor[1 * 3 + 2] = 0;
@@ -582,7 +594,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 2;
 	    ind[id++] = 9;
 	    ind[id++] = 8;
+	    ind[id++] = 8;
 	    ind[id++] = 3;
+	    ind[id++] = 2;
 	    nor[2 * 3 + 0] = -1;
 	    nor[2 * 3 + 1] = 1;
 	    nor[2 * 3 + 2] = 0;
@@ -593,7 +607,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 3;
 	    ind[id++] = 8;
 	    ind[id++] = 7;
+	    ind[id++] = 7;
 	    ind[id++] = 4;
+	    ind[id++] = 3;
 	    nor[3 * 3 + 0] = 1;
 	    nor[3 * 3 + 1] = 1;
 	    nor[3 * 3 + 2] = 0;
@@ -604,7 +620,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 4;
 	    ind[id++] = 7;
 	    ind[id++] = 6;
+	    ind[id++] = 6;
 	    ind[id++] = 5;
+	    ind[id++] = 4;
 	    nor[4 * 3 + 0] = 1;
 	    nor[4 * 3 + 1] = 0;
 	    nor[4 * 3 + 2] = 0;
@@ -613,7 +631,9 @@ PolygonAnim::tessellateIntoHexagons (int gridSizeX,
 	    ind[id++] = 5;
 	    ind[id++] = 6;
 	    ind[id++] = 11;
+	    ind[id++] = 11;
 	    ind[id++] = 0;
+	    ind[id++] = 5;
 	    nor[5 * 3 + 0] = 1;
 	    nor[5 * 3 + 1] = -1;
 	    nor[5 * 3 + 2] = 0;
@@ -946,8 +966,8 @@ PolygonAnim::tessellateIntoGlass (int spokeMultiplier,
 	    pv[22] = -shards[yc][xc].centerY + shards[yc][xc].pt3Y;
 	    pv[23] = -halfThick;
 
-	    // 16 indices for 4 sides (for quads)
-	    p->sideIndices = (GLushort *)calloc (4 * 4, sizeof (GLushort));
+	    // 24 indices for 4 sides (for triangles)
+	    p->sideIndices = (GLushort *)calloc (6 * 4, sizeof (GLushort));
 	    if (!p->sideIndices)
 	    {
 		compLogMessage ("animationaddon",
@@ -965,7 +985,9 @@ PolygonAnim::tessellateIntoGlass (int spokeMultiplier,
 	    ind[id++] = 6; // First vertex
 	    ind[id++] = 1;
 	    ind[id++] = 0;
+	    ind[id++] = 6;
 	    ind[id++] = 7;
+	    ind[id++] = 0;
 	    nor[6 * 3 + 0] = -1; // Flat shading only uses 1st vertex's normal
 	    nor[6 * 3 + 1] = 0; // in a polygon, vertex 6 for this face.
 	    nor[6 * 3 + 2] = 0;
@@ -974,7 +996,9 @@ PolygonAnim::tessellateIntoGlass (int spokeMultiplier,
 	    ind[id++] = 1;
 	    ind[id++] = 6;
 	    ind[id++] = 5;
+	    ind[id++] = 1;
 	    ind[id++] = 2;
+	    ind[id++] = 5;
 	    nor[1 * 3 + 0] = 0;
 	    nor[1 * 3 + 1] = 1;
 	    nor[1 * 3 + 2] = 0;
@@ -983,7 +1007,9 @@ PolygonAnim::tessellateIntoGlass (int spokeMultiplier,
 	    ind[id++] = 2;
 	    ind[id++] = 5;
 	    ind[id++] = 4;
+	    ind[id++] = 2;
 	    ind[id++] = 3;
+	    ind[id++] = 4;
 	    nor[2 * 3 + 0] = 1;
 	    nor[2 * 3 + 1] = 0;
 	    nor[2 * 3 + 2] = 0;
@@ -992,7 +1018,9 @@ PolygonAnim::tessellateIntoGlass (int spokeMultiplier,
 	    ind[id++] = 7;
 	    ind[id++] = 0;
 	    ind[id++] = 3;
+	    ind[id++] = 7;
 	    ind[id++] = 4;
+	    ind[id++] = 3;
 	    nor[7 * 3 + 0] = 0;
 	    nor[7 * 3 + 1] = -1;
 	    nor[7 * 3 + 2] = 0;
@@ -1067,8 +1095,11 @@ PolygonAnim::addGeometry (const GLTexture::MatrixList &matrix,
     if (!matrix.size ())
 	return;
 
-    GLWindow::Geometry &geometry = GLWindow::get (mWindow)->geometry ();
-    geometry.vCount = 1; // Force glDrawGeometry to be called
+    /* Force glDrawTexture to be called by pushing a single vertex into the
+     * window's vertex buffer */
+    GLWindow *gWindow = GLWindow::get (mWindow);
+    GLfloat vertexData[3] = {0.0f, 0.0f, 0.0f};
+    gWindow->vertexBuffer ()->addVertices (1, vertexData);
 
     bool dontStoreClips = true;
 
@@ -1298,47 +1329,54 @@ PolygonAnim::getPerspectiveCorrectionMat (const PolygonObject *p,
 }
 
 void
-PolygonAnim::prepareDrawingForAttrib (GLFragment::Attrib &attrib)
+PolygonAnim::prepareDrawingForAttrib (GLWindowPaintAttrib &attrib,
+                                      GLVertexBuffer      &vertexBuffer)
 {
-    if (GL::canDoSaturated && attrib.getSaturation () != COLOR)
+    // Disabled for now until lighting can be re-written
+    // attrib.brightness *= 0.76;
+    GLushort color = (attrib.brightness * attrib.opacity) >> 16;
+    GLfloat colorNormalized = color / static_cast <GLfloat> (COLOR);
+
+    vertexBuffer.color4f (colorNormalized,
+                          colorNormalized,
+                          colorNormalized,
+                          attrib.opacity / static_cast <GLfloat> (COLOR));
+}
+
+namespace
+{
+    enum class Winding : int
     {
-	GLfloat constant[4];
+	Clockwise = 0,
+	Counterclockwise = 1
+    };
 
-	if (GL::canDoSlightlySaturated && attrib.getSaturation () > 0)
-	{
-	    constant[3] = attrib.getOpacity () / 65535.0f;
-	    constant[0] = constant[1] = constant[2] = constant[3] *
-		attrib.getBrightness () / 65535.0f;
-
-	    glTexEnvfv (GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, constant);
-	}
-	else
-	{
-	    constant[3] = attrib.getOpacity () / 65535.0f;
-	    constant[0] = constant[1] = constant[2] = constant[3] *
-		attrib.getBrightness () / 65535.0f;
-
-	    constant[0] = 0.5f + 0.5f * RED_SATURATION_WEIGHT   * constant[0];
-	    constant[1] = 0.5f + 0.5f * GREEN_SATURATION_WEIGHT * constant[1];
-	    constant[2] = 0.5f + 0.5f * BLUE_SATURATION_WEIGHT  * constant[2];
-
-	    glTexEnvfv (GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, constant);
-	}
-    }
-    else
+    /* This function assumes that indices is large enough to
+     * hold a polygon of nSides sides */
+    unsigned int determineIndicesForPolygon (GLushort *indices,
+					     GLushort nSides,
+					     Winding direction)
     {
-	attrib.setBrightness (0.76 * attrib.getBrightness ());
+	unsigned int index = 0;
+	bool front = direction == Winding::Counterclockwise;
 
-	GLushort color =
-	    (attrib.getOpacity () * attrib.getBrightness ()) >> 16;
+	for (GLushort i = 2; i < nSides; ++i)
+	{
+	    indices[index] = 0;
+	    indices[index + 1] = (front ? (i - 1) : i);
+	    indices[index + 2] = (front ? i : (i - 1));
 
-	mGScreen->setTexEnvMode (GL_MODULATE);
-	glColor4us (color, color, color, attrib.getOpacity ());
+	    index += 3;
+	}
+
+	return index;
     }
 }
 
 inline void
-PolygonAnim::drawPolygonClipIntersection (const PolygonObject *p,
+PolygonAnim::drawPolygonClipIntersection (GLTexture *texture,
+					  const GLMatrix &transform,
+					  const PolygonObject *p,
                                           const Clip4Polygons &c,
                                           const GLfloat *vertexTexCoords,
                                           int pass,
@@ -1347,7 +1385,7 @@ PolygonAnim::drawPolygonClipIntersection (const PolygonObject *p,
                                           const CompOutput &output,
                                           float newOpacity,
                                           bool decelerates,
-                                          GLfloat skewMat[16])
+					  GLMatrix &skewMat)
 {
     int nSides = p->nSides;
     float newOpacityPolygon = newOpacity;
@@ -1386,52 +1424,56 @@ PolygonAnim::drawPolygonClipIntersection (const PolygonObject *p,
     else if (newOpacityPolygon > 0.9999)	// if fully opaque
 	return;	// draw only non-opaque ones in pass 1
 
-    glPushMatrix ();
+    GLMatrix polygonTransform (transform);
 
     if (mCorrectPerspective == CorrectPerspectivePolygon)
-	getPerspectiveCorrectionMat (p, skewMat, NULL, output);
+	getPerspectiveCorrectionMat (p, NULL, &skewMat, output);
 
     if (mCorrectPerspective != CorrectPerspectiveNone)
-	glMultMatrixf (skewMat);
+	polygonTransform *= skewMat;
 
     // Center
-    glTranslatef (p->centerPos.x (),
-		  p->centerPos.y (),
-		  p->centerPos.z ());
+    polygonTransform.translate (p->centerPos.x (),
+				p->centerPos.y (),
+				p->centerPos.z ());
 
     // Scale z first
-    glScalef (1.0f, 1.0f, 1.0f / ::screen->width ());
+    polygonTransform.scale (1.0f, 1.0f, 1.0f / ::screen->width ());
 
-    transformPolygon (p);
+    transformPolygon (polygonTransform, p);
 
     // Move by "rotation axis offset"
-    glTranslatef (p->rotAxisOffset.x (),
-		  p->rotAxisOffset.y (),
-		  p->rotAxisOffset.z ());
+    polygonTransform.translate (p->rotAxisOffset.x (),
+				p->rotAxisOffset.y (),
+				p->rotAxisOffset.z ());
 
     // Rotate by desired angle
-    glRotatef (p->rotAngle,
-	       p->rotAxis.x (), p->rotAxis.y (), p->rotAxis.z ());
+    polygonTransform.rotate (p->rotAngle,
+			     p->rotAxis.x (),
+			     p->rotAxis.y (),
+			     p->rotAxis.z ());
 
     // Move back to center
-    glTranslatef (-p->rotAxisOffset.x (),
-		  -p->rotAxisOffset.y (),
-		  -p->rotAxisOffset.z ());
+    polygonTransform.translate (-p->rotAxisOffset.x (),
+				-p->rotAxisOffset.y (),
+				-p->rotAxisOffset.z ());
 
     // Scale back
-    glScalef (1.0f, 1.0f, ::screen->width ());
+    polygonTransform.scale (1.0f, 1.0f, ::screen->width ());
 
     clipPlanes[0][3] = -(c.boxf.x1 - p->centerPosStart.x ());
     clipPlanes[1][3] = -(c.boxf.y1 - p->centerPosStart.y ());
     clipPlanes[2][3] = (c.boxf.x2 - p->centerPosStart.x ());
     clipPlanes[3][3] = (c.boxf.y2 - p->centerPosStart.y ());
-    glClipPlane (GL_CLIP_PLANE0, clipPlanes[0]);
-    glClipPlane (GL_CLIP_PLANE1, clipPlanes[1]);
-    glClipPlane (GL_CLIP_PLANE2, clipPlanes[2]);
-    glClipPlane (GL_CLIP_PLANE3, clipPlanes[3]);
+    // Clip planes are not supported on Modern OpenGL
+    //
+    // glClipPlane (GL_CLIP_PLANE0, clipPlanes[0]);
+    // glClipPlane (GL_CLIP_PLANE1, clipPlanes[1]);
+    // glClipPlane (GL_CLIP_PLANE2, clipPlanes[2]);
+    // glClipPlane (GL_CLIP_PLANE3, clipPlanes[3]);
+    // for (int k = 0; k < 4; k++)
+	// glEnable (GL_CLIP_PLANE0 + k);
 
-    for (int k = 0; k < 4; k++)
-	glEnable (GL_CLIP_PLANE0 + k);
     bool fadeBackAndSides =
 	mBackAndSidesFadeDur > 0 &&
 	forwardProgress <= mBackAndSidesFadeDur;
@@ -1445,56 +1487,92 @@ PolygonAnim::drawPolygonClipIntersection (const PolygonObject *p,
 	    (forwardProgress / mBackAndSidesFadeDur);
     }
 
-    GLFragment::Attrib attrib = mCurPaintAttrib;
-    attrib.setOpacity (newOpacityPolygon2 * OPAQUE);
+    GLWindowPaintAttrib attrib = mCurPaintAttrib;
+    attrib.opacity = newOpacityPolygon2 * OPAQUE;
 
-    prepareDrawingForAttrib (attrib);
+    GLVertexBuffer *streamingVertexBuffer = GLVertexBuffer::streamingBuffer ();
 
     // Draw back face
-    glVertexPointer (3, GL_FLOAT, 0, p->vertices + 3 * nSides);
-    if (mThickness > 0)
-	glNormalPointer (GL_FLOAT, 0, p->normals + 3 * nSides);
-    else
-	glNormal3f (0.0f, 0.0f, -1.0f);
-    glTexCoordPointer (2, GL_FLOAT, 0, &vertexTexCoords[2 * nSides]);
-    glDrawArrays (GL_POLYGON, 0, nSides);
-
-    // Vertex coords
-    glVertexPointer (3, GL_FLOAT, 0, p->vertices);
-    if (mThickness > 0)
-	glNormalPointer (GL_FLOAT, 0, p->normals);
-    else
-	glNormal3f (0.0f, 0.0f, 1.0f);
-    glTexCoordPointer (2, GL_FLOAT, 0, vertexTexCoords);
-
-    // Draw quads for sides
-    for (int k = 0; k < nSides; k++)
+    glActiveTexture (GL_TEXTURE0);
+    texture->enable (GLTexture::Fast);
+    streamingVertexBuffer->begin (GL_TRIANGLES);
+    streamingVertexBuffer->addVertices (nSides, p->vertices + 3 * nSides);
+    if (p->normals)
+	streamingVertexBuffer->addNormals (nSides, p->normals + 3 * nSides);
+    streamingVertexBuffer->addTexCoords (0, nSides, &vertexTexCoords[2 * nSides]);
+    if (streamingVertexBuffer->end ())
     {
-	// GL_QUADS uses a different vertex normal than the first
-	// so I use GL_POLYGON to make sure the normals are right.
-	glDrawElements (GL_POLYGON, 4,
-		       GL_UNSIGNED_SHORT,
-		       p->sideIndices + k * 4);
+	GLushort indices[64];
+	unsigned int nIndices = determineIndicesForPolygon (indices,
+							    nSides,
+							    Winding::Counterclockwise);
+	streamingVertexBuffer->render (polygonTransform,
+				       attrib,
+				       indices,
+				       nIndices);
     }
 
+    // GL_QUADS uses a different vertex normal than the first
+    // so I use GL_TRIANGLES to make sure the normals are right.
+    texture->disable ();
+    streamingVertexBuffer->begin (GL_TRIANGLES);
+    streamingVertexBuffer->addVertices (p->nVertices, p->vertices);
+    prepareDrawingForAttrib (attrib, *streamingVertexBuffer);
+    if (mThickness > 0 && p->normals)
+	streamingVertexBuffer->addNormals (nSides, p->normals);
+
+    // Draw quads for sides
+    if (streamingVertexBuffer->end ())
+    {
+	for (int k = 0; k < nSides; k++)
+	    streamingVertexBuffer->render (polygonTransform,
+					   attrib,
+					   p->sideIndices + k * 6,
+					   6);
+    }
+
+    streamingVertexBuffer->colorDefault ();
+
+    texture->enable (GLTexture::Fast);
+    streamingVertexBuffer->begin (GL_TRIANGLES);
     // if opacity was changed just above
     if (fadeBackAndSides)
     {
 	// Go back to normal opacity for front face
 	attrib = mCurPaintAttrib;
-	attrib.setOpacity (newOpacityPolygon * OPAQUE);
-	prepareDrawingForAttrib (attrib);
+	attrib.opacity = newOpacityPolygon * OPAQUE;
     }
-    // Draw front face
-    glDrawArrays (GL_POLYGON, 0, nSides);
-    for (int k = 0; k < 4; k++)
-	glDisable (GL_CLIP_PLANE0 + k);
+    streamingVertexBuffer->addVertices (nSides, p->vertices);
+    if (p->normals)
+	streamingVertexBuffer->addNormals (nSides, p->normals);
+    streamingVertexBuffer->addTexCoords (0, nSides, vertexTexCoords);
+    if (streamingVertexBuffer->end ())
+    {
+	GLushort indices[64];
+	unsigned int nIndices = determineIndicesForPolygon (indices,
+							    nSides,
+							    Winding::Counterclockwise);
+	streamingVertexBuffer->render (polygonTransform,
+				       attrib,
+				       indices,
+				       nIndices);
+    }
 
-    glPopMatrix ();
+    streamingVertexBuffer->colorDefault ();
+
+    texture->disable ();
+
+    // Clip planes are not supported on Modern OpenGL
+    //
+    // for (int k = 0; k < 4; k++)
+	// glDisable (GL_CLIP_PLANE0 + k);
 }
 
 void
-PolygonAnim::drawGeometry ()
+PolygonAnim::drawGeometry (GLTexture                 *texture,
+			   const GLMatrix            &transform,
+			   const GLWindowPaintAttrib &attrib,
+			   unsigned int              mask)
 {
     mNumDrawGeometryCalls++;
 
@@ -1540,48 +1618,34 @@ PolygonAnim::drawGeometry ()
 
     // OpenGL stuff starts here
 
-    GLboolean normalArrayWas = false;
-
-    if (mThickness > 0)
-    {
-	glPushAttrib (GL_NORMALIZE);
-	glEnable (GL_NORMALIZE);
-
-	normalArrayWas = glIsEnabled (GL_NORMAL_ARRAY);
-	glEnableClientState (GL_NORMAL_ARRAY);
-    }
-
-    if (mDoLighting)
-    {
-	glPushAttrib (GL_SHADE_MODEL);
-	glShadeModel (GL_FLAT);
-
-	glPushAttrib (GL_LIGHT0);
-	glPushAttrib (GL_COLOR_MATERIAL);
-	glPushAttrib (GL_LIGHTING);
-	glEnable (GL_COLOR_MATERIAL);
-	glEnable (GL_LIGHTING);
-
-	GLfloat ambientLight[] = { 0.3f, 0.3f, 0.3f, 0.3f };
-	GLfloat diffuseLight[] = { 0.9f, 0.9f, 0.9f, 0.9f };
-	GLfloat light0Position[] = { -0.5f, 0.5f, 9.0f, 0.0f };
-
-	glLightfv (GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-	glLightfv (GL_LIGHT0, GL_POSITION, light0Position);
-    }
-
-    glPushMatrix ();
-
-    glPushAttrib (GL_STENCIL_BUFFER_BIT);
-    glDisable (GL_STENCIL_TEST);
+    // Lighting will require special shaders, which aren't
+    // implemented right now, so disable it.
+    //
+    // if (mDoLighting)
+    // {
+    //	glPushAttrib (GL_SHADE_MODEL);
+    //	glShadeModel (GL_FLAT);
+    //
+    //	glPushAttrib (GL_LIGHT0);
+    //	glPushAttrib (GL_COLOR_MATERIAL);
+    //	glPushAttrib (GL_LIGHTING);
+    //	glEnable (GL_COLOR_MATERIAL);
+    //	glEnable (GL_LIGHTING);
+    //
+    //	GLfloat ambientLight[] = { 0.3f, 0.3f, 0.3f, 0.3f };
+    //	GLfloat diffuseLight[] = { 0.9f, 0.9f, 0.9f, 0.9f };
+    //	GLfloat light0Position[] = { -0.5f, 0.5f, 9.0f, 0.0f };
+    //
+    //	glLightfv (GL_LIGHT0, GL_AMBIENT, ambientLight);
+    //	glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    //	glLightfv (GL_LIGHT0, GL_POSITION, light0Position);
+    // }
 
     if (mDoDepthTest)
     {
 	// Depth test
-	glPushAttrib (GL_DEPTH_FUNC);
-	glPushAttrib (GL_DEPTH_TEST);
 	glDepthFunc (GL_LEQUAL);
+	glDepthMask (GL_TRUE);
 	glEnable (GL_DEPTH_TEST);
     }
 
@@ -1591,44 +1655,14 @@ PolygonAnim::drawGeometry ()
 				 { -1, 0, 0, 0 },
 				 { 0, -1, 0, 0 }};
 
-    // Save old color values
-    GLfloat oldColor[4];
-
-    glGetFloatv (GL_CURRENT_COLOR, oldColor);
-
-    // Determine where we are called from in paint.c's drawWindowTexture
-    // to find out how we should change the opacity
-    GLint prevActiveTexture = GL_TEXTURE0_ARB;
-    bool saturationFull = true;
-
-    if (GL::canDoSaturated && mCurPaintAttrib.getSaturation () != COLOR)
-    {
-	saturationFull = false;
-	if (GL::canDoSlightlySaturated &&
-	    mCurPaintAttrib.getSaturation () > 0)
-	{
-	    if (mCurPaintAttrib.getOpacity () < OPAQUE ||
-		mCurPaintAttrib.getBrightness () != BRIGHT)
-		prevActiveTexture = GL_TEXTURE3_ARB;
-	    else
-		prevActiveTexture = GL_TEXTURE2_ARB;
-	}
-	else
-	    prevActiveTexture = GL_TEXTURE1_ARB;
-    }
-
-    float opacity = mCurPaintAttrib.getOpacity () / 65535.0;
+    float opacity = mCurPaintAttrib.opacity / 65535.0;
 
     float newOpacity = opacity;
     float fadePassedBy;
 
     bool decelerates = deceleratingMotion ();
 
-    glPushAttrib (GL_BLEND);
     glEnable (GL_BLEND);
-
-    if (saturationFull)
-	mGScreen->setTexEnvMode (GL_MODULATE);
 
     // if fade-out duration is not specified per polygon
     if (mAllFadeDuration > -1.0f)
@@ -1657,9 +1691,9 @@ PolygonAnim::drawGeometry ()
 	static_cast<ExtensionPluginAnimAddon*> (getExtensionPluginInfo ())->
 	output ();
 
-    GLfloat skewMat[16];
+    GLMatrix skewMat;
     if (mCorrectPerspective == CorrectPerspectiveWindow)
-	getPerspectiveCorrectionMat (NULL, skewMat, NULL, *output);
+	getPerspectiveCorrectionMat (NULL, NULL, &skewMat, *output);
 
     // pass: 0: draw opaque ones
     //       1: draw transparent ones
@@ -1673,7 +1707,9 @@ PolygonAnim::drawGeometry ()
 		const GLfloat *vTexCoords = &c->polygonVertexTexCoords[0];
 		foreach (const PolygonObject *p, mPolygons)
 		{
-		    drawPolygonClipIntersection (p, *c,
+		    drawPolygonClipIntersection (texture,
+						 transform,
+						 p, *c,
 		                                 vTexCoords,
 						 pass, forwardProgress,
 						 clipPlanes, *output,
@@ -1688,7 +1724,9 @@ PolygonAnim::drawGeometry ()
 		foreach (const PolygonClipInfo *pci,
 		         c->intersectingPolygonInfos)
 		{
-		    drawPolygonClipIntersection (pci->p, *c,
+		    drawPolygonClipIntersection (texture,
+						 transform,
+						 pci->p, *c,
 		                                 &pci->vertexTexCoords[0],
 						 pass, forwardProgress,
 						 clipPlanes, *output,
@@ -1702,45 +1740,24 @@ PolygonAnim::drawGeometry ()
     // Restore
     // -----------------------------------------
 
-    // Restore old color values
-    glColor4f (oldColor[0], oldColor[1], oldColor[2], oldColor[3]);
-
-    glPopAttrib (); // GL_BLEND
+    glDisable (GL_BLEND);
 
     if (mDoDepthTest)
     {
-	glPopAttrib (); // GL_DEPTH_TEST
-	glPopAttrib (); // GL_DEPTH_FUNC
+	glDisable (GL_DEPTH_TEST);
+	glDepthMask (GL_FALSE);
     }
 
-    glPopAttrib (); // GL_STENCIL_BUFFER_BIT
-
-    // Restore texture stuff
-    if (saturationFull)
-	mGScreen->setTexEnvMode (GL_REPLACE);
-
-    glPopMatrix ();
-    (GL::activeTexture) (prevActiveTexture);
-
-    if (mDoLighting)
-    {
-	glPopAttrib (); // GL_LIGHTING
-	glPopAttrib (); // GL_COLOR_MATERIAL
-	glPopAttrib (); // GL_LIGHT0
-	glPopAttrib (); // GL_SHADE_MODEL
-    }
-
-    if (mThickness > 0)
-    {
-	glPopAttrib (); // GL_NORMALIZE
-
-	if (normalArrayWas)
-	    glEnableClientState (GL_NORMAL_ARRAY);
-	else
-	    glDisableClientState (GL_NORMAL_ARRAY);
-    }
-    else
-	glNormal3f (0.0f, 0.0f, -1.0f);
+    // Lighting will require special shaders whcih
+    // are not implemented for now.
+    //
+    // if (mDoLighting)
+    // {
+    //	glPopAttrib (); // GL_LIGHTING
+    //	glPopAttrib (); // GL_COLOR_MATERIAL
+    //	glPopAttrib (); // GL_LIGHT0
+    //	glPopAttrib (); // GL_SHADE_MODEL
+    // }
 
     if (mClipsUpdated)		// set the end mark for this group of clips
 	mLastClipInGroup.push_back (lastClip);
@@ -1760,7 +1777,7 @@ PolygonAnim::prePaintWindow ()
 }
 
 void
-PolygonAnim::postPaintWindow ()
+PolygonAnim::postPaintWindow (const GLMatrix &)
 {
     if (mClipsUpdated &&	// clips should be dropped only in the 1st step
 	mNumDrawGeometryCalls == 0)	// if clips not drawn
@@ -1842,12 +1859,12 @@ PolygonAnim::updateBB (CompOutput &output)
 
     prepareTransform (output, wTransform, wTransform2);
 
-    const float *screenProjection = gScreen->projectionMatrix ();
+    GLMatrix *screenProjection = gScreen->projectionMatrix ();
     GLdouble dModel[16];
     GLdouble dProjection[16];
     for (int i = 0; i < 16; i++)
     {
-	dProjection[i] = screenProjection[i];
+	dProjection[i] = (*screenProjection)[i];
     }
     GLint viewport[4] =
 	{output.region ()->extents.x1,
@@ -1988,9 +2005,12 @@ ExtensionPluginAnimAddon::prePaintOutput (CompOutput *output)
 	    }
 	}
     }
+
     if (depthUsed)
     {
 	glClearDepth (1000.0f);
+	glDepthMask (GL_TRUE);
 	glClear (GL_DEPTH_BUFFER_BIT);
+	glDepthMask (GL_FALSE);
     }
 }
