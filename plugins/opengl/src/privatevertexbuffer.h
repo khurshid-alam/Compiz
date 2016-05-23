@@ -109,10 +109,14 @@ class PrivateVertexBuffer
 
 	int render (const GLMatrix            *projection,
 	            const GLMatrix            *modelview,
-	            const GLWindowPaintAttrib *attrib);
+		    const GLWindowPaintAttrib *attrib,
+		    const GLushort            *indices,
+		    GLuint                    nIndices);
 	int legacyRender (const GLMatrix            &projection,
 	                  const GLMatrix            &modelview,
-	                  const GLWindowPaintAttrib &attrib);
+			  const GLWindowPaintAttrib &attrib,
+			  const GLushort            *indices,
+			  GLuint                    nIndices);
 
     public:
 	static GLVertexBuffer *streamingBuffer;

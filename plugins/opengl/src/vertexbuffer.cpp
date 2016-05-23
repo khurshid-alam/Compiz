@@ -338,7 +338,16 @@ void GLVertexBuffer::setAutoProgram (AutoProgram *autoProgram)
 int GLVertexBuffer::render ()
 {
     if (enabled ())
-	return priv->render (NULL, NULL, NULL);
+	return priv->render (NULL, NULL, NULL, NULL, 0);
+    else
+	return -1;
+}
+
+int GLVertexBuffer::render (const GLushort *indices,
+			    GLuint         nIndices)
+{
+    if (enabled ())
+	return priv->render (NULL, NULL, NULL, indices, nIndices);
     else
 	return -1;
 }
@@ -350,15 +359,42 @@ int GLVertexBuffer::render (const GLMatrix &modelview)
     return render (modelview, attrib);
 }
 
+int GLVertexBuffer::render (const GLMatrix   &modelview,
+			    const GLushort   *indices,
+			    GLuint           nIndices)
+{
+    const GLWindowPaintAttrib attrib = { OPAQUE, BRIGHT, COLOR, 0, 0, 0, 0 };
+
+    return render (modelview, attrib, indices, nIndices);
+}
+
 int GLVertexBuffer::render (const GLMatrix            &modelview,
                             const GLWindowPaintAttrib &attrib)
 {
     GLScreen *gScreen = GLScreen::get (screen);
     GLMatrix *projection = gScreen->projectionMatrix ();
 
-    return render (*projection, modelview, attrib);
+    return render (*projection, modelview, attrib, NULL, 0);
 }
 
+
+int GLVertexBuffer::render (const GLMatrix              &modelview,
+			    const GLWindowPaintAttrib   &attrib,
+			    const GLushort              *indices,
+			    GLuint                      nIndices)
+{
+    GLScreen *gScreen = GLScreen::get (screen);
+    GLMatrix *projection = gScreen->projectionMatrix ();
+
+    return render (*projection, modelview, attrib, indices, nIndices);
+}
+
+int GLVertexBuffer::render (const GLMatrix            &projection,
+			    const GLMatrix            &modelview,
+			    const GLWindowPaintAttrib &attrib)
+{
+    return render (projection, modelview, attrib, NULL, 0);
+}
 
 #if 0
 #define PRINT_MATRIX(m) printMatrix ((m), #m)
@@ -373,9 +409,11 @@ static void printMatrix (const GLMatrix &matrix, const char *title = NULL)
 #define PRINT_MATRIX(m)
 #endif
 
-int GLVertexBuffer::render (const GLMatrix            &projection,
-                            const GLMatrix            &modelview,
-                            const GLWindowPaintAttrib &attrib)
+int GLVertexBuffer::render (const GLMatrix              &projection,
+			    const GLMatrix              &modelview,
+			    const GLWindowPaintAttrib   &attrib,
+			    const GLushort              *indices,
+			    GLuint                      nIndices)
 {
     if (!priv->vertexData.size ())
 	return -1;
@@ -384,9 +422,9 @@ int GLVertexBuffer::render (const GLMatrix            &projection,
     PRINT_MATRIX(projection);
 
     if (enabled ())
-	return priv->render (&projection, &modelview, &attrib);
+	return priv->render (&projection, &modelview, &attrib, indices, nIndices);
     else
-	return priv->legacyRender (projection, modelview, attrib);
+	return priv->legacyRender (projection, modelview, attrib, indices, nIndices);
 }
 
 PrivateVertexBuffer::PrivateVertexBuffer () :
@@ -426,9 +464,11 @@ PrivateVertexBuffer::~PrivateVertexBuffer ()
     }
 }
 
-int PrivateVertexBuffer::render (const GLMatrix            *projection,
-                                 const GLMatrix            *modelview,
-                                 const GLWindowPaintAttrib *attrib)
+int PrivateVertexBuffer::render (const GLMatrix              *projection,
+				 const GLMatrix              *modelview,
+				 const GLWindowPaintAttrib   *attrib,
+				 const GLushort              *indices,
+				 GLuint                      nIndices)
 {
     GLfloat attribs[3] = {1, 1, 1};
     GLint positionIndex = -1;
@@ -547,11 +587,16 @@ int PrivateVertexBuffer::render (const GLMatrix            *projection,
 	tmpProgram->setUniform3f ("paintAttrib", attribs[0], attribs[1], attribs[2]);
     }
 
+    const GLuint nVerticesToDraw = maxVertices > 0 ?
+		std::min (static_cast <int> (vertexData.size () / 3),
+			  maxVertices) :
+		vertexData.size () / 3;
 
-    glDrawArrays (primitiveType, vertexOffset, maxVertices > 0 ?
-				    std::min (static_cast <int> (vertexData.size () / 3),
-					      maxVertices) :
-				    vertexData.size () / 3);
+    if (nIndices && indices)
+	glDrawElements (primitiveType, nIndices, GL_UNSIGNED_SHORT, indices);
+    else
+	glDrawArrays (primitiveType, vertexOffset, nVerticesToDraw);
+
     for (int i = 0; i < 4; ++i)
     {
 	if (texCoordIndex[i] != -1)
@@ -573,7 +618,9 @@ int PrivateVertexBuffer::render (const GLMatrix            *projection,
 
 int PrivateVertexBuffer::legacyRender (const GLMatrix            &projection,
                                        const GLMatrix            &modelview,
-                                       const GLWindowPaintAttrib &attrib)
+				       const GLWindowPaintAttrib &attrib,
+				       const GLushort            *indices,
+				       GLuint                    nIndices)
 {
     #ifndef USE_GLES
     glMatrixMode (GL_PROJECTION);
@@ -621,10 +668,19 @@ int PrivateVertexBuffer::legacyRender (const GLMatrix            &projection,
 	glTexCoordPointer (2, GL_FLOAT, 0, &textureData[i][0]);
     }
 
-    glDrawArrays (primitiveType, vertexOffset, maxVertices > 0 ?
-				    std::min (static_cast <int> (vertexData.size () / 3),
-					      maxVertices) :
-				    vertexData.size () / 3);
+    const GLuint nVerticesToDraw = maxVertices > 0 ?
+		std::min (static_cast <int> (vertexData.size () / 3),
+			  maxVertices) :
+		vertexData.size () / 3;
+
+    if (indices && nIndices) {
+	glDrawElements (primitiveType,
+			nIndices,
+			GL_UNSIGNED_SHORT,
+			indices);
+    }
+
+    glDrawArrays (primitiveType, vertexOffset, nVerticesToDraw);
 
     glDisableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);

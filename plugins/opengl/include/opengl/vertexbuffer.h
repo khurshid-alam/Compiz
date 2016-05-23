@@ -112,12 +112,30 @@ class GLVertexBuffer
 
 	int render (const GLMatrix &modelview);
 
+	int render (const GLushort *indices,
+		    GLuint         nIndices);
+
+	int render (const GLMatrix    &modelview,
+		    const GLushort    *indices,
+		    GLuint            nIndices);
+
 	int render (const GLMatrix            &modelview,
 	            const GLWindowPaintAttrib &attrib);
 
+	int render (const GLMatrix              &modelview,
+		    const GLWindowPaintAttrib   &attrib,
+		    const GLushort              *indices,
+		    GLuint                      nIndices);
+
 	int render (const GLMatrix            &projection,
-	            const GLMatrix            &modelview,
-	            const GLWindowPaintAttrib &attrib);
+		    const GLMatrix            &modelview,
+		    const GLWindowPaintAttrib &attrib);
+
+	int render (const GLMatrix              &projection,
+		    const GLMatrix              &modelview,
+		    const GLWindowPaintAttrib   &attrib,
+		    const GLushort              *indices,
+		    GLuint                      nIndices);
 
 	void setVertexOffset (GLuint vOffset);
 	void setMaxVertices (GLint vMax);
