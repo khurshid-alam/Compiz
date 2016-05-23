@@ -142,7 +142,7 @@ public:
     virtual void updateAttrib (GLWindowPaintAttrib &) {}
     virtual void updateTransform (GLMatrix &) {}
     virtual void prePaintWindow () {}
-    virtual void postPaintWindow () {}
+    virtual void postPaintWindow (const GLMatrix &) {}
     virtual bool postPaintWindowUsed () { return false; }
 
     /// Returns true if the animation is still in progress.

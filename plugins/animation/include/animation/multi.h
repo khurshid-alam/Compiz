@@ -172,14 +172,14 @@ public:
 	    }
 	}
 
-	void postPaintWindow ()
+	void postPaintWindow (const GLMatrix &transform)
 	{
 	    int count = 0;
 	    foreach (SingleAnim *a, animList)
 	    {
 		setCurrAnimNumber (mAWindow, count);
 		++count;
-		a->postPaintWindow ();
+		a->postPaintWindow (transform);
 	    }
 	}
 

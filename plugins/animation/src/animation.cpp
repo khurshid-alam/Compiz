@@ -1731,18 +1731,7 @@ PrivateAnimWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	status = gWindow->glPaint (wAttrib, wTransform, region, mask);
 
     if (mCurAnimation->postPaintWindowUsed ())
-    {
-#if 0 // Not ported yet
-	// Transform to make post-paint coincide with the window
-	glPushMatrix ();
-	glLoadMatrixf (wTransform.getMatrix ());
-#endif
-	mCurAnimation->postPaintWindow ();
-
-#if 0 // Not ported yet
-	glPopMatrix ();
-#endif
-    }
+	mCurAnimation->postPaintWindow (wTransform);
 
     return status;
 }
