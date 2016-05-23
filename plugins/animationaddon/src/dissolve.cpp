@@ -62,5 +62,14 @@ DissolveSingleAnim::updateTransform (GLMatrix &transform)
 void
 DissolveSingleAnim::updateBB (CompOutput &output)
 {
-    mAWindow->expandBBWithWindow ();
+    CompRect outRect (mAWindow->mWindow->outputRect ());
+
+    Box windowBox =
+    {
+	static_cast <short int> (outRect.x () - 4),
+	static_cast <short int> (outRect.x () + outRect.width () + 4),
+	static_cast <short int> (outRect.y () - 4),
+	static_cast <short int> (outRect.y () + outRect.height () + 4)
+    };
+    mAWindow->expandBBWithBox (windowBox);
 }
