@@ -315,16 +315,6 @@ gboolean (*theme_calc_decoration_size)      (decor_t *d,
 					     int     text_width,
 					     int     *width,
 					     int     *height);
-void     (*theme_get_event_window_position) (decor_t *d,
-
-					     gint    i,
-					     gint    j,
-					     gint    width,
-					     gint    height,
-					     gint    *x,
-					     gint    *y,
-					     gint    *w,
-					     gint    *h);
 
 extern char *program_name;
 
@@ -556,17 +546,6 @@ calc_decoration_size (decor_t *d,
 		      gint    *width,
 		      gint    *height);
 
-void
-get_event_window_position (decor_t *d,
-			   gint    i,
-			   gint    j,
-			   gint    width,
-			   gint    height,
-			   gint    *x,
-			   gint    *y,
-			   gint    *w,
-			   gint    *h);
-
 /* gdk.c */
 
 GdkWindow *
@@ -605,17 +584,6 @@ meta_calc_decoration_size (decor_t *d,
 			   gint    name_width,
 			   gint    *width,
 			   gint    *height);
-
-void
-meta_get_event_window_position (decor_t *d,
-				gint    i,
-				gint    j,
-				gint	width,
-				gint	height,
-				gint    *x,
-				gint    *y,
-				gint    *w,
-				gint    *h);
 
 void
 meta_update_button_layout (const char *value);

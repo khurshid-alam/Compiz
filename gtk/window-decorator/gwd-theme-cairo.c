@@ -80,6 +80,45 @@ gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
     gwd_decor_frame_unref (frame);
 }
 
+static void
+gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
+                                           decor_t  *decor,
+                                           gint      i,
+                                           gint      j,
+                                           gint      width,
+                                           gint      height,
+                                           gint     *x,
+                                           gint     *y,
+                                           gint     *w,
+                                           gint     *h)
+{
+    if (decor->frame_window) {
+        *x = pos[i][j].x + pos[i][j].xw * width + decor->frame->win_extents.left;
+        *y = pos[i][j].y + decor->frame->win_extents.top +
+             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
+
+        if (i == 0 && (j == 0 || j == 2))
+            *y -= decor->frame->titlebar_height;
+    } else {
+        *x = pos[i][j].x + pos[i][j].xw * width;
+        *y = pos[i][j].y +
+             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
+    }
+
+    if ((decor->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY) && (j == 0 || j == 2)) {
+        *w = 0;
+    } else {
+        *w = pos[i][j].w + pos[i][j].ww * width;
+    }
+
+    if ((decor->state & WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY) && (i == 0 || i == 2)) {
+        *h = 0;
+    } else {
+        *h = pos[i][j].h +
+             pos[i][j].hh * height + pos[i][j].hth * (decor->frame->titlebar_height - 17);
+    }
+}
+
 static gboolean
 gwd_theme_cairo_get_button_position (GWDTheme *theme,
                                      decor_t  *decor,
@@ -131,6 +170,7 @@ gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
     GWDThemeClass *theme_class = GWD_THEME_CLASS (cairo_class);
 
     theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;
+    theme_class->get_event_window_position = gwd_theme_cairo_get_event_window_position;
     theme_class->get_button_position = gwd_theme_cairo_get_button_position;
 }
 

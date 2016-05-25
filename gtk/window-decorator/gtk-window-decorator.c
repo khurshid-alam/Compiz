@@ -174,7 +174,6 @@ update_metacity_theme_cb (GWDSettings *settings,
 
         theme_draw_window_decoration = meta_draw_window_decoration;
         theme_calc_decoration_size = meta_calc_decoration_size;
-        theme_get_event_window_position = meta_get_event_window_position;
     } else {
         g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
 
@@ -182,14 +181,12 @@ update_metacity_theme_cb (GWDSettings *settings,
 
         theme_draw_window_decoration = draw_window_decoration;
         theme_calc_decoration_size = calc_decoration_size;
-        theme_get_event_window_position = get_event_window_position;
     }
 #else
     type = GWD_THEME_TYPE_CAIRO;
 
     theme_draw_window_decoration = draw_window_decoration;
     theme_calc_decoration_size = calc_decoration_size;
-    theme_get_event_window_position = get_event_window_position;
 #endif
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));

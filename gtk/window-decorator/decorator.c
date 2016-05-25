@@ -230,8 +230,8 @@ update_event_windows (WnckWindow *win)
 	    h = 0;
 
 	    if (actions & event_window_actions[i][j] && i >= k && i <= l)
-		(*theme_get_event_window_position) (d, i, j, width, height,
-						    &x, &y, &w, &h);
+		gwd_theme_get_event_window_position (gwd_theme, d, i, j, width, height,
+		                                     &x, &y, &w, &h);
 
 	    /* Reparenting mode - create boxes which we monitor motionnotify on */
 	    if (d->frame_window)
