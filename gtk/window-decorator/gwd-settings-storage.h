@@ -60,41 +60,41 @@ G_DECLARE_FINAL_TYPE (GWDSettingsStorage, gwd_settings_storage,
                       GWD, SETTINGS_STORAGE, GObject)
 
 GWDSettingsStorage *
-gwd_settings_storage_new                          (GWDSettingsWritable *writable,
-                                                   gboolean             connect);
+gwd_settings_storage_new                          (GWDSettings        *settings,
+                                                   gboolean            connect);
 
 gboolean
-gwd_settings_storage_update_use_tooltips          (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_use_tooltips          (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_blur                  (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_blur                  (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_metacity_theme        (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_metacity_theme        (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_opacity               (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_opacity               (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_button_layout         (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_button_layout         (GWDSettingsStorage *storage);
 
 gboolean
-gwd_settings_storage_update_font                  (GWDSettingsStorage  *storage);
+gwd_settings_storage_update_font                  (GWDSettingsStorage *storage);
 
 gboolean
 gwd_settings_storage_update_titlebar_actions      (GWDSettingsStorage *storage);
 
 GSettings *
-gwd_get_org_compiz_gwd_settings                   (GWDSettingsStorage  *storage);
+gwd_get_org_compiz_gwd_settings                   (GWDSettingsStorage *storage);
 
 GSettings *
-gwd_get_org_gnome_desktop_wm_preferences_settings (GWDSettingsStorage  *storage);
+gwd_get_org_gnome_desktop_wm_preferences_settings (GWDSettingsStorage *storage);
 
 GSettings *
-gwd_get_org_gnome_metacity_settings               (GWDSettingsStorage  *storage);
+gwd_get_org_gnome_metacity_settings               (GWDSettingsStorage *storage);
 
 GSettings *
-gwd_get_org_mate_marco_general_settings           (GWDSettingsStorage  *storage);
+gwd_get_org_mate_marco_general_settings           (GWDSettingsStorage *storage);
 
 G_END_DECLS
 

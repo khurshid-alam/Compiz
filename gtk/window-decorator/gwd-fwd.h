@@ -25,7 +25,6 @@
 G_BEGIN_DECLS
 
 typedef struct _GWDSettings                 GWDSettings;
-typedef struct _GWDSettingsWritable         GWDSettingsWritable;
 typedef struct _GWDSettingsStorage          GWDSettingsStorage;
 typedef struct _GWDSettingsXPropertyStorage GWDSettingsXPropertyStorage;
 

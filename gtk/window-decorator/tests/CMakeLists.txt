@@ -18,18 +18,11 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
     link_directories (${CMAKE_CURRENT_BINARY_DIR}
 		      ${CMAKE_CURRENT_BINARY_DIR}/..)
 
-    add_library (gtk_window_decorator_mock_settings_writable STATIC
-		 ${CMAKE_CURRENT_SOURCE_DIR}/compiz_gwd_mock_settings_writable.cpp)
-
-    target_link_libraries (gtk_window_decorator_mock_settings_writable
-			   gtk_window_decorator_settings_writable_interface)
-
     add_executable (compiz_test_gwd_settings
 		    ${CMAKE_CURRENT_SOURCE_DIR}/test_gwd_settings.cpp)
 
     set (COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES
-	 gtk_window_decorator_settings
-	 gtk_window_decorator_mock_settings_writable)
+	 gtk_window_decorator_settings)
 
     set (COMPIZ_TEST_GWD_SETTINGS_COVERAGE_TARGETS
 	 gtk_window_decorator_settings)
