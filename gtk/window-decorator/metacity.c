@@ -991,25 +991,6 @@ meta_get_button_position (decor_t *d,
     return TRUE;
 }
 
-gfloat
-meta_get_title_scale (decor_frame_t *frame)
-{
-    MetaTheme *theme;
-    MetaFrameType type;
-    MetaFrameFlags flags; 
-
-    theme = meta_theme_get_current ();
-    type = meta_frame_type_from_string (frame->type);
-    flags = 0xc33; /* fixme */
-
-    if (type == META_FRAME_TYPE_LAST)
-        return 1.0f;
-
-    gfloat scale = meta_theme_get_title_scale (theme, type, flags);
-
-    return scale;
-}
-
 gboolean
 meta_calc_decoration_size (decor_t *d,
                            gint     w,

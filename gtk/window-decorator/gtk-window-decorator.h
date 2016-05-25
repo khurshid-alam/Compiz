@@ -332,7 +332,6 @@ gboolean (*theme_get_button_position)       (decor_t *d,
 					     gint    *y,
 					     gint    *w,
 					     gint    *h);
-gfloat (*theme_get_title_scale)		    (decor_frame_t *frame);
 
 extern char *program_name;
 
@@ -585,9 +584,6 @@ get_event_window_position (decor_t *d,
 			   gint    *w,
 			   gint    *h);
 
-gfloat
-get_title_scale (decor_frame_t *frame);
-
 /* gdk.c */
 
 GdkWindow *
@@ -647,9 +643,6 @@ meta_get_event_window_position (decor_t *d,
 				gint    *y,
 				gint    *w,
 				gint    *h);
-
-gfloat
-meta_get_title_scale (decor_frame_t *);
 
 void
 meta_update_button_layout (const char *value);
