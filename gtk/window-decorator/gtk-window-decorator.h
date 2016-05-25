@@ -101,8 +101,6 @@ unsigned long decorations;
 
 extern gboolean minimal;
 
-extern GWDSettings *settings;
-
 extern GWDTheme *gwd_theme;
 
 extern gdouble decoration_alpha;

@@ -27,7 +27,6 @@
 #include "gwd-metacity-window-decoration-util.h"
 #include "gwd-settings.h"
 
-GWDSettings	    *settings;
 GWDTheme *gwd_theme;
 
 gdouble decoration_alpha = 0.5;
@@ -35,8 +34,6 @@ gdouble decoration_alpha = 0.5;
 gboolean minimal = FALSE;
 
 const unsigned short ICON_SPACE = 20;
-
-guint cmdline_options = 0;
 
 Atom frame_input_window_atom;
 Atom frame_output_window_atom;
@@ -184,6 +181,7 @@ main (int argc, char *argv[])
     Display       *xdisplay;
     GdkScreen     *gdkscreen;
     WnckScreen    *screen;
+    GWDSettings   *settings;
     gint          i, j, status;
     gboolean      replace = FALSE;
     unsigned int  nchildren;
@@ -440,6 +438,7 @@ main (int argc, char *argv[])
 
     g_clear_object (&gwd_theme);
     fini_settings ();
+    g_clear_object (&settings);
 
     return 0;
 }

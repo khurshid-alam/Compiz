@@ -263,6 +263,7 @@ style_updated (GtkWidget *widget,
 void
 decor_frame_refresh (decor_frame_t *frame)
 {
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     decor_shadow_options_t active_o, inactive_o;
     decor_shadow_info_t *info;
     const gchar *titlebar_font = NULL;
