@@ -1,3 +1,25 @@
+compiz (1:0.9.12.2+16.10.20160525-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Add GWDTheme, GWDThemeCairo and GWDThemeMetacity.
+  * GWDTheme: implement calc_decoration_size.
+  * GWDTheme: implement draw_window_decoration.
+  * GWDTheme: implement get_button_position.
+  * GWDTheme: implement get_event_window_position.
+  * GWDTheme: implement get_shadow.
+  * GWDTheme: implement get_title_scale.
+  * GWDTheme: implement update_border_extents.
+  * Remove GWDSettingsInterface.
+  * Remove GWDSettingsNotifiedInterface and GDWSettingsNotified.
+  * gtk-window-decorator: remove global meta_button_layout and
+    meta_button_layout_set variables.
+
+  [ Alberts Muktupāvels, CI Train Bot ]
+  * Remove GWDSettingsWritable.
+  * gtk-window-decorator: don't use GWDSettings as global variable.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 25 May 2016 14:20:56 +0000
+
 compiz (1:0.9.12.2+16.10.20160517-0ubuntu1) yakkety; urgency=medium
 
   [ Alberts Muktupāvels ]
