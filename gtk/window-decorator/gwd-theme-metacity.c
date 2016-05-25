@@ -932,7 +932,7 @@ gwd_theme_metacity_dispose (GObject *object)
         metacity->button_layout_changed_id = 0;
     }
 
-    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
+    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
 
 static void
