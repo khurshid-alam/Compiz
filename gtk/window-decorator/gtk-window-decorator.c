@@ -30,6 +30,7 @@
 
 GWDSettingsWritable *writable;
 GWDSettings	    *settings;
+GWDTheme *gwd_theme;
 
 gdouble decoration_alpha = 0.5;
 #ifdef USE_METACITY
@@ -159,6 +160,7 @@ static void
 update_metacity_theme_cb (GWDSettings *settings,
                           gpointer     user_data)
 {
+    GWDThemeType type;
 #ifdef USE_METACITY
     const gchar *metacity_theme;
 
@@ -167,6 +169,8 @@ update_metacity_theme_cb (GWDSettings *settings,
     if (gwd_metacity_window_decoration_update_meta_theme (metacity_theme,
                                                           meta_theme_get_current,
                                                           meta_theme_set_current)) {
+        type = GWD_THEME_TYPE_METACITY;
+
         theme_draw_window_decoration = meta_draw_window_decoration;
         theme_calc_decoration_size = meta_calc_decoration_size;
         theme_update_border_extents = meta_update_border_extents;
@@ -177,6 +181,8 @@ update_metacity_theme_cb (GWDSettings *settings,
     } else {
         g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
 
+        type = GWD_THEME_TYPE_CAIRO;
+
         theme_draw_window_decoration = draw_window_decoration;
         theme_calc_decoration_size = calc_decoration_size;
         theme_update_border_extents = update_border_extents;
@@ -186,6 +192,8 @@ update_metacity_theme_cb (GWDSettings *settings,
         theme_get_shadow = cairo_get_shadow;
     }
 #else
+    type = GWD_THEME_TYPE_CAIRO;
+
     theme_draw_window_decoration = draw_window_decoration;
     theme_calc_decoration_size = calc_decoration_size;
     theme_update_border_extents = update_border_extents;
@@ -194,6 +202,8 @@ update_metacity_theme_cb (GWDSettings *settings,
     theme_get_title_scale = get_title_scale;
     theme_get_shadow = cairo_get_shadow;
 #endif
+
+    g_set_object (&gwd_theme, gwd_theme_new (type, settings));
 }
 
 static void
@@ -482,6 +492,7 @@ main (int argc, char *argv[])
     gwd_decor_frame_unref (bare_p);
     gwd_decor_frame_unref (switcher_p);
 
+    g_clear_object (&gwd_theme);
     fini_settings ();
 
     return 0;

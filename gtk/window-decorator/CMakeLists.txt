@@ -71,6 +71,10 @@ if (USE_GTK)
     compiz_install_gsettings_schema (${_gwd_gschema_generated_location}
                                      ${_gwd_gschema_dest})
 
+    if (USE_METACITY)
+        set (gwd_theme_metacity ${CMAKE_CURRENT_SOURCE_DIR}/gwd-theme-metacity.c)
+    endif (USE_METACITY)
+
     add_executable (gtk-window-decorator
 		    gtk-window-decorator.c
 		    blurprops.c
@@ -89,6 +93,9 @@ if (USE_GTK)
 		    wnck.c
 		    decorator.c
 		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-xproperty-storage.c
+		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-theme.c
+		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-theme-cairo.c
+		    ${gwd_theme_metacity}
 		    ${gwd_schema}
     )
 
@@ -97,7 +104,6 @@ if (USE_GTK)
     if (USE_METACITY)
 	set (metacitylibs ${METACITY_LIBRARIES})
     endif (USE_METACITY)
-
 
     target_link_libraries (
 	gtk-window-decorator

@@ -78,6 +78,8 @@
 
 #include <gwd-fwd.h>
 
+#include "gwd-theme.h"
+
 extern const unsigned short ICON_SPACE;
 
 #define META_MAXIMIZED (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | \
@@ -105,6 +107,8 @@ extern gboolean minimal;
 
 extern GWDSettings *settings;
 extern GWDSettingsWritable *writable;
+
+extern GWDTheme *gwd_theme;
 
 extern gdouble decoration_alpha;
 #ifdef USE_METACITY
