@@ -159,7 +159,8 @@ update_metacity_theme (GWDSettings *settings)
 static void
 update_metacity_button_layout (GWDSettings *settings)
 {
-    g_signal_emit (settings, settings_signals[UPDATE_METACITY_BUTTON_LAYOUT], 0);
+    g_signal_emit (settings, settings_signals[UPDATE_METACITY_BUTTON_LAYOUT],
+                   0, settings->metacity_button_layout);
 }
 
 static void
@@ -815,7 +816,7 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
     settings_signals[UPDATE_METACITY_BUTTON_LAYOUT] =
         g_signal_new ("update-metacity-button-layout",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
 }
 
 static void

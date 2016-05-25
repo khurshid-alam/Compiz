@@ -30,14 +30,6 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GWDThemeMetacity, gwd_theme_metacity,
                       GWD, THEME_METACITY, GWDTheme)
 
-void
-gwd_theme_metacity_get_decoration_geometry (GWDThemeMetacity  *metacity,
-                                            decor_t           *decor,
-                                            MetaFrameFlags    *flags,
-                                            MetaFrameGeometry *fgeom,
-                                            MetaButtonLayout  *button_layout,
-                                            MetaFrameType      frame_type);
-
 G_END_DECLS
 
 #endif
