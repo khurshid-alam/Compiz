@@ -169,7 +169,7 @@ update_frames_border_extents (gpointer key,
 {
     decor_frame_t *frame = (decor_frame_t *) value;
 
-    (*theme_update_border_extents) (frame);
+    gwd_theme_update_border_extents (gwd_theme, frame);
 }
 
 void

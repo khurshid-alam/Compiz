@@ -954,17 +954,3 @@ get_title_scale (decor_frame_t *frame)
 {
     return 1.0f;
 }
-
-void
-update_border_extents (decor_frame_t *frame)
-{
-    frame = gwd_decor_frame_ref (frame);
-
-    gwd_cairo_window_decoration_get_extents (&frame->win_extents,
-					     &frame->max_win_extents);
-
-    frame->titlebar_height = frame->max_titlebar_height =
-	    (frame->text_height < 17) ? 17 : frame->text_height;
-
-    gwd_decor_frame_unref (frame);
-}

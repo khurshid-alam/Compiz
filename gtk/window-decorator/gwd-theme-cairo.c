@@ -18,6 +18,8 @@
  */
 
 #include "config.h"
+#include "gtk-window-decorator.h"
+#include "gwd-cairo-window-decoration-util.h"
 #include "gwd-theme-cairo.h"
 
 struct _GWDThemeCairo
@@ -28,8 +30,26 @@ struct _GWDThemeCairo
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
 
 static void
+gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
+                                       decor_frame_t *frame)
+{
+    frame = gwd_decor_frame_ref (frame);
+
+    gwd_cairo_window_decoration_get_extents (&frame->win_extents,
+                                             &frame->max_win_extents);
+
+    frame->titlebar_height = frame->max_titlebar_height =
+        (frame->text_height < 17) ? 17 : frame->text_height;
+
+    gwd_decor_frame_unref (frame);
+}
+
+static void
 gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
 {
+    GWDThemeClass *theme_class = GWD_THEME_CLASS (cairo_class);
+
+    theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;
 }
 
 static void
