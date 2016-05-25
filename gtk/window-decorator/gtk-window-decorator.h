@@ -309,12 +309,6 @@ extern default_frame_references_t default_frames[WINDOW_TYPE_FRAMES_NUM * 2];
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM];
 
 void     (*theme_draw_window_decoration)    (decor_t *d);
-gboolean (*theme_calc_decoration_size)      (decor_t *d,
-					     int     client_width,
-					     int     client_height,
-					     int     text_width,
-					     int     *width,
-					     int     *height);
 
 extern char *program_name;
 
@@ -538,14 +532,6 @@ rounded_rectangle (cairo_t *cr,
 		   double  radius,
 		   int	   corner);
 
-gboolean
-calc_decoration_size (decor_t *d,
-		      gint    w,
-		      gint    h,
-		      gint    name_width,
-		      gint    *width,
-		      gint    *height);
-
 /* gdk.c */
 
 GdkWindow *
@@ -576,14 +562,6 @@ meta_get_frame_type_for_decor_type (const gchar *frame_type);
 
 void
 meta_draw_window_decoration (decor_t *d);
-
-gboolean
-meta_calc_decoration_size (decor_t *d,
-			   gint    w,
-			   gint    h,
-			   gint    name_width,
-			   gint    *width,
-			   gint    *height);
 
 void
 meta_update_button_layout (const char *value);
