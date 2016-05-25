@@ -35,11 +35,7 @@ if (USE_GTK)
     add_library (gtk_window_decorator_settings_writable_interface STATIC
 		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-writable-interface.c)
 
-    add_library (gtk_window_decorator_settings_notified_interface
-		 ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-notified-interface.c)
-
     set (GTK_WINDOW_DECORATOR_ADDITIONAL_LIBRARIES
-	 gtk_window_decorator_settings_notified_interface
 	 gtk_window_decorator_settings_writable_interface
 	 gtk_window_decorator_settings
 	 gtk_window_decorator_metacity_window_decoration_util
@@ -93,7 +89,6 @@ if (USE_GTK)
 		    wnck.c
 		    decorator.c
 		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-xproperty-storage.c
-		    ${CMAKE_CURRENT_SOURCE_DIR}/gwd-settings-notified.c
 		    ${gwd_schema}
     )
 

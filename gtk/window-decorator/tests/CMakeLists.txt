@@ -24,23 +24,15 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
     target_link_libraries (gtk_window_decorator_mock_settings_writable
 			   gtk_window_decorator_settings_writable_interface)
 
-    add_library (gtk_window_decorator_mock_settings_notified STATIC
-		 ${CMAKE_CURRENT_SOURCE_DIR}/compiz_gwd_mock_settings_notified.cpp)
-
-    target_link_libraries (gtk_window_decorator_mock_settings_notified
-			   gtk_window_decorator_settings_notified_interface)
-
     add_executable (compiz_test_gwd_settings
 		    ${CMAKE_CURRENT_SOURCE_DIR}/test_gwd_settings.cpp)
 
     set (COMPIZ_TEST_GWD_SETTINGS_ADDITIONAL_LIBRARIES
 	 gtk_window_decorator_settings
-	 gtk_window_decorator_mock_settings_writable
-	 gtk_window_decorator_mock_settings_notified)
+	 gtk_window_decorator_mock_settings_writable)
 
     set (COMPIZ_TEST_GWD_SETTINGS_COVERAGE_TARGETS
-	 gtk_window_decorator_settings
-	 gtk_window_decorator_settings_notified_interface)
+	 gtk_window_decorator_settings)
 
     set (_desktop_gschema_name org.gnome.desktop.wm.preferences)
     set (_desktop_gschema_filename ${_desktop_gschema_name}.gschema.xml)
