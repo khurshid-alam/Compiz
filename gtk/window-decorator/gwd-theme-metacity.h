@@ -20,6 +20,8 @@
 #ifndef GWD_THEME_METACITY_H
 #define GWD_THEME_METACITY_H
 
+#include <metacity-private/theme.h>
+
 #include "gwd-theme.h"
 
 G_BEGIN_DECLS
@@ -27,6 +29,14 @@ G_BEGIN_DECLS
 #define GWD_TYPE_THEME_METACITY gwd_theme_metacity_get_type ()
 G_DECLARE_FINAL_TYPE (GWDThemeMetacity, gwd_theme_metacity,
                       GWD, THEME_METACITY, GWDTheme)
+
+void
+gwd_theme_metacity_get_decoration_geometry (GWDThemeMetacity  *metacity,
+                                            decor_t           *decor,
+                                            MetaFrameFlags    *flags,
+                                            MetaFrameGeometry *fgeom,
+                                            MetaButtonLayout  *button_layout,
+                                            MetaFrameType      frame_type);
 
 G_END_DECLS
 

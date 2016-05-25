@@ -113,6 +113,7 @@ extern GWDTheme *gwd_theme;
 extern gdouble decoration_alpha;
 #ifdef USE_METACITY
 extern gboolean meta_button_layout_set;
+extern MetaButtonLayout meta_button_layout;
 #endif
 
 extern Atom frame_input_window_atom;
@@ -318,14 +319,6 @@ void     (*theme_get_event_window_position) (decor_t *d,
 
 					     gint    i,
 					     gint    j,
-					     gint    width,
-					     gint    height,
-					     gint    *x,
-					     gint    *y,
-					     gint    *w,
-					     gint    *h);
-gboolean (*theme_get_button_position)       (decor_t *d,
-					     gint    i,
 					     gint    width,
 					     gint    height,
 					     gint    *x,
@@ -563,16 +556,6 @@ calc_decoration_size (decor_t *d,
 		      gint    *width,
 		      gint    *height);
 
-gboolean
-get_button_position (decor_t *d,
-		     gint    i,
-		     gint    width,
-		     gint    height,
-		     gint    *x,
-		     gint    *y,
-		     gint    *w,
-		     gint    *h);
-
 void
 get_event_window_position (decor_t *d,
 			   gint    i,
@@ -622,16 +605,6 @@ meta_calc_decoration_size (decor_t *d,
 			   gint    name_width,
 			   gint    *width,
 			   gint    *height);
-
-gboolean
-meta_get_button_position (decor_t *d,
-			  gint    i,
-			  gint	  width,
-			  gint	  height,
-			  gint    *x,
-			  gint    *y,
-			  gint    *w,
-			  gint    *h);
 
 void
 meta_get_event_window_position (decor_t *d,

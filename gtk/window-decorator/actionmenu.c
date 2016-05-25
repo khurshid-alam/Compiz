@@ -53,8 +53,9 @@ position_action_menu (GtkMenu  *menu,
 
     if (d->decorated)
     {
-	if ((*theme_get_button_position) (d, BUTTON_MENU, width, height,
-				      &bx, &by, &width, &height))
+	if (gwd_theme_get_button_position (gwd_theme, d, BUTTON_MENU,
+	                                   width, height, &bx, &by,
+	                                   &width, &height))
 	    *x = *x - frame->win_extents.left + bx;
     }
 
