@@ -307,10 +307,6 @@ typedef struct _default_frame_references
 extern default_frame_references_t default_frames[WINDOW_TYPE_FRAMES_NUM * 2];
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM];
 
-void     (*theme_get_shadow)		    (decor_frame_t *d,
-					     decor_shadow_options_t *,
-					     gboolean);
-
 void     (*theme_draw_window_decoration)    (decor_t *d);
 gboolean (*theme_calc_decoration_size)      (decor_t *d,
 					     int     client_width,
@@ -596,9 +592,6 @@ get_event_window_position (decor_t *d,
 gfloat
 get_title_scale (decor_frame_t *frame);
 
-void
-cairo_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active);
-
 /* gdk.c */
 
 GdkWindow *
@@ -667,9 +660,6 @@ meta_update_border_extents ();
 
 void
 meta_update_button_layout (const char *value);
-
-void
-meta_get_shadow (decor_frame_t *, decor_shadow_options_t *opts, gboolean active);
 
 #endif
 

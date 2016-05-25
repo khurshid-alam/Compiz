@@ -177,7 +177,6 @@ update_metacity_theme_cb (GWDSettings *settings,
         theme_get_event_window_position = meta_get_event_window_position;
         theme_get_button_position = meta_get_button_position;
         theme_get_title_scale = meta_get_title_scale;
-        theme_get_shadow = meta_get_shadow;
     } else {
         g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
 
@@ -189,7 +188,6 @@ update_metacity_theme_cb (GWDSettings *settings,
         theme_get_event_window_position = get_event_window_position;
         theme_get_button_position = get_button_position;
         theme_get_title_scale = get_title_scale;
-        theme_get_shadow = cairo_get_shadow;
     }
 #else
     type = GWD_THEME_TYPE_CAIRO;
@@ -200,7 +198,6 @@ update_metacity_theme_cb (GWDSettings *settings,
     theme_get_event_window_position = get_event_window_position;
     theme_get_button_position = get_button_position;
     theme_get_title_scale = get_title_scale;
-    theme_get_shadow = cairo_get_shadow;
 #endif
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));

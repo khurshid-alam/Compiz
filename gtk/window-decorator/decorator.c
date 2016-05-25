@@ -959,8 +959,8 @@ update_frames_shadows (gpointer key,
     opts->active_shadow = &active_o;
     opts->inactive_shadow = &inactive_o;
 
-    (*theme_get_shadow) (frame, opts->active_shadow, TRUE);
-    (*theme_get_shadow) (frame, opts->inactive_shadow, FALSE);
+    gwd_theme_get_shadow (gwd_theme, frame, opts->active_shadow, TRUE);
+    gwd_theme_get_shadow (gwd_theme, frame, opts->inactive_shadow, FALSE);
 
     gwd_decor_frame_ref (frame);
 
@@ -985,34 +985,6 @@ update_frames_shadows (gpointer key,
     free (opts);
     opts = NULL;
 
-}
-
-static void
-get_shadow_common (decor_frame_t *d, decor_shadow_options_t *opts, gboolean active)
-{
-    decor_shadow_options_t *setting_opts = NULL;
-
-    if (active)
-	g_object_get (settings, "active-shadow", &setting_opts, NULL);
-    else
-	g_object_get (settings, "inactive-shadow", &setting_opts, NULL);
-
-    if (setting_opts)
-    {
-	memcpy (opts, setting_opts, sizeof (decor_shadow_options_t));
-    }
-}
-
-void
-cairo_get_shadow (decor_frame_t *frame, decor_shadow_options_t *opts, gboolean active)
-{
-    get_shadow_common (frame, opts, active);
-}
-
-void
-meta_get_shadow (decor_frame_t *frame, decor_shadow_options_t *opts, gboolean active)
-{
-    get_shadow_common (frame, opts, active);
 }
 
 int
