@@ -25,6 +25,12 @@
 
 #include "gtk-window-decorator.h"
 
+static void
+draw_window_decoration (decor_t *decor)
+{
+    gwd_theme_draw_window_decoration (gwd_theme, decor);
+}
+
 const gchar *
 get_frame_type (WnckWindow *win)
 {
@@ -207,16 +213,8 @@ decorations_changed (WnckScreen *screen)
     {
 	decor_t *d = g_object_get_data (G_OBJECT (windows->data), "decor");
 
-	if (d->decorated)
-	{
-
-#ifdef USE_METACITY
-	    if (d->draw == draw_window_decoration ||
-		d->draw == meta_draw_window_decoration)
-		d->draw = theme_draw_window_decoration;
-#endif
-
-	}
+        if (d->decorated)
+            d->draw = draw_window_decoration;
 
 	update_window_decoration (WNCK_WINDOW (windows->data));
 	windows = windows->next;
@@ -813,7 +811,7 @@ window_opened (WnckScreen *screen,
 					    &d->client_width,
 					    &d->client_height);
 
-    d->draw = theme_draw_window_decoration;
+    d->draw = draw_window_decoration;
 
     d->created = FALSE;
     d->surface = NULL;

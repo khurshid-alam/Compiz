@@ -171,19 +171,13 @@ update_metacity_theme_cb (GWDSettings *settings,
                                                           meta_theme_get_current,
                                                           meta_theme_set_current)) {
         type = GWD_THEME_TYPE_METACITY;
-
-        theme_draw_window_decoration = meta_draw_window_decoration;
     } else {
         g_log ("gtk-window-decorator", G_LOG_LEVEL_INFO, "using cairo decoration");
 
         type = GWD_THEME_TYPE_CAIRO;
-
-        theme_draw_window_decoration = draw_window_decoration;
     }
 #else
     type = GWD_THEME_TYPE_CAIRO;
-
-    theme_draw_window_decoration = draw_window_decoration;
 #endif
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));

@@ -24,6 +24,13 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-theme-cairo.h"
+
+static void
+draw_window_decoration (decor_t *decor)
+{
+    gwd_theme_draw_window_decoration (gwd_theme, decor);
+}
 
 void
 destroy_normal_frame (decor_frame_t *frame)
@@ -408,7 +415,7 @@ update_window_decoration_name (WnckWindow *win)
 	gint w;
 
 	/* Cairo mode: w = SHRT_MAX */
-	if (theme_draw_window_decoration != draw_window_decoration)
+	if (!GWD_IS_THEME_CAIRO (gwd_theme))
 	{
 	    w = SHRT_MAX;
 	}
@@ -706,7 +713,7 @@ draw_border_shape (Display	   *xdisplay,
     d.width   = width;
     d.height  = height;
     d.active  = TRUE;
-    d.draw    = theme_draw_window_decoration;
+    d.draw    = draw_window_decoration;
     d.picture = picture;
     d.context = c;
 
@@ -1341,7 +1348,7 @@ update_default_decorations (GdkScreen *screen)
 
         extents.top += frame->titlebar_height;
 
-        default_frames[i].d->draw = theme_draw_window_decoration;
+        default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
 	                                                               default_frames[i].d->height,
 	                                                               frame->style_window_rgba);
