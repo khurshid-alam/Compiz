@@ -41,7 +41,6 @@
 
 #include "compiz_gwd_tests.h"
 
-#include "gwd-settings-interface.h"
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 #include "gwd-settings-writable-interface.h"
@@ -49,7 +48,6 @@
 
 #include "decoration.h"
 
-#include "compiz_gwd_mock_settings.h"
 #include "compiz_gwd_mock_settings_writable.h"
 #include "compiz_gwd_mock_settings_notified.h"
 
@@ -266,7 +264,7 @@ namespace
 	g_object_unref (G_OBJECT (writable));
     }
 
-    void gwd_settings_unref (GWDSettingsImpl *settings)
+    void gwd_settings_unref (GWDSettings *settings)
     {
 	g_object_unref (G_OBJECT (settings));
     }
@@ -378,185 +376,10 @@ TEST_F(GWDMockSettingsWritableTest, TestMock)
 								 testing_values::TITLEBAR_ACTION_SHADE.c_str ()), IsTrue ());
 }
 
-class GWDMockSettingsTest :
-    public GWDSettingsTestCommon
-{
-};
-
-TEST_F(GWDMockSettingsTest, TestMock)
-{
-    GWDMockSettingsGMock settingsGMock;
-    boost::shared_ptr <GWDSettingsImpl> settingsMock (gwd_mock_settings_new (&settingsGMock),
-						  boost::bind (gwd_settings_unref, _1));
-
-    AutoUnsetGValue pointerValue (G_TYPE_POINTER);
-    AutoUnsetGValue booleanValue (G_TYPE_BOOLEAN);
-    AutoUnsetGValue stringValue (G_TYPE_STRING);
-    AutoUnsetGValue integerValue (G_TYPE_INT);
-    AutoUnsetGValue doubleValue (G_TYPE_DOUBLE);
-
-    GValue &pointerGValue = pointerValue;
-    GValue &booleanGValue = booleanValue;
-    GValue &stringGValue = stringValue;
-    GValue &integerGValue = integerValue;
-    GValue &doubleGValue  = doubleValue;
-
-    int	  POINTEE_VALUE = 1;
-    gpointer POINTER_VALUE = &POINTEE_VALUE;
-    const std::string STRING_VALUE ("test");
-    const int INTEGER_VALUE = 2;
-    const gboolean BOOLEAN_VALUE = TRUE;
-    const gdouble DOUBLE_VALUE = 2.0;
-
-    g_value_set_pointer (&pointerGValue, POINTER_VALUE);
-    g_value_set_boolean (&booleanGValue, BOOLEAN_VALUE);
-    g_value_set_string (&stringGValue, STRING_VALUE.c_str ());
-    g_value_set_int (&integerGValue, INTEGER_VALUE);
-    g_value_set_double (&doubleGValue, DOUBLE_VALUE);
-
-    EXPECT_CALL (settingsGMock, dispose ());
-    EXPECT_CALL (settingsGMock, finalize ());
-
-    /* The order of evaluation of matchers in Google Mock appears to be undefined and
-     * the way GValueMatch is written makes it particularly unsafe when used with
-     * matchers of multiple types on the same function, since there's no guaruntee
-     * that the matchers will be traversed in any order. If a type is passed to
-     * any of the matchers that it doesn't know how to handle then it will
-     * call directly through to GValueCmp which will run into undefined behaviour
-     * in itself.
-     *
-     * In reality, the API for GValueMatch is probably a little bit broken in this
-     * sense, but just satisfying each expectation as soon as its set seems to do
-     * the job here
-     */
-
-    /* calling g_object_get_property actually resets
-     * the value so expecting 0x0 is correct */
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_SHADOW,
-					     GValueMatch <gpointer> (0x0, g_value_get_pointer),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "active-shadow",
-			   &pointerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_SHADOW,
-					     GValueMatch <gpointer> (0x0, g_value_get_pointer),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "inactive-shadow",
-			   &pointerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_USE_TOOLTIPS,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "use-tooltips",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BLUR_CHANGED,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "blur",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_METACITY_THEME,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-theme",
-			   &stringGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_OPACITY,
-					     GValueMatch <gdouble> (0.0, g_value_get_double),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-active-opacity",
-			   &doubleGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_OPACITY,
-					     GValueMatch <gdouble> (0.0, g_value_get_double),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-inactive-opacity",
-			   &doubleGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_ACTIVE_SHADE_OPACITY,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-active-shade-opacity",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_INACTIVE_SHADE_OPACITY,
-					     GValueMatch <gboolean> (FALSE, g_value_get_boolean),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-inactive-shade-opacity",
-			   &booleanGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_BUTTON_LAYOUT,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "metacity-button-layout",
-			   &stringGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_DOUBLE_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-double-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_MIDDLE_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-middle-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_ACTION_RIGHT_CLICK,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-right-click-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_MOUSE_WHEEL_ACTION,
-					     GValueMatch <gint> (0, g_value_get_int),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "mouse-wheel-action",
-			   &integerGValue);
-
-    EXPECT_CALL (settingsGMock, getProperty (GWD_MOCK_SETTINGS_PROPERTY_TITLEBAR_FONT,
-					     GValueMatch <const gchar *> (NULL, g_value_get_string),
-					     _));
-
-    g_object_get_property (G_OBJECT (settingsMock.get ()),
-			   "titlebar-font",
-			   &stringGValue);
-}
-
 namespace
 {
     void ExpectAllNotificationsOnce (boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > &gmockNotified,
-				     boost::shared_ptr <GWDSettingsImpl>	      &settings)
+				     boost::shared_ptr <GWDSettings> &settings)
     {
 	InSequence s;
 
@@ -580,9 +403,7 @@ class GWDSettingsTest :
 	    mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> ());
 	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
 				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_impl_new (NULL,
-						    NULL,
-						    mMockNotified.get ()),
+	    mSettings.reset (gwd_settings_new (NULL, NULL, mMockNotified.get ()),
 			     boost::bind (gwd_settings_unref, _1));
 	    ExpectAllNotificationsOnce (mGMockNotified, mSettings);
 	}
@@ -597,7 +418,7 @@ class GWDSettingsTest :
 
 	boost::shared_ptr <StrictMock <GWDMockSettingsNotifiedGMock> > mGMockNotified;
 	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
-	boost::shared_ptr <GWDSettingsImpl> mSettings;
+	boost::shared_ptr <GWDSettings> mSettings;
 };
 
 TEST_F(GWDSettingsTest, TestGWDSettingsInstantiation)
@@ -791,11 +612,9 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
     gint blurType = testing_values::BLUR_TYPE_ALL_INT_VALUE;
 
     /* We need to increment the reference count so that it doesn't
-     * go away when we create a new GWDSettingsImpl */
+     * go away when we create a new GWDSettings */
     g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_impl_new (&blurType,
-					    NULL,
-					    mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (&blurType, NULL, mMockNotified.get ()),
 		     boost::bind (gwd_settings_unref, _1));
 
     EXPECT_THAT (gwd_settings_writable_blur_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
@@ -862,9 +681,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
     const gchar *metacityTheme = "Ambiance";
 
     g_object_ref (mMockNotified.get ());
-    mSettings.reset (gwd_settings_impl_new (NULL,
-					    &metacityTheme,
-					    mMockNotified.get ()),
+    mSettings.reset (gwd_settings_new (NULL, &metacityTheme, mMockNotified.get ()),
 		     boost::bind (gwd_settings_unref, _1));
 
     EXPECT_THAT (gwd_settings_writable_metacity_theme_changed (GWD_SETTINGS_WRITABLE_INTERFACE (mSettings.get ()),
@@ -1046,9 +863,7 @@ class GWDSettingsTestClickActions :
 	    mGMockNotified.reset (new GWDMockSettingsNotifiedGMock ());
 	    mMockNotified.reset (gwd_mock_settings_notified_new (mGMockNotified.get ()),
 				 boost::bind (gwd_settings_notified_do_nothing, _1));
-	    mSettings.reset (gwd_settings_impl_new (NULL,
-						    NULL,
-						    mMockNotified.get ()),
+	    mSettings.reset (gwd_settings_new (NULL, NULL, mMockNotified.get ()),
 			     boost::bind (gwd_settings_unref, _1));
 	}
 
@@ -1064,7 +879,7 @@ class GWDSettingsTestClickActions :
 
 	boost::shared_ptr <GWDMockSettingsNotifiedGMock> mGMockNotified;
 	boost::shared_ptr <GWDSettingsNotified> mMockNotified;
-	boost::shared_ptr <GWDSettingsImpl> mSettings;
+	boost::shared_ptr <GWDSettings> mSettings;
 };
 
 TEST_P(GWDSettingsTestClickActions, TestClickActionsAndMouseActions)
