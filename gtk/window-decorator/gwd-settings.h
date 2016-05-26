@@ -24,7 +24,6 @@
 #define GWD_SETTINGS_H
 
 #include <glib-object.h>
-#include <gwd-fwd.h>
 
 G_BEGIN_DECLS
 

@@ -29,16 +29,8 @@ GWDSettingsXPropertyStorage *xprop_storage = NULL;
 void
 init_settings (GWDSettings *settings)
 {
-    storage = gwd_settings_storage_new (settings, TRUE);
+    storage = gwd_settings_storage_new (settings);
     xprop_storage = gwd_settings_xproperty_storage_new (settings);
-
-    gwd_settings_storage_update_metacity_theme (storage);
-    gwd_settings_storage_update_opacity (storage);
-    gwd_settings_storage_update_button_layout (storage);
-    gwd_settings_storage_update_font (storage);
-    gwd_settings_storage_update_titlebar_actions (storage);
-    gwd_settings_storage_update_blur (storage);
-    gwd_settings_storage_update_use_tooltips (storage);
 
     gwd_process_decor_shadow_property_update ();
 }

@@ -72,8 +72,6 @@
 #define _(x)  gettext (x)
 #define N_(x) x
 
-#include <gwd-fwd.h>
-
 #include "gwd-theme.h"
 
 extern const unsigned short ICON_SPACE;

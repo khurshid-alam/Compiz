@@ -21,8 +21,7 @@
 #ifndef GWD_SETTINGS_XPROPERTY_STORAGE_H
 #define GWD_SETTINGS_XPROPERTY_STORAGE_H
 
-#include <glib-object.h>
-#include <gwd-fwd.h>
+#include "gwd-settings.h"
 
 G_BEGIN_DECLS
 
