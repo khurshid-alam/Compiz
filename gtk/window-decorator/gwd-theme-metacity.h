@@ -22,6 +22,7 @@
 
 #include <metacity-private/theme.h>
 
+#include "gwd-settings.h"
 #include "gwd-theme.h"
 
 G_BEGIN_DECLS
@@ -30,8 +31,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GWDThemeMetacity, gwd_theme_metacity,
                       GWD, THEME_METACITY, GWDTheme)
 
-gboolean
-gwd_theme_metacity_is_valid (GWDThemeMetacity *metacity);
+GWDTheme *
+gwd_theme_metacity_new (GWDSettings *settings);
 
 G_END_DECLS
 

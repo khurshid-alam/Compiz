@@ -1555,8 +1555,32 @@ gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
 }
 
-gboolean
-gwd_theme_metacity_is_valid (GWDThemeMetacity *metacity)
+/**
+ * gwd_theme_metacity_new:
+ * @settings: a #GWDSettings
+ *
+ * Creates a new #GWDTheme. If meta_theme_load will fail to load Metacity
+ * theme then this function will return %NULL. In this case #GWDThemeCairo
+ * must be used as fallback.
+ *
+ * This function MUST be used only in gwd_theme_new!
+ *
+ * Returns: (transfer full) (nullable): a newly created #GWDTheme, or %NULL
+ */
+GWDTheme *
+gwd_theme_metacity_new (GWDSettings *settings)
 {
-    return metacity->theme != NULL;
+    GWDThemeMetacity *metacity;
+
+    metacity = g_object_new (GWD_TYPE_THEME_METACITY,
+                             "settings", settings,
+                             NULL);
+
+    /* We failed to load Metacity theme */
+    if (metacity->theme == NULL) {
+        g_object_unref (metacity);
+        return NULL;
+    }
+
+    return GWD_THEME (metacity);
 }
