@@ -169,8 +169,11 @@ class DesktopWindowCount
 {
 public:
     virtual void incrementDesktopWindowCount() = 0;
+    virtual void incrementOpaqueDesktopWindowCount() = 0;
     virtual void decrementDesktopWindowCount() = 0;
+    virtual void decrementOpaqueDesktopWindowCount() = 0;
     virtual int desktopWindowCount() = 0;
+    virtual int opaqueDesktopWindowCount() = 0;
 protected:
     ~DesktopWindowCount() {}
 };

@@ -1,3 +1,63 @@
+compiz (1:0.9.12.2+16.10.20160525-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Add GWDTheme, GWDThemeCairo and GWDThemeMetacity.
+  * GWDTheme: implement calc_decoration_size.
+  * GWDTheme: implement draw_window_decoration.
+  * GWDTheme: implement get_button_position.
+  * GWDTheme: implement get_event_window_position.
+  * GWDTheme: implement get_shadow.
+  * GWDTheme: implement get_title_scale.
+  * GWDTheme: implement update_border_extents.
+  * Remove GWDSettingsInterface.
+  * Remove GWDSettingsNotifiedInterface and GDWSettingsNotified.
+  * gtk-window-decorator: remove global meta_button_layout and
+    meta_button_layout_set variables.
+
+  [ Alberts Muktupāvels, CI Train Bot ]
+  * Remove GWDSettingsWritable.
+  * gtk-window-decorator: don't use GWDSettings as global variable.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 25 May 2016 14:20:56 +0000
+
+compiz (1:0.9.12.2+16.10.20160517-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * CMake: Remove USE_GSETTINGS option.
+  * Fix memory leaks in GWDSettingsStorage.
+  * OpenGL: use the number of Opaque windows around to decide whether
+    paint the bg or not (LP: #1574866)
+  * Remove GWDSettingsStorageInterface.
+
+  [ Andrea Azzarone ]
+  * Add an option to notify that a key press is actually an "auto
+    repeat" one. (LP: #1572241)
+
+  [ Eleni Maria Stea ]
+  * Expo, Scale: add support for bottom offsets (LP: #1573897, #1562346)
+
+  [ Marco Trevisan (Treviño) ]
+  * Scale: allow to iterate through windows using Tab key
+  * Scale: use the selectedWindow as starting point when focusing a
+    window (LP: #1575168)
+  * Window: call stateChangeNotify when compiz state changed but before
+    changing the WM state (LP: #1521302)
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * Blur: port the plugin to modern OpenGL
+
+  [ handsome_feng ]
+  * Add a YBottomOffset value when stretch maximized windows。 (LP:
+    #1562348)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 17 May 2016 02:53:09 +0000
+
+compiz (1:0.9.12.2+16.04.20160415-0ubuntu2) yakkety; urgency=medium
+
+  * No-change rebuild for libpng soname change.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 23 Apr 2016 00:01:37 +0000
+
 compiz (1:0.9.12.2+16.04.20160415-0ubuntu1) xenial; urgency=medium
 
   [ Martin Wimpress ]
