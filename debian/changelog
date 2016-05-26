@@ -1,3 +1,13 @@
+compiz (1:0.9.12.2+16.10.20160526-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Simplify GWDSettingsStorage.
+  * gtk-window-decorator: Stop using g_object_get with GWDSettings.
+  * gtk-window-decorator: remove gwd-cairo-window-decoration-util.[c/h].
+  * gtk-window-decorator: update Metacity theme loading.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 26 May 2016 13:33:29 +0000
+
 compiz (1:0.9.12.2+16.10.20160525-0ubuntu1) yakkety; urgency=medium
 
   [ Alberts Muktupāvels ]
