@@ -67,6 +67,8 @@ usr/share/compiz/*showmouse.*
 usr/share/compiz/showmouse
 usr/lib/*/compiz/*showrepaint.*
 usr/share/compiz/*showrepaint.*
+usr/lib/*/compiz/*simple-animations.*
+usr/share/compiz/*simple-animations
 usr/lib/*/compiz/*splash.*
 usr/share/compiz/*splash.*
 usr/share/compiz/splash
