@@ -21,31 +21,6 @@
 
 #include "gtk-window-decorator.h"
 
-cairo_surface_t *
-surface_new_from_pixbuf (GdkPixbuf *pixbuf,
-                         GtkWidget *parent)
-{
-    cairo_surface_t *surface;
-    guint            width;
-    guint            height;
-    cairo_t         *cr;
-
-    width  = gdk_pixbuf_get_width (pixbuf);
-    height = gdk_pixbuf_get_height (pixbuf);
-
-    surface = create_surface (width, height, parent);
-    if (!surface)
-	return NULL;
-
-    cr = cairo_create (surface);
-    gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint (cr);
-    cairo_destroy (cr);
-
-    return surface;
-}
-
 GdkWindow *
 create_gdk_window (Window xframe)
 {

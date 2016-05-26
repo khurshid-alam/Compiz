@@ -151,7 +151,6 @@ typedef struct _decor_color {
     double b;
 } decor_color_t;
 
-
 #define IN_EVENT_WINDOW      (1 << 0)
 #define PRESSED_EVENT_WINDOW (1 << 1)
 
@@ -235,7 +234,6 @@ typedef struct _decor {
     decor_frame_t     *frame;
     event_window      event_windows[3][3];
     event_window      button_windows[BUTTON_NUM];
-    Box		      *last_pos_entered;
     guint	      button_states[BUTTON_NUM];
     Pixmap            x11Pixmap;
     cairo_surface_t   *surface;
@@ -507,9 +505,6 @@ cairo_surface_t *
 create_native_surface_and_wrap (int	  w,
 			       int	  h,
 			       GtkWidget *parent_style_window);
-
-cairo_surface_t *
-surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 /* switcher.c */
 
