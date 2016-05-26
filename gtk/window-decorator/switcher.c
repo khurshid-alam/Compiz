@@ -45,10 +45,8 @@ create_switcher_frame (const gchar *type)
     frame->win_extents = _switcher_extents;
     frame->window_context_inactive = _switcher_context;
     frame->window_context_active = _switcher_context;
-    frame->window_context_no_shadow = _switcher_context;
     frame->max_window_context_active = _switcher_context;
     frame->max_window_context_inactive = _switcher_context;
-    frame->max_window_context_no_shadow = _switcher_context;
     frame->update_shadow = switcher_frame_update_shadow;
 
     /* keep the switcher frame around since we need to keep its
@@ -519,7 +517,7 @@ update_switcher_window (Window     popup,
     d->buffer_surface = buffer_surface;
     d->cr             = cairo_create (surface);
 
-    format = get_format_for_surface (d, d->buffer_surface);
+    format = xformat_rgba;
     d->picture = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (buffer_surface),
 				       format, 0, NULL);
 

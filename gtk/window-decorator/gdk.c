@@ -55,16 +55,6 @@ create_gdk_window (Window xframe)
     return window;
 }
 
-XRenderPictFormat *
-get_format_for_surface (decor_t         *d,
-                        cairo_surface_t *surface)
-{
-    if (!d->frame_window || cairo_xlib_surface_get_depth (surface) == 32)
-	return xformat_rgba;
-
-    return xformat_rgb;
-}
-
 cairo_surface_t *
 create_native_surface_and_wrap (int        w,
                                 int        h,

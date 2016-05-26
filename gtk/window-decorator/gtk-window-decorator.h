@@ -104,7 +104,6 @@ extern GWDTheme *gwd_theme;
 extern gdouble decoration_alpha;
 
 extern Atom frame_input_window_atom;
-extern Atom frame_output_window_atom;
 extern Atom win_decor_atom;
 extern Atom win_blur_decor_atom;
 extern Atom wm_move_resize_atom;
@@ -224,20 +223,15 @@ struct _decor_frame {
     int		    max_titlebar_height;
     decor_shadow_t *border_shadow_active;
     decor_shadow_t *border_shadow_inactive;
-    decor_shadow_t *border_no_shadow;
     decor_shadow_t *max_border_shadow_active;
     decor_shadow_t *max_border_shadow_inactive;
-    decor_shadow_t *max_border_no_shadow;
     decor_context_t window_context_active;
     decor_context_t window_context_inactive;
-    decor_context_t window_context_no_shadow;
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
-    decor_context_t max_window_context_no_shadow;
     PangoFontDescription *titlebar_font;
     PangoContext	 *pango_context;
     GtkWidget	         *style_window_rgba;
-    GtkWidget		 *style_window_rgb;
     gint		 text_height;
     gchar		 *type;
 
@@ -255,10 +249,6 @@ typedef struct _decor {
     Pixmap            x11Pixmap;
     cairo_surface_t   *surface;
     cairo_surface_t   *buffer_surface;
-    GdkWindow	      *frame_window;
-    GtkWidget         *decor_window;
-    GtkWidget	      *decor_event_box;
-    GtkWidget         *decor_image;
     cairo_t	      *cr;
     decor_layout_t    border_layout;
     decor_context_t   *context;
@@ -322,7 +312,6 @@ extern GtkWidget  *switcher_label;
 extern decor_t    *switcher_window;
 
 extern XRenderPictFormat *xformat_rgba;
-extern XRenderPictFormat *xformat_rgb;
 
 /* frames.c */
 
@@ -440,8 +429,7 @@ window_closed (WnckScreen *screen,
 
 void
 add_frame_window (WnckWindow *win,
-		  Window     frame,
-		  Bool	     mode);
+                  Window     frame);
 
 void
 remove_frame_window (WnckWindow *win);
@@ -518,9 +506,6 @@ rounded_rectangle (cairo_t *cr,
 
 GdkWindow *
 create_gdk_window (Window xframe);
-
-XRenderPictFormat *
-get_format_for_surface (decor_t *d, cairo_surface_t *surface);
 
 cairo_surface_t *
 create_surface (int	 w,
@@ -654,25 +639,6 @@ void
 bottom_right_event (WnckWindow *win,
 		    decor_event *gtkwd_event,
 		    decor_event_type gtkwd_type);
-
-void
-frame_window_realized (GtkWidget *widget,
-		       gpointer  data);
-
-void
-frame_handle_button_press (GtkWidget      *widget,
-			   GdkEventButton *event,
-			   gpointer       user_data);
-
-void
-frame_handle_button_release (GtkWidget      *widget,
-			     GdkEventButton *event,
-			     gpointer       user_data);
-
-void
-frame_handle_motion (GtkWidget      *widget,
-		     GdkEventMotion *event,
-		     gpointer       user_data);
 
 GdkFilterReturn
 selection_event_filter_func (GdkXEvent *gdkxevent,

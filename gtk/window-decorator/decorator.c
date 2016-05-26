@@ -241,24 +241,15 @@ update_event_windows (WnckWindow *win)
 		gwd_theme_get_event_window_position (gwd_theme, d, i, j, width, height,
 		                                     &x, &y, &w, &h);
 
-	    /* Reparenting mode - create boxes which we monitor motionnotify on */
-	    if (d->frame_window)
-	    {
-		BoxPtr box = &d->event_windows[i][j].pos;
-		box->x1  = x;
-		box->x2 = x + w;
-		box->y1 = y;
-		box->y2 = y + h;
-	    }
 	    /* Pixmap mode with window geometry - create small event windows */
-	    else if (!d->frame_window && w != 0 && h != 0)
+	    if (w != 0 && h != 0)
 	    {
 		XMapWindow (xdisplay, d->event_windows[i][j].window);
 		XMoveResizeWindow (xdisplay, d->event_windows[i][j].window,
 				   x, y, w, h);
 	    }
 	    /* No parent and no geometry - unmap all event windows */
-	    else if (!d->frame_window)
+	    else
 	    {
 		XUnmapWindow (xdisplay, d->event_windows[i][j].window);
 	    }
@@ -285,43 +276,23 @@ update_event_windows (WnckWindow *win)
 	    WNCK_WINDOW_ACTION_UNSTICK
 	};
 
-	/* Reparenting mode - if a box was set and we no longer need it reset its geometry */
-	if (d->frame_window &&
-	    button_actions[i] && !(actions & button_actions[i]))
-	{
-	    memset (&d->button_windows[i].pos, 0, sizeof (Box));
-	}
 	/* Pixmap mode - if a box was set and we no longer need it unmap its window */
-	else if (!d->frame_window &&
-		 button_actions[i] && !(actions & button_actions[i]))
+	if (button_actions[i] && !(actions & button_actions[i]))
 	{
 	    XUnmapWindow (xdisplay, d->button_windows[i].window);
 	    continue;
 	}
 
-	/* Reparenting mode - if there is a button position for this
-	 * button then set the geometry */
-	if (d->frame_window &&
-	    gwd_theme_get_button_position (gwd_theme, d, i, width, height,
-	                                   &x, &y, &w, &h))
-	{
-	    BoxPtr box = &d->button_windows[i].pos;
-	    box->x1 = x;
-	    box->y1 = y;
-	    box->x2 = x + w;
-	    box->y2 = y + h;
-	}
 	/* Pixmap mode - if there is a button position for this button then map the window
 	 * and resize it to this position */
-	else if (!d->frame_window &&
-		 gwd_theme_get_button_position (gwd_theme, d, i, width, height,
-		                                &x, &y, &w, &h))
+	if (gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+	                                   &x, &y, &w, &h))
 	{
 	    Window x11_win = d->button_windows[i].window;
 	    XMapWindow (xdisplay, x11_win);
 	    XMoveResizeWindow (xdisplay, x11_win, x, y, w, h);
 	}
-	else if (!d->frame_window)
+	else
 	{
 	    XUnmapWindow (xdisplay, d->button_windows[i].window);
 	}
@@ -497,13 +468,9 @@ update_window_decoration_icon (WnckWindow *win)
 
 	g_object_ref (G_OBJECT (d->icon_pixbuf));
 
-	/* 32 bit pixmap on pixmap mode, 24 for reparenting */
-	if (d->frame_window)
-	    d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                               d->frame->style_window_rgb);
-	else
-	    d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                               d->frame->style_window_rgba);
+        d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
+                                                   d->frame->style_window_rgba);
+
 	cr = cairo_create (d->icon_surface);
 	d->icon = cairo_pattern_create_for_surface (cairo_get_target (cr));
 	cairo_destroy (cr);
@@ -514,7 +481,6 @@ update_window_decoration_icon (WnckWindow *win)
  * request_update_window_decoration_size
  * Description: asks the rendering process to allow a size update
  * for pixmap synchronization */
-
 
 gboolean
 request_update_window_decoration_size (WnckWindow *win)
@@ -588,12 +554,7 @@ update_window_decoration_size (WnckWindow *win)
 
     gdk_error_trap_push ();
 
-    /* Get the correct depth for the frame window in reparenting mode, otherwise
-     * enforce 32 */
-    if (d->frame_window)
-	surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgb);
-    else
-	surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
+    surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
 
     gdk_flush ();
 
@@ -607,10 +568,7 @@ update_window_decoration_size (WnckWindow *win)
 
     gdk_error_trap_push ();
 
-    if (d->frame_window)
-	buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgb);
-    else
-	buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
+    buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
 
     gdk_flush ();
 
@@ -624,7 +582,7 @@ update_window_decoration_size (WnckWindow *win)
     }
 
     /* Create XRender context */
-    format = get_format_for_surface (d, buffer_surface);
+    format = xformat_rgba;
     picture = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (buffer_surface),
 				    format, 0, NULL);
 
@@ -1439,10 +1397,8 @@ create_bare_frame (const gchar *type)
     frame->win_extents = _shadow_extents;
     frame->window_context_active = _shadow_context;
     frame->window_context_inactive = _shadow_context;
-    frame->window_context_no_shadow = _shadow_context;
     frame->max_window_context_active = _shadow_context;
     frame->max_window_context_inactive = _shadow_context;
-    frame->max_window_context_no_shadow = _shadow_context;
     frame->update_shadow = bare_frame_update_shadow;
 
     return frame;
@@ -1465,18 +1421,6 @@ create_normal_frame (const gchar *type)
         0, 0, 0, 0
     };
 
-    decor_context_t _window_context_no_shadow = {
-        { 0, 0, 0, 0 },
-        6, 6, 4, 6,
-        0, 0, 0, 0
-    };
-
-    decor_context_t _max_window_context_no_shadow = {
-        { 0, 0, 0, 0 },
-        6, 6, 4, 6,
-        0, 0, 0, 0
-    };
-
     decor_extents_t _win_extents         = { 6, 6, 6, 6 };
     decor_extents_t _max_win_extents     = { 6, 6, 4, 6 };
 
@@ -1485,10 +1429,8 @@ create_normal_frame (const gchar *type)
     frame->update_shadow = decor_frame_update_shadow;
     frame->window_context_active = _window_context;
     frame->window_context_inactive = _window_context;
-    frame->window_context_no_shadow = _window_context_no_shadow;
     frame->max_window_context_active = _max_window_context;
     frame->max_window_context_inactive = _max_window_context;
-    frame->max_window_context_no_shadow = _max_window_context_no_shadow;
 
     return frame;
 }
