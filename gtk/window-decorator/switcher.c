@@ -393,7 +393,6 @@ update_switcher_window (Window     popup,
     Window	      root_return;
     WnckWindow        *selected_win;
     Display           *xdisplay;
-    XRenderPictFormat *format;
 
     if (!d)
 	d = switcher_window_opened (popup, selected);
@@ -517,9 +516,8 @@ update_switcher_window (Window     popup,
     d->buffer_surface = buffer_surface;
     d->cr             = cairo_create (surface);
 
-    format = xformat_rgba;
     d->picture = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (buffer_surface),
-				       format, 0, NULL);
+                                       xformat_rgba, 0, NULL);
 
     d->width  = width;
     d->height = height;

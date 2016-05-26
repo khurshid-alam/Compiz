@@ -468,8 +468,8 @@ update_window_decoration_icon (WnckWindow *win)
 
 	g_object_ref (G_OBJECT (d->icon_pixbuf));
 
-        d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-                                                   d->frame->style_window_rgba);
+	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
+	                                           d->frame->style_window_rgba);
 
 	cr = cairo_create (d->icon_surface);
 	d->icon = cairo_pattern_create_for_surface (cairo_get_target (cr));
@@ -540,7 +540,6 @@ update_window_decoration_size (WnckWindow *win)
     cairo_surface_t   *surface, *buffer_surface = NULL;
     Picture           picture;
     Display           *xdisplay;
-    XRenderPictFormat *format;
 
     if (win == NULL)
 	return FALSE;
@@ -582,9 +581,8 @@ update_window_decoration_size (WnckWindow *win)
     }
 
     /* Create XRender context */
-    format = xformat_rgba;
     picture = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (buffer_surface),
-				    format, 0, NULL);
+                                    xformat_rgba, 0, NULL);
 
     /* Destroy the old pixmaps and pictures */
     if (d->surface)

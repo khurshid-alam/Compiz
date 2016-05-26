@@ -293,19 +293,6 @@ add_frame_window (WnckWindow *win,
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
-    /* If we have already done this, there is no need to do it again, except
-     * if the property changed.
-     *
-     * The reason this check is here is because sometimes the PropertyNotify X
-     * event can come a bit after the property on the window is actually set
-     * which might result in this function being called twice - once by
-     * wnck through window_opened and once through our X event handler
-     * event_filter_func
-     */
-
-    if (d->created)
-	return;
-
     d->active = wnck_window_is_active (win);
     d->win = win;
     d->frame = gwd_get_decor_frame (get_frame_type (win));
