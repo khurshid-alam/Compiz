@@ -196,8 +196,6 @@ namespace testing_values
     const gint BLUR_TYPE_NONE_INT_VALUE = BLUR_TYPE_NONE;
     const gboolean USE_METACITY_THEME_VALUE  = TRUE;
     const std::string METACITY_THEME_VALUE ("metacity_theme");
-    const gboolean NO_USE_METACITY_THEME_VALUE  = FALSE;
-    const std::string NO_METACITY_THEME_VALUE ("");
     const gdouble ACTIVE_OPACITY_VALUE = 0.9;
     const gdouble INACTIVE_OPACITY_VALUE = 0.8;
     const gboolean ACTIVE_SHADE_OPACITY_VALUE = !METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -315,6 +313,7 @@ class GWDMockSettingsNotifiedGMock
         }
 
         static void updateMetacityThemeCb (GWDSettings                  *settings,
+                                           const gchar                  *metacity_theme,
                                            GWDMockSettingsNotifiedGMock *gmock)
         {
             gmock->updateMetacityTheme ();
@@ -593,9 +592,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
-                                                      testing_values::NO_USE_METACITY_THEME_VALUE,
-                                                      testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
+    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE, NULL), IsTrue ());
 
     AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
     GValue &metacityThemeGValue = metacityThemeValue;
@@ -604,8 +601,7 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 			   "metacity-theme",
 			   &metacityThemeGValue);
 
-    EXPECT_THAT (&metacityThemeGValue, GValueMatch <std::string> (testing_values::NO_METACITY_THEME_VALUE,
-								  g_value_get_string));
+    EXPECT_THAT (&metacityThemeGValue, GValueMatch <const gchar *> (NULL, g_value_get_string));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedIsDefault)

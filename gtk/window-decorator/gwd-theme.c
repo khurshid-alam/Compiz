@@ -217,20 +217,35 @@ gwd_theme_init (GWDTheme *theme)
 {
 }
 
+/**
+ * gwd_theme_new:
+ * @type: a #GWDThemeType
+ * @settings: a #GWDSettings
+ *
+ * Creates a new #GWDTheme. If requested @type can not be created then a
+ * #GWDThemeCairo will be created as fallback. Thus this function will always
+ * return valid theme.
+ *
+ * Returns: (transfer full): a newly created #GWDTheme
+ */
 GWDTheme *
 gwd_theme_new (GWDThemeType  type,
                GWDSettings  *settings)
 {
-    GType object_type;
-
-    object_type = GWD_TYPE_THEME_CAIRO;
-
 #ifdef USE_METACITY
-    if (type == GWD_THEME_TYPE_METACITY)
-        object_type = GWD_TYPE_THEME_METACITY;
+    if (type == GWD_THEME_TYPE_METACITY) {
+        GWDTheme *theme = gwd_theme_metacity_new (settings);
+
+        /* gwd_theme_metacity_new may return NULL if meta_theme_load fails
+         * to load Metacity theme. In such case we must fallback to Cairo
+         * theme.
+         */
+        if (theme != NULL)
+            return theme;
+    }
 #endif
 
-    return g_object_new (object_type,
+    return g_object_new (GWD_TYPE_THEME_CAIRO,
                          "settings", settings,
                          NULL);
 }
