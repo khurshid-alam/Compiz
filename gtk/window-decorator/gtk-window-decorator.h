@@ -25,6 +25,7 @@
 
 #ifndef _GTK_WINDOW_DECORATOR_H
 #define _GTK_WINDOW_DECORATOR_H
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -41,21 +42,11 @@
 #include <gdk/gdkx.h>
 #include <gdk/gdk.h>
 
-#ifdef USE_DBUS_GLIB
-#define DBUS_API_SUBJECT_TO_CHANGE
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#endif
-
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 
 #include <cairo.h>
 #include <cairo-xlib.h>
-
-#if CAIRO_VERSION < CAIRO_VERSION_ENCODE(1, 1, 0)
-#define CAIRO_EXTEND_PAD CAIRO_EXTEND_NONE
-#endif
 
 #include <pango/pango-context.h>
 #include <pango/pangocairo.h>
