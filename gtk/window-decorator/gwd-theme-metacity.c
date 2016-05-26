@@ -39,7 +39,7 @@ struct _GWDThemeMetacity
 
     MetaTheme        *theme;
 
-    gulong            button_layout_changed_id;
+    gulong            button_layout_id;
     MetaButtonLayout  button_layout;
 };
 
@@ -900,7 +900,7 @@ setup_button_layout (GWDThemeMetacity *metacity)
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
     const gchar *button_layout = gwd_settings_get_metacity_button_layout (settings);
 
-    metacity->button_layout_changed_id =
+    metacity->button_layout_id =
         g_signal_connect (settings, "update-metacity-button-layout",
                           G_CALLBACK (update_metacity_button_layout_cb), metacity);
 
@@ -925,11 +925,11 @@ gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-    if (metacity->button_layout_changed_id != 0) {
+    if (metacity->button_layout_id != 0) {
         GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
 
-        g_signal_handler_disconnect (settings, metacity->button_layout_changed_id);
-        metacity->button_layout_changed_id = 0;
+        g_signal_handler_disconnect (settings, metacity->button_layout_id);
+        metacity->button_layout_id = 0;
     }
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);

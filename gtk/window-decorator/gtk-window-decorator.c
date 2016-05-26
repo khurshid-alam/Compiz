@@ -152,9 +152,8 @@ update_metacity_theme_cb (GWDSettings *settings,
                           const gchar *metacity_theme,
                           gpointer     user_data)
 {
-    GWDThemeType type;
+    GWDThemeType type = GWD_THEME_TYPE_CAIRO;
 
-    type = GWD_THEME_TYPE_CAIRO;
     if (metacity_theme != NULL)
         type = GWD_THEME_TYPE_METACITY;
 
