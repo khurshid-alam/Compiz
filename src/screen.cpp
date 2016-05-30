@@ -4565,7 +4565,13 @@ CompScreenImpl::vpSize () const
 int
 cps::DesktopWindowCount::desktopWindowCount ()
 {
-    return count;
+    return countAll;
+}
+
+int
+cps::DesktopWindowCount::opaqueDesktopWindowCount ()
+{
+    return countOpaque;
 }
 
 unsigned int
@@ -4879,19 +4885,32 @@ CompScreenImpl::incrementPendingDestroys()
 }
 
 cps::DesktopWindowCount::DesktopWindowCount() :
-count(0)
+countAll(0), countOpaque(0)
 {
 }
 
 void
 cps::DesktopWindowCount::incrementDesktopWindowCount()
 {
-    count++;
+    countAll++;
 }
+
+void
+cps::DesktopWindowCount::incrementOpaqueDesktopWindowCount()
+{
+    countOpaque++;
+}
+
 void
 cps::DesktopWindowCount::decrementDesktopWindowCount()
 {
-    count--;
+    countAll--;
+}
+
+void
+cps::DesktopWindowCount::decrementOpaqueDesktopWindowCount()
+{
+    countOpaque--;
 }
 
 cps::MapNum::MapNum() :
@@ -5451,7 +5470,8 @@ PrivateScreen::PrivateScreen (CompScreen *screen, cps::WindowManager& windowMana
     edgeWindow (None),
     edgeDelayTimer (),
     xdndWindow (None),
-    windowManager(windowManager)
+    windowManager(windowManager),
+    nextKeyPressIsRepeated_(false)
 {
     for (int i = 0; i < SCREEN_EDGE_NUM; i++)
     {

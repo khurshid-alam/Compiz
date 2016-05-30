@@ -921,6 +921,8 @@ ExpoScreen::paintWall (const GLScreenPaintAttrib &attrib,
     /* translate expo to center */
     sTransform.translate (vpSize.x () * sx * -0.5 + offsetInWorldCoordX,
 			  vpSize.y () * sy *  0.5 - offsetInWorldCoordY, 0.0f);
+
+    worldScaleFactorY -= (float)optionGetYBottomOffset () / (float)output->height ();
     sTransform.scale (worldScaleFactorX, worldScaleFactorY, 1.0f);
 
 
@@ -1503,7 +1505,7 @@ ExpoWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	    float yS = 1.0 + ((o->height () / (float) window->height ()) - 1.0f) * sigmoidProgress (eScreen->expoCam);
 	    float xS = 1.0 + ((o->width () / (float) window->width ()) - 1.0f) * sigmoidProgress (eScreen->expoCam);
 	    wTransform.translate (window->x () + window->width (),
-				  window->y () + window->height (),
+				  window->y () + window->height () + eScreen->optionGetYBottomOffset (),
 				  0.0f);
 	    wTransform.scale (xS, yS, 1.0f);
 	    wTransform.translate (-(window->x () + window->width ()),

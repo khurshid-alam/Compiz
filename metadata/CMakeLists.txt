@@ -40,16 +40,14 @@ add_custom_target (core-xml-file ALL
     DEPENDS ${_core_xml_file}
 )
 
-if (USE_GSETTINGS)
-    set (_core_gschema_path ${CMAKE_BINARY_DIR}/generated/glib-2.0/schemas/org.compiz.core.gschema.xml)
-    compiz_gsettings_schema (
-	compiz
-	${_core_xml_file}
-	${_core_gschema_path}
-	${datadir}/glib-2.0/schemas
-    )
-    add_custom_target (core-settings-schema ALL
-	DEPENDS ${_core_gschema_path}
-	        core-xml-file
-    )
-endif ()
+set (_core_gschema_path ${CMAKE_BINARY_DIR}/generated/glib-2.0/schemas/org.compiz.core.gschema.xml)
+compiz_gsettings_schema (
+    compiz
+    ${_core_xml_file}
+    ${_core_gschema_path}
+    ${datadir}/glib-2.0/schemas
+)
+add_custom_target (core-settings-schema ALL
+    DEPENDS ${_core_gschema_path}
+            core-xml-file
+)

@@ -131,6 +131,7 @@ class FrameProvider
 	virtual ~FrameProvider () {}
 
 	virtual GLuint getCurrentFrame () = 0;
+	virtual void useCurrentFrame () = 0;
 	virtual void endFrame () = 0;
 
 	virtual bool providesPersistence () = 0;
@@ -268,6 +269,8 @@ class PrivateGLScreen :
 	std::vector<XToGLSync*>::size_type currentSyncNum;
 	XToGLSync *currentSync;
 	std::vector<XToGLSync*>::size_type warmupSyncs;
+
+	bool driverHasBrokenFBOMipmapImplementation;
 };
 
 class PrivateGLWindow :

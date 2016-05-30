@@ -210,6 +210,12 @@ GLWindow::release ()
 	priv->needsRebind = true;
 }
 
+void
+GLWindowInterface::glTransformationComplete (const GLMatrix   &matrix,
+					     const CompRegion &region,
+					     unsigned int     mask)
+    WRAPABLE_DEF (glTransformationComplete, matrix, region, mask)
+
 bool
 GLWindowInterface::glPaint (const GLWindowPaintAttrib &attrib,
 			    const GLMatrix            &transform,

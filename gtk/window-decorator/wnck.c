@@ -24,6 +24,13 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-settings.h"
+
+static void
+draw_window_decoration (decor_t *decor)
+{
+    gwd_theme_draw_window_decoration (gwd_theme, decor);
+}
 
 const gchar *
 get_frame_type (WnckWindow *win)
@@ -169,7 +176,7 @@ update_frames_border_extents (gpointer key,
 {
     decor_frame_t *frame = (decor_frame_t *) value;
 
-    (*theme_update_border_extents) (frame);
+    gwd_theme_update_border_extents (gwd_theme, frame);
 }
 
 void
@@ -183,8 +190,8 @@ decorations_changed (WnckScreen *screen)
     gdkdisplay = gdk_display_get_default ();
     gdkscreen  = gdk_display_get_default_screen (gdkdisplay);
 
-    const gchar *titlebar_font = NULL;
-    g_object_get (settings, "titlebar-font", &titlebar_font, NULL);
+    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
 
     gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
 
@@ -207,16 +214,8 @@ decorations_changed (WnckScreen *screen)
     {
 	decor_t *d = g_object_get_data (G_OBJECT (windows->data), "decor");
 
-	if (d->decorated)
-	{
-
-#ifdef USE_METACITY
-	    if (d->draw == draw_window_decoration ||
-		d->draw == meta_draw_window_decoration)
-		d->draw = theme_draw_window_decoration;
-#endif
-
-	}
+        if (d->decorated)
+            d->draw = draw_window_decoration;
 
 	update_window_decoration (WNCK_WINDOW (windows->data));
 	windows = windows->next;
@@ -813,7 +812,7 @@ window_opened (WnckScreen *screen,
 					    &d->client_width,
 					    &d->client_height);
 
-    d->draw = theme_draw_window_decoration;
+    d->draw = draw_window_decoration;
 
     d->created = FALSE;
     d->surface = NULL;

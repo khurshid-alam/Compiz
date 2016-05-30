@@ -21,7 +21,7 @@
 #ifndef GWD_SETTINGS_XPROPERTY_STORAGE_H
 #define GWD_SETTINGS_XPROPERTY_STORAGE_H
 
-#include <glib-object.h>
+#include "gwd-settings.h"
 
 G_BEGIN_DECLS
 
@@ -30,7 +30,7 @@ G_DECLARE_FINAL_TYPE (GWDSettingsXPropertyStorage, gwd_settings_xproperty_storag
                       GWD, SETTINGS_XPROPERTY_STORAGE, GObject)
 
 GWDSettingsXPropertyStorage *
-gwd_settings_xproperty_storage_new        (GWDSettingsWritable         *writable);
+gwd_settings_xproperty_storage_new        (GWDSettings                 *settings);
 
 gboolean
 gwd_settings_xproperty_storage_update_all (GWDSettingsXPropertyStorage *storage);

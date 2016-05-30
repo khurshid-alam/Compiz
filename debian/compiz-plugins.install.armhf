@@ -2,6 +2,8 @@ usr/lib/*/compiz/*addhelper.*
 usr/share/compiz/*addhelper.*
 usr/lib/*/compiz/*annotate.*
 usr/share/compiz/*annotate.*
+usr/lib/*/compiz/*animationsim.*
+usr/share/compiz/*animationsim.*
 usr/lib/*/compiz/*clone.*
 usr/share/compiz/*clone.*
 usr/lib/*/compiz/*crashhandler.*
@@ -67,8 +69,6 @@ usr/share/compiz/*showmouse.*
 usr/share/compiz/showmouse
 usr/lib/*/compiz/*showrepaint.*
 usr/share/compiz/*showrepaint.*
-usr/lib/*/compiz/*simple-animations.*
-usr/share/compiz/*simple-animations
 usr/lib/*/compiz/*splash.*
 usr/share/compiz/*splash.*
 usr/share/compiz/splash

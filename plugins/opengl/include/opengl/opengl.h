@@ -59,7 +59,7 @@
 #include <opengl/programcache.h>
 #include <opengl/shadercache.h>
 
-#define COMPIZ_OPENGL_ABI 7
+#define COMPIZ_OPENGL_ABI 8
 
 /*
  * Some plugins check for #ifdef USE_MODERN_COMPIZ_GL. Support it for now, but
@@ -851,6 +851,8 @@ class GLScreen :
 
 	bool glInitContext (XVisualInfo *);
 
+	bool driverHasBrokenFBOMipmaps () const;
+
 	WRAPABLE_HND (0, GLScreenInterface, bool, glPaintOutput,
 		      const GLScreenPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, CompOutput *, unsigned int);
@@ -957,12 +959,20 @@ class GLWindowInterface :
 				    unsigned int		max = MAXSHORT);
 	virtual void glDrawTexture (GLTexture *texture, const GLMatrix &,
 	                            const GLWindowPaintAttrib &, unsigned int);
+
+        /**
+         * Hookable function to notify transformation was complete, plugins
+         * should use the results of transformation from glPaint here
+         */
+        virtual void glTransformationComplete (const GLMatrix   &matrix,
+                                               const CompRegion &region,
+                                               unsigned int     mask);
 };
 
 extern template class PluginClassHandler<GLWindow, CompWindow, COMPIZ_OPENGL_ABI>;
 
 class GLWindow :
-    public WrapableHandler<GLWindowInterface, 4>,
+    public WrapableHandler<GLWindowInterface, 5>,
     public PluginClassHandler<GLWindow, CompWindow, COMPIZ_OPENGL_ABI>
 {
     public:
@@ -1047,6 +1057,8 @@ class GLWindow :
 	WRAPABLE_HND (3, GLWindowInterface, void, glDrawTexture,
 		      GLTexture *texture, const GLMatrix &,
 	              const GLWindowPaintAttrib &, unsigned int);
+	WRAPABLE_HND (4, GLWindowInterface, void, glTransformationComplete,
+		      const GLMatrix &, const CompRegion &, unsigned int);
 
 	friend class GLScreen;
 	friend class PrivateGLScreen;

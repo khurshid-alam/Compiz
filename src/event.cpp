@@ -855,7 +855,7 @@ PrivateScreen::handleActionEvent (XEvent *event)
 
     if (o.empty ())
     {
-	o.resize (8);
+	o.resize (9);
 	o[0].setName ("event_window", CompOption::TypeInt);
 	o[1].setName ("window", CompOption::TypeInt);
 	o[2].setName ("modifiers", CompOption::TypeInt);
@@ -867,6 +867,7 @@ PrivateScreen::handleActionEvent (XEvent *event)
     {
 	o[6].reset ();
 	o[7].reset ();
+	o[8].reset ();
     }
 
     switch (event->type) {
@@ -936,9 +937,13 @@ PrivateScreen::handleActionEvent (XEvent *event)
 
 	o[6].setName ("keycode", CompOption::TypeInt);
 	o[7].setName ("time", CompOption::TypeInt);
+	o[8].setName ("is_repeated", CompOption::TypeBool);
 
 	o[6].value ().set ((int) event->xkey.keycode);
 	o[7].value ().set ((int) event->xkey.time);
+
+	o[8].value ().set (nextKeyPressIsRepeated_);
+	nextKeyPressIsRepeated_ = false;
 
 	eventManager.resetPossibleTap();
 	foreach (CompPlugin *p, CompPlugin::getPlugins ())
@@ -965,6 +970,19 @@ PrivateScreen::handleActionEvent (XEvent *event)
 	o[7].value ().set ((int) event->xkey.time);
 
 	bool handled = false;
+
+	nextKeyPressIsRepeated_ = false;
+	if (XEventsQueued (dpy, QueuedAfterReading))
+	{
+	    XEvent nev;
+	    XPeekEvent (dpy, &nev);
+
+	    if (nev.type == KeyPress && nev.xkey.time == event->xkey.time &&
+		nev.xkey.keycode == event->xkey.keycode)
+	    {
+		nextKeyPressIsRepeated_ = true;
+	    }
+	}
 
 	foreach (CompPlugin *p, CompPlugin::getPlugins ())
 	{
@@ -1679,9 +1697,17 @@ CompScreenImpl::_handleEvent (XEvent *event)
 		    if (w->isViewable ())
 		    {
 			if (w->type () == CompWindowTypeDesktopMask)
-			    decrementDesktopWindowCount();
+			{
+			    decrementDesktopWindowCount ();
+			    if (!w->alpha ())
+			        decrementOpaqueDesktopWindowCount ();
+			}
 			else if (type == CompWindowTypeDesktopMask)
-			    incrementDesktopWindowCount();
+			{
+			    incrementDesktopWindowCount ();
+			    if (!w->alpha ())
+			        incrementOpaqueDesktopWindowCount ();
+			}
 		    }
 
 		    w->wmType () = type;

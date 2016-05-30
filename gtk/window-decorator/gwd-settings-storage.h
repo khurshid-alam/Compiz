@@ -17,21 +17,21 @@
  *
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#ifndef _GWD_CAIRO_WINDOW_DECORATION_UTIL_H
-#define _GWD_CAIRO_WINDOW_DECORATION_UTIL_H
 
-#include <glib.h>
-#include <decoration.h>
+#ifndef GWD_SETTINGS_STORAGE_H
+#define GWD_SETTINGS_STORAGE_H
+
+#include "gwd-settings.h"
 
 G_BEGIN_DECLS
 
-const decor_extents_t * gwd_cairo_window_decoration_get_default_max_win_extents ();
-const decor_extents_t * gwd_cairo_window_decoration_get_default_win_extents ();
+#define GWD_TYPE_SETTINGS_STORAGE gwd_settings_storage_get_type ()
+G_DECLARE_FINAL_TYPE (GWDSettingsStorage, gwd_settings_storage,
+                      GWD, SETTINGS_STORAGE, GObject)
 
-void
-gwd_cairo_window_decoration_get_extents (decor_extents_t *win_extents,
-					 decor_extents_t *max_win_extents);
+GWDSettingsStorage *
+gwd_settings_storage_new (GWDSettings *settings);
 
-G_END_DECLS;
+G_END_DECLS
 
 #endif

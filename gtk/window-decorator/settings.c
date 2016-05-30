@@ -20,55 +20,19 @@
  */
 
 #include "gtk-window-decorator.h"
-#include "gwd-settings-writable-interface.h"
-#include "gwd-settings-storage-interface.h"
-
-#ifdef USE_GSETTINGS
-#include "gwd-settings-storage-gsettings.h"
-#endif
-
+#include "gwd-settings-storage.h"
 #include "gwd-settings-xproperty-storage.h"
 
 GWDSettingsStorage *storage = NULL;
 GWDSettingsXPropertyStorage *xprop_storage = NULL;
 
-gboolean
-init_settings (GWDSettingsWritable *writable,
-	       WnckScreen	    *screen)
+void
+init_settings (GWDSettings *settings)
 {
-#ifdef USE_GSETTINGS
-#define STORAGE_USED
-    GSettings *compiz = gwd_get_org_compiz_gwd_settings ();
-    GSettings *metacity = gwd_get_org_gnome_metacity_settings ();
-    GSettings *gnome  = gwd_get_org_gnome_desktop_wm_preferences_settings ();
-    GSettings *marco = gwd_get_org_mate_marco_general_settings ();
+    storage = gwd_settings_storage_new (settings);
+    xprop_storage = gwd_settings_xproperty_storage_new (settings);
 
-    storage = gwd_settings_storage_gsettings_new (gnome, metacity, marco, compiz, writable);
-
-    gwd_connect_org_compiz_gwd_settings (compiz, storage);
-    gwd_connect_org_gnome_metacity_settings (metacity, storage);
-    gwd_connect_org_gnome_desktop_wm_preferences_settings (gnome, storage);
-    gwd_connect_org_mate_marco_general_settings (marco, storage);
-#endif
-
-    xprop_storage = gwd_settings_xproperty_storage_new (writable);
-
-#ifdef STORAGE_USED
-    gwd_settings_storage_update_metacity_theme (storage);
-    gwd_settings_storage_update_opacity (storage);
-    gwd_settings_storage_update_button_layout (storage);
-    gwd_settings_storage_update_font (storage);
-    gwd_settings_storage_update_titlebar_actions (storage);
-    gwd_settings_storage_update_blur (storage);
-    gwd_settings_storage_update_use_tooltips (storage);
     gwd_process_decor_shadow_property_update ();
-#else
-    storage = NULL;
-#endif
-
-#undef STORAGE_USED
-
-    return TRUE;
 }
 
 void

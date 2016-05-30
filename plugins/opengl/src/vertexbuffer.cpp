@@ -240,6 +240,11 @@ void GLVertexBuffer::addTexCoords (GLuint texture,
 	data.push_back (texcoords[i]);
 }
 
+GLuint GLVertexBuffer::countTextures () const
+{
+    return priv->nTextures;
+}
+
 void GLVertexBuffer::addUniform (const char *name, GLfloat value)
 {
     // we're casting to double here to make our template va_arg happy
