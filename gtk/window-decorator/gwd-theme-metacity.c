@@ -1414,18 +1414,17 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     return TRUE;
 }
 
-static gfloat
-gwd_theme_metacity_get_title_scale (GWDTheme      *theme,
-                                    decor_frame_t *frame)
+static void
+gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
+                                              decor_frame_t        *frame,
+                                              PangoFontDescription *titlebar_font)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameType type = meta_frame_type_from_string (frame->type);
-    MetaFrameFlags flags = 0xc33; /* FIXME */ 
+    MetaFrameFlags flags = 0xc33; /* FIXME */
+    MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
-    if (type == META_FRAME_TYPE_LAST)
-        return 1.0f;
-
-    return meta_theme_get_title_scale (metacity->theme, type, flags);
+    meta_frame_style_apply_scale (style, titlebar_font);
 }
 
 static void
@@ -1442,7 +1441,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
-    theme_class->get_title_scale = gwd_theme_metacity_get_title_scale;
+    theme_class->update_titlebar_font_size = gwd_theme_metacity_update_titlebar_font_size;
 }
 
 static void
