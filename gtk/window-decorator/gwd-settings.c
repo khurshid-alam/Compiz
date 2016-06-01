@@ -303,7 +303,7 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
     properties[PROP_METACITY_THEME_NAME] =
         g_param_spec_string ("metacity-theme-name",
                              "Metacity Theme Name",
-                             "Metacity Theme NAME",
+                             "Metacity Theme Name",
                              METACITY_THEME_DEFAULT,
                              G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
 
