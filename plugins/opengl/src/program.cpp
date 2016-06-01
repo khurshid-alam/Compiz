@@ -69,7 +69,7 @@ void printProgramInfoLog(GLuint program)
     }
 }
 
-static bool compileShader (GLuint *shader, GLenum type, CompString &source)
+static bool compileShader (GLuint *shader, GLenum type, const CompString &source)
 {
     const GLchar *data;
     GLint         status;
@@ -84,7 +84,7 @@ static bool compileShader (GLuint *shader, GLenum type, CompString &source)
     return (status == GL_TRUE);
 }
 
-GLProgram::GLProgram (CompString &vertexShader, CompString &fragmentShader) :
+GLProgram::GLProgram (const CompString &vertexShader, const CompString &fragmentShader) :
     priv (new PrivateProgram ())
 {
     GLuint vertex, fragment;

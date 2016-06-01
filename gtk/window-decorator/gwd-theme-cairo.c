@@ -27,7 +27,6 @@
 
 #include "config.h"
 #include "gtk-window-decorator.h"
-#include "gwd-cairo-window-decoration-util.h"
 #include "gwd-theme-cairo.h"
 
 #define STROKE_ALPHA 0.6f
@@ -710,10 +709,13 @@ static void
 gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
                                        decor_frame_t *frame)
 {
+    decor_extents_t win_extents = { 6, 6, 10, 6 };
+    decor_extents_t max_win_extents = { 6, 6, 4, 6 };
+
     frame = gwd_decor_frame_ref (frame);
 
-    gwd_cairo_window_decoration_get_extents (&frame->win_extents,
-                                             &frame->max_win_extents);
+    frame->win_extents = win_extents;
+    frame->max_win_extents = max_win_extents;
 
     frame->titlebar_height = frame->max_titlebar_height =
         (frame->text_height < 17) ? 17 : frame->text_height;

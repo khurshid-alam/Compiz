@@ -24,6 +24,7 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-settings.h"
 
 static void
 draw_window_decoration (decor_t *decor)
@@ -190,8 +191,7 @@ decorations_changed (WnckScreen *screen)
     gdkscreen  = gdk_display_get_default_screen (gdkdisplay);
 
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font = NULL;
-    g_object_get (settings, "titlebar-font", &titlebar_font, NULL);
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
 
     gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
 

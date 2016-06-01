@@ -44,130 +44,21 @@
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 
-#include "decoration.h"
-
-using ::testing::TestWithParam;
 using ::testing::Eq;
-using ::testing::Return;
-using ::testing::InvokeWithoutArgs;
-using ::testing::IgnoreResult;
-using ::testing::MatcherInterface;
-using ::testing::MakeMatcher;
-using ::testing::MatchResultListener;
-using ::testing::Matcher;
 using ::testing::Action;
-using ::testing::ActionInterface;
-using ::testing::MakeAction;
-using ::testing::IsNull;
 using ::testing::Values;
 using ::testing::_;
 using ::testing::StrictMock;
-using ::testing::InSequence;
 
-template <class ValueCType>
-class GValueCmp
+MATCHER_P(IsShadowsEqual, element, "")
 {
-    public:
-
-	typedef ValueCType (*GetFunc) (const GValue *value);
-
-	bool compare (const ValueCType &val,
-		      GValue           *value,
-		      GetFunc	       get)
-	{
-	    const ValueCType &valForValue = (*get) (value);
-	    return valForValue == val;
-	}
-};
-
-template <>
-class GValueCmp <decor_shadow_options_t>
-{
-    public:
-
-	typedef gpointer (*GetFunc) (const GValue *value);
-
-	bool compare (const decor_shadow_options_t &val,
-		      GValue			   *value,
-		      GetFunc			   get)
-	{
-	    gpointer shadowOptionsPtr = (*get) (value);
-	    const decor_shadow_options_t &shadowOptions = *(reinterpret_cast <decor_shadow_options_t *> (shadowOptionsPtr));
-	    if (decor_shadow_options_cmp (&val, &shadowOptions))
-		return true;
-	    else
-		return false;
-	}
-};
-
-template <>
-class GValueCmp <std::string>
-{
-    public:
-
-	typedef const gchar * (*GetFunc) (const GValue *value);
-
-	bool compare (const std::string &val,
-		      GValue	        *value,
-		      GetFunc		get)
-	{
-	    const gchar *valueForValue = (*get) (value);
-	    const std::string valueForValueStr (valueForValue);\
-
-	    return val == valueForValueStr;
-	}
-};
-
-namespace
-{
-    std::ostream &
-    operator<< (std::ostream &os, const decor_shadow_options_t &options)
-    {
-	os << " radius: " << options.shadow_radius <<
-	      " opacity: " << options.shadow_opacity <<
-	      " offset: (" << options.shadow_offset_x << ", " << options.shadow_offset_y << ")" <<
-	      " color: r: " << options.shadow_color[0] <<
-	      " g: " << options.shadow_color[1] <<
-	      " b: " << options.shadow_color[2];
-
-	return os;
-    }
+    return decor_shadow_options_cmp (&arg, &element);
 }
 
-template <class ValueCType>
-class GObjectPropertyMatcher :
-    public ::testing::MatcherInterface <GValue *>
+MATCHER_P(IsStringsEqual, element, "")
 {
-    public:
-
-	GObjectPropertyMatcher (const ValueCType			&value,
-				typename GValueCmp<ValueCType>::GetFunc	func) :
-	    mValue (value),
-	    mGetFunc (func)
-	{
-	}
-	virtual ~GObjectPropertyMatcher () {}
-
-	virtual bool MatchAndExplain (GValue *value, MatchResultListener *listener) const
-	{
-	    return GValueCmp <ValueCType> ().compare (mValue, value, mGetFunc);
-	}
-
-	virtual void DescribeTo (std::ostream *os) const
-	{
-	    *os << "value contains " << mValue;
-	}
-
-	virtual void DescribeNegationTo (std::ostream *os) const
-	{
-	    *os << "value does not contain " << mValue;
-	}
-
-    private:
-
-	const ValueCType &mValue;
-	typename GValueCmp<ValueCType>::GetFunc mGetFunc;
-};
+    return g_strcmp0 (arg, element) == 0;
+}
 
 namespace testing_values
 {
@@ -215,14 +106,6 @@ namespace testing_values
     const std::string MOUSE_WHEEL_ACTION_SHADE ("shade");
 }
 
-template <class ValueCType>
-inline Matcher<GValue *>
-GValueMatch (const ValueCType &value,
-	     typename GValueCmp<ValueCType>::GetFunc	func)
-{
-    return MakeMatcher (new GObjectPropertyMatcher <ValueCType> (value, func));
-}
-
 class GWDSettingsTestCommon :
     public ::testing::Test
 {
@@ -246,35 +129,6 @@ namespace
     {
 	g_object_unref (G_OBJECT (settings));
     }
-
-    class AutoUnsetGValue
-    {
-	public:
-
-	    AutoUnsetGValue (GType type)
-	    {
-		/* This is effectively G_VALUE_INIT, we can't use that here
-		 * because this is not a C++11 project */
-		mValue.g_type = 0;
-		mValue.data[0].v_int = 0;
-		mValue.data[1].v_int = 0;
-		g_value_init (&mValue, type);
-	    }
-
-	    ~AutoUnsetGValue ()
-	    {
-		g_value_unset (&mValue);
-	    }
-
-	    operator GValue & ()
-	    {
-		return mValue;
-	    }
-
-	private:
-
-	    GValue mValue;
-    };
 }
 
 class GWDMockSettingsNotifiedGMock
@@ -337,7 +191,7 @@ class GWDSettingsTest :
         {
             GWDSettingsTestCommon::SetUp ();
 
-            mSettings.reset (gwd_settings_new (-1, NULL), boost::bind (gwd_settings_unref, _1));
+            mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, NULL), boost::bind (gwd_settings_unref, _1));
             mGMockNotified.reset (new StrictMock <GWDMockSettingsNotifiedGMock> (mSettings));
 
             ExpectAllNotificationsOnce ();
@@ -407,8 +261,11 @@ TEST_F(GWDSettingsTest, TestFreezeUpdatesNoUpdatesThawUpdatesAllUpdatesNoDupes)
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
 {
+    decor_shadow_options_t activeShadow;
+    decor_shadow_options_t inactiveShadow;
+
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_shadow_property_changed (mSettings.get (),
+    EXPECT_TRUE (gwd_settings_shadow_property_changed (mSettings.get (),
                                                        testing_values::ACTIVE_SHADOW_OPACITY_VALUE,
                                                        testing_values::ACTIVE_SHADOW_RADIUS_VALUE,
                                                        testing_values::ACTIVE_SHADOW_OFFSET_X_VALUE,
@@ -418,23 +275,7 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
                                                        testing_values::INACTIVE_SHADOW_RADIUS_VALUE,
                                                        testing_values::INACTIVE_SHADOW_OFFSET_X_VALUE,
                                                        testing_values::INACTIVE_SHADOW_OFFSET_Y_VALUE,
-                                                       testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()), IsTrue ());
-
-    AutoUnsetGValue activeShadowValue (G_TYPE_POINTER);
-    AutoUnsetGValue inactiveShadowValue (G_TYPE_POINTER);
-
-    GValue &activeShadowGValue = activeShadowValue;
-    GValue &inactiveShadowGValue = inactiveShadowValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "active-shadow",
-			   &activeShadowGValue);
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "inactive-shadow",
-			   &inactiveShadowGValue);
-
-    decor_shadow_options_t activeShadow;
+                                                       testing_values::INACTIVE_SHADOW_COLOR_STR_VALUE.c_str ()));
 
     activeShadow.shadow_opacity = testing_values::ACTIVE_SHADOW_OPACITY_VALUE;
     activeShadow.shadow_radius = testing_values::ACTIVE_SHADOW_RADIUS_VALUE;
@@ -444,8 +285,6 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
     activeShadow.shadow_color[1] = testing_values::ACTIVE_SHADOW_COLOR_VALUE[1];
     activeShadow.shadow_color[2] = testing_values::ACTIVE_SHADOW_COLOR_VALUE[2];
 
-    decor_shadow_options_t inactiveShadow;
-
     inactiveShadow.shadow_opacity = testing_values::INACTIVE_SHADOW_OPACITY_VALUE;
     inactiveShadow.shadow_radius = testing_values::INACTIVE_SHADOW_RADIUS_VALUE;
     inactiveShadow.shadow_offset_x = testing_values::INACTIVE_SHADOW_OFFSET_X_INT_VALUE;
@@ -454,98 +293,71 @@ TEST_F(GWDSettingsTest, TestShadowPropertyChanged)
     inactiveShadow.shadow_color[1] = testing_values::INACTIVE_SHADOW_COLOR_VALUE[1];
     inactiveShadow.shadow_color[2] = testing_values::INACTIVE_SHADOW_COLOR_VALUE[2];
 
-    EXPECT_THAT (&activeShadowGValue, GValueMatch <decor_shadow_options_t> (activeShadow,
-									    g_value_get_pointer));
-    EXPECT_THAT (&inactiveShadowGValue, GValueMatch <decor_shadow_options_t> (inactiveShadow,
-									      g_value_get_pointer));
+    EXPECT_THAT (gwd_settings_get_active_shadow (mSettings.get ()),
+                 IsShadowsEqual (activeShadow));
+
+    EXPECT_THAT (gwd_settings_get_inactive_shadow (mSettings.get ()),
+                 IsShadowsEqual (inactiveShadow));
 }
 
 TEST_F(GWDSettingsTest, TestShadowPropertyChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_shadow_property_changed (mSettings.get (),
-								ACTIVE_SHADOW_RADIUS_DEFAULT,
-								ACTIVE_SHADOW_OPACITY_DEFAULT,
-								ACTIVE_SHADOW_OFFSET_X_DEFAULT,
-								ACTIVE_SHADOW_OFFSET_Y_DEFAULT,
-								ACTIVE_SHADOW_COLOR_DEFAULT,
-								INACTIVE_SHADOW_RADIUS_DEFAULT,
-								INACTIVE_SHADOW_OPACITY_DEFAULT,
-								INACTIVE_SHADOW_OFFSET_X_DEFAULT,
-								INACTIVE_SHADOW_OFFSET_Y_DEFAULT,
-								INACTIVE_SHADOW_COLOR_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_shadow_property_changed (mSettings.get (),
+                                                        ACTIVE_SHADOW_RADIUS_DEFAULT,
+                                                        ACTIVE_SHADOW_OPACITY_DEFAULT,
+                                                        ACTIVE_SHADOW_OFFSET_X_DEFAULT,
+                                                        ACTIVE_SHADOW_OFFSET_Y_DEFAULT,
+                                                        ACTIVE_SHADOW_COLOR_DEFAULT,
+                                                        INACTIVE_SHADOW_RADIUS_DEFAULT,
+                                                        INACTIVE_SHADOW_OPACITY_DEFAULT,
+                                                        INACTIVE_SHADOW_OFFSET_X_DEFAULT,
+                                                        INACTIVE_SHADOW_OFFSET_Y_DEFAULT,
+                                                        INACTIVE_SHADOW_COLOR_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
-                                                    testing_values::USE_TOOLTIPS_VALUE), IsTrue ());
+    EXPECT_TRUE (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                    testing_values::USE_TOOLTIPS_VALUE));
 
-    AutoUnsetGValue useTooltipsValue (G_TYPE_BOOLEAN);
-    GValue &useTooltipsGValue = useTooltipsValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "use-tooltips",
-			   &useTooltipsGValue);
-
-    EXPECT_THAT (&useTooltipsGValue, GValueMatch <gboolean> (testing_values::USE_TOOLTIPS_VALUE,
-							     g_value_get_boolean));
+    EXPECT_THAT (gwd_settings_get_use_tooltips (mSettings.get ()),
+                 Eq (testing_values::USE_TOOLTIPS_VALUE));
 }
 
 TEST_F(GWDSettingsTest, TestUseTooltipsChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_use_tooltips_changed (mSettings.get (),
-                                                    USE_TOOLTIPS_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_use_tooltips_changed (mSettings.get (),
+                                                     USE_TOOLTIPS_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedTitlebar)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
-                                            testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()), IsTrue ());
+    EXPECT_TRUE (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_TITLEBAR_VALUE.c_str ()));
 
-    AutoUnsetGValue blurValue (G_TYPE_INT);
-    GValue &blurGValue = blurValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
-			   &blurGValue);
-
-    EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_TITLEBAR_INT_VALUE,
-						  g_value_get_int));
+    EXPECT_THAT (gwd_settings_get_blur_type (mSettings.get ()),
+                 Eq (testing_values::BLUR_TYPE_TITLEBAR_INT_VALUE));
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedAll)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
-                                            testing_values::BLUR_TYPE_ALL_VALUE.c_str ()), IsTrue ());
+    EXPECT_TRUE (gwd_settings_blur_changed (mSettings.get (),
+                                            testing_values::BLUR_TYPE_ALL_VALUE.c_str ()));
 
-    AutoUnsetGValue blurValue (G_TYPE_INT);
-    GValue &blurGValue = blurValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
-			   &blurGValue);
-
-    EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_ALL_INT_VALUE,
-						  g_value_get_int));
+    EXPECT_THAT (gwd_settings_get_blur_type (mSettings.get ()),
+                 Eq (testing_values::BLUR_TYPE_ALL_INT_VALUE));
 }
 
 TEST_F(GWDSettingsTest, TestBlurChangedNone)
 {
-    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
-                                            testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
+    EXPECT_FALSE (gwd_settings_blur_changed (mSettings.get (),
+                                             testing_values::BLUR_TYPE_NONE_VALUE.c_str ()));
 
-    AutoUnsetGValue blurValue (G_TYPE_INT);
-    GValue &blurGValue = blurValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
-			   &blurGValue);
-
-    EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_NONE_INT_VALUE,
-						  g_value_get_int));
+    EXPECT_THAT (gwd_settings_get_blur_type (mSettings.get ()),
+                 Eq (testing_values::BLUR_TYPE_NONE_INT_VALUE));
 }
 
 TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
@@ -553,205 +365,140 @@ TEST_F(GWDSettingsTest, TestBlurSetCommandLine)
     gint blurType = testing_values::BLUR_TYPE_ALL_INT_VALUE;
 
     mSettings.reset (gwd_settings_new (blurType, NULL),
-		     boost::bind (gwd_settings_unref, _1));
+                     boost::bind (gwd_settings_unref, _1));
 
-    EXPECT_THAT (gwd_settings_blur_changed (mSettings.get (),
-                                            testing_values::BLUR_TYPE_NONE_VALUE.c_str ()), IsFalse ());
+    EXPECT_FALSE (gwd_settings_blur_changed (mSettings.get (),
+                                             testing_values::BLUR_TYPE_NONE_VALUE.c_str ()));
 
-    AutoUnsetGValue blurValue (G_TYPE_INT);
-    GValue &blurGValue = blurValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "blur",
-			   &blurGValue);
-
-    EXPECT_THAT (&blurGValue, GValueMatch <gint> (testing_values::BLUR_TYPE_ALL_INT_VALUE,
-						  g_value_get_int));
+    EXPECT_THAT (gwd_settings_get_blur_type (mSettings.get ()), Eq (blurType));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
+    EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                       testing_values::USE_METACITY_THEME_VALUE,
-                                                      testing_values::METACITY_THEME_VALUE.c_str ()), IsTrue ());
+                                                      testing_values::METACITY_THEME_VALUE.c_str ()));
 
-    AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
-    GValue &metacityThemeGValue = metacityThemeValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-theme",
-			   &metacityThemeGValue);
-
-    EXPECT_THAT (&metacityThemeGValue, GValueMatch <std::string> (testing_values::METACITY_THEME_VALUE,
-								  g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+                 IsStringsEqual (testing_values::METACITY_THEME_VALUE.c_str ()));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
 {
+    const gchar *metacityTheme = NULL;
+
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE, NULL), IsTrue ());
+    EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE,
+                                                      METACITY_THEME_DEFAULT));
 
-    AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
-    GValue &metacityThemeGValue = metacityThemeValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-theme",
-			   &metacityThemeGValue);
-
-    EXPECT_THAT (&metacityThemeGValue, GValueMatch <const gchar *> (NULL, g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+                 IsStringsEqual (metacityTheme));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
-                                                      testing_values::USE_METACITY_THEME_VALUE,
-                                                      METACITY_THEME_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
+                                                       testing_values::USE_METACITY_THEME_VALUE,
+                                                       METACITY_THEME_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 {
     const gchar *metacityTheme = "Ambiance";
 
-    mSettings.reset (gwd_settings_new (-1, metacityTheme),
-		     boost::bind (gwd_settings_unref, _1));
+    mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, metacityTheme),
+                     boost::bind (gwd_settings_unref, _1));
 
-    EXPECT_THAT (gwd_settings_metacity_theme_changed (mSettings.get (),
-                                                      testing_values::USE_METACITY_THEME_VALUE,
-                                                      testing_values::METACITY_THEME_VALUE.c_str ()), IsFalse ());
+    EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
+                                                       testing_values::USE_METACITY_THEME_VALUE,
+                                                       testing_values::METACITY_THEME_VALUE.c_str ()));
 
-    AutoUnsetGValue metacityThemeValue (G_TYPE_STRING);
-    GValue &metacityThemeGValue = metacityThemeValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-theme",
-			   &metacityThemeGValue);
-
-    EXPECT_THAT (&metacityThemeGValue, GValueMatch <std::string> (std::string (metacityTheme),
-								  g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+                 IsStringsEqual (metacityTheme));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityOpacityChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_opacity_changed (mSettings.get (),
+    EXPECT_TRUE (gwd_settings_opacity_changed (mSettings.get (),
                                                testing_values::ACTIVE_OPACITY_VALUE,
                                                testing_values::INACTIVE_OPACITY_VALUE,
                                                testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-                                               testing_values::INACTIVE_SHADE_OPACITY_VALUE), IsTrue ());
+                                               testing_values::INACTIVE_SHADE_OPACITY_VALUE));
 
-    AutoUnsetGValue metacityInactiveOpacityValue (G_TYPE_DOUBLE);
-    AutoUnsetGValue metacityActiveOpacityValue (G_TYPE_DOUBLE);
-    AutoUnsetGValue metacityInactiveShadeOpacityValue (G_TYPE_BOOLEAN);
-    AutoUnsetGValue metacityActiveShadeOpacityValue (G_TYPE_BOOLEAN);
+    EXPECT_THAT (gwd_settings_get_metacity_inactive_opacity (mSettings.get ()),
+                 Eq (testing_values::INACTIVE_OPACITY_VALUE));
 
-    GValue &metacityInactiveOpacityGValue = metacityInactiveOpacityValue;
-    GValue &metacityActiveOpacityGValue = metacityActiveOpacityValue;
-    GValue &metacityInactiveShadeOpacityGValue = metacityInactiveShadeOpacityValue;
-    GValue &metacityActiveShadeOpacityGValue = metacityActiveShadeOpacityValue;
+    EXPECT_THAT (gwd_settings_get_metacity_active_opacity (mSettings.get ()),
+                 Eq (testing_values::ACTIVE_OPACITY_VALUE));
 
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-inactive-opacity",
-			   &metacityInactiveOpacityGValue);
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-active-opacity",
-			   &metacityActiveOpacityGValue);
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-inactive-shade-opacity",
-			   &metacityInactiveShadeOpacityGValue);
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-active-shade-opacity",
-			   &metacityActiveShadeOpacityGValue);
+    EXPECT_THAT (gwd_settings_get_metacity_inactive_shade_opacity (mSettings.get ()),
+                 Eq (testing_values::INACTIVE_SHADE_OPACITY_VALUE));
 
-    EXPECT_THAT (&metacityInactiveOpacityGValue, GValueMatch <gdouble> (testing_values::INACTIVE_OPACITY_VALUE,
-									g_value_get_double));
-    EXPECT_THAT (&metacityActiveOpacityGValue, GValueMatch <gdouble> (testing_values::ACTIVE_OPACITY_VALUE,
-									g_value_get_double));
-    EXPECT_THAT (&metacityInactiveShadeOpacityGValue, GValueMatch <gboolean> (testing_values::INACTIVE_SHADE_OPACITY_VALUE,
-									g_value_get_boolean));
-    EXPECT_THAT (&metacityActiveShadeOpacityGValue, GValueMatch <gboolean> (testing_values::ACTIVE_SHADE_OPACITY_VALUE,
-									g_value_get_boolean));
+    EXPECT_THAT (gwd_settings_get_metacity_active_shade_opacity (mSettings.get ()),
+                 Eq (testing_values::ACTIVE_SHADE_OPACITY_VALUE));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityOpacityChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_opacity_changed (mSettings.get (),
-                                               METACITY_ACTIVE_OPACITY_DEFAULT,
-                                               METACITY_INACTIVE_OPACITY_DEFAULT,
-                                               METACITY_ACTIVE_SHADE_OPACITY_DEFAULT,
-                                               METACITY_INACTIVE_SHADE_OPACITY_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_opacity_changed (mSettings.get (),
+                                                METACITY_ACTIVE_OPACITY_DEFAULT,
+                                                METACITY_INACTIVE_OPACITY_DEFAULT,
+                                                METACITY_ACTIVE_SHADE_OPACITY_DEFAULT,
+                                                METACITY_INACTIVE_SHADE_OPACITY_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_button_layout_changed (mSettings.get (),
-                                                     testing_values::BUTTON_LAYOUT_VALUE.c_str ()), IsTrue ());
+    EXPECT_TRUE (gwd_settings_button_layout_changed (mSettings.get (),
+                                                     testing_values::BUTTON_LAYOUT_VALUE.c_str ()));
 
-    AutoUnsetGValue buttonLayoutValue (G_TYPE_STRING);
-    GValue &buttonLayoutGValue = buttonLayoutValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "metacity-button-layout",
-			   &buttonLayoutGValue);
-
-    EXPECT_THAT (&buttonLayoutGValue, GValueMatch <std::string> (testing_values::BUTTON_LAYOUT_VALUE,
-								 g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_metacity_button_layout (mSettings.get ()),
+                 IsStringsEqual (testing_values::BUTTON_LAYOUT_VALUE.c_str ()));
 }
 
 TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_button_layout_changed (mSettings.get (),
-                                                     METACITY_BUTTON_LAYOUT_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_button_layout_changed (mSettings.get (),
+                                                      METACITY_BUTTON_LAYOUT_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
     EXPECT_CALL (*mGMockNotified, updateFrames ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
+    EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::NO_USE_SYSTEM_FONT_VALUE,
-                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
+                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()));
 
-    AutoUnsetGValue fontValue (G_TYPE_STRING);
-    GValue	    &fontGValue = fontValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "titlebar-font",
-			   &fontGValue);
-
-    EXPECT_THAT (&fontGValue, GValueMatch <std::string> (testing_values::TITLEBAR_FONT_VALUE.c_str (),
-							 g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_titlebar_font (mSettings.get ()),
+                 IsStringsEqual (testing_values::TITLEBAR_FONT_VALUE.c_str ()));
 }
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
+    const gchar *titlebarFont = NULL;
+
     EXPECT_CALL (*mGMockNotified, updateFrames ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
-    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
+    EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::USE_SYSTEM_FONT_VALUE,
-                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()), IsTrue ());
+                                            testing_values::TITLEBAR_FONT_VALUE.c_str ()));
 
-    AutoUnsetGValue fontValue (G_TYPE_STRING);
-    GValue	    &fontGValue = fontValue;
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "titlebar-font",
-			   &fontGValue);
-
-    EXPECT_THAT (&fontGValue, GValueMatch <const gchar *> (NULL,
-							   g_value_get_string));
+    EXPECT_THAT (gwd_settings_get_titlebar_font (mSettings.get ()),
+                 IsStringsEqual (titlebarFont));
 }
-
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChangedIsDefault)
 {
-    EXPECT_THAT (gwd_settings_font_changed (mSettings.get (),
-                                            testing_values::NO_USE_SYSTEM_FONT_VALUE,
-                                            TITLEBAR_FONT_DEFAULT), IsFalse ());
+    EXPECT_FALSE (gwd_settings_font_changed (mSettings.get (),
+                                             testing_values::NO_USE_SYSTEM_FONT_VALUE,
+                                             TITLEBAR_FONT_DEFAULT));
 }
 
 namespace
@@ -794,7 +541,7 @@ class GWDSettingsTestClickActions :
 	virtual void SetUp ()
 	{
 	    GWDSettingsTestCommon::SetUp ();
-	    mSettings.reset (gwd_settings_new (-1, NULL),
+	    mSettings.reset (gwd_settings_new (BLUR_TYPE_UNSET, NULL),
 			     boost::bind (gwd_settings_unref, _1));
 	}
 
@@ -811,40 +558,17 @@ TEST_P(GWDSettingsTestClickActions, TestClickActionsAndMouseActions)
                                            GetParam ().titlebarAction ().c_str (),
                                            GetParam ().mouseWheelAction ().c_str ());
 
-    AutoUnsetGValue doubleClickActionValue (G_TYPE_INT);
-    AutoUnsetGValue middleClickActionValue (G_TYPE_INT);
-    AutoUnsetGValue rightClickActionValue (G_TYPE_INT);
-    AutoUnsetGValue mouseWheelActionValue (G_TYPE_INT);
+    EXPECT_THAT (gwd_settings_get_titlebar_double_click_action (mSettings.get ()),
+                 Eq (GetParam ().titlebarActionId ()));
 
-    GValue &doubleClickActionGValue = doubleClickActionValue;
-    GValue &middleClickActionGValue = middleClickActionValue;
-    GValue &rightClickActionGValue = rightClickActionValue;
-    GValue &mouseWheelActionGValue = mouseWheelActionValue;
+    EXPECT_THAT (gwd_settings_get_titlebar_middle_click_action (mSettings.get ()),
+                 Eq (GetParam ().titlebarActionId ()));
 
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "titlebar-double-click-action",
-			   &doubleClickActionGValue);
+    EXPECT_THAT (gwd_settings_get_titlebar_right_click_action (mSettings.get ()),
+                 Eq (GetParam ().titlebarActionId ()));
 
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "titlebar-middle-click-action",
-			   &middleClickActionGValue);
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "titlebar-right-click-action",
-			   &rightClickActionGValue);
-
-    g_object_get_property (G_OBJECT (mSettings.get ()),
-			   "mouse-wheel-action",
-			   &mouseWheelActionGValue);
-
-    EXPECT_THAT (&doubleClickActionGValue, GValueMatch <gint> (GetParam ().titlebarActionId (),
-							      g_value_get_int));
-    EXPECT_THAT (&middleClickActionGValue, GValueMatch <gint> (GetParam ().titlebarActionId (),
-							      g_value_get_int));
-    EXPECT_THAT (&rightClickActionGValue, GValueMatch <gint> (GetParam ().titlebarActionId (),
-							     g_value_get_int));
-    EXPECT_THAT (&mouseWheelActionGValue, GValueMatch <gint> (GetParam ().mouseWheelActionId (),
-							     g_value_get_int));
+    EXPECT_THAT (gwd_settings_get_mouse_wheel_action (mSettings.get ()),
+                 Eq (GetParam ().mouseWheelActionId ()));
 }
 
 INSTANTIATE_TEST_CASE_P (MouseActions, GWDSettingsTestClickActions,

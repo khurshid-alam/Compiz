@@ -36,13 +36,11 @@ decor_update_blur_property (decor_t *d,
 			    int     right_offset)
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    gint blur_type = gwd_settings_get_blur_type (settings);
     Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     long    *data = NULL;
     int     size = 0;
-    gint    blur_type;
 
-    g_object_get (settings, "blur", &blur_type, NULL);
-    
     if (blur_type != BLUR_TYPE_ALL)
     {
 	bottom_region = NULL;

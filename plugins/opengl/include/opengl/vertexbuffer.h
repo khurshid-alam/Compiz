@@ -89,6 +89,7 @@ class GLVertexBuffer
 	void addTexCoords (GLuint texture,
 	                   GLuint nTexcoords,
 	                   const GLfloat *texcoords);
+	GLuint countTextures () const;
 
 	void addUniform (const char *name, GLfloat value);
 	void addUniform (const char *name, GLint value);

@@ -33,7 +33,13 @@
 			</option>
 			<option name="y_offset" type="int">
 				<_short>Y Offset</_short>
-				<_long>Vertical offset (in pixels).</_long>
+				<_long>Vertical offset from the top (in pixels).</_long>
+				<min>0</min>
+				<default>0</default>
+			</option>
+			<option name="y_bottom_offset" type="int">
+				<_short>Y Bottom Offset</_short>
+				<_long>Vertical offset from the bottom (in pixels).</_long>)
 				<min>0</min>
 				<default>0</default>
 			</option>

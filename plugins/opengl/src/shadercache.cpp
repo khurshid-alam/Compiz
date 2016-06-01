@@ -232,10 +232,11 @@ PrivateShaderCache::createFragmentShader (const GLShaderParameters &params)
     else if (params.color == GLShaderVariableVarying)
         ss << "vColor *";
 
-    for (int i = 0; i < params.numTextures; i++)
-        ss << " texture2D(texture" << i << ", vTexCoord" << i << ") *";
-
-    ss << " 1.0;\n";
+    /* Sample first texture only */
+    if (params.numTextures)
+        ss << " texture2D(texture0, vTexCoord0);\n";
+    else
+        ss << " 1.0;\n";
 
     if (params.saturation) {
 	ss << "vec3 desaturated = color.rgb * vec3 (0.30, 0.59, 0.11);\n" <<

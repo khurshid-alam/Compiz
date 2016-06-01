@@ -509,7 +509,7 @@ PrivateScaleScreen::layoutSlotsForArea (const CompRect& workArea,
     int nSlots  = 0;
 
     y      = optionGetYOffset() + workArea.y () + spacing;
-    height = (workArea.height () - optionGetYOffset() - (lines + 1) * spacing) / lines;
+    height = (workArea.height () - optionGetYOffset () - optionGetYBottomOffset () - (lines + 1) * spacing) / lines;
 
     for (int i = 0; i < lines; i++)
     {
@@ -1528,13 +1528,67 @@ PrivateScaleScreen::selectWindowAt (int  x,
 }
 
 void
+PrivateScaleScreen::moveFocusWindow (int distance)
+{
+    CompWindow *selected;
+    CompWindow *next;
+
+    next = NULL;
+    selected = screen->findWindow (selectedWindow ? selectedWindow : screen->activeWindow ());
+    auto scaledWindows = windows;
+
+    /* Sort windows to respect the natural grid view */
+    scaledWindows.sort ([] (ScaleWindow *sw1, ScaleWindow *sw2) {
+	if (!sw1->priv->slot)
+	    return !sw2->priv->slot;
+	if (!sw2->priv->slot)
+	    return true;
+
+	int cy1 = (sw1->priv->slot->y1 () + sw1->priv->slot->y2 ()) / 2;
+	int cy2 = (sw2->priv->slot->y1 () + sw2->priv->slot->y2 ()) / 2;
+
+	if (abs (cy1 - cy2) < std::max (sw1->priv->slot->height (), sw2->priv->slot->height ()) / 2)
+	{
+	    int cx1 = (sw1->priv->slot->x1 () + sw1->priv->slot->x2 ()) / 2;
+	    int cx2 = (sw2->priv->slot->x1 () + sw2->priv->slot->x2 ()) / 2;
+	    return cx1 < cx2;
+	}
+
+	return cy1 < cy2;
+    });
+
+    if (selected && !scaledWindows.empty())
+    {
+	SCALE_WINDOW (selected);
+	auto selected_it = std::find (scaledWindows.begin (), scaledWindows.end (), sw);
+
+	if (selected_it != scaledWindows.end ())
+	{
+	    std::advance (selected_it, distance);
+
+	    if (selected_it == scaledWindows.end ())
+	    {
+		if (distance > 0)
+		    selected_it = scaledWindows.begin ();
+		else if (distance < 0)
+		    selected_it = std::prev (scaledWindows.end ());
+	    }
+
+	    next = (*selected_it)->window;
+	}
+    }
+
+    moveFocusWindow (next);
+}
+
+void
 PrivateScaleScreen::moveFocusWindow (int dx,
 				     int dy)
 {
     CompWindow *active;
     CompWindow *focus = NULL;
 
-    active = screen->findWindow (screen->activeWindow ());
+    active = screen->findWindow (selectedWindow ? selectedWindow : screen->activeWindow ());
     if (active)
     {
 	SCALE_WINDOW (active);
@@ -1547,9 +1601,9 @@ PrivateScaleScreen::moveFocusWindow (int dx,
 	    cx = (sw->priv->slot->x1 () + sw->priv->slot->x2 ()) / 2;
 	    cy = (sw->priv->slot->y1 () + sw->priv->slot->y2 ()) / 2;
 
-	    foreach (CompWindow *w, screen->windows ())
+	    foreach (ScaleWindow *w, windows)
 	    {
-		slot = ScaleWindow::get (w)->priv->slot;
+		slot = w->priv->slot;
 		if (!slot)
 		    continue;
 
@@ -1566,23 +1620,29 @@ PrivateScaleScreen::moveFocusWindow (int dx,
 			continue;
 
 		    min   = d;
-		    focus = w;
+		    focus = w->window;
 		}
 	    }
 	}
     }
 
+    moveFocusWindow (focus);
+}
+
+void
+PrivateScaleScreen::moveFocusWindow (CompWindow *focus)
+{
     /* move focus to the last focused window if no slot window is currently
        focused */
     if (!focus)
     {
-	foreach (CompWindow *w, screen->windows ())
+	foreach (ScaleWindow *sw, windows)
 	{
-	    if (!ScaleWindow::get (w)->priv->slot)
+	    if (!sw->priv->slot)
 		continue;
 
-	    if (!focus || focus->activeNum () < w->activeNum ())
-		focus = w;
+	    if (!focus || focus->activeNum () < sw->window->activeNum ())
+		focus = sw->window;
 	}
     }
 
@@ -1719,14 +1779,23 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 	    {
 		if (grabIndex)
 		{
-		    if (event->xkey.keycode == leftKeyCode)
+		    KeySym keySym = XkbKeycodeToKeysym (event->xany.display,
+							event->xkey.keycode, 0, 0);
+		    if (keySym == XK_Left)
 			moveFocusWindow (-1, 0);
-		    else if (event->xkey.keycode == rightKeyCode)
+		    else if (keySym == XK_Right)
 			moveFocusWindow (1, 0);
-		    else if (event->xkey.keycode == upKeyCode)
+		    else if (keySym == XK_Up)
 			moveFocusWindow (0, -1);
-		    else if (event->xkey.keycode == downKeyCode)
+		    else if (keySym == XK_Down)
 			moveFocusWindow (0, 1);
+		    else if (keySym == XK_Tab)
+			moveFocusWindow (!(event->xkey.state & ShiftMask) ? 1 : -1);
+		    else if (keySym == XK_w && (event->xkey.state & ControlMask))
+		    {
+			if (CompWindow *selected = screen->findWindow (selectedWindow))
+			    selected->close (0);
+		    }
 		}
 	    }
 	    break;
@@ -1752,6 +1821,7 @@ PrivateScaleScreen::handleEvent (XEvent *event)
 		    CompRect  workArea (screen->currentOutputDev ().workArea ());
 		    workArea.setX (workArea.x() + optionGetXOffset ());
 		    workArea.setY (workArea.y() + optionGetYOffset ());
+		    workArea.setBottom (workArea.bottom () + optionGetYBottomOffset ());
 
 		    if (workArea.contains (pointer))
 		    {
@@ -1962,11 +2032,6 @@ PrivateScaleScreen::PrivateScaleScreen (CompScreen *s) :
     moreAdjust (false),
     nSlots (0)
 {
-    leftKeyCode  = XKeysymToKeycode (screen->dpy (), XStringToKeysym ("Left"));
-    rightKeyCode = XKeysymToKeycode (screen->dpy (), XStringToKeysym ("Right"));
-    upKeyCode    = XKeysymToKeycode (screen->dpy (), XStringToKeysym ("Up"));
-    downKeyCode  = XKeysymToKeycode (screen->dpy (), XStringToKeysym ("Down"));
-
     opacity = (OPAQUE * optionGetOpacity ()) / 100;
 
     hover.setCallback (boost::bind (&PrivateScaleScreen::hoverTimeout, this));

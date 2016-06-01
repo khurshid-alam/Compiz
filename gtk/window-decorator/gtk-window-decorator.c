@@ -152,9 +152,8 @@ update_metacity_theme_cb (GWDSettings *settings,
                           const gchar *metacity_theme,
                           gpointer     user_data)
 {
-    GWDThemeType type;
+    GWDThemeType type = GWD_THEME_TYPE_CAIRO;
 
-    type = GWD_THEME_TYPE_CAIRO;
     if (metacity_theme != NULL)
         type = GWD_THEME_TYPE_METACITY;
 
@@ -178,7 +177,7 @@ main (int argc, char *argv[])
     decor_frame_t *bare_p, *switcher_p;
 
     const char *option_meta_theme = NULL;
-    gint       option_blur_type = -1;
+    gint       option_blur_type = BLUR_TYPE_UNSET;
 
     program_name = argv[0];
 

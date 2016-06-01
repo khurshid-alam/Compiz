@@ -92,18 +92,4 @@ if (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)
 			   COVERAGE
 			   ${COMPIZ_TEST_GWD_SETTINGS_COVERAGE_TARGETS})
 
-    add_executable (compiz_test_gwd_cairo_decorations
-		    ${CMAKE_CURRENT_SOURCE_DIR}/test_gwd_cairo_decorations.cpp)
-
-    target_link_libraries (compiz_test_gwd_cairo_decorations
-			   gtk_window_decorator_cairo_window_decoration_util
-			   ${COMPIZ_TEST_GTK_WINDOW_DECORATOR_LIBRARIES}
-			   ${GTEST_BOTH_LIBRARIES}
-			   ${GMOCK_LIBRARY}
-		       	   ${GMOCK_MAIN_LIBRARY}
-			   decoration)
-
-    compiz_discover_tests (compiz_test_gwd_cairo_decorations COVERAGE
-			   gtk_window_decorator_cairo_window_decoration_util)
-
 endif (COMPIZ_TEST_GTK_WINDOW_DECORATOR_FOUND)

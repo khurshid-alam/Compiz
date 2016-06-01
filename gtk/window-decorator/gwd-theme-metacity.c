@@ -37,6 +37,7 @@ struct _GWDThemeMetacity
 
     MetaTheme        *theme;
 
+    gulong            button_layout_id;
     MetaButtonLayout  button_layout;
 };
 
@@ -701,9 +702,10 @@ setup_button_layout (GWDThemeMetacity *metacity)
 {
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
     const gchar *button_layout = gwd_settings_get_metacity_button_layout (settings);
- 
-    g_signal_connect (settings, "update-metacity-button-layout",
-                      G_CALLBACK (update_metacity_button_layout_cb), metacity);
+
+    metacity->button_layout_id =
+        g_signal_connect (settings, "update-metacity-button-layout",
+                          G_CALLBACK (update_metacity_button_layout_cb), metacity);
 
     update_metacity_button_layout_cb (settings, button_layout, metacity);
 }
@@ -728,6 +730,13 @@ gwd_theme_metacity_dispose (GObject *object)
 
     g_clear_object (&metacity->theme);
 
+    if (metacity->button_layout_id != 0) {
+        GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
+
+        g_signal_handler_disconnect (settings, metacity->button_layout_id);
+        metacity->button_layout_id = 0;
+    }
+
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
 
@@ -751,10 +760,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     Region bottom_region;
     Region left_region;
     Region right_region;
-    gdouble meta_active_opacity;
-    gdouble meta_inactive_opacity;
-    gboolean meta_active_shade_opacity;
-    gboolean meta_inactive_shade_opacity;
     double alpha;
     gboolean shade_alpha;
 
@@ -771,13 +776,13 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     left_region = NULL;
     right_region = NULL;
 
-    g_object_get (settings, "metacity-active-opacity", &meta_active_opacity, NULL);
-    g_object_get (settings, "metacity-inactive-opacity", &meta_inactive_opacity, NULL);
-    g_object_get (settings, "metacity-active-shade-opacity", &meta_active_shade_opacity, NULL);
-    g_object_get (settings, "metacity-inactive-shade-opacity", &meta_inactive_shade_opacity, NULL);
-
-    alpha = (decor->active) ? meta_active_opacity : meta_inactive_opacity;
-    shade_alpha = (decor->active) ? meta_active_shade_opacity : meta_inactive_shade_opacity;
+    if (decor->active) {
+        alpha = gwd_settings_get_metacity_active_opacity (settings);
+        shade_alpha = gwd_settings_get_metacity_active_shade_opacity (settings);
+    } else {
+        alpha = gwd_settings_get_metacity_inactive_opacity (settings);
+        shade_alpha = gwd_settings_get_metacity_inactive_shade_opacity (settings);
+    }
 
     if (decoration_alpha == 1.0)
         alpha = 1.0;
@@ -1317,8 +1322,32 @@ gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
 }
 
-gboolean
-gwd_theme_metacity_is_valid (GWDThemeMetacity *metacity)
+/**
+ * gwd_theme_metacity_new:
+ * @settings: a #GWDSettings
+ *
+ * Creates a new #GWDTheme. If meta_theme_load will fail to load Metacity
+ * theme then this function will return %NULL. In this case #GWDThemeCairo
+ * must be used as fallback.
+ *
+ * This function MUST be used only in gwd_theme_new!
+ *
+ * Returns: (transfer full) (nullable): a newly created #GWDTheme, or %NULL
+ */
+GWDTheme *
+gwd_theme_metacity_new (GWDSettings *settings)
 {
-    return metacity->theme != NULL;
+    GWDThemeMetacity *metacity;
+
+    metacity = g_object_new (GWD_TYPE_THEME_METACITY,
+                             "settings", settings,
+                             NULL);
+
+    /* We failed to load Metacity theme */
+    if (metacity->theme == NULL) {
+        g_object_unref (metacity);
+        return NULL;
+    }
+
+    return GWD_THEME (metacity);
 }

@@ -111,18 +111,16 @@ gwd_theme_real_get_shadow (GWDTheme               *theme,
                            gboolean                active)
 {
     GWDThemePrivate *priv;
-    decor_shadow_options_t *shadow;
+    decor_shadow_options_t shadow;
 
     priv = gwd_theme_get_instance_private (theme);
-    shadow = NULL;
 
     if (active)
-        g_object_get (priv->settings, "active-shadow", &shadow, NULL);
+        shadow = gwd_settings_get_active_shadow (priv->settings);
     else
-        g_object_get (priv->settings, "inactive-shadow", &shadow, NULL);
+        shadow = gwd_settings_get_inactive_shadow (priv->settings);
 
-    if (shadow)
-        memcpy (options, shadow, sizeof (decor_shadow_options_t));
+    memcpy (options, &shadow, sizeof (decor_shadow_options_t));
 }
 
 static void
@@ -217,22 +215,31 @@ gwd_theme_init (GWDTheme *theme)
 {
 }
 
+/**
+ * gwd_theme_new:
+ * @type: a #GWDThemeType
+ * @settings: a #GWDSettings
+ *
+ * Creates a new #GWDTheme. If requested @type can not be created then a
+ * #GWDThemeCairo will be created as fallback. Thus this function will always
+ * return valid theme.
+ *
+ * Returns: (transfer full): a newly created #GWDTheme
+ */
 GWDTheme *
 gwd_theme_new (GWDThemeType  type,
                GWDSettings  *settings)
 {
 #ifdef USE_METACITY
     if (type == GWD_THEME_TYPE_METACITY) {
-        GWDTheme *theme;
+        GWDTheme *theme = gwd_theme_metacity_new (settings);
 
-        theme = g_object_new (GWD_TYPE_THEME_METACITY,
-                              "settings", settings,
-                              NULL);
-
-        if (gwd_theme_metacity_is_valid (GWD_THEME_METACITY (theme)))
+        /* gwd_theme_metacity_new may return NULL if meta_theme_load fails
+         * to load Metacity theme. In such case we must fallback to Cairo
+         * theme.
+         */
+        if (theme != NULL)
             return theme;
-        else
-            g_object_unref (theme);
     }
 #endif
 

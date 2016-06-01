@@ -21,6 +21,7 @@
  */
 
 #include "gtk-window-decorator.h"
+#include "gwd-settings.h"
 
 typedef struct _decor_frame_type_info
 {
@@ -264,16 +265,14 @@ void
 decor_frame_refresh (decor_frame_t *frame)
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
     decor_shadow_options_t active_o, inactive_o;
     decor_shadow_info_t *info;
-    const gchar *titlebar_font = NULL;
 
     gwd_decor_frame_ref (frame);
 
     update_style (frame->style_window_rgba);
     update_style (frame->style_window_rgb);
-
-    g_object_get (settings, "titlebar-font", &titlebar_font, NULL);
 
     set_frame_scale (frame, titlebar_font);
 
