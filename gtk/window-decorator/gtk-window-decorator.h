@@ -493,9 +493,6 @@ rounded_rectangle (cairo_t *cr,
 
 /* gdk.c */
 
-GdkWindow *
-create_gdk_window (Window xframe);
-
 cairo_surface_t *
 create_surface (int	 w,
 	       int	 h,
