@@ -1422,7 +1422,12 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameType type = meta_frame_type_from_string (frame->type);
     MetaFrameFlags flags = 0xc33; /* FIXME */
-    MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
+    MetaFrameStyle *style;
+
+    if (type == META_FRAME_TYPE_LAST)
+        type = META_FRAME_TYPE_NORMAL;
+
+    style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
     meta_frame_style_apply_scale (style, titlebar_font);
 }
