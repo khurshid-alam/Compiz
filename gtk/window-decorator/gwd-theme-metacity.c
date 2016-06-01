@@ -647,7 +647,7 @@ decor_update_meta_window_property (decor_t        *d,
     {
 #ifndef HAVE_METACITY_3_20_0
         GdkScreen *screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-        MetaStyleInfo *style_info= meta_theme_create_style_info (screen, d->gtk_theme_variant);
+        MetaStyleInfo *style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
 #endif
         MetaFrameBorders borders;
 
@@ -937,7 +937,7 @@ setup_theme (GWDThemeMetacity *metacity)
 
     if (!meta_theme_load (metacity->theme, metacity_theme_name, &error)) {
         g_warning ("Failed to load metacity theme '%s': %s",
-                   metacity_theme, error->message);
+                   metacity_theme_name, error->message);
 
         g_error_free (error);
         g_clear_object (&metacity->theme);
@@ -1111,9 +1111,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cr = cairo_create (surface);
 
-#ifdef HAVE_METACITY_3_20_0
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-#else
+#ifndef HAVE_METACITY_3_20_0
     gdk_cairo_set_source_rgba (cr, &bg_rgba);
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
     cairo_paint (cr);
