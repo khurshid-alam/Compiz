@@ -34,7 +34,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <GL/glu.h>
 #include "private.h"
 
 static const unsigned short MIN_WINDOW_GRID_SIZE = 10;
@@ -1860,19 +1859,6 @@ PolygonAnim::updateBB (CompOutput &output)
     prepareTransform (output, wTransform, wTransform2);
 
     GLMatrix *screenProjection = gScreen->projectionMatrix ();
-    GLdouble dModel[16];
-    GLdouble dProjection[16];
-    for (int i = 0; i < 16; i++)
-    {
-	dProjection[i] = (*screenProjection)[i];
-    }
-    GLint viewport[4] =
-	{output.region ()->extents.x1,
-	 output.region ()->extents.y1,
-	 output.width (),
-	 output.height ()};
-    GLdouble px, py, pz;
-
     GLMatrix *modelViewTransform = &wTransform;
 
     GLMatrix skewMat;
@@ -1895,9 +1881,6 @@ PolygonAnim::updateBB (CompOutput &output)
 
 	// if modelViewTransform == wTransform2, then
 	// it changes for each polygon
-	const float *modelViewMatrix = modelViewTransform->getMatrix ();
-	for (int j = 0; j < 16; j++)
-	    dModel[j] = modelViewMatrix[j];
 
 	Point3d center = p->centerPos;
 	float radius = p->boundSphereRadius + 2;
@@ -1941,13 +1924,16 @@ static const unsigned short N_POINTS = 8;
 	Point3d *pnt = cubeCorners;
 	for (int j = 0; j < N_POINTS; j++, pnt++)
 	{
-	    if (!gluProject (pnt->x (), pnt->y (), pnt->z (),
-			     dModel, dProjection, viewport,
-			     &px, &py, &pz))
-		return;
+	    namespace com = compiz::opengl::matrix;
+	    CompPoint p (com::projectIntoViewport(*screenProjection,
+						  *modelViewTransform,
+						  output,
+						  GLVector (pnt->x (),
+							    pnt->y (),
+							    pnt->z ())));
 
-	    py = ::screen->height () - py;
-	    mAWindow->expandBBWithPoint (px + 0.5, py + 0.5);
+	    p.setY (::screen->height () - p.y ());
+	    mAWindow->expandBBWithPoint (p.x () + 0.5, p.y () + 0.5);
 	}
 #undef N_POINTS
     }
