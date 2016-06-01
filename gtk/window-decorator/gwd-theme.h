@@ -22,6 +22,7 @@
 
 #include <decoration.h>
 #include <glib-object.h>
+#include <pango/pango.h>
 
 G_BEGIN_DECLS
 
@@ -76,8 +77,9 @@ struct _GWDThemeClass
                                             gint                   *w,
                                             gint                   *h);
 
-    gfloat   (* get_title_scale)           (GWDTheme               *theme,
-                                            decor_frame_t          *frame);
+    void     (* update_titlebar_font_size) (GWDTheme               *theme,
+                                            decor_frame_t          *frame,
+                                            PangoFontDescription   *titlebar_font);
 };
 
 typedef enum
@@ -139,9 +141,10 @@ gwd_theme_get_button_position       (GWDTheme               *theme,
                                      gint                   *w,
                                      gint                   *h);
 
-gfloat
-gwd_theme_get_title_scale           (GWDTheme               *theme,
-                                     decor_frame_t          *frame);
+void
+gwd_theme_update_titlebar_font_size (GWDTheme               *theme,
+                                     decor_frame_t          *frame,
+                                     PangoFontDescription   *titlebar_font);
 
 G_END_DECLS
 

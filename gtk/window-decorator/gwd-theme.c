@@ -177,11 +177,11 @@ gwd_theme_real_get_button_position (GWDTheme *theme,
     return FALSE;
 }
 
-static gfloat
-gwd_theme_real_get_title_scale (GWDTheme      *theme,
-                                decor_frame_t *frame)
+static void
+gwd_theme_real_update_titlebar_font_size (GWDTheme             *theme,
+                                          decor_frame_t        *frame,
+                                          PangoFontDescription *titlebar_font)
 {
-    return 1.0;
 }
 
 static void
@@ -201,7 +201,7 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     theme_class->update_border_extents = gwd_theme_real_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_real_get_event_window_position;
     theme_class->get_button_position = gwd_theme_real_get_button_position;
-    theme_class->get_title_scale = gwd_theme_real_get_title_scale;
+    theme_class->update_titlebar_font_size = gwd_theme_real_update_titlebar_font_size;
 
     properties[PROP_SETTINGS] =
         g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
@@ -321,9 +321,11 @@ gwd_theme_get_button_position (GWDTheme *theme,
                                                              x, y, w, h);
 }
 
-gfloat
-gwd_theme_get_title_scale (GWDTheme      *theme,
-                           decor_frame_t *frame)
+void
+gwd_theme_update_titlebar_font_size (GWDTheme             *theme,
+                                     decor_frame_t        *frame,
+                                     PangoFontDescription *titlebar_font)
 {
-    return GWD_THEME_GET_CLASS (theme)->get_title_scale (theme, frame);
+    GWD_THEME_GET_CLASS (theme)->update_titlebar_font_size (theme, frame,
+                                                            titlebar_font);
 }
