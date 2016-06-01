@@ -71,7 +71,8 @@ struct _GWDSettings
     GObject                 parent;
 
     gint                    blur_type;
-    gchar                  *metacity_theme;
+    gchar                  *metacity_theme_name;
+    gint                    metacity_theme_type;
     guint                   cmdline_opts;
 
     decor_shadow_options_t  active_shadow;
@@ -97,7 +98,7 @@ enum
     PROP_0,
 
     PROP_BLUR_TYPE,
-    PROP_METACITY_THEME,
+    PROP_METACITY_THEME_NAME,
     PROP_CMDLINE_OPTIONS,
 
     LAST_PROP
@@ -134,8 +135,8 @@ update_frames (GWDSettings *settings)
 static void
 update_metacity_theme (GWDSettings *settings)
 {
-    g_signal_emit (settings, settings_signals[UPDATE_METACITY_THEME],
-                   0, settings->metacity_theme);
+    g_signal_emit (settings, settings_signals[UPDATE_METACITY_THEME], 0,
+                   settings->metacity_theme_type, settings->metacity_theme_name);
 }
 
 static void
@@ -245,7 +246,7 @@ gwd_settings_finalize (GObject *object)
 
     settings = GWD_SETTINGS (object);
 
-    g_clear_pointer (&settings->metacity_theme, g_free);
+    g_clear_pointer (&settings->metacity_theme_name, g_free);
     g_clear_pointer (&settings->metacity_button_layout, g_free);
     g_clear_pointer (&settings->titlebar_font, g_free);
 
@@ -271,9 +272,10 @@ gwd_settings_set_property (GObject      *object,
             settings->blur_type = g_value_get_int (value);
             break;
 
-        case PROP_METACITY_THEME:
-            g_free (settings->metacity_theme);
-            settings->metacity_theme = g_value_dup_string (value);
+        case PROP_METACITY_THEME_NAME:
+            g_free (settings->metacity_theme_name);
+            settings->metacity_theme_name = g_value_dup_string (value);
+            settings->metacity_theme_type = -1;
             break;
 
         default:
@@ -299,10 +301,10 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
                           BLUR_TYPE_NONE,
                           G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
 
-    properties[PROP_METACITY_THEME] =
-        g_param_spec_string ("metacity-theme",
-                             "Metacity Theme",
-                             "Metacity Theme Setting",
+    properties[PROP_METACITY_THEME_NAME] =
+        g_param_spec_string ("metacity-theme-name",
+                             "Metacity Theme Name",
+                             "Metacity Theme Name",
                              METACITY_THEME_DEFAULT,
                              G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
 
@@ -328,12 +330,14 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
     settings_signals[UPDATE_METACITY_THEME] =
         g_signal_new ("update-metacity-theme",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 2,
+                      G_TYPE_INT, G_TYPE_STRING);
 
     settings_signals[UPDATE_METACITY_BUTTON_LAYOUT] =
         g_signal_new ("update-metacity-button-layout",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_STRING);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 1,
+                      G_TYPE_STRING);
 }
 
 static void
@@ -355,7 +359,8 @@ gwd_settings_init (GWDSettings *settings)
     settings->inactive_shadow.shadow_color[1] = 0;
     settings->inactive_shadow.shadow_color[2] = 0;
     settings->blur_type = BLUR_TYPE_DEFAULT;
-    settings->metacity_theme = g_strdup (METACITY_THEME_DEFAULT);
+    settings->metacity_theme_name = g_strdup (METACITY_THEME_DEFAULT);
+    settings->metacity_theme_type = -1;
     settings->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
     settings->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
     settings->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -378,22 +383,24 @@ gwd_settings_init (GWDSettings *settings)
 }
 
 GWDSettings *
-gwd_settings_new (gint         blur,
-                  const gchar *metacity_theme)
+gwd_settings_new (gint         blur_type,
+                  const gchar *metacity_theme_name)
 {
-    guint cmdline_opts;
+    guint cmdline_opts = 0;
 
-    cmdline_opts = 0;
-
-    if (blur != BLUR_TYPE_UNSET)
+    if (blur_type != BLUR_TYPE_UNSET)
         cmdline_opts |= CMDLINE_BLUR;
+    else
+        blur_type = BLUR_TYPE_DEFAULT;
 
-    if (metacity_theme != NULL)
+    if (metacity_theme_name != NULL)
         cmdline_opts |= CMDLINE_THEME;
+    else
+        metacity_theme_name = METACITY_THEME_DEFAULT;
 
     return g_object_new (GWD_TYPE_SETTINGS,
-                         "blur-type", blur != BLUR_TYPE_UNSET ? blur : BLUR_TYPE_DEFAULT,
-                         "metacity-theme", metacity_theme ? metacity_theme : METACITY_THEME_DEFAULT,
+                         "blur-type", blur_type,
+                         "metacity-theme-name", metacity_theme_name,
                          "cmdline-options", cmdline_opts,
                          NULL);
 }
@@ -411,9 +418,15 @@ gwd_settings_get_metacity_button_layout (GWDSettings *settings)
 }
 
 const gchar *
-gwd_settings_get_metacity_theme (GWDSettings *settings)
+gwd_settings_get_metacity_theme_name (GWDSettings *settings)
 {
-    return settings->metacity_theme;
+    return settings->metacity_theme_name;
+}
+
+gint
+gwd_settings_get_metacity_theme_type (GWDSettings *settings)
+{
+    return settings->metacity_theme_type;
 }
 
 const gchar *
@@ -614,21 +627,25 @@ gwd_settings_blur_changed (GWDSettings *settings,
 gboolean
 gwd_settings_metacity_theme_changed (GWDSettings *settings,
                                      gboolean     use_metacity_theme,
-                                     const gchar *metacity_theme)
+                                     gint         metacity_theme_type,
+                                     const gchar *metacity_theme_name)
 {
     if (settings->cmdline_opts & CMDLINE_THEME)
         return FALSE;
 
     if (use_metacity_theme) {
-        if (g_strcmp0 (metacity_theme, settings->metacity_theme) == 0)
+        if (g_strcmp0 (metacity_theme_name, settings->metacity_theme_name) == 0 &&
+            metacity_theme_type == settings->metacity_theme_type)
             return FALSE;
 
-        g_free (settings->metacity_theme);
-        settings->metacity_theme = g_strdup (metacity_theme);
+        g_free (settings->metacity_theme_name);
+        settings->metacity_theme_name = g_strdup (metacity_theme_name);
     } else {
-        g_free (settings->metacity_theme);
-        settings->metacity_theme = NULL;
+        g_free (settings->metacity_theme_name);
+        settings->metacity_theme_name = NULL;
     }
+
+    settings->metacity_theme_type = metacity_theme_type;
 
     append_to_notify_funcs (settings, update_metacity_theme);
     append_to_notify_funcs (settings, update_decorations);

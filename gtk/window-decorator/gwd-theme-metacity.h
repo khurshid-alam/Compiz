@@ -20,8 +20,6 @@
 #ifndef GWD_THEME_METACITY_H
 #define GWD_THEME_METACITY_H
 
-#include <libmetacity/meta-theme.h>
-
 #include "gwd-settings.h"
 #include "gwd-theme.h"
 

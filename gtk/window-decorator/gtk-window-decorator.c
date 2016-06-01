@@ -147,12 +147,13 @@ update_frames_cb (GWDSettings *settings,
 
 static void
 update_metacity_theme_cb (GWDSettings *settings,
-                          const gchar *metacity_theme,
+                          gint         metacity_theme_type,
+                          const gchar *metacity_theme_name,
                           gpointer     user_data)
 {
     GWDThemeType type = GWD_THEME_TYPE_CAIRO;
 
-    if (metacity_theme != NULL)
+    if (metacity_theme_name != NULL)
         type = GWD_THEME_TYPE_METACITY;
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));

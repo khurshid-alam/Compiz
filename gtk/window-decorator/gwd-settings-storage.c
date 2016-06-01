@@ -29,7 +29,13 @@
 
 static const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
+
+#ifdef HAVE_METACITY_3_20_0
+static const gchar * ORG_GNOME_METACITY_THEME = "org.gnome.metacity.theme";
+#else
 static const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
+#endif
+
 static const gchar * ORG_MATE_MARCO_GENERAL = "org.mate.Marco.general";
 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
@@ -41,7 +47,12 @@ static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 static const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
 
-static const gchar * ORG_GNOME_METACITY_THEME = "name";
+#ifdef HAVE_METACITY_3_20_0
+static const gchar * ORG_GNOME_METACITY_THEME_NAME = "name";
+static const gchar * ORG_GNOME_METACITY_THEME_TYPE = "type";
+#else
+static const gchar * ORG_GNOME_METACITY_THEME = "theme";
+#endif
 
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
@@ -185,25 +196,34 @@ void
 update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
-    gchar *theme;
+    gint theme_type;
+    gchar *theme_name;
 
     if (!storage->gwd)
         return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
+    theme_type = -1;
 
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
-        theme = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
+        theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
     } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
-        theme = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
+#ifdef HAVE_METACITY_3_20_0
+        theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
+        theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+#else
+        theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
+#endif
     } else if (storage->desktop) {
-        theme = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
+        theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
     } else {
         return;
     }
 
-    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
-    g_free (theme);
+    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme,
+                                         theme_type, theme_name);
+
+    g_free (theme_name);
 }
 
 void
@@ -355,8 +375,14 @@ org_gnome_metacity_settings_changed (GSettings          *settings,
                                      const gchar        *key,
                                      GWDSettingsStorage *storage)
 {
+#ifdef HAVE_METACITY_3_20_0
+    if (strcmp (key, ORG_GNOME_METACITY_THEME_NAME) == 0 ||
+        strcmp (key, ORG_GNOME_METACITY_THEME_TYPE) == 0)
+        update_metacity_theme (storage);
+#else
     if (strcmp (key, ORG_GNOME_METACITY_THEME) == 0)
         update_metacity_theme (storage);
+#endif
 }
 
 static void
@@ -515,7 +541,12 @@ gwd_settings_storage_init (GWDSettingsStorage *storage)
         case GWD_DESKTOP_GNOME_FLASHBACK:
             storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
             storage->desktop = get_settings_no_abort (ORG_GNOME_DESKTOP_WM_PREFERENCES);
+
+#ifdef HAVE_METACITY_3_20_0
+            storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY_THEME);
+#else
             storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY);
+#endif
 
             storage->gtk_decoration_layout_id =
                 g_signal_connect (gtk_settings_get_default (), "notify::gtk-decoration-layout",
