@@ -2,8 +2,10 @@ usr/lib/*/compiz/*addhelper.*
 usr/share/compiz/*addhelper.*
 usr/lib/*/compiz/*annotate.*
 usr/share/compiz/*annotate.*
+usr/lib/*/compiz/*animationaddon.*
+usr/share/compiz/*animationaddon.*
 usr/lib/*/compiz/*animationjc.*
-usr/share/compiz/*animationjc
+usr/share/compiz/*animationjc.*
 usr/lib/*/compiz/*clone.*
 usr/share/compiz/*clone.*
 usr/lib/*/compiz/*crashhandler.*
