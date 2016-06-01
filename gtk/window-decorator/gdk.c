@@ -21,15 +21,6 @@
 
 #include "gtk-window-decorator.h"
 
-GdkWindow *
-create_gdk_window (Window xframe)
-{
-    GdkDisplay  *display = gdk_display_get_default ();
-    GdkWindow   *window  = gdk_x11_window_foreign_new_for_display (display, xframe);
-
-    return window;
-}
-
 cairo_surface_t *
 create_native_surface_and_wrap (int        w,
                                 int        h,

@@ -275,7 +275,6 @@ gwd_settings_set_property (GObject      *object,
         case PROP_METACITY_THEME_NAME:
             g_free (settings->metacity_theme_name);
             settings->metacity_theme_name = g_value_dup_string (value);
-            settings->metacity_theme_type = -1;
             break;
 
         default:
@@ -640,12 +639,12 @@ gwd_settings_metacity_theme_changed (GWDSettings *settings,
 
         g_free (settings->metacity_theme_name);
         settings->metacity_theme_name = g_strdup (metacity_theme_name);
+        settings->metacity_theme_type = metacity_theme_type;
     } else {
         g_free (settings->metacity_theme_name);
         settings->metacity_theme_name = NULL;
+        settings->metacity_theme_type = -1;
     }
-
-    settings->metacity_theme_type = metacity_theme_type;
 
     append_to_notify_funcs (settings, update_metacity_theme);
     append_to_notify_funcs (settings, update_decorations);

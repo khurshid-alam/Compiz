@@ -196,34 +196,34 @@ void
 update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
-    gint theme_type;
-    gchar *theme_name;
+    gint metacity_theme_type;
+    gchar *metacity_theme_name;
 
     if (!storage->gwd)
         return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
-    theme_type = -1;
+    metacity_theme_type = -1;
 
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
-        theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
+        metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
     } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
 #ifdef HAVE_METACITY_3_20_0
-        theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
-        theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
+        metacity_theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
 #else
-        theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
+        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
 #endif
     } else if (storage->desktop) {
-        theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
+        metacity_theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
     } else {
         return;
     }
 
     gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme,
-                                         theme_type, theme_name);
+                                         metacity_theme_type, metacity_theme_name);
 
-    g_free (theme_name);
+    g_free (metacity_theme_name);
 }
 
 void

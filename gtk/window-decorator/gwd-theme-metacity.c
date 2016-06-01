@@ -915,7 +915,7 @@ static gboolean
 setup_theme (GWDThemeMetacity *metacity)
 {
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
-    const gchar *metacity_theme = gwd_settings_get_metacity_theme_name (settings);
+    const gchar *metacity_theme_name = gwd_settings_get_metacity_theme_name (settings);
 #ifdef HAVE_METACITY_3_20_0
     gint metacity_theme_type = gwd_settings_get_metacity_theme_type (settings);
     GError *error = NULL;
@@ -927,7 +927,7 @@ setup_theme (GWDThemeMetacity *metacity)
      * metacity theme with use-metacity-theme setting. In that case
      * GWDThemeCairo will be created / should be created.
      */
-    g_assert (metacity_theme != NULL);
+    g_assert (metacity_theme_name != NULL);
 
 #ifdef HAVE_METACITY_3_20_0
     if (metacity_theme_type == -1)
@@ -935,7 +935,7 @@ setup_theme (GWDThemeMetacity *metacity)
 
     metacity->theme = meta_theme_new (metacity_theme_type);
 
-    if (!meta_theme_load (metacity->theme, metacity_theme, &error)) {
+    if (!meta_theme_load (metacity->theme, metacity_theme_name, &error)) {
         g_warning ("Failed to load metacity theme '%s': %s",
                    metacity_theme, error->message);
 
@@ -948,7 +948,7 @@ setup_theme (GWDThemeMetacity *metacity)
     /* meta_theme_get_current returns the last good theme, so we will try to
      * load theme manually to know that theme is 100% valid.
      */
-    theme = meta_theme_load (metacity_theme, NULL);
+    theme = meta_theme_load (metacity_theme_name, NULL);
     if (theme == NULL)
         return FALSE;
 
@@ -959,7 +959,7 @@ setup_theme (GWDThemeMetacity *metacity)
     meta_theme_free (theme);
 
     /* If we are here then we know that this will not fail. */
-    meta_theme_set_current (metacity_theme, TRUE);
+    meta_theme_set_current (metacity_theme_name, TRUE);
     metacity->theme = meta_theme_get_current ();
 #endif
 
@@ -1017,21 +1017,20 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    GdkDisplay *display;
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
 #ifndef HAVE_METACITY_3_20_0
-    GdkScreen *screen;
+    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
+    GtkWidget *style_window = decor->frame->style_window_rgba;
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
 #endif
-    Display *xdisplay;
     cairo_surface_t *surface;
     Picture src;
     MetaButtonState button_states [META_BUTTON_TYPE_LAST];
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
-#ifndef HAVE_METACITY_3_20_0
-    MetaStyleInfo *style_info;
-    GtkStyleContext *context;
-#endif
     cairo_t *cr;
     gint i;
     Region top_region;
@@ -1042,7 +1041,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     gboolean shade_alpha;
 #ifndef HAVE_METACITY_3_20_0
     MetaFrameStyle *frame_style;
-    GtkWidget *style_window;
     GdkRGBA bg_rgba;
 #endif
 
@@ -1052,9 +1050,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 #ifdef HAVE_METACITY_3_20_0
     connect_to_style_updated_signal (metacity);
 #endif
-
-    display = gdk_display_get_default ();
-    xdisplay = gdk_x11_display_get_xdisplay (display);
 
     top_region = NULL;
     bottom_region = NULL;
@@ -1068,11 +1063,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
         alpha = gwd_settings_get_metacity_inactive_opacity (settings);
         shade_alpha = gwd_settings_get_metacity_inactive_shade_opacity (settings);
     }
-
-#ifndef HAVE_METACITY_3_20_0
-    style_window = decor->frame->style_window_rgba;
-    context = gtk_widget_get_style_context (style_window);
-#endif
 
     if (decoration_alpha == 1.0)
         alpha = 1.0;
@@ -1120,20 +1110,18 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
 
     cr = cairo_create (surface);
-#ifndef HAVE_METACITY_3_20_0
-    gdk_cairo_set_source_rgba (cr, &bg_rgba);
-#endif
+
+#ifdef HAVE_METACITY_3_20_0
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+#else
+    gdk_cairo_set_source_rgba (cr, &bg_rgba);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+#endif
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-#ifndef HAVE_METACITY_3_20_0
-    screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
-#endif
-
-    cairo_paint (cr);
 #ifdef HAVE_METACITY_3_20_0
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
 #else
