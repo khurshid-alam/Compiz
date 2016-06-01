@@ -254,8 +254,8 @@ update_button_layout (GWDSettingsStorage *storage)
 void
 update_font (GWDSettingsStorage *storage)
 {
-    gchar *titlebar_font;
     gboolean titlebar_system_font;
+    gchar *titlebar_font;
 
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         titlebar_system_font = g_settings_get_boolean (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT);

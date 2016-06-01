@@ -42,7 +42,6 @@
 #include "compiz_gwd_tests.h"
 
 #include "gwd-settings.h"
-#include "gwd-settings-storage.h"
 
 using ::testing::Eq;
 using ::testing::Action;
