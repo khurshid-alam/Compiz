@@ -68,7 +68,7 @@ class GLMatrix {
 };
 
 namespace compiz
-    {
+{
     namespace opengl
     {
 	namespace matrix
