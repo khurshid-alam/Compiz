@@ -283,8 +283,7 @@ restack_window (WnckWindow *win,
 
 void
 add_frame_window (WnckWindow *win,
-		  Window     frame,
-		  Bool	     mode)
+                  Window     frame)
 {
     Display		 *xdisplay;
     XSetWindowAttributes attr;
@@ -294,23 +293,9 @@ add_frame_window (WnckWindow *win,
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
-    /* If we have already done this, there is no need to do it again, except
-     * if the property changed.
-     *
-     * The reason this check is here is because sometimes the PropertyNotify X
-     * event can come a bit after the property on the window is actually set
-     * which might result in this function being called twice - once by
-     * wnck through window_opened and once through our X event handler
-     * event_filter_func
-     */
-
-    if (d->created && mode && d->frame_window)
-	return;
-
     d->active = wnck_window_is_active (win);
     d->win = win;
     d->frame = gwd_get_decor_frame (get_frame_type (win));
-    d->last_pos_entered = NULL;
 
     attr.event_mask = ButtonPressMask | EnterWindowMask |
 		      LeaveWindowMask | ExposureMask;
@@ -318,53 +303,7 @@ add_frame_window (WnckWindow *win,
 
     gdk_error_trap_push ();
 
-    if (mode)
     {
-	d->frame_window = create_gdk_window (frame);
-	d->decor_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	d->decor_image = gtk_image_new ();
-	d->decor_event_box = gtk_event_box_new ();
-
-	gtk_event_box_set_visible_window (GTK_EVENT_BOX (d->decor_event_box),
-					  FALSE);
-	gtk_widget_set_events (d->decor_event_box, GDK_BUTTON_PRESS_MASK |
-						   GDK_BUTTON_RELEASE_MASK |
-						   GDK_POINTER_MOTION_MASK);
-
-	g_signal_connect (G_OBJECT (d->decor_event_box), "button-press-event",
-			  G_CALLBACK (frame_handle_button_press),
-			  (gpointer) (d));
-
-	g_signal_connect (G_OBJECT (d->decor_event_box), "button-release-event",
-			  G_CALLBACK (frame_handle_button_release),
-			  (gpointer) (d));
-
-	g_signal_connect (G_OBJECT (d->decor_event_box), "motion-notify-event",
-			  G_CALLBACK (frame_handle_motion),
-			  (gpointer) (d));
-
-	gtk_container_add (GTK_CONTAINER (d->decor_event_box), d->decor_image);
-	gtk_event_box_set_above_child (GTK_EVENT_BOX (d->decor_event_box), TRUE);
-	gtk_widget_show_all (d->decor_event_box);
-	gtk_window_set_decorated (GTK_WINDOW (d->decor_window), FALSE);
-	gtk_window_set_default_size (GTK_WINDOW (d->decor_window), 1000, 1000);
-	gtk_container_add (GTK_CONTAINER (d->decor_window), d->decor_event_box);
-
-	/* Assumed realization happens here */
-
-	g_signal_connect (G_OBJECT (d->decor_window), "realize",
-			  G_CALLBACK (frame_window_realized), (gpointer) d);
-
-	gtk_widget_show_all (d->decor_window);
-	gtk_widget_show (d->decor_window);
-
-	g_object_set_data (G_OBJECT (d->frame_window),
-			   "client_wnck_window", win);
-    }
-    else
-    {
-	d->frame_window = NULL;
-
 	for (i = 0; i < 3; ++i)
 	{
 	    for (j = 0; j < 3; ++j)
@@ -420,13 +359,6 @@ add_frame_window (WnckWindow *win,
 				 GINT_TO_POINTER (d->button_windows[i].window),
 				 GINT_TO_POINTER (xid));
 
-	if (d->frame_window)
-	{
-	    g_hash_table_insert (frame_table,
-				 GINT_TO_POINTER (frame),
-				 GINT_TO_POINTER (xid));
-	}
-
 	if (d->decorated)
 	{
 	    update_window_decoration_state (win);
@@ -455,7 +387,6 @@ remove_frame_window (WnckWindow *win)
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
-    if (!d->frame_window)
     {
 	int i, j;
 
@@ -499,7 +430,7 @@ remove_frame_window (WnckWindow *win)
 	d->cr = NULL;
     }
 
-    if (d->picture && !d->frame_window)
+    if (d->picture)
     {
 	XRenderFreePicture (xdisplay, d->picture);
 	d->picture = 0;
@@ -547,30 +478,6 @@ remove_frame_window (WnckWindow *win)
 
 	d->force_quit_dialog = NULL;
 	gtk_widget_destroy (dialog);
-    }
-
-    if (d->frame_window)
-    {
-	gdk_window_destroy (d->frame_window);
-	d->frame_window = NULL;
-    }
-
-    if (d->decor_image)
-    {
-	g_object_unref (d->decor_image);
-	d->decor_image = NULL;
-    }
-
-    if (d->decor_event_box)
-    {
-	g_object_unref (d->decor_event_box);
-	d->decor_event_box = NULL;
-    }
-
-    if (d->decor_window)
-    {
-	g_object_unref (d->decor_window);
-	d->decor_window = NULL;
     }
 
     if (d->frame)
@@ -643,8 +550,6 @@ active_window_changed (WnckScreen *screen)
 
 	    if ((d->state & META_MAXIMIZED) == META_MAXIMIZED)
 	    {
-		if (!d->frame_window)
-		{
 		   if (d->active)
 		   {
 		       set_context_if_decorated (d, &frame->max_window_context_active);
@@ -655,16 +560,9 @@ active_window_changed (WnckScreen *screen)
 		       set_context_if_decorated (d, &frame->max_window_context_inactive);
 		       d->shadow  = frame->max_border_shadow_inactive;
 		   }
-                }
-                else
-                {
-		   d->shadow  = d->frame->max_border_no_shadow;
-                }
 	    }
 	    else
 	    {
-	       if (!d->frame_window)
-	       {
 		   if (d->active)
 		   {
 		       set_context_if_decorated (d, &frame->window_context_active);
@@ -675,11 +573,6 @@ active_window_changed (WnckScreen *screen)
 		       set_context_if_decorated (d, &frame->window_context_inactive);
 		       d->shadow  = frame->border_shadow_inactive;
 		   }
-	       }
-	       else
-	       {
-		   d->shadow  = d->frame->border_no_shadow;
-	       }
 	    }
 
             if (!d->decorated)
@@ -712,8 +605,6 @@ active_window_changed (WnckScreen *screen)
 
 	    if ((d->state & META_MAXIMIZED) == META_MAXIMIZED)
 	    {
-		if (!d->frame_window)
-		{
 		   if (d->active)
 		   {
 		       set_context_if_decorated (d, &frame->max_window_context_active);
@@ -724,16 +615,9 @@ active_window_changed (WnckScreen *screen)
 		       set_context_if_decorated (d, &frame->max_window_context_inactive);
 		       d->shadow  = frame->max_border_shadow_inactive;
 		   }
-		}
-		else
-		{
-		   d->shadow  = frame->max_border_no_shadow;
-		}
 	    }
 	    else
 	    {
-		if (!d->frame_window)
-		{
 		   if (d->active)
 		   {
 		       set_context_if_decorated (d, &frame->window_context_active);
@@ -744,11 +628,6 @@ active_window_changed (WnckScreen *screen)
 		       set_context_if_decorated (d, &frame->window_context_inactive);
 		       d->shadow  = frame->border_shadow_inactive;
 		   }
-		}
-		else
-		{
-		   d->shadow =  frame->border_no_shadow;
-		}
 	    }
 
             if (!d->decorated)
@@ -827,13 +706,7 @@ window_opened (WnckScreen *screen,
     xid = wnck_window_get_xid (win);
 
     if (get_window_prop (xid, frame_input_window_atom, &window))
-    {
-	add_frame_window (win, window, FALSE);
-    }
-    else if (get_window_prop (xid, frame_output_window_atom, &window))
-    {
-	add_frame_window (win, window, TRUE);
-    }
+        add_frame_window (win, window);
 }
 
 void

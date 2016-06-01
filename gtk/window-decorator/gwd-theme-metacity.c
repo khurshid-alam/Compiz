@@ -418,9 +418,8 @@ decor_update_meta_window_property (decor_t        *d,
     win_extents = frame_win_extents = d->frame->win_extents;
     max_win_extents = frame_max_win_extents = d->frame->max_win_extents;
 
-    /* Add the invisible grab area padding, but only for
-     * pixmap type decorations */
-    if (!d->frame_window) {
+    /* Add the invisible grab area padding */
+    {
         MetaFrameBorders borders;
 
         meta_theme_get_frame_borders (theme, d->gtk_theme_variant, type,
@@ -470,18 +469,12 @@ decor_update_meta_window_property (decor_t        *d,
     max_win_extents.top += d->frame->max_titlebar_height;
     frame_max_win_extents.top += d->frame->max_titlebar_height;
 
-    if (d->frame_window) {
-        data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_WINDOW);
-        decor_gen_window_property (data, nOffset - 1, &win_extents, &max_win_extents,
-                                   20, 20, frame_type, frame_state, frame_actions);
-    } else {
-        data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
-        decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
-                                 &frame_win_extents, &win_extents,
-                                 &frame_max_win_extents, &max_win_extents,
-                                 ICON_SPACE + d->button_width,
-                                 0, quads, nQuad, frame_type, frame_state, frame_actions);
-    }
+    data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
+    decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
+                             &frame_win_extents, &win_extents,
+                             &frame_max_win_extents, &max_win_extents,
+                             ICON_SPACE + d->button_width,
+                             0, quads, nQuad, frame_type, frame_state, frame_actions);
 
     gdk_error_trap_push ();
 
@@ -798,7 +791,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
-    if ((decor->prop_xid || !decor->buffer_surface) && !decor->frame_window)
+    if (decor->prop_xid || !decor->buffer_surface)
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
@@ -813,16 +806,13 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cairo_destroy (cr);
 
-    if (decor->frame_window)
-        surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgb);
-    else
-        surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
+    surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
 
     cr = cairo_create (surface);
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
-                                get_format_for_surface (decor, surface), 0, NULL);
+                                xformat_rgba, 0, NULL);
 
     cairo_paint (cr);
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
@@ -881,25 +871,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     copy_to_front_buffer (decor);
 
-    if (decor->frame_window) {
-        GdkWindow *gdk_frame_window;
-        GdkPixbuf *pixbuf;
-
-        gdk_frame_window = gtk_widget_get_window (decor->decor_window);
-
-        pixbuf = gdk_pixbuf_get_from_surface (decor->surface, 0, 0, decor->width, decor->height);
-        gtk_image_set_from_pixbuf (GTK_IMAGE (decor->decor_image), pixbuf);
-        g_object_unref (pixbuf);
-
-        gdk_window_move_resize (gdk_frame_window,
-                                decor->context->left_corner_space - 1,
-                                decor->context->top_corner_space - 1,
-                                decor->width,
-                                decor->height);
-
-        gdk_window_lower (gdk_frame_window);
-    }
-
     if (decor->prop_xid) {
         /* translate from frame to client window space */
         if (top_region)
@@ -944,64 +915,33 @@ gwd_theme_metacity_calc_decoration_size (GWDTheme *theme,
         return FALSE;
 
     if ((decor->state & META_MAXIMIZED) == META_MAXIMIZED) {
-        if (!decor->frame_window) {
-            if (decor->active) {
-                context = &decor->frame->max_window_context_active;
-                shadow = decor->frame->max_border_shadow_active;
-            } else {
-                context = &decor->frame->max_window_context_inactive;
-                shadow = decor->frame->max_border_shadow_inactive;
-            }
+        if (decor->active) {
+            context = &decor->frame->max_window_context_active;
+            shadow = decor->frame->max_border_shadow_active;
         } else {
-            context = &decor->frame->max_window_context_no_shadow;
-            shadow = decor->frame->max_border_no_shadow;
+            context = &decor->frame->max_window_context_inactive;
+            shadow = decor->frame->max_border_shadow_inactive;
         }
     } else {
-        if (!decor->frame_window) {
-            if (decor->active) {
-                context = &decor->frame->window_context_active;
-                shadow = decor->frame->border_shadow_active;
-            } else {
-                context = &decor->frame->window_context_inactive;
-                shadow = decor->frame->border_shadow_inactive;
-            }
+        if (decor->active) {
+            context = &decor->frame->window_context_active;
+            shadow = decor->frame->border_shadow_active;
         } else {
-            context = &decor->frame->window_context_no_shadow;
-            shadow = decor->frame->border_no_shadow;
+            context = &decor->frame->window_context_inactive;
+            shadow = decor->frame->border_shadow_inactive;
         }
     }
 
-    if (!decor->frame_window) {
-        decor_get_best_layout (context, w, h, &layout);
+    decor_get_best_layout (context, w, h, &layout);
 
-        if (context != decor->context ||
-            memcmp (&layout, &decor->border_layout, sizeof (layout))) {
-            *width = layout.width;
-            *height = layout.height;
-
-            decor->border_layout = layout;
-            decor->context = context;
-            decor->shadow = shadow;
-
-            calc_button_size (theme, decor);
-
-            return TRUE;
-        }
-    } else {
-        if ((decor->state & META_MAXIMIZED) == META_MAXIMIZED)
-            decor_get_default_layout (context, decor->client_width,
-                                      decor->client_height - decor->frame->titlebar_height,
-                                      &layout);
-        else
-            decor_get_default_layout (context, decor->client_width,
-                                      decor->client_height, &layout);
-
+    if (context != decor->context ||
+        memcmp (&layout, &decor->border_layout, sizeof (layout))) {
         *width = layout.width;
         *height = layout.height;
 
         decor->border_layout = layout;
-        decor->shadow = shadow;
         decor->context = context;
+        decor->shadow = shadow;
 
         calc_button_size (theme, decor);
 
@@ -1081,20 +1021,12 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                     *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
                     *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
 
-                    if (decor->frame_window) {
-                        *x += decor->frame->win_extents.left + 2;
-                        *y += decor->frame->win_extents.top + 2;
-                    }
-
                     *w = fgeom.borders.total.right + RESIZE_EXTENDS;
                     *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
                     break;
                 case 1: /* bottom */
                     *x = fgeom.borders.total.left + RESIZE_EXTENDS;
                     *y = height - fgeom.borders.total.bottom;
-
-                    if (decor->frame_window)
-                        *y += decor->frame->win_extents.top + 2;
 
                     *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
                     *h = fgeom.borders.total.bottom;
@@ -1103,11 +1035,6 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                 default:
                     *x = 0;
                     *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
-
-                    if (decor->frame_window) {
-                        *x += decor->frame->win_extents.left + 4;
-                        *y += decor->frame->win_extents.bottom + 2;
-                    }
 
                     *w = fgeom.borders.total.left + RESIZE_EXTENDS;
                     *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
@@ -1119,9 +1046,6 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                 case 2: /* right */
                     *x = width - fgeom.borders.total.right;
                     *y = fgeom.borders.total.top + RESIZE_EXTENDS;
-
-                    if (decor->frame_window)
-                        *x += decor->frame->win_extents.left + 2;
 
                     *w = fgeom.borders.total.right;
                     *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
@@ -1137,9 +1061,6 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                     *x = 0;
                     *y = fgeom.borders.total.top + RESIZE_EXTENDS;
 
-                    if (decor->frame_window)
-                        *x += decor->frame->win_extents.left + 4;
-
                     *w = fgeom.borders.total.left;
                     *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
                     break;
@@ -1152,20 +1073,12 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                     *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
                     *y = 0;
 
-                    if (decor->frame_window) {
-                        *x += decor->frame->win_extents.left + 2;
-                        *y += decor->frame->win_extents.top + 2 - fgeom.title_rect.height;
-                    }
-
                     *w = fgeom.borders.total.right + RESIZE_EXTENDS;
                     *h = fgeom.borders.total.top + RESIZE_EXTENDS;
                     break;
                 case 1: /* top */
                     *x = fgeom.borders.total.left + RESIZE_EXTENDS;
                     *y = 0;
-
-                    if (decor->frame_window)
-                        *y += decor->frame->win_extents.top + 2;
 
                     *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
                     *h = fgeom.borders.total.top - fgeom.title_rect.height;
@@ -1174,11 +1087,6 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
                 default:
                     *x = 0;
                     *y = 0;
-
-                    if (decor->frame_window) {
-                        *x += decor->frame->win_extents.left + 4;
-                        *y += decor->frame->win_extents.top + 2 - fgeom.title_rect.height;
-                    }
 
                     *w = fgeom.borders.total.left + RESIZE_EXTENDS;
                     *h = fgeom.borders.total.top + RESIZE_EXTENDS;
@@ -1279,11 +1187,6 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     *w = space->clickable.width;
     *h = space->clickable.height;
 
-    if (decor->frame_window) {
-        *x += decor->frame->win_extents.left + 4;
-        *y += decor->frame->win_extents.top + 2;
-    }
-
     return TRUE;
 }
 
@@ -1295,7 +1198,12 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameType type = meta_frame_type_from_string (frame->type);
     MetaFrameFlags flags = 0xc33; /* FIXME */
-    MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
+    MetaFrameStyle *style;
+
+    if (type == META_FRAME_TYPE_LAST)
+        type = META_FRAME_TYPE_NORMAL;
+
+    style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
     meta_frame_style_apply_scale (style, titlebar_font);
 }
