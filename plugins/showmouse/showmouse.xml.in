@@ -34,6 +34,32 @@
 					<_long>Toggle the mouse pointer trail.</_long>
 					<default/>
 				</option>
+				<option name="guide_thickness" type="int">
+					<_short>Guide thickness</_short>
+					<_long>How thick mouse guides should be, in pixels.</_long>
+					<default>0</default>
+					<min>0</min>
+					<max>20</max><!-- search for "XML" in showmouse.cpp -->
+					<precision>1</precision>
+				</option>
+				<option name="guide_empty_radius" type="int">
+					<_short>Guide empty radius</_short>
+					<_long>Radius of the disk around the cursor which doesn't contain guides.</_long>
+					<default>20</default>
+					<min>0</min>
+					<max>100</max>
+					<precision>1</precision>
+				</option>
+				<option name="guide_color" type="color">
+					<_short>Guide Color</_short>
+					<_long>Guide color.</_long>
+					<default>
+					  <red>0xffff</red>
+					  <green>0x0</green>
+					  <blue>0x0</blue>
+					  <alpha>0x9999</alpha>
+					</default>
+				</option>
 				<option name="rotation_speed" type="float">
 					<_short>Rotation speed</_short>
 					<_long>Rotation speed.</_long>
@@ -51,9 +77,9 @@
 				</option>
 				<option name="emitters" type="int">
 					<_short>Emitters</_short>
-					<_long>Number of particle emitters.</_long>
+					<_long>Number of particle emitters (0 to disable).</_long>
 					<default>3</default>
-					<min>1</min>
+					<min>0</min>
 					<max>10</max>
 				</option>
 			</group>
