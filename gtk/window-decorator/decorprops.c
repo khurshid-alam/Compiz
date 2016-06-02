@@ -58,21 +58,13 @@ decor_update_window_property (decor_t *d)
 
     extents.top += d->frame->titlebar_height;
 
-    if (d->frame_window)
-    {
-        data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_WINDOW);
-        decor_gen_window_property (data, nOffset - 1, &extents, &extents, 20, 20, frame_type, frame_state, frame_actions);
-    }
-    else
-    {
-        data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
-        decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
-			     &extents, &extents,
-			     &extents, &extents,
-			     ICON_SPACE + d->button_width,
-			     0,
-			     quads, nQuad, frame_type, frame_state, frame_actions);
-    }
+    data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
+    decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
+                             &extents, &extents,
+                             &extents, &extents,
+                             ICON_SPACE + d->button_width,
+                             0,
+                             quads, nQuad, frame_type, frame_state, frame_actions);
 
     gdk_error_trap_push ();
     XChangeProperty (xdisplay, d->prop_xid,

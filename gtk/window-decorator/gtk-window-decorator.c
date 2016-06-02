@@ -35,7 +35,6 @@ gboolean minimal = FALSE;
 const unsigned short ICON_SPACE = 20;
 
 Atom frame_input_window_atom;
-Atom frame_output_window_atom;
 Atom win_decor_atom;
 Atom win_blur_decor_atom;
 Atom wm_move_resize_atom;
@@ -123,7 +122,6 @@ Window    switcher_selected_window = None;
 decor_t   *switcher_window = NULL;
 
 XRenderPictFormat *xformat_rgba;
-XRenderPictFormat *xformat_rgb;
 
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM] = {
     "normal", "modal_dialog", "dialog", "menu", "utility"
@@ -240,8 +238,6 @@ main (int argc, char *argv[])
 
     frame_input_window_atom  = XInternAtom (xdisplay,
 					    DECOR_INPUT_FRAME_ATOM_NAME, FALSE);
-    frame_output_window_atom = XInternAtom (xdisplay,
-					    DECOR_OUTPUT_FRAME_ATOM_NAME, FALSE);
 
     win_decor_atom	= XInternAtom (xdisplay, DECOR_WINDOW_ATOM_NAME, FALSE);
     win_blur_decor_atom	= XInternAtom (xdisplay, DECOR_BLUR_ATOM_NAME, FALSE);
@@ -333,7 +329,6 @@ main (int argc, char *argv[])
     }
 
     xformat_rgba = XRenderFindStandardFormat (xdisplay, PictStandardARGB32);
-    xformat_rgb  = XRenderFindStandardFormat (xdisplay, PictStandardRGB24);
 
     frame_table = g_hash_table_new (NULL, NULL);
 
@@ -384,8 +379,7 @@ main (int argc, char *argv[])
     }
 
     decor_set_dm_check_hint (xdisplay, gdk_screen_get_number (gdkscreen),
-			     WINDOW_DECORATION_TYPE_PIXMAP |
-			     WINDOW_DECORATION_TYPE_WINDOW);
+                             WINDOW_DECORATION_TYPE_PIXMAP);
 
     /* Update the decorations based on the settings */
     gwd_settings_thaw_updates (settings);

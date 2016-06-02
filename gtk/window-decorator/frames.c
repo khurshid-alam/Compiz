@@ -272,11 +272,8 @@ decor_frame_refresh (decor_frame_t *frame)
     gwd_decor_frame_ref (frame);
 
     update_style (frame->style_window_rgba);
-    update_style (frame->style_window_rgb);
 
     set_frame_scale (frame, titlebar_font);
-
-    titlebar_font = NULL;
 
     frame_update_titlebar_font (frame);
 
@@ -444,8 +441,6 @@ decor_frame_new (const gchar *type)
     frame->max_titlebar_height = 17;
     frame->border_shadow_active = NULL;
     frame->border_shadow_inactive = NULL;
-    frame->border_no_shadow = NULL;
-    frame->max_border_no_shadow = NULL;
     frame->max_border_shadow_active = NULL;
     frame->max_border_shadow_inactive = NULL;
     frame->titlebar_font = NULL;
@@ -458,27 +453,11 @@ decor_frame_new (const gchar *type)
 
     gtk_widget_realize (frame->style_window_rgba);
 
-    gtk_widget_set_size_request (frame->style_window_rgba, 0, 0);
     gtk_window_move (GTK_WINDOW (frame->style_window_rgba), -100, -100);
 
     frame->pango_context = gtk_widget_create_pango_context (frame->style_window_rgba);
 
     g_signal_connect_data (frame->style_window_rgba, "style-updated",
-			   G_CALLBACK (style_updated),
-			   (gpointer) frame->pango_context, 0, 0);
-
-    frame->style_window_rgb = gtk_window_new (GTK_WINDOW_POPUP);
-
-    visual = gdk_screen_get_system_visual (gdkscreen);
-    if (visual)
-	gtk_widget_set_visual (frame->style_window_rgb, visual);
-
-    gtk_widget_realize (frame->style_window_rgb);
-
-    gtk_widget_set_size_request (frame->style_window_rgb, 0, 0);
-    gtk_window_move (GTK_WINDOW (frame->style_window_rgb), -100, -100);
-
-    g_signal_connect_data (frame->style_window_rgb, "style-updated",
 			   G_CALLBACK (style_updated),
 			   (gpointer) frame->pango_context, 0, 0);
 
@@ -496,23 +475,14 @@ decor_frame_destroy (decor_frame_t *frame)
     if (frame->border_shadow_inactive)
 	decor_shadow_destroy (xdisplay, frame->border_shadow_inactive);
 
-    if (frame->border_no_shadow)
-	decor_shadow_destroy (xdisplay, frame->border_no_shadow);
-
     if (frame->max_border_shadow_active)
 	decor_shadow_destroy (xdisplay, frame->max_border_shadow_active);
 
     if (frame->max_border_shadow_inactive)
 	decor_shadow_destroy (xdisplay, frame->max_border_shadow_inactive);
 
-    if (frame->max_border_no_shadow)
-	decor_shadow_destroy (xdisplay, frame->max_border_no_shadow);
-
     if (frame->style_window_rgba)
 	gtk_widget_destroy (GTK_WIDGET (frame->style_window_rgba));
-
-    if (frame->style_window_rgb)
-	gtk_widget_destroy (GTK_WIDGET (frame->style_window_rgb));
 
     if (frame->pango_context)
 	g_object_unref (G_OBJECT (frame->pango_context));

@@ -286,8 +286,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     cairo_set_line_width (cr, 1.0);
 
-    if (!decor->frame_window)
-        draw_shadow_background (decor, cr, decor->shadow, decor->context);
+    draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
     if (decor->active) {
         decor_color_t *title_color = _title_color;
@@ -605,19 +604,6 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     copy_to_front_buffer (decor);
 
-    if (decor->frame_window) {
-        GdkWindow *gdk_frame_window = gtk_widget_get_window (decor->decor_window);
-        GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface (decor->surface, 0, 0,
-                                                         decor->width, decor->height);
-
-        gtk_image_set_from_pixbuf (GTK_IMAGE (decor->decor_image), pixbuf);
-        g_object_unref (pixbuf);
-
-        gtk_window_resize (GTK_WINDOW (decor->decor_window), decor->width, decor->height);
-        gdk_window_move (gdk_frame_window, 0, 0);
-        gdk_window_lower (gdk_frame_window);
-    }
-
     if (decor->prop_xid) {
         decor_update_window_property (decor);
         decor->prop_xid = 0;
@@ -644,50 +630,22 @@ gwd_theme_cairo_calc_decoration_size (GWDTheme *theme,
      * appropriate
      */
 
-    if (!decor->frame_window) {
-        calc_button_size (decor);
+    calc_button_size (decor);
 
-        if (w < ICON_SPACE + decor->button_width)
-            return FALSE;
+    if (w < ICON_SPACE + decor->button_width)
+        return FALSE;
 
-        top_width = name_width + decor->button_width + ICON_SPACE;
-        if (w < top_width)
-            top_width = MAX (ICON_SPACE + decor->button_width, w);
+    top_width = name_width + decor->button_width + ICON_SPACE;
+    if (w < top_width)
+        top_width = MAX (ICON_SPACE + decor->button_width, w);
 
-        if (decor->active)
-            decor_get_default_layout (&decor->frame->window_context_active, top_width, 1, &layout);
-        else
-            decor_get_default_layout (&decor->frame->window_context_inactive, top_width, 1, &layout);
+    if (decor->active)
+        decor_get_default_layout (&decor->frame->window_context_active, top_width, 1, &layout);
+    else
+        decor_get_default_layout (&decor->frame->window_context_inactive, top_width, 1, &layout);
 
-        if (!decor->context || memcmp (&layout, &decor->border_layout, sizeof (layout))) {
-            *width  = layout.width;
-            *height = layout.height;
-
-            decor->border_layout = layout;
-            if (decor->active) {
-                decor->context = &decor->frame->window_context_active;
-                decor->shadow = decor->frame->border_shadow_active;
-            } else {
-                decor->context = &decor->frame->window_context_inactive;
-                decor->shadow = decor->frame->border_shadow_inactive;
-            }
-
-            return TRUE;
-        }
-    } else {
-        calc_button_size (decor);
-
-        /* _default_win_extents + top height */
-
-        top_width = name_width + decor->button_width + ICON_SPACE;
-        if (w < top_width)
-            top_width = MAX (ICON_SPACE + decor->button_width, w);
-
-        decor_get_default_layout (&decor->frame->window_context_no_shadow,
-                                  decor->client_width, decor->client_height,
-                                  &layout);
-
-        *width = layout.width;
+    if (!decor->context || memcmp (&layout, &decor->border_layout, sizeof (layout))) {
+        *width  = layout.width;
         *height = layout.height;
 
         decor->border_layout = layout;
@@ -735,18 +693,9 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
                                            gint     *w,
                                            gint     *h)
 {
-    if (decor->frame_window) {
-        *x = pos[i][j].x + pos[i][j].xw * width + decor->frame->win_extents.left;
-        *y = pos[i][j].y + decor->frame->win_extents.top +
-             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
-
-        if (i == 0 && (j == 0 || j == 2))
-            *y -= decor->frame->titlebar_height;
-    } else {
-        *x = pos[i][j].x + pos[i][j].xw * width;
-        *y = pos[i][j].y +
-             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
-    }
+    *x = pos[i][j].x + pos[i][j].xw * width;
+    *y = pos[i][j].y +
+         pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
 
     if ((decor->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY) && (j == 0 || j == 2)) {
         *w = 0;
@@ -776,15 +725,9 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
     if (i > BUTTON_MENU)
         return FALSE;
 
-    if (decor->frame_window) {
-        *x = bpos[i].x + bpos[i].xw * width + decor->frame->win_extents.left + 4;
-        *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
-             (decor->frame->titlebar_height - 17) + decor->frame->win_extents.top + 2;
-    } else {
-        *x = bpos[i].x + bpos[i].xw * width;
-        *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
-             (decor->frame->titlebar_height - 17);
-    }
+    *x = bpos[i].x + bpos[i].xw * width;
+    *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
+         (decor->frame->titlebar_height - 17);
 
     *w = bpos[i].w + bpos[i].ww * width;
     *h = bpos[i].h + bpos[i].hh * height + bpos[i].hth +
