@@ -516,8 +516,6 @@ void
 set_frame_scale (decor_frame_t *frame,
                  const gchar   *font_str)
 {
-    gfloat scale = 1.0f;
-
     gwd_decor_frame_ref (frame);
 
     if (frame->titlebar_font) {
@@ -526,14 +524,8 @@ set_frame_scale (decor_frame_t *frame,
     }
 
     if (font_str) {
-        gint size;
-
         frame->titlebar_font = pango_font_description_from_string (font_str);
-
-        scale = gwd_theme_get_title_scale (gwd_theme, frame);
-        size = MAX (pango_font_description_get_size (frame->titlebar_font) * scale, 1);
-
-        pango_font_description_set_size (frame->titlebar_font, size);
+        gwd_theme_update_titlebar_font_size (gwd_theme, frame, frame->titlebar_font);
     }
 
     gwd_decor_frame_unref (frame);
