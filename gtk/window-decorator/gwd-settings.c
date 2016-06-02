@@ -43,7 +43,8 @@ const gchar    *INACTIVE_SHADOW_COLOR_DEFAULT = "#00000000";
 
 const gint      BLUR_TYPE_DEFAULT = BLUR_TYPE_NONE;
 
-const gchar    *METACITY_THEME_DEFAULT = "Adwaita";
+const gchar    *METACITY_THEME_NAME_DEFAULT = "Adwaita";
+const gint      METACITY_THEME_TYPE_DEFAULT = -1;
 const gdouble   METACITY_ACTIVE_OPACITY_DEFAULT = 1.0;
 const gdouble   METACITY_INACTIVE_OPACITY_DEFAULT = 0.75;
 const gboolean  METACITY_ACTIVE_SHADE_OPACITY_DEFAULT = TRUE;
@@ -304,7 +305,7 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
         g_param_spec_string ("metacity-theme-name",
                              "Metacity Theme Name",
                              "Metacity Theme Name",
-                             METACITY_THEME_DEFAULT,
+                             METACITY_THEME_NAME_DEFAULT,
                              G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY);
 
     properties[PROP_CMDLINE_OPTIONS] =
@@ -358,8 +359,8 @@ gwd_settings_init (GWDSettings *settings)
     settings->inactive_shadow.shadow_color[1] = 0;
     settings->inactive_shadow.shadow_color[2] = 0;
     settings->blur_type = BLUR_TYPE_DEFAULT;
-    settings->metacity_theme_name = g_strdup (METACITY_THEME_DEFAULT);
-    settings->metacity_theme_type = -1;
+    settings->metacity_theme_name = g_strdup (METACITY_THEME_NAME_DEFAULT);
+    settings->metacity_theme_type = METACITY_THEME_TYPE_DEFAULT;
     settings->metacity_active_opacity = METACITY_ACTIVE_OPACITY_DEFAULT;
     settings->metacity_inactive_opacity = METACITY_INACTIVE_OPACITY_DEFAULT;
     settings->metacity_active_shade_opacity = METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -395,7 +396,7 @@ gwd_settings_new (gint         blur_type,
     if (metacity_theme_name != NULL)
         cmdline_opts |= CMDLINE_THEME;
     else
-        metacity_theme_name = METACITY_THEME_DEFAULT;
+        metacity_theme_name = METACITY_THEME_NAME_DEFAULT;
 
     return g_object_new (GWD_TYPE_SETTINGS,
                          "blur-type", blur_type,
@@ -643,7 +644,6 @@ gwd_settings_metacity_theme_changed (GWDSettings *settings,
     } else {
         g_free (settings->metacity_theme_name);
         settings->metacity_theme_name = NULL;
-        settings->metacity_theme_type = -1;
     }
 
     append_to_notify_funcs (settings, update_metacity_theme);

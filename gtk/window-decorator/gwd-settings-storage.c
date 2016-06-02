@@ -203,7 +203,7 @@ update_metacity_theme (GWDSettingsStorage *storage)
         return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
-    metacity_theme_type = -1;
+    metacity_theme_type = METACITY_THEME_TYPE_DEFAULT;
 
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);

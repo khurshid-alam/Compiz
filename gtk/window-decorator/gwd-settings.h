@@ -69,7 +69,8 @@ extern const gchar    *INACTIVE_SHADOW_COLOR_DEFAULT;
 
 extern const gint      BLUR_TYPE_DEFAULT;
 
-extern const gchar    *METACITY_THEME_DEFAULT;
+extern const gchar    *METACITY_THEME_NAME_DEFAULT;
+extern const gint      METACITY_THEME_TYPE_DEFAULT;
 extern const gdouble   METACITY_ACTIVE_OPACITY_DEFAULT;
 extern const gdouble   METACITY_INACTIVE_OPACITY_DEFAULT;
 extern const gboolean  METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
