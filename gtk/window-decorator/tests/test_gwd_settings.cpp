@@ -377,7 +377,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                       testing_values::USE_METACITY_THEME_VALUE,
-                                                      -1, testing_values::METACITY_THEME_VALUE.c_str ()));
+                                                      METACITY_THEME_TYPE_DEFAULT,
+                                                      testing_values::METACITY_THEME_VALUE.c_str ()));
 
     EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (testing_values::METACITY_THEME_VALUE.c_str ()));
@@ -390,7 +391,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE,
-                                                      -1, METACITY_THEME_DEFAULT));
+                                                      METACITY_THEME_TYPE_DEFAULT,
+                                                      METACITY_THEME_NAME_DEFAULT));
 
     EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (metacityTheme));
@@ -400,7 +402,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedIsDefault)
 {
     EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                        testing_values::USE_METACITY_THEME_VALUE,
-                                                       -1, METACITY_THEME_DEFAULT));
+                                                       METACITY_THEME_TYPE_DEFAULT,
+                                                       METACITY_THEME_NAME_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
@@ -412,7 +415,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 
     EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                        testing_values::USE_METACITY_THEME_VALUE,
-                                                       -1, testing_values::METACITY_THEME_VALUE.c_str ()));
+                                                       METACITY_THEME_TYPE_DEFAULT,
+                                                       testing_values::METACITY_THEME_VALUE.c_str ()));
 
     EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (metacityTheme));
