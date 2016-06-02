@@ -39,8 +39,6 @@
 
 #include <gtest_unspecified_bool_type_matcher.h>
 
-#include "compiz_gwd_tests.h"
-
 #include "gwd-settings.h"
 
 using ::testing::Eq;
