@@ -402,10 +402,18 @@ ExpoScreen::preparePaint (int msSinceLastPaint)
     float val = (static_cast <float> (msSinceLastPaint) / 1000.0f) /
 		optionGetZoomTime ();
 
-    if (expoMode)
-	expoCam = MIN (1.0, expoCam + val);
-    else
-	expoCam = MAX (0.0, expoCam - val);
+    if (optionGetExpoAnimation() != ExpoScreen::ExpoAnimationNone) {
+	if (expoMode)
+	    expoCam = MIN (1.0, expoCam + val);
+	else
+	    expoCam = MAX (0.0, expoCam - val);
+    }
+    else {
+	if (expoMode)
+	    expoCam = 1;
+	else
+	    expoCam = 0;
+    }
 
     if (expoCam)
     {
