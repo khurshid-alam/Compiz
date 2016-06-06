@@ -1,3 +1,11 @@
+compiz (1:0.9.12.2+16.10.20160606.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * removed a line that includes a missing header file and breaks the
+    build
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 06 Jun 2016 14:28:30 +0000
+
 compiz (1:0.9.12.2+16.10.20160602.3-0ubuntu1) yakkety; urgency=medium
 
   [ Graham Inggs ]
