@@ -185,25 +185,29 @@ void
 update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
-    gchar *theme;
+    gint metacity_theme_type;
+    gchar *metacity_theme_name;
 
     if (!storage->gwd)
         return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
+    metacity_theme_type = METACITY_THEME_TYPE_DEFAULT;
 
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
-        theme = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
+        metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
     } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
-        theme = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
+        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
     } else if (storage->desktop) {
-        theme = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
+        metacity_theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
     } else {
         return;
     }
 
-    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
-    g_free (theme);
+    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme,
+                                         metacity_theme_type, metacity_theme_name);
+
+    g_free (metacity_theme_name);
 }
 
 void
