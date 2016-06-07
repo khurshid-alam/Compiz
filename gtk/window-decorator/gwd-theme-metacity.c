@@ -329,6 +329,7 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
 #endif
 }
 
+#ifdef HAVE_METACITY_3_20_0
 static void
 update_titlebar_font_cb (GWDSettings      *settings,
                          /*const gchar      *titlebar_font,*/
@@ -345,6 +346,7 @@ update_titlebar_font_cb (GWDSettings      *settings,
 
     /* FIXME: update_decorations? titlebar height might be bigger or smaller. */
 }
+#endif
 
 static MetaButtonType
 meta_function_to_type (MetaButtonFunction function)
@@ -1018,6 +1020,7 @@ setup_button_layout (GWDThemeMetacity *metacity)
 static void
 setup_titlebar_font (GWDThemeMetacity *metacity)
 {
+#ifdef HAVE_METACITY_3_20_0
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
     /*const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);*/
 
@@ -1026,6 +1029,7 @@ setup_titlebar_font (GWDThemeMetacity *metacity)
                           G_CALLBACK (update_titlebar_font_cb), metacity);
 
     update_titlebar_font_cb (settings, /*titlebar_font,*/ metacity);
+#endif
 }
 
 static void
