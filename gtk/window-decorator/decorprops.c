@@ -56,8 +56,6 @@ decor_update_window_property (decor_t *d)
 					     &d->border_layout,
 					     stretch_offset);
 
-    extents.top += d->frame->titlebar_height;
-
     data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
     decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
                              &extents, &extents,
