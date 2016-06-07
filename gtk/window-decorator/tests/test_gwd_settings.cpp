@@ -136,8 +136,8 @@ class GWDMockSettingsNotifiedGMock
         {
             g_signal_connect (settings.get (), "update-decorations",
                               G_CALLBACK (GWDMockSettingsNotifiedGMock::updateDecorationsCb), this);
-            g_signal_connect (settings.get (), "update-frames",
-                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateFramesCb), this);
+            g_signal_connect (settings.get (), "update-titlebar-font",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateTitlebarFontCb), this);
             g_signal_connect (settings.get (), "update-metacity-theme",
                               G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityThemeCb), this);
             g_signal_connect (settings.get (), "update-metacity-button-layout",
@@ -145,7 +145,7 @@ class GWDMockSettingsNotifiedGMock
         }
 
         MOCK_METHOD0 (updateDecorations, void ());
-        MOCK_METHOD0 (updateFrames, void ());
+        MOCK_METHOD0 (updateTitlebarFont, void ());
         MOCK_METHOD0 (updateMetacityTheme, void ());
         MOCK_METHOD0 (updateMetacityButtonLayout, void ());
 
@@ -157,10 +157,11 @@ class GWDMockSettingsNotifiedGMock
             gmock->updateDecorations ();
         }
 
-        static void updateFramesCb (GWDSettings                  *settings,
-                                    GWDMockSettingsNotifiedGMock *gmock)
+        static void updateTitlebarFontCb (GWDSettings                  *settings,
+                                          const gchar                  *titlebar_font,
+                                          GWDMockSettingsNotifiedGMock *gmock)
         {
-            gmock->updateFrames ();
+            gmock->updateTitlebarFont ();
         }
 
         static void updateMetacityThemeCb (GWDSettings                  *settings,
@@ -206,7 +207,7 @@ class GWDSettingsTest :
         {
             EXPECT_CALL (*mGMockNotified, updateMetacityTheme ()).Times (1);
             EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ()).Times (1);
-            EXPECT_CALL (*mGMockNotified, updateFrames ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateTitlebarFont ()).Times (1);
             EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
 
             gwd_settings_thaw_updates (mSettings.get ());
@@ -472,7 +473,7 @@ TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateTitlebarFont ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::NO_USE_SYSTEM_FONT_VALUE,
@@ -486,7 +487,7 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
     const gchar *titlebarFont = NULL;
 
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateTitlebarFont ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::USE_SYSTEM_FONT_VALUE,

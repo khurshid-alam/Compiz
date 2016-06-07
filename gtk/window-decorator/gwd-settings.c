@@ -110,7 +110,7 @@ static GParamSpec *properties[LAST_PROP] = { NULL };
 enum
 {
   UPDATE_DECORATIONS,
-  UPDATE_FRAMES,
+  UPDATE_TITLEBAR_FONT,
   UPDATE_METACITY_THEME,
   UPDATE_METACITY_BUTTON_LAYOUT,
 
@@ -128,9 +128,10 @@ update_decorations (GWDSettings *settings)
 }
 
 static void
-update_frames (GWDSettings *settings)
+update_titlebar_font (GWDSettings *settings)
 {
-    g_signal_emit (settings, settings_signals[UPDATE_FRAMES], 0);
+    g_signal_emit (settings, settings_signals[UPDATE_TITLEBAR_FONT],
+                   0, settings->titlebar_font);
 }
 
 static void
@@ -322,10 +323,11 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
                       0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
-    settings_signals[UPDATE_FRAMES] =
-        g_signal_new ("update-frames",
+    settings_signals[UPDATE_TITLEBAR_FONT] =
+        g_signal_new ("update-titlebar-font",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 1,
+                      G_TYPE_STRING);
 
     settings_signals[UPDATE_METACITY_THEME] =
         g_signal_new ("update-metacity-theme",
@@ -378,7 +380,7 @@ gwd_settings_init (GWDSettings *settings)
      * the settings backend can't do it itself */
     append_to_notify_funcs (settings, update_metacity_theme);
     append_to_notify_funcs (settings, update_metacity_button_layout);
-    append_to_notify_funcs (settings, update_frames);
+    append_to_notify_funcs (settings, update_titlebar_font);
     append_to_notify_funcs (settings, update_decorations);
 }
 
@@ -710,8 +712,8 @@ gwd_settings_font_changed (GWDSettings *settings,
     g_free (settings->titlebar_font);
     settings->titlebar_font = g_strdup (use_font);
 
+    append_to_notify_funcs (settings, update_titlebar_font);
     append_to_notify_funcs (settings, update_decorations);
-    append_to_notify_funcs (settings, update_frames);
     release_notify_funcs (settings);
 
     return TRUE;
