@@ -961,6 +961,7 @@ setup_theme (GWDThemeMetacity *metacity)
         return FALSE;
     }
 #else
+
     /* meta_theme_get_current returns the last good theme, so we will try to
      * load theme manually to know that theme is 100% valid.
      */
