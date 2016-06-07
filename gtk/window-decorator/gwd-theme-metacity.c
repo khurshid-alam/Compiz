@@ -57,7 +57,6 @@ frame_type_from_string (const gchar *str)
     else if (strcmp ("menu", str) == 0)
         return META_FRAME_TYPE_MENU;
 
-    /* `normal`, `bare` and `switcher` frame types */
     return META_FRAME_TYPE_NORMAL;
 }
 
