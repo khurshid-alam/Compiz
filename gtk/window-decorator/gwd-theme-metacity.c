@@ -668,11 +668,12 @@ decor_update_meta_window_property (decor_t        *d,
 
 #ifdef HAVE_METACITY_3_20_0
         meta_theme_get_frame_borders (theme, d->gtk_theme_variant, type,
+                                      flags, &borders);
 #else
         meta_theme_get_frame_borders (theme, style_info, type,
-#endif
                                       d->frame->text_height,
                                       flags, &borders);
+#endif
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
             frame_win_extents.left += borders.invisible.left;
@@ -820,12 +821,14 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
 #ifdef HAVE_METACITY_3_20_0
-    meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant, frame_type,
+    meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
+                              frame_type, *flags, client_width, client_height,
+                              &metacity->button_layout, fgeom);
 #else
     meta_theme_calc_geometry (metacity->theme, style_info, frame_type,
-#endif
                               decor->frame->text_height, *flags, client_width,
                               client_height, &metacity->button_layout, fgeom);
+#endif
 
 #ifndef HAVE_METACITY_3_20_0
     meta_style_info_unref (style_info);
@@ -1132,13 +1135,17 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
 #ifdef HAVE_METACITY_3_20_0
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
+                           fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
+                           fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
+                           decor->name, &metacity->button_layout,
+                           button_states, decor->icon_pixbuf, NULL);
 #else
     meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
-#endif
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->layout, decor->frame->text_height, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
+#endif
 
 #ifndef HAVE_METACITY_3_20_0
     meta_style_info_unref (style_info);
@@ -1290,10 +1297,11 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 
 #ifdef HAVE_METACITY_3_20_0
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
+                                  0, &borders);
 #else
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-#endif
                                   frame->text_height, 0, &borders);
+#endif
 
     frame->win_extents.top = frame->win_extents.top;
     frame->win_extents.bottom = borders.visible.bottom;
@@ -1304,11 +1312,12 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 
 #ifdef HAVE_METACITY_3_20_0
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
+                                  META_FRAME_MAXIMIZED, &borders);
 #else
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-#endif
                                   frame->text_height, META_FRAME_MAXIMIZED,
                                   &borders);
+#endif
 
     frame->max_win_extents.top = frame->win_extents.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
@@ -1528,6 +1537,9 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
                                               decor_frame_t        *frame,
                                               PangoFontDescription *titlebar_font)
 {
+#ifdef HAVE_METACITY_3_20_0
+    /* FIXME: meta_theme_set_titlebar_font if not using system font. */
+#else
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameType type = frame_type_from_string (frame->type);
     MetaFrameFlags flags = 0xc33; /* FIXME */
@@ -1536,6 +1548,7 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
     style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
     meta_frame_style_apply_scale (style, titlebar_font);
+#endif
 }
 
 static void
