@@ -128,13 +128,6 @@ update_frames_titlebar_fonts (gpointer key,
     frame_update_titlebar_font ((decor_frame_t *) value);
 }
 
-void
-update_titlebar_font ()
-{
-    gwd_frames_foreach (update_frames_titlebar_fonts, NULL);
-}
-
-
 /*
  * update_event_windows
  *

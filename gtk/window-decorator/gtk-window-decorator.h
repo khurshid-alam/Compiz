@@ -390,7 +390,9 @@ int
 update_shadow (void);
 
 void
-update_titlebar_font ();
+update_frames_titlebar_fonts (gpointer key,
+                              gpointer value,
+                              gpointer user_data);
 
 void
 update_window_decoration (WnckWindow *win);

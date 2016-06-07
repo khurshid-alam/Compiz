@@ -194,8 +194,8 @@ decorations_changed (WnckScreen *screen)
     const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
 
     gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+    gwd_frames_foreach (update_frames_titlebar_fonts, NULL);
 
-    update_titlebar_font ();
     gwd_process_frames (update_frames_border_extents,
                         window_type_frames,
 			WINDOW_TYPE_FRAMES_NUM,
