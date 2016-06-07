@@ -45,6 +45,8 @@ struct _GWDThemeMetacity
     MetaTheme        *theme;
 
     gulong            button_layout_id;
+    gulong            titlebar_font_id;
+
     MetaButtonLayout  button_layout;
 };
 
@@ -325,6 +327,23 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
 
     metacity->button_layout = new_layout;
 #endif
+}
+
+static void
+update_titlebar_font_cb (GWDSettings      *settings,
+                         /*const gchar      *titlebar_font,*/
+                         GWDThemeMetacity *metacity)
+{
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
+    PangoFontDescription *description = NULL;
+
+    if (titlebar_font != NULL)
+        description = pango_font_description_from_string (titlebar_font);
+
+    meta_theme_set_titlebar_font (metacity->theme, description);
+    pango_font_description_free (description);
+
+    /* FIXME: update_decorations? titlebar height might be bigger or smaller. */
 }
 
 static MetaButtonType
@@ -997,6 +1016,19 @@ setup_button_layout (GWDThemeMetacity *metacity)
 }
 
 static void
+setup_titlebar_font (GWDThemeMetacity *metacity)
+{
+    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
+    /*const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);*/
+
+    metacity->titlebar_font_id =
+        g_signal_connect (settings, "update-frames",
+                          G_CALLBACK (update_titlebar_font_cb), metacity);
+
+    update_titlebar_font_cb (settings, /*titlebar_font,*/ metacity);
+}
+
+static void
 gwd_theme_metacity_constructed (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
@@ -1007,22 +1039,27 @@ gwd_theme_metacity_constructed (GObject *object)
         return;
 
     setup_button_layout (metacity);
+    setup_titlebar_font (metacity);
 }
 
 static void
 gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
+    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
 
 #ifdef HAVE_METACITY_3_20_0
     g_clear_object (&metacity->theme);
 #endif
 
     if (metacity->button_layout_id != 0) {
-        GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
-
         g_signal_handler_disconnect (settings, metacity->button_layout_id);
         metacity->button_layout_id = 0;
+    }
+
+    if (metacity->titlebar_font_id != 0) {
+        g_signal_handler_disconnect (settings, metacity->titlebar_font_id);
+        metacity->titlebar_font_id = 0;
     }
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
@@ -1538,9 +1575,7 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
                                               decor_frame_t        *frame,
                                               PangoFontDescription *titlebar_font)
 {
-#ifdef HAVE_METACITY_3_20_0
-    /* FIXME: meta_theme_set_titlebar_font if not using system font. */
-#else
+#ifndef HAVE_METACITY_3_20_0
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameType type = frame_type_from_string (frame->type);
     MetaFrameFlags flags = 0xc33; /* FIXME */
