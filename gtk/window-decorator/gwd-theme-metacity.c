@@ -50,6 +50,21 @@ struct _GWDThemeMetacity
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
+static MetaFrameType
+frame_type_from_string (const gchar *str)
+{
+    if (strcmp ("dialog", str) == 0)
+        return META_FRAME_TYPE_DIALOG;
+    else if (strcmp ("modal_dialog", str) == 0)
+        return META_FRAME_TYPE_MODAL_DIALOG;
+    else if (strcmp ("utility", str) == 0)
+        return META_FRAME_TYPE_UTILITY;
+    else if (strcmp ("menu", str) == 0)
+        return META_FRAME_TYPE_MENU;
+
+    return META_FRAME_TYPE_NORMAL;
+}
+
 #ifdef HAVE_METACITY_3_20_0
 static void
 style_updated_cb (GtkWidget        *widget,
@@ -831,9 +846,7 @@ calc_button_size (GWDTheme *theme,
         return;
     }
 
-    frame_type = meta_frame_type_from_string (decor->frame->type);
-    if (!(frame_type < META_FRAME_TYPE_LAST))
-        frame_type = META_FRAME_TYPE_NORMAL;
+    frame_type = frame_type_from_string (decor->frame->type);
 
     get_decoration_geometry (GWD_THEME_METACITY (theme), decor, &flags,
                              &fgeom, frame_type);
@@ -1071,10 +1084,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
-    frame_type = meta_frame_type_from_string (decor->frame->type);
-
-    if (frame_type == META_FRAME_TYPE_LAST)
-        frame_type = META_FRAME_TYPE_NORMAL;
+    frame_type = frame_type_from_string (decor->frame->type);
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
@@ -1273,14 +1283,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
     MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
 #endif
-    MetaFrameType frame_type;
+    MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
-
-    frame_type = meta_frame_type_from_string (frame->type);
-    if (!(frame_type < META_FRAME_TYPE_LAST))
-        frame_type = META_FRAME_TYPE_NORMAL;
 
 #ifdef HAVE_METACITY_3_20_0
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
@@ -1335,7 +1341,7 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
     MetaFrameFlags flags;
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom,
-                             meta_frame_type_from_string (decor->frame->type));
+                             frame_type_from_string (decor->frame->type));
 
     width += fgeom.borders.total.right + fgeom.borders.total.left;
     height += fgeom.borders.total.top  + fgeom.borders.total.bottom;
@@ -1463,9 +1469,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
         return FALSE;
     }
 
-    frame_type = meta_frame_type_from_string (decor->frame->type);
-    if (!(frame_type < META_FRAME_TYPE_LAST))
-        frame_type = META_FRAME_TYPE_NORMAL;
+    frame_type = frame_type_from_string (decor->frame->type);
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
@@ -1525,12 +1529,9 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
                                               PangoFontDescription *titlebar_font)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    MetaFrameType type = meta_frame_type_from_string (frame->type);
+    MetaFrameType type = frame_type_from_string (frame->type);
     MetaFrameFlags flags = 0xc33; /* FIXME */
     MetaFrameStyle *style;
-
-    if (type == META_FRAME_TYPE_LAST)
-        type = META_FRAME_TYPE_NORMAL;
 
     style = meta_theme_get_frame_style (metacity->theme, type, flags);
 

@@ -1,3 +1,32 @@
+compiz (1:0.9.12.2+16.10.20160606.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * removed a line that includes a missing header file and breaks the
+    build
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 06 Jun 2016 14:28:30 +0000
+
+compiz (1:0.9.12.2+16.10.20160602.3-0ubuntu1) yakkety; urgency=medium
+
+  [ Graham Inggs ]
+  * Move libjpeg8-dev to libjpeg-dev
+
+  [ Gianfranco Costamagna ]
+  * Move libpng12-dev to libpng-dev, to ease libpng12 removal.
+  * Move libjpeg8-dev to libjpeg-dev and libpng12-dev to libpng-dev, to
+    ease libpng12 removal
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: remove broken 2D decoration mode.
+  * gtk-window-decorator: replace get_title_scale with
+    update_titlebar_font_size.
+  * gtk-window-decorator: improve GWDSettingsStorage
+
+  [ Marco Trevisan (Treviño) ]
+  * showmouse: add mouse vertical and horizontal guides (LP: #1541059)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 02 Jun 2016 01:30:40 +0000
+
 compiz (1:0.9.12.2+16.10.20160526-0ubuntu1) yakkety; urgency=medium
 
   [ Alberts Muktupāvels ]

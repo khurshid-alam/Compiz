@@ -11,6 +11,9 @@
  * Copyright : (C) 2009 by Sam Spilsbury
  * E-mail    : smpillaz@gmail.com
  *
+ * Copyright (C) 2016 by Hypra
+ * E-mail    contact@hypra.fr
+ * Added mouse guides.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -350,6 +353,12 @@ toggleFunctions (bool enabled)
 void
 ShowmouseScreen::genNewParticles (int f_time)
 {
+    unsigned int nE = optionGetEmitters ();
+    if (nE == 0)
+    {
+      ps.active = true; // Don't stop drawing: we may have guides.
+      return;
+    }
     bool rColor     = optionGetRandom ();
     float life      = optionGetLife ();
     float lifeNeg   = 1 - life;
@@ -373,7 +382,6 @@ ShowmouseScreen::genNewParticles (int f_time)
     unsigned int i, j;
 
     float pos[10][2];
-    unsigned int nE = optionGetEmitters ();
     float rA     = (2 * M_PI) / nE;
     int radius   = optionGetRadius ();
 
@@ -562,9 +570,63 @@ ShowmouseScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 
     sTransform.toScreenSpace (output, -DEFAULT_Z_CAMERA);
 
-    ps.drawParticles (sTransform);
+    drawGuides (sTransform);
+
+    if (optionGetEmitters () > 0)
+      ps.drawParticles (sTransform);
 
     return status;
+}
+
+void
+ShowmouseScreen::drawLine (const GLMatrix &transform,
+                           double x1, double y1, double x2, double y2,
+                           unsigned short *color)
+{
+  GLVertexBuffer *stream = GLVertexBuffer::streamingBuffer ();
+  GLfloat vertices[6] =
+    {GLfloat(x1), GLfloat(y1), GLfloat(0), GLfloat(x2), GLfloat(y2), GLfloat(0)};
+
+  stream->begin (GL_LINES);
+  stream->addColors (1, color);
+  stream->addVertices (2, vertices);
+  if (stream->end ())
+    stream->render (transform);
+}
+
+void
+ShowmouseScreen::drawGuides (const GLMatrix &transform)
+{
+  unsigned short *color = optionGetGuideColor ();
+  float x = mousePos.x ();
+  float y = mousePos.y ();
+  float thickness = optionGetGuideThickness ();
+  float r = optionGetGuideEmptyRadius ();
+
+  // If the thickness is zero we don't have to draw, but we should
+  // still mark the region where the guides should be as damaged --
+  // this is useful when thickness has just been changed.
+
+  if (thickness > 0)
+  {
+    glLineWidth (thickness);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable (GL_BLEND);
+    drawLine (transform, x, 0, x, y - r, color);
+    drawLine (transform, x, y + r, x, screen->height (), color);
+    drawLine (transform, 0, y, x - r, y, color);
+    drawLine (transform, x + r, y, screen->width (), y, color);
+    glDisable (GL_BLEND);
+  }
+
+  // This has to be manually synchronized with the maximum value in
+  // showmouse.xml.in.  The code generated from the XML file keeps
+  // the value private.
+  thickness = 20;
+  cScreen->damageRegion (CompRegion(0, y - thickness / 2 - 1,
+                                    screen->width (), thickness + 1));
+  cScreen->damageRegion (CompRegion(x - thickness / 2 - 1, 0,
+                                    thickness + 1, screen->height ()));
 }
 
 bool
