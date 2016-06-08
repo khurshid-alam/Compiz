@@ -442,14 +442,6 @@ decor_update_blur_property (decor_t *d,
 			    Region  right_region,
 			    int     right_offset);
 
-/* decorprops.c */
-
-void
-decor_update_window_property (decor_t *d);
-
-void
-decor_update_switcher_property (decor_t *d);
-
 /* cairo.c */
 
 #define CORNER_TOPLEFT     (1 << 0)
