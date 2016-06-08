@@ -1404,11 +1404,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 #ifdef HAVE_METACITY_3_20_0
     /* Add `shadow` border */
 
+    frame->win_extents.top += borders.shadow.top;
     frame->win_extents.bottom += borders.shadow.bottom;
     frame->win_extents.left += borders.shadow.left;
     frame->win_extents.right += borders.shadow.right;
-
-    frame->titlebar_height += borders.shadow.top;
 #endif
 
 #ifdef HAVE_METACITY_3_20_0
@@ -1428,11 +1427,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 #ifdef HAVE_METACITY_3_20_0
     /* Add `shadow` border */
 
+    frame->max_win_extents.top += borders.shadow.top;
     frame->max_win_extents.bottom += borders.shadow.bottom;
     frame->max_win_extents.left += borders.shadow.left;
     frame->max_win_extents.right += borders.shadow.right;
-
-    frame->max_titlebar_height += borders.shadow.top;
 #endif
 
 #ifndef HAVE_METACITY_3_20_0
