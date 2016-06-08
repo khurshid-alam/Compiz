@@ -40,7 +40,6 @@ struct _GWDThemeMetacity
 
     MetaTheme                  *theme;
 
-    GtkWidget                  *style_window;
     GHashTable                 *style_variants;
 
     gulong                      button_layout_id;
@@ -59,7 +58,9 @@ get_style_info (GWDThemeMetacity *metacity,
     MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
 
     if (style == NULL) {
-        GdkScreen *screen = gtk_widget_get_screen (metacity->style_window);
+        GWDTheme *theme = GWD_THEME (theme);
+        GtkWidget *style_window = gwd_theme_get_style_window (theme);
+        GdkScreen *screen = gtk_widget_get_screen (style_window);
 
         style = meta_theme_create_style_info (screen, variant);
 
@@ -67,31 +68,6 @@ get_style_info (GWDThemeMetacity *metacity,
     }
 
     return style;
-}
-
-static void
-style_updated_cb (GtkWidget        *widget,
-                  GWDThemeMetacity *metacity)
-{
-    g_hash_table_remove_all (metacity->style_variants);
-    decorations_changed (wnck_screen_get_default ());
-}
-
-static GtkWidget *
-create_style_window (GWDThemeMetacity *metacity)
-{
-    GtkWidget *widget = gtk_window_new (GTK_WINDOW_POPUP);
-    GtkWindow *window = GTK_WINDOW (widget);
-
-    gtk_window_move (window, -200, -200);
-    gtk_window_resize (window, 1, 1);
-
-    gtk_widget_show (widget);
-
-    g_signal_connect (widget, "style-updated",
-                      G_CALLBACK (style_updated_cb), metacity);
-
-    return widget;
 }
 
 static MetaFrameType
@@ -950,7 +926,6 @@ gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-    g_clear_pointer (&metacity->style_window, gtk_widget_destroy);
     g_clear_pointer (&metacity->style_variants, g_hash_table_destroy);
 
     if (metacity->button_layout_id != 0) {
@@ -968,6 +943,7 @@ gwd_theme_metacity_dispose (GObject *object)
 static void
 gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
+    g_hash_table_remove_all (metacity->style_variants);
 }
 
 static void
@@ -1477,7 +1453,6 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
-    metacity->style_window = create_style_window (metacity);
     metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                       (GDestroyNotify) meta_style_info_unref);
 }
