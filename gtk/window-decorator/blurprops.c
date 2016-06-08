@@ -77,7 +77,6 @@ decor_update_blur_property (decor_t *d,
 			 XA_INTEGER,
 			 32, PropModeReplace, (guchar *) data,
 			 2 + size * 6);
-	gdk_display_sync (gdk_display_get_default ());
 	gdk_error_trap_pop_ignored ();
 
 	free (data);
@@ -86,7 +85,6 @@ decor_update_blur_property (decor_t *d,
     {
 	gdk_error_trap_push ();
 	XDeleteProperty (xdisplay, d->prop_xid, win_blur_decor_atom);
-	gdk_display_sync (gdk_display_get_default ());
 	gdk_error_trap_pop_ignored ();
     }
 }

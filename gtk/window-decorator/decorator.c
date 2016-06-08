@@ -298,7 +298,6 @@ update_event_windows (WnckWindow *win)
 	}
     }
 
-    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 }
 
