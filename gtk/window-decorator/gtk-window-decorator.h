@@ -443,9 +443,6 @@ decor_update_blur_property (decor_t *d,
 /* decorprops.c */
 
 void
-decor_update_window_property (decor_t *d);
-
-void
 decor_update_switcher_property (decor_t *d);
 
 /* cairo.c */

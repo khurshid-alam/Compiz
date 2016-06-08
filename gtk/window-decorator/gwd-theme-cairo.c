@@ -39,6 +39,96 @@ struct _GWDThemeCairo
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
 
 static void
+decor_update_window_property (decor_t *d)
+{
+    long	    *data;
+    Display	    *xdisplay =
+	GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    decor_extents_t extents = d->frame->win_extents;
+    gint	    nQuad;
+    unsigned int    nOffset = 1;
+    unsigned int   frame_type = populate_frame_type (d);
+    unsigned int   frame_state = populate_frame_state (d);
+    unsigned int   frame_actions = populate_frame_actions (d);
+    decor_quad_t    quads[N_QUADS_MAX];
+    int		    w, h;
+    gint	    stretch_offset;
+    REGION	    top, bottom, left, right;
+
+    w = d->border_layout.top.x2 - d->border_layout.top.x1 -
+	d->context->left_space - d->context->right_space;
+
+    if (d->border_layout.rotation)
+	h = d->border_layout.left.x2 - d->border_layout.left.x1;
+    else
+	h = d->border_layout.left.y2 - d->border_layout.left.y1;
+
+    stretch_offset = w - d->button_width - 1;
+
+    nQuad = decor_set_lSrStXbS_window_quads (quads, d->context,
+					     &d->border_layout,
+					     stretch_offset);
+
+    data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
+    decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
+                             &extents, &extents,
+                             &extents, &extents,
+                             ICON_SPACE + d->button_width,
+                             0,
+                             quads, nQuad, frame_type, frame_state, frame_actions);
+
+    gdk_error_trap_push ();
+    XChangeProperty (xdisplay, d->prop_xid,
+		     win_decor_atom,
+		     XA_INTEGER,
+		     32, PropModeReplace, (guchar *) data,
+		     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
+    gdk_display_sync (gdk_display_get_default ());
+    gdk_error_trap_pop_ignored ();
+
+    top.rects = &top.extents;
+    top.numRects = top.size = 1;
+
+    top.extents.x1 = -extents.left;
+    top.extents.y1 = -extents.top;
+    top.extents.x2 = w + extents.right;
+    top.extents.y2 = 0;
+
+    bottom.rects = &bottom.extents;
+    bottom.numRects = bottom.size = 1;
+
+    bottom.extents.x1 = -extents.left;
+    bottom.extents.y1 = 0;
+    bottom.extents.x2 = w + extents.right;
+    bottom.extents.y2 = extents.bottom;
+
+    left.rects = &left.extents;
+    left.numRects = left.size = 1;
+
+    left.extents.x1 = -extents.left;
+    left.extents.y1 = 0;
+    left.extents.x2 = 0;
+    left.extents.y2 = h;
+
+    right.rects = &right.extents;
+    right.numRects = right.size = 1;
+
+    right.extents.x1 = 0;
+    right.extents.y1 = 0;
+    right.extents.x2 = extents.right;
+    right.extents.y2 = h;
+
+    decor_update_blur_property (d,
+				w, h,
+				&top, stretch_offset,
+				&bottom, w / 2,
+				&left, h / 2,
+				&right, h / 2);
+
+    free (data);
+}
+
+static void
 button_state_offsets (gdouble  x,
                       gdouble  y,
                       guint    state,
