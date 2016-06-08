@@ -149,8 +149,7 @@ gwd_theme_set_property (GObject      *object,
 }
 
 static void
-gwd_theme_real_style_updated (GWDTheme  *theme,
-                              GtkWidget *widget)
+gwd_theme_real_style_updated (GWDTheme *theme)
 {
 }
 

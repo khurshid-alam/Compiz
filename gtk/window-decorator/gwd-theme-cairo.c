@@ -33,9 +33,9 @@
 
 struct _GWDThemeCairo
 {
-    GObject parent;
+    GObject       parent;
 
-    decor_color_t  title_color[2];
+    decor_color_t title_color[2];
 };
 
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
@@ -514,8 +514,7 @@ gwd_theme_cairo_constructed (GObject *object)
 }
 
 static void
-gwd_theme_cairo_style_updated (GWDTheme  *theme,
-                               GtkWidget *widget)
+gwd_theme_cairo_style_updated (GWDTheme *theme)
 {
     GWDThemeCairo *cairo = GWD_THEME_CAIRO (theme);
 

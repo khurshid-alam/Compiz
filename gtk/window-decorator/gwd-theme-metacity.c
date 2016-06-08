@@ -939,8 +939,7 @@ gwd_theme_metacity_dispose (GObject *object)
 }
 
 static void
-gwd_theme_metacity_style_updated (GWDTheme  *theme,
-                                  GtkWidget *widget)
+gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
 }
 

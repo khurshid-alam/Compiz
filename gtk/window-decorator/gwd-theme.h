@@ -37,8 +37,7 @@ struct _GWDThemeClass
 {
     GObjectClass parent_class;
 
-    void     (* style_updated)                      (GWDTheme                   *theme,
-                                                     GtkWidget                  *widget);
+    void     (* style_updated)                      (GWDTheme                   *theme);
 
     void     (* get_shadow)                         (GWDTheme                   *theme,
                                                      decor_frame_t              *frame,
