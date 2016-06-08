@@ -62,7 +62,6 @@ get_frame_type (WnckWindow *win)
 					 net_wm_state_atom,
 					 0L, 1024L, FALSE, XA_ATOM, &actual, &format,
 					 &n, &left, &data);
-	    gdk_flush ();
 	    gdk_error_trap_pop_ignored ();
 
 	    if (result == Success && data)

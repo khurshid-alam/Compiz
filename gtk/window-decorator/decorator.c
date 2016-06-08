@@ -579,10 +579,8 @@ update_window_decoration_size (WnckWindow *win)
 
     surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
 
-    gdk_flush ();
-
     /* Handle failure */
-    if (!surface || gdk_error_trap_pop ())
+    if (gdk_error_trap_pop () || !surface)
     {
 	if (surface)
 	    cairo_surface_destroy (surface);
@@ -593,10 +591,8 @@ update_window_decoration_size (WnckWindow *win)
 
     buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
 
-    gdk_flush ();
-
     /* Handle failure */
-    if (!buffer_surface || gdk_error_trap_pop ())
+    if (gdk_error_trap_pop () || !buffer_surface)
     {
 	if (buffer_surface)
 	    cairo_surface_destroy (buffer_surface);
