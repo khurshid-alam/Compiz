@@ -53,7 +53,7 @@ static void
 style_updated_cb (GtkWidget *widget,
                   GWDTheme  *theme)
 {
-    GWD_THEME_GET_CLASS (theme)->style_updated (theme, widget);
+    GWD_THEME_GET_CLASS (theme)->style_updated (theme);
 
     decorations_changed (wnck_screen_get_default ());
 }

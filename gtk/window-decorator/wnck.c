@@ -169,6 +169,16 @@ window_actions_changed (WnckWindow *win)
 }
 
 static void
+update_frames_titlebar_fonts (gpointer key,
+                              gpointer value,
+                              gpointer user_data)
+{
+    decor_frame_t *frame = (decor_frame_t *) value;
+
+    frame_update_titlebar_font (frame);
+}
+
+static void
 update_frames_border_extents (gpointer key,
 			      gpointer value,
 			      gpointer user_data)
