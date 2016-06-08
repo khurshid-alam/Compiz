@@ -48,6 +48,16 @@ static GParamSpec *properties[LAST_PROP] = { NULL };
 G_DEFINE_TYPE_WITH_PRIVATE (GWDTheme, gwd_theme, G_TYPE_OBJECT)
 
 static void
+gwd_theme_constructed (GObject *object)
+{
+    GWDTheme *theme = GWD_THEME (object);
+
+    G_OBJECT_CLASS (gwd_theme_parent_class)->constructed (object);
+
+    gwd_theme_update_titlebar_font (theme);
+}
+
+static void
 gwd_theme_dispose (GObject *object)
 {
     GWDTheme *theme = GWD_THEME (object);
@@ -190,6 +200,7 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
 
     object_class = G_OBJECT_CLASS (theme_class);
 
+    object_class->constructed = gwd_theme_constructed;
     object_class->dispose = gwd_theme_dispose;
     object_class->get_property = gwd_theme_get_property;
     object_class->set_property = gwd_theme_set_property;
