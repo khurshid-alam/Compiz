@@ -637,7 +637,6 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
     decor_extents_t frame_win_extents;
     decor_extents_t max_win_extents;
     decor_extents_t frame_max_win_extents;
-    MetaFrameBorders borders;
     decor_quad_t quads[N_QUADS_MAX];
     gint w;
     gint lh;
@@ -652,8 +651,10 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
     win_extents = frame_win_extents = d->frame->win_extents;
     max_win_extents = frame_max_win_extents = d->frame->max_win_extents;
 
+    /* Add the invisible grab area padding */
     {
-        /* Add the invisible grab area padding */
+        MetaFrameBorders borders;
+
         meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d->gtk_theme_variant),
                                       type, d->frame->text_height, flags, &borders);
 
@@ -965,6 +966,11 @@ gwd_theme_metacity_dispose (GObject *object)
 }
 
 static void
+gwd_theme_metacity_style_updated (GWDTheme *theme)
+{
+}
+
+static void
 gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                                            decor_t  *decor)
 {
@@ -972,7 +978,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
-    GtkWidget *style_window = decor->frame->style_window_rgba;
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_surface_t *surface;
     Picture src;
@@ -1045,7 +1051,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cairo_destroy (cr);
 
-    surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
+    surface = create_surface (fgeom.width, fgeom.height, style_window);
 
     cr = cairo_create (surface);
 
@@ -1436,6 +1442,7 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
                                       decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
     MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
     MetaFrameType type = frame_type_from_string (frame->type);
@@ -1457,6 +1464,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     object_class->constructed = gwd_theme_metacity_constructed;
     object_class->dispose = gwd_theme_metacity_dispose;
 
+    theme_class->style_updated = gwd_theme_metacity_style_updated;
     theme_class->draw_window_decoration = gwd_theme_metacity_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_metacity_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
