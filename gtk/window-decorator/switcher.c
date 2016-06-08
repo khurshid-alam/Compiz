@@ -480,8 +480,8 @@ update_switcher_window (Window     popup,
 	    if (!d->layout)
 	    {
 		d->layout = pango_layout_new (d->frame->pango_context);
-		if (d->layout)
-		    pango_layout_set_wrap (d->layout, PANGO_WRAP_CHAR);
+
+		pango_layout_set_wrap (d->layout, PANGO_WRAP_CHAR);
 	    }
 
 	    if (d->layout)

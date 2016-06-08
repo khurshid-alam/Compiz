@@ -279,8 +279,6 @@ max_window_name_width (WnckWindow *win)
     if (!d->layout)
     {
 	d->layout = pango_layout_new (d->frame->pango_context);
-	if (!d->layout)
-	    return 0;
 
 	pango_layout_set_wrap (d->layout, PANGO_WRAP_CHAR);
     }
@@ -347,6 +345,10 @@ update_window_decoration_name (WnckWindow *win)
 	    if (w < 1)
 		w = 1;
 	}
+
+        /* Ensure that a layout is created */
+        if (d->layout == NULL)
+            d->layout = pango_layout_new (d->frame->pango_context);
 
 	/* Set the maximum width for the layout (in case
 	 * decoration size < text width) since we
@@ -1256,7 +1258,7 @@ update_default_decorations (GdkScreen *screen)
 
         default_frames[i].d->context = i < WINDOW_TYPE_FRAMES_NUM ? &frame->window_context_active : &frame->window_context_inactive;
         default_frames[i].d->shadow  =  i < WINDOW_TYPE_FRAMES_NUM ? frame->border_shadow_active : frame->border_shadow_inactive;
-        default_frames[i].d->layout  = pango_layout_new (frame->pango_context);
+        default_frames[i].d->layout = NULL;
 
         decor_get_default_layout (default_frames[i].d->context, 1, 1, &default_frames[i].d->border_layout);
 
