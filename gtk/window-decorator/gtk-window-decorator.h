@@ -209,8 +209,6 @@ typedef void (*destroy_frame_proc) (decor_frame_t *);
 struct _decor_frame {
     decor_extents_t win_extents;
     decor_extents_t max_win_extents;
-    int		    titlebar_height;
-    int		    max_titlebar_height;
     decor_shadow_t *border_shadow_active;
     decor_shadow_t *border_shadow_inactive;
     decor_shadow_t *max_border_shadow_active;

@@ -243,6 +243,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     gint corners = SHADE_LEFT | SHADE_RIGHT | SHADE_TOP | SHADE_BOTTOM;
     gint top;
     gint button_x;
+    gint titlebar_height;
 
     if (!decor->surface)
         return;
@@ -275,10 +276,10 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
-    top = decor->frame->win_extents.top + decor->frame->titlebar_height;
+    top = decor->frame->win_extents.top;
 
     x1 = decor->context->left_space - decor->frame->win_extents.left;
-    y1 = decor->context->top_space - decor->frame->win_extents.top - decor->frame->titlebar_height;
+    y1 = decor->context->top_space - decor->frame->win_extents.top;
     x2 = decor->width - decor->context->right_space + decor->frame->win_extents.right;
     y2 = decor->height - decor->context->bottom_space + decor->frame->win_extents.bottom;
 
@@ -474,10 +475,11 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     cairo_set_line_width (cr, 2.0);
 
     button_x = decor->width - decor->context->right_space - 13;
+    titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
 
     if (decor->actions & WNCK_WINDOW_ACTION_CLOSE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_CLOSE], &x, &y);
 
         button_x -= 17;
@@ -499,7 +501,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (decor->actions & WNCK_WINDOW_ACTION_MAXIMIZE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_MAX], &x, &y);
 
         button_x -= 17;
@@ -538,7 +540,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (decor->actions & WNCK_WINDOW_ACTION_MINIMIZE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_MIN], &x, &y);
 
         button_x -= 17;
@@ -565,7 +567,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
         if (decor->active) {
             cairo_move_to (cr,
                            decor->context->left_space + 21.0,
-                           y1 + 2.0 + (decor->frame->titlebar_height - decor->frame->text_height) / 2.0);
+                           y1 + 2.0 + (titlebar_height - decor->frame->text_height) / 2.0);
 
             fg.alpha = STROKE_ALPHA;
             gdk_cairo_set_source_rgba (cr, &fg);
@@ -581,7 +583,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
         cairo_move_to (cr,
                        decor->context->left_space + 21.0,
-                        y1 + 2.0 + (decor->frame->titlebar_height - decor->frame->text_height) / 2.0);
+                        y1 + 2.0 + (titlebar_height - decor->frame->text_height) / 2.0);
 
         pango_cairo_show_layout (cr, decor->layout);
     }
@@ -589,7 +591,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     if (decor->icon) {
         cairo_translate (cr,
                          decor->context->left_space + 1,
-                         y1 - 5.0 + decor->frame->titlebar_height / 2);
+                         y1 - 5.0 + titlebar_height / 2);
         cairo_set_source (cr, decor->icon);
         cairo_rectangle (cr, 0.0, 0.0, 16.0, 16.0);
         cairo_clip (cr);
@@ -669,14 +671,15 @@ gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
 {
     decor_extents_t win_extents = { 6, 6, 10, 6 };
     decor_extents_t max_win_extents = { 6, 6, 4, 6 };
+    gint titlebar_height = frame->text_height < 17 ? 17 : frame->text_height;
 
     frame = gwd_decor_frame_ref (frame);
 
+    win_extents.top += titlebar_height;
+    max_win_extents.top += titlebar_height;
+
     frame->win_extents = win_extents;
     frame->max_win_extents = max_win_extents;
-
-    frame->titlebar_height = frame->max_titlebar_height =
-        (frame->text_height < 17) ? 17 : frame->text_height;
 
     gwd_decor_frame_unref (frame);
 }
@@ -693,9 +696,11 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
                                            gint     *w,
                                            gint     *h)
 {
+    gint titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
+
     *x = pos[i][j].x + pos[i][j].xw * width;
     *y = pos[i][j].y +
-         pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
+         pos[i][j].yh * height + pos[i][j].yth * (titlebar_height - 17);
 
     if ((decor->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY) && (j == 0 || j == 2)) {
         *w = 0;
@@ -707,7 +712,7 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
         *h = 0;
     } else {
         *h = pos[i][j].h +
-             pos[i][j].hh * height + pos[i][j].hth * (decor->frame->titlebar_height - 17);
+             pos[i][j].hh * height + pos[i][j].hth * (titlebar_height - 17);
     }
 }
 
@@ -722,16 +727,16 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
                                      gint     *w,
                                      gint     *h)
 {
+    gint titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
+
     if (i > BUTTON_MENU)
         return FALSE;
 
     *x = bpos[i].x + bpos[i].xw * width;
-    *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
-         (decor->frame->titlebar_height - 17);
+    *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth * (titlebar_height - 17);
 
     *w = bpos[i].w + bpos[i].ww * width;
-    *h = bpos[i].h + bpos[i].hh * height + bpos[i].hth +
-         (decor->frame->titlebar_height - 17);
+    *h = bpos[i].h + bpos[i].hh * height + bpos[i].hth + (titlebar_height - 17);
 
     /* hack to position multiple buttons on the right */
     if (i != BUTTON_MENU) {
