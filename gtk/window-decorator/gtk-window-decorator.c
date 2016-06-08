@@ -136,7 +136,6 @@ update_decorations_cb (GWDSettings *settings,
 
 static void
 update_titlebar_font_cb (GWDSettings *settings,
-                         const gchar *titlebar_font,
                          gpointer     user_data)
 {
     gwd_theme_update_titlebar_font (gwd_theme);
