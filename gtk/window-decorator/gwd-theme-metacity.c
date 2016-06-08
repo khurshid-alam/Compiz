@@ -45,11 +45,11 @@ struct _GWDThemeMetacity
     MetaTheme                  *theme;
 
     gulong                      button_layout_id;
-    gulong                      titlebar_font_id;
-
     MetaButtonLayout            button_layout;
 
+#ifndef HAVE_METACITY_3_20_0
     const PangoFontDescription *titlebar_font;
+#endif
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
@@ -330,24 +330,6 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
     metacity->button_layout = new_layout;
 #endif
 }
-
-#ifdef HAVE_METACITY_3_20_0
-static void
-update_titlebar_font_cb (GWDSettings      *settings,
-                         const gchar      *titlebar_font,
-                         GWDThemeMetacity *metacity)
-{
-    PangoFontDescription *description = NULL;
-
-    if (titlebar_font != NULL)
-        description = pango_font_description_from_string (titlebar_font);
-
-    meta_theme_set_titlebar_font (metacity->theme, description);
-    pango_font_description_free (description);
-
-    /* FIXME: update_decorations? titlebar height might be bigger or smaller. */
-}
-#endif
 
 static MetaButtonType
 meta_function_to_type (MetaButtonFunction function)
@@ -1062,21 +1044,6 @@ setup_button_layout (GWDThemeMetacity *metacity)
 }
 
 static void
-setup_titlebar_font (GWDThemeMetacity *metacity)
-{
-#ifdef HAVE_METACITY_3_20_0
-    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    metacity->titlebar_font_id =
-        g_signal_connect (settings, "update-titlebar-font",
-                          G_CALLBACK (update_titlebar_font_cb), metacity);
-
-    update_titlebar_font_cb (settings, titlebar_font, metacity);
-#endif
-}
-
-static void
 gwd_theme_metacity_constructed (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
@@ -1087,7 +1054,6 @@ gwd_theme_metacity_constructed (GObject *object)
         return;
 
     setup_button_layout (metacity);
-    setup_titlebar_font (metacity);
 }
 
 static void
@@ -1105,7 +1071,9 @@ gwd_theme_metacity_dispose (GObject *object)
         metacity->button_layout_id = 0;
     }
 
+#ifndef HAVE_METACITY_3_20_0
     metacity->titlebar_font = NULL;
+#endif
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
@@ -1649,7 +1617,11 @@ gwd_theme_metacity_update_titlebar_font (GWDTheme                   *theme,
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_set_titlebar_font (metacity->theme, titlebar_font);
+#else
     metacity->titlebar_font = titlebar_font;
+#endif
 }
 
 static PangoFontDescription *
