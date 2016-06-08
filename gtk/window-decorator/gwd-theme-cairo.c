@@ -316,8 +316,9 @@ static void
 gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
                                         decor_t  *decor)
 {
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_t *cr;
-    GtkStyleContext *context;
     GdkRGBA bg, fg;
     cairo_surface_t *surface;
     decor_color_t color;
@@ -330,8 +331,6 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (!decor->surface)
         return;
-
-    context = gtk_widget_get_style_context (decor->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);

@@ -54,6 +54,7 @@ style_updated_cb (GtkWidget *widget,
                   GWDTheme  *theme)
 {
     GWD_THEME_GET_CLASS (theme)->style_updated (theme, widget);
+
     decorations_changed (wnck_screen_get_default ());
 }
 
@@ -71,7 +72,7 @@ create_style_window (GWDTheme *theme)
     if (visual)
 	    gtk_widget_set_visual (priv->style_window, visual);
 
-    gtk_window_move (window, -200, -200);
+    gtk_window_move (window, -100, -100);
     gtk_window_resize (window, 1, 1);
 
     gtk_widget_show (priv->style_window);

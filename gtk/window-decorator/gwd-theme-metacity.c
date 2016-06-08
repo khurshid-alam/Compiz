@@ -572,14 +572,14 @@ get_right_border_region (const MetaFrameGeometry *fgeom,
 }
 
 static void
-decor_update_meta_window_property (decor_t        *d,
-                                   MetaTheme      *theme,
-                                   MetaFrameFlags  flags,
-                                   MetaFrameType   type,
-                                   Region          top,
-                                   Region          bottom,
-                                   Region          left,
-                                   Region          right)
+decor_update_meta_window_property (GWDThemeMetacity *metacity,
+                                   decor_t          *d,
+                                   MetaFrameFlags    flags,
+                                   MetaFrameType     type,
+                                   Region            top,
+                                   Region            bottom,
+                                   Region            left,
+                                   Region            right)
 {
     long *data;
     GdkDisplay *display;
@@ -616,11 +616,13 @@ decor_update_meta_window_property (decor_t        *d,
 
     /* Add the invisible grab area padding */
     {
-        GdkScreen *screen = gtk_widget_get_screen (d->frame->style_window_rgba);
+        GWDTheme *theme = GWD_THEME (metacity);
+        GtkWidget *style_window = gwd_theme_get_style_window (theme);
+        GdkScreen *screen = gtk_widget_get_screen (style_window);
         MetaStyleInfo *style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
         MetaFrameBorders borders;
 
-        meta_theme_get_frame_borders (theme, style_info, type,
+        meta_theme_get_frame_borders (metacity->theme, style_info, type,
                                       d->frame->text_height,
                                       flags, &borders);
 
@@ -695,7 +697,9 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
                          MetaFrameGeometry *fgeom,
                          MetaFrameType      frame_type)
 {
-    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    GWDTheme *theme = GWD_THEME (metacity);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GdkScreen *screen = gtk_widget_get_screen (style_window);
     MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
     gint client_width;
     gint client_height;
@@ -938,7 +942,6 @@ static void
 gwd_theme_metacity_style_updated (GWDTheme  *theme,
                                   GtkWidget *widget)
 {
-    g_warning ("gwd_theme_metacity_style_updated");
 }
 
 static void
@@ -949,9 +952,9 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
-    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GdkScreen *screen = gtk_widget_get_screen (style_window);
     MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
-    GtkWidget *style_window = decor->frame->style_window_rgba;
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_surface_t *surface;
     Picture src;
@@ -1024,7 +1027,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cairo_destroy (cr);
 
-    surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
+    surface = create_surface (fgeom.width, fgeom.height, style_window);
 
     cr = cairo_create (surface);
 
@@ -1102,8 +1105,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
         if (left_region)
             XOffsetRegion (left_region, -fgeom.borders.total.left, 0);
 
-        decor_update_meta_window_property (decor, metacity->theme, flags,
-                                           frame_type,
+        decor_update_meta_window_property (metacity, decor, flags, frame_type,
                                            top_region, bottom_region,
                                            left_region, right_region);
 
@@ -1178,7 +1180,8 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GdkScreen *screen = gtk_widget_get_screen (style_window);
     MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
@@ -1420,7 +1423,8 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
                                       decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GdkScreen *screen = gtk_widget_get_screen (style_window);
     MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
     MetaFrameType type = frame_type_from_string (frame->type);
