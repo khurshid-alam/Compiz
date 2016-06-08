@@ -32,6 +32,8 @@ typedef struct
     GWDSettings          *settings;
 
     PangoFontDescription *titlebar_font;
+
+    GtkWidget            *style_window;
 } GWDThemePrivate;
 
 enum
@@ -48,6 +50,37 @@ static GParamSpec *properties[LAST_PROP] = { NULL };
 G_DEFINE_TYPE_WITH_PRIVATE (GWDTheme, gwd_theme, G_TYPE_OBJECT)
 
 static void
+style_updated_cb (GtkWidget *widget,
+                  GWDTheme  *theme)
+{
+    GWD_THEME_GET_CLASS (theme)->style_updated (theme, widget);
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+create_style_window (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    GdkScreen *screen = gdk_screen_get_default ();
+    GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
+    GtkWindow *window;
+
+    priv->style_window = gtk_window_new (GTK_WINDOW_POPUP);
+    window = GTK_WINDOW (priv->style_window);
+
+    if (visual)
+	    gtk_widget_set_visual (priv->style_window, visual);
+
+    gtk_window_move (window, -200, -200);
+    gtk_window_resize (window, 1, 1);
+
+    gtk_widget_show (priv->style_window);
+
+    g_signal_connect (priv->style_window, "style-updated",
+                      G_CALLBACK (style_updated_cb), theme);
+}
+
+static void
 gwd_theme_constructed (GObject *object)
 {
     GWDTheme *theme = GWD_THEME (object);
@@ -55,6 +88,7 @@ gwd_theme_constructed (GObject *object)
     G_OBJECT_CLASS (gwd_theme_parent_class)->constructed (object);
 
     gwd_theme_update_titlebar_font (theme);
+    create_style_window (theme);
 }
 
 static void
@@ -67,6 +101,8 @@ gwd_theme_dispose (GObject *object)
 
     pango_font_description_free (priv->titlebar_font);
     priv->titlebar_font = NULL;
+
+    g_clear_pointer (&priv->style_window, gtk_widget_destroy);
 
     G_OBJECT_CLASS (gwd_theme_parent_class)->dispose (object);
 }
@@ -109,6 +145,12 @@ gwd_theme_set_property (GObject      *object,
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
     }
+}
+
+static void
+gwd_theme_real_style_updated (GWDTheme  *theme,
+                              GtkWidget *widget)
+{
 }
 
 static void
@@ -205,6 +247,7 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     object_class->get_property = gwd_theme_get_property;
     object_class->set_property = gwd_theme_set_property;
 
+    theme_class->style_updated = gwd_theme_real_style_updated;
     theme_class->get_shadow = gwd_theme_real_get_shadow;
     theme_class->draw_window_decoration = gwd_theme_real_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_real_calc_decoration_size;
@@ -267,6 +310,14 @@ gwd_theme_get_settings (GWDTheme *theme)
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     return priv->settings;
+}
+
+GtkWidget *
+gwd_theme_get_style_window (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+
+    return priv->style_window;
 }
 
 void

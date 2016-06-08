@@ -935,6 +935,13 @@ gwd_theme_metacity_dispose (GObject *object)
 }
 
 static void
+gwd_theme_metacity_style_updated (GWDTheme  *theme,
+                                  GtkWidget *widget)
+{
+    g_warning ("gwd_theme_metacity_style_updated");
+}
+
+static void
 gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                                            decor_t  *decor)
 {
@@ -1435,6 +1442,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     object_class->constructed = gwd_theme_metacity_constructed;
     object_class->dispose = gwd_theme_metacity_dispose;
 
+    theme_class->style_updated = gwd_theme_metacity_style_updated;
     theme_class->draw_window_decoration = gwd_theme_metacity_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_metacity_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
