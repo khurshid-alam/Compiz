@@ -58,7 +58,7 @@ get_style_info (GWDThemeMetacity *metacity,
     MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
 
     if (style == NULL) {
-        GWDTheme *theme = GWD_THEME (theme);
+        GWDTheme *theme = GWD_THEME (metacity);
         GtkWidget *style_window = gwd_theme_get_style_window (theme);
         GdkScreen *screen = gtk_widget_get_screen (style_window);
 
@@ -943,6 +943,8 @@ gwd_theme_metacity_dispose (GObject *object)
 static void
 gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+
     g_hash_table_remove_all (metacity->style_variants);
 }
 
@@ -1418,7 +1420,6 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
                                       decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GtkWidget *style_window = gwd_theme_get_style_window (theme);
     MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
     MetaFrameType type = frame_type_from_string (frame->type);
