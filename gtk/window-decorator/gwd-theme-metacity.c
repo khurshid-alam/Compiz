@@ -40,6 +40,9 @@ struct _GWDThemeMetacity
 
     MetaTheme                  *theme;
 
+    GtkWidget                  *style_window;
+    GHashTable                 *style_variants;
+
     gulong                      button_layout_id;
     MetaButtonLayout            button_layout;
 
@@ -47,6 +50,24 @@ struct _GWDThemeMetacity
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
+
+static MetaStyleInfo *
+get_style_info (GWDThemeMetacity *metacity,
+                const gchar      *variant)
+{
+    const gchar *key = variant != NULL ? variant : "default";
+    MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
+
+    if (style == NULL) {
+        GdkScreen *screen = gtk_widget_get_screen (metacity->style_window);
+
+        style = meta_theme_create_style_info (screen, variant);
+
+        g_hash_table_insert (metacity->style_variants, g_strdup (key), style);
+    }
+
+    return style;
+}
 
 static MetaFrameType
 frame_type_from_string (const gchar *str)
@@ -572,28 +593,27 @@ get_right_border_region (const MetaFrameGeometry *fgeom,
 }
 
 static void
-decor_update_meta_window_property (decor_t        *d,
-                                   MetaTheme      *theme,
-                                   MetaFrameFlags  flags,
-                                   MetaFrameType   type,
-                                   Region          top,
-                                   Region          bottom,
-                                   Region          left,
-                                   Region          right)
+decor_update_meta_window_property (GWDThemeMetacity *metacity,
+                                   decor_t          *d,
+                                   MetaFrameFlags    flags,
+                                   MetaFrameType     type,
+                                   Region            top,
+                                   Region            bottom,
+                                   Region            left,
+                                   Region            right)
 {
-    long *data;
-    GdkDisplay *display;
-    Display *xdisplay;
-    gint nQuad;
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    unsigned int frame_type = populate_frame_type (d);
+    unsigned int frame_state = populate_frame_state (d);
+    unsigned int frame_actions = populate_frame_actions (d);
+    unsigned int nOffset = 1;
     decor_extents_t win_extents;
     decor_extents_t frame_win_extents;
     decor_extents_t max_win_extents;
     decor_extents_t frame_max_win_extents;
+    MetaFrameBorders borders;
     decor_quad_t quads[N_QUADS_MAX];
-    unsigned int nOffset;
-    unsigned int frame_type;
-    unsigned int frame_state;
-    unsigned int frame_actions;
     gint w;
     gint lh;
     gint rh;
@@ -601,28 +621,16 @@ decor_update_meta_window_property (decor_t        *d,
     gint bottom_stretch_offset;
     gint left_stretch_offset;
     gint right_stretch_offset;
-
-    display = gdk_display_get_default ();
-    xdisplay = gdk_x11_display_get_xdisplay (display);
-
-    nOffset = 1;
-
-    frame_type = populate_frame_type (d);
-    frame_state = populate_frame_state (d);
-    frame_actions = populate_frame_actions (d);
+    gint nQuad;
+    long *data;
 
     win_extents = frame_win_extents = d->frame->win_extents;
     max_win_extents = frame_max_win_extents = d->frame->max_win_extents;
 
-    /* Add the invisible grab area padding */
     {
-        GdkScreen *screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-        MetaStyleInfo *style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
-        MetaFrameBorders borders;
-
-        meta_theme_get_frame_borders (theme, style_info, type,
-                                      d->frame->text_height,
-                                      flags, &borders);
+        /* Add the invisible grab area padding */
+        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d->gtk_theme_variant),
+                                      type, d->frame->text_height, flags, &borders);
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
             frame_win_extents.left += borders.invisible.left;
@@ -637,8 +645,6 @@ decor_update_meta_window_property (decor_t        *d,
             frame_max_win_extents.bottom += borders.invisible.bottom;
             frame_max_win_extents.top += borders.invisible.top;
         }
-
-        meta_style_info_unref (style_info);
     }
 
     w = d->border_layout.top.x2 - d->border_layout.top.x1 -
@@ -695,8 +701,6 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
                          MetaFrameGeometry *fgeom,
                          MetaFrameType      frame_type)
 {
-    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
-    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
     gint client_width;
     gint client_height;
 
@@ -759,11 +763,9 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
-    meta_theme_calc_geometry (metacity->theme, style_info, frame_type,
-                              decor->frame->text_height, *flags, client_width,
+    meta_theme_calc_geometry (metacity->theme, get_style_info (metacity, decor->gtk_theme_variant),
+                              frame_type, decor->frame->text_height, *flags, client_width,
                               client_height, &metacity->button_layout, fgeom);
-
-    meta_style_info_unref (style_info);
 }
 
 static void
@@ -922,6 +924,9 @@ gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
+    g_clear_pointer (&metacity->style_window, gtk_widget_destroy);
+    g_clear_pointer (&metacity->style_variants, g_hash_table_destroy);
+
     if (metacity->button_layout_id != 0) {
         GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
 
@@ -942,8 +947,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
-    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
-    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
     GtkWidget *style_window = decor->frame->style_window_rgba;
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_surface_t *surface;
@@ -1028,13 +1031,13 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-    meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
+    meta_theme_draw_frame (metacity->theme, get_style_info (metacity, decor->gtk_theme_variant),
+                           cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->layout, decor->frame->text_height, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
 
-    meta_style_info_unref (style_info);
 
     if (fgeom.borders.visible.top) {
         top_region = get_top_border_region (&fgeom, fgeom.width);
@@ -1095,8 +1098,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
         if (left_region)
             XOffsetRegion (left_region, -fgeom.borders.total.left, 0);
 
-        decor_update_meta_window_property (decor, metacity->theme, flags,
-                                           frame_type,
+        decor_update_meta_window_property (metacity, decor, flags, frame_type,
                                            top_region, bottom_region,
                                            left_region, right_region);
 
@@ -1171,31 +1173,27 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
-    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
-    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-                                  frame->text_height, 0, &borders);
+    meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, NULL),
+                                  frame_type, frame->text_height, 0, &borders);
 
     frame->win_extents.top = borders.visible.top;
     frame->win_extents.bottom = borders.visible.bottom;
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
 
-    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-                                  frame->text_height, META_FRAME_MAXIMIZED,
-                                  &borders);
+    meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, NULL),
+                                  frame_type, frame->text_height,
+                                  META_FRAME_MAXIMIZED, &borders);
 
     frame->max_win_extents.top = borders.visible.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
     frame->max_win_extents.left = borders.visible.left;
     frame->max_win_extents.right = borders.visible.right;
-
-    meta_style_info_unref (style_info);
 
     gwd_decor_frame_unref (frame);
 }
@@ -1413,11 +1411,10 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
                                       decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
-    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
+    MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
     MetaFrameType type = frame_type_from_string (frame->type);
-    MetaFrameFlags flags = 0xc33; /* FIXME */
+    MetaFrameFlags flags = 0xc33;
     MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
     pango_font_description_merge (font_desc, metacity->titlebar_font, TRUE);
@@ -1447,6 +1444,17 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
+    GtkWindow *window;
+
+    metacity->style_window = gtk_window_new (GTK_WINDOW_POPUP);
+    metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                                      (GDestroyNotify) meta_style_info_unref);
+
+    window = GTK_WINDOW (metacity->style_window);
+
+    gtk_window_move (window, -200, -200);
+    gtk_window_resize (window, 1, 1);
+    gtk_widget_show (metacity->style_window);
 }
 
 /**
