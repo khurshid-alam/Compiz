@@ -76,14 +76,6 @@ frame_update_titlebar_font (decor_frame_t *frame)
     gwd_decor_frame_unref (frame);
 }
 
-void
-update_frames_titlebar_fonts (gpointer key,
-			      gpointer value,
-			      gpointer user_data)
-{
-    frame_update_titlebar_font ((decor_frame_t *) value);
-}
-
 /*
  * update_event_windows
  *
