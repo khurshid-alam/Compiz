@@ -28,7 +28,9 @@
 
 typedef struct
 {
-    GWDSettings *settings;
+    GWDSettings          *settings;
+
+    PangoFontDescription *titlebar_font;
 } GWDThemePrivate;
 
 enum
@@ -47,13 +49,13 @@ G_DEFINE_TYPE_WITH_PRIVATE (GWDTheme, gwd_theme, G_TYPE_OBJECT)
 static void
 gwd_theme_dispose (GObject *object)
 {
-    GWDTheme *theme;
-    GWDThemePrivate *priv;
-
-    theme = GWD_THEME (object);
-    priv = gwd_theme_get_instance_private (theme);
+    GWDTheme *theme = GWD_THEME (object);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     g_clear_object (&priv->settings);
+
+    pango_font_description_free (priv->titlebar_font);
+    priv->titlebar_font = NULL;
 
     G_OBJECT_CLASS (gwd_theme_parent_class)->dispose (object);
 }
@@ -64,11 +66,8 @@ gwd_theme_get_property (GObject    *object,
                         GValue     *value,
                         GParamSpec *pspec)
 {
-    GWDTheme *theme;
-    GWDThemePrivate *priv;
-
-    theme = GWD_THEME (object);
-    priv = gwd_theme_get_instance_private (theme);
+    GWDTheme *theme = GWD_THEME (object);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     switch (property_id) {
         case PROP_SETTINGS:
@@ -87,11 +86,8 @@ gwd_theme_set_property (GObject      *object,
                         const GValue *value,
                         GParamSpec   *pspec)
 {
-    GWDTheme *theme;
-    GWDThemePrivate *priv;
-
-    theme = GWD_THEME (object);
-    priv = gwd_theme_get_instance_private (theme);
+    GWDTheme *theme = GWD_THEME (object);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     switch (property_id) {
         case PROP_SETTINGS:
@@ -110,10 +106,8 @@ gwd_theme_real_get_shadow (GWDTheme               *theme,
                            decor_shadow_options_t *options,
                            gboolean                active)
 {
-    GWDThemePrivate *priv;
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
     decor_shadow_options_t shadow;
-
-    priv = gwd_theme_get_instance_private (theme);
 
     if (active)
         shadow = gwd_settings_get_active_shadow (priv->settings);
@@ -183,6 +177,12 @@ gwd_theme_real_update_titlebar_font_size (GWDTheme             *theme,
 }
 
 static void
+gwd_theme_real_update_titlebar_font (GWDTheme             *theme,
+                                     PangoFontDescription *titlebar_font)
+{
+}
+
+static void
 gwd_theme_class_init (GWDThemeClass *theme_class)
 {
     GObjectClass *object_class;
@@ -200,6 +200,7 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     theme_class->get_event_window_position = gwd_theme_real_get_event_window_position;
     theme_class->get_button_position = gwd_theme_real_get_button_position;
     theme_class->update_titlebar_font_size = gwd_theme_real_update_titlebar_font_size;
+    theme_class->update_titlebar_font = gwd_theme_real_update_titlebar_font;
 
     properties[PROP_SETTINGS] =
         g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
@@ -251,9 +252,7 @@ gwd_theme_new (GWDThemeType  type,
 GWDSettings *
 gwd_theme_get_settings (GWDTheme *theme)
 {
-    GWDThemePrivate *priv;
-
-    priv = gwd_theme_get_instance_private (theme);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     return priv->settings;
 }
@@ -335,4 +334,19 @@ gwd_theme_update_titlebar_font_size (GWDTheme             *theme,
 {
     GWD_THEME_GET_CLASS (theme)->update_titlebar_font_size (theme, frame,
                                                             titlebar_font);
+}
+
+void
+gwd_theme_update_titlebar_font (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (priv->settings);
+
+    pango_font_description_free (priv->titlebar_font);
+    priv->titlebar_font = NULL;
+
+    if (titlebar_font != NULL)
+        priv->titlebar_font = pango_font_description_from_string (titlebar_font);
+
+    GWD_THEME_GET_CLASS (theme)->update_titlebar_font (theme, priv->titlebar_font);
 }

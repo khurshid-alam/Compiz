@@ -139,7 +139,7 @@ update_titlebar_font_cb (GWDSettings *settings,
                          const gchar *titlebar_font,
                          gpointer     user_data)
 {
-    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+    gwd_theme_update_titlebar_font (gwd_theme);
 }
 
 static void

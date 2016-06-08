@@ -80,6 +80,9 @@ struct _GWDThemeClass
     void     (* update_titlebar_font_size) (GWDTheme               *theme,
                                             decor_frame_t          *frame,
                                             PangoFontDescription   *titlebar_font);
+
+    void     (* update_titlebar_font)      (GWDTheme               *theme,
+                                            PangoFontDescription   *titlebar_font);
 };
 
 typedef enum
@@ -145,6 +148,9 @@ void
 gwd_theme_update_titlebar_font_size (GWDTheme               *theme,
                                      decor_frame_t          *frame,
                                      PangoFontDescription   *titlebar_font);
+
+void
+gwd_theme_update_titlebar_font      (GWDTheme               *theme);
 
 G_END_DECLS
 

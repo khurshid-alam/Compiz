@@ -36,12 +36,14 @@
 
 struct _GWDThemeMetacity
 {
-    GObject           parent;
+    GObject               parent;
 
-    MetaTheme        *theme;
+    MetaTheme            *theme;
 
-    gulong            button_layout_id;
-    MetaButtonLayout  button_layout;
+    gulong                button_layout_id;
+    MetaButtonLayout      button_layout;
+
+    PangoFontDescription *titlebar_font;
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
@@ -1411,6 +1413,15 @@ gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
 }
 
 static void
+gwd_theme_metacity_update_titlebar_font (GWDTheme             *theme,
+                                         PangoFontDescription *titlebar_font)
+{
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+
+    metacity->titlebar_font = titlebar_font;
+}
+
+static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (metacity_class);
@@ -1425,6 +1436,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
     theme_class->update_titlebar_font_size = gwd_theme_metacity_update_titlebar_font_size;
+    theme_class->update_titlebar_font = gwd_theme_metacity_update_titlebar_font;
 }
 
 static void
