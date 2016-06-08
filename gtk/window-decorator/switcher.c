@@ -30,18 +30,20 @@
 static void
 decor_update_switcher_property (decor_t *d)
 {
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     long	 *data;
-    Display	 *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     gint	 nQuad;
     decor_quad_t quads[N_QUADS_MAX];
     unsigned int    nOffset = 1;
     unsigned int   frame_type = populate_frame_type (d);
     unsigned int   frame_state = populate_frame_state (d);
     unsigned int   frame_actions = populate_frame_actions (d);
-    GtkStyleContext *context;
     GdkRGBA fg;
     long         fgColor[4];
-    
+
     nQuad = decor_set_lSrStSbX_window_quads (quads, &d->frame->window_context_active,
 					     &d->border_layout,
 					     d->border_layout.top.x2 -
@@ -55,8 +57,6 @@ decor_update_switcher_property (decor_t *d)
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     &d->frame->win_extents, &d->frame->win_extents,
 			     0, 0, quads, nQuad, frame_type, frame_state, frame_actions);
-
-    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
@@ -111,7 +111,6 @@ create_switcher_frame (const gchar *type)
     switcher_label = gtk_label_new ("");
     switcher_label_obj = gtk_widget_get_accessible (switcher_label);
     atk_object_set_role (switcher_label_obj, ATK_ROLE_STATUSBAR);
-    gtk_container_add (GTK_CONTAINER (frame->style_window_rgba), switcher_label);
 
     return frame;
 }
@@ -126,9 +125,11 @@ destroy_switcher_frame (decor_frame_t *frame)
 static void
 draw_switcher_background (decor_t *d)
 {
-    Display	  *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_t	  *cr;
-    GtkStyleContext *context;
     GdkRGBA bg, fg;
     decor_color_t color;
     double	  alpha = SWITCHER_ALPHA / 65535.0;
@@ -139,8 +140,6 @@ draw_switcher_background (decor_t *d)
 
     if (!d->buffer_surface)
 	return;
-
-    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
@@ -326,15 +325,14 @@ draw_switcher_background (decor_t *d)
 static void
 draw_switcher_foreground (decor_t *d)
 {
-    cairo_t	  *cr;
-    GtkStyleContext *context;
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
+    cairo_t *cr;
     GdkRGBA bg, fg;
     double	  alpha = SWITCHER_ALPHA / 65535.0;
 
     if (!d->surface || !d->buffer_surface)
 	return;
-
-    context = gtk_widget_get_style_context (d->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
@@ -433,23 +431,22 @@ switcher_window_opened (Window popup, Window window)
     return d;
 }
 
-
 gboolean
 update_switcher_window (Window     popup,
 			Window     selected)
 {
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     decor_t           *d = switcher_window;
     cairo_surface_t   *surface, *buffer_surface = NULL;
     unsigned int      height, width = 0, border, depth;
     int		      x, y;
     Window	      root_return;
     WnckWindow        *selected_win;
-    Display           *xdisplay;
 
     if (!d)
 	d = switcher_window_opened (popup, selected);
-
-    xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
     /* FIXME: Thats a round-trip */
     XGetGeometry (gdk_x11_get_default_xdisplay (), popup, &root_return,
@@ -535,11 +532,11 @@ update_switcher_window (Window     popup,
 	switcher_selected_window = selected;
     }
 
-    surface = create_native_surface_and_wrap (width, height, d->frame->style_window_rgba);
+    surface = create_native_surface_and_wrap (width, height, style_window);
     if (!surface)
 	return FALSE;
 
-    buffer_surface = create_surface (width, height, d->frame->style_window_rgba);
+    buffer_surface = create_surface (width, height, style_window);
     if (!buffer_surface)
     {
 	cairo_surface_destroy (surface);

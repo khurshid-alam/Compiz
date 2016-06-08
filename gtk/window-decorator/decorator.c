@@ -1176,13 +1176,12 @@ update_default_decorations (GdkScreen *screen)
     Window xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
     Atom bareAtom = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
     Atom activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     long	    *data;
     decor_frame_t   *frame;
     decor_frame_t   *bare_frame = gwd_get_decor_frame ("bare");
     decor_extents_t extents;
     unsigned int    i;
-    GtkWidget *style_window;
-
 
     if (bare_frame->border_shadow_active)
     {
@@ -1242,7 +1241,6 @@ update_default_decorations (GdkScreen *screen)
                      activeAtom);
 
     data = decor_alloc_property (WINDOW_TYPE_FRAMES_NUM * 2, WINDOW_DECORATION_TYPE_PIXMAP);
-    style_window = gwd_theme_get_style_window (gwd_theme);
 
     /* All active states and all inactive states */
     for (i = 0; i < WINDOW_TYPE_FRAMES_NUM * 2; ++i)
