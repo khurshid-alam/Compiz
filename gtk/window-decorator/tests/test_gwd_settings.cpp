@@ -158,7 +158,6 @@ class GWDMockSettingsNotifiedGMock
         }
 
         static void updateTitlebarFontCb (GWDSettings                  *settings,
-                                          const gchar                  *titlebar_font,
                                           GWDMockSettingsNotifiedGMock *gmock)
         {
             gmock->updateTitlebarFont ();

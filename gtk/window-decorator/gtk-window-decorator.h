@@ -217,7 +217,6 @@ struct _decor_frame {
     decor_context_t window_context_inactive;
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
-    PangoFontDescription *titlebar_font;
     PangoContext	 *pango_context;
     GtkWidget	         *style_window_rgba;
     gint		 text_height;
@@ -667,15 +666,6 @@ gchar *
 get_gtk_theme_variant (Window xwindow);
 
 /* settings.c */
-
-void
-set_frame_scale (decor_frame_t *frame,
-		 const gchar *font_str);
-
-void
-set_frames_scales (gpointer key,
-		   gpointer value,
-		   gpointer user_data);
 
 void
 init_settings (GWDSettings *settings);

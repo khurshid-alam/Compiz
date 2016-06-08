@@ -130,8 +130,7 @@ update_decorations (GWDSettings *settings)
 static void
 update_titlebar_font (GWDSettings *settings)
 {
-    g_signal_emit (settings, settings_signals[UPDATE_TITLEBAR_FONT],
-                   0, settings->titlebar_font);
+    g_signal_emit (settings, settings_signals[UPDATE_TITLEBAR_FONT], 0);
 }
 
 static void
@@ -326,8 +325,7 @@ gwd_settings_class_init (GWDSettingsClass *settings_class)
     settings_signals[UPDATE_TITLEBAR_FONT] =
         g_signal_new ("update-titlebar-font",
                       GWD_TYPE_SETTINGS, G_SIGNAL_RUN_LAST,
-                      0, NULL, NULL, NULL, G_TYPE_NONE, 1,
-                      G_TYPE_STRING);
+                      0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
     settings_signals[UPDATE_METACITY_THEME] =
         g_signal_new ("update-metacity-theme",

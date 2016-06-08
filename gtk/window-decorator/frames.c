@@ -264,16 +264,12 @@ style_updated (GtkWidget *widget,
 void
 decor_frame_refresh (decor_frame_t *frame)
 {
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
     decor_shadow_options_t active_o, inactive_o;
     decor_shadow_info_t *info;
 
     gwd_decor_frame_ref (frame);
 
     update_style (frame->style_window_rgba);
-
-    set_frame_scale (frame, titlebar_font);
 
     frame_update_titlebar_font (frame);
 
@@ -441,7 +437,6 @@ decor_frame_new (const gchar *type)
     frame->border_shadow_inactive = NULL;
     frame->max_border_shadow_active = NULL;
     frame->max_border_shadow_inactive = NULL;
-    frame->titlebar_font = NULL;
 
     frame->style_window_rgba = gtk_window_new (GTK_WINDOW_POPUP);
 
@@ -485,9 +480,6 @@ decor_frame_destroy (decor_frame_t *frame)
     if (frame->pango_context)
 	g_object_unref (G_OBJECT (frame->pango_context));
 
-    if (frame->titlebar_font)
-	pango_font_description_free (frame->titlebar_font);
-
     if (frame)
 	free (frame->type);
 
@@ -508,38 +500,4 @@ initialize_decorations ()
     gwd_decor_frame_add_type ("bare", create_bare_frame, destroy_bare_frame);
 
     frames_table = g_hash_table_new (g_str_hash, g_str_equal);
-}
-
-void
-set_frame_scale (decor_frame_t *frame,
-                 const gchar   *font_str)
-{
-    gwd_decor_frame_ref (frame);
-
-    if (frame->titlebar_font) {
-        pango_font_description_free (frame->titlebar_font);
-        frame->titlebar_font = NULL;
-    }
-
-    if (font_str) {
-        frame->titlebar_font = pango_font_description_from_string (font_str);
-        gwd_theme_update_titlebar_font_size (gwd_theme, frame, frame->titlebar_font);
-    }
-
-    gwd_decor_frame_unref (frame);
-}
-
-void
-set_frames_scales (gpointer key,
-                   gpointer value,
-                   gpointer user_data)
-{
-    decor_frame_t *frame = (decor_frame_t *) value;
-    gchar *font_str = (gchar *) user_data;
-
-    gwd_decor_frame_ref (frame);
-
-    set_frame_scale (frame, font_str);
-
-    gwd_decor_frame_unref (frame);
 }

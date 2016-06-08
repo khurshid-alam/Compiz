@@ -45,26 +45,6 @@ destroy_bare_frame (decor_frame_t *frame)
     decor_frame_destroy (frame);
 }
 
-
-/*
- * get_titlebar_font
- *
- * Returns: PangoFontDescription * or NULL if using system font
- * Description: Helper function to get the font for the titlebar
- */
-static const PangoFontDescription *
-get_titlebar_font (decor_frame_t *frame)
-{
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    /* Using system font */
-    if (!titlebar_font)
-	return NULL;
-    else
-	return frame->titlebar_font;
-}
-
 /*
  * frame_update_titlebar_font
  *
@@ -75,49 +55,25 @@ get_titlebar_font (decor_frame_t *frame)
 void
 frame_update_titlebar_font (decor_frame_t *frame)
 {
-    const PangoFontDescription *font_desc;
-    PangoFontDescription *free_font_desc;
+    PangoFontDescription *font_desc = gwd_theme_get_titlebar_font (gwd_theme, frame);
+    PangoLanguage *lang = pango_context_get_language (frame->pango_context);
     PangoFontMetrics *metrics;
-    PangoLanguage *lang;
+    gint ascent, descent;
 
-    free_font_desc = NULL;
     frame = gwd_decor_frame_ref (frame);
-
-    font_desc = get_titlebar_font (frame);
-    if (!font_desc)
-    {
-        GtkCssProvider *provider = gtk_css_provider_get_default ();
-        GtkStyleContext *context = gtk_style_context_new ();
-        GtkWidgetPath *path = gtk_widget_path_new ();
-
-        gtk_widget_path_prepend_type (path, GTK_TYPE_WIDGET);
-        gtk_style_context_set_path (context, path);
-        gtk_widget_path_free (path);
-
-        gtk_style_context_add_provider (context, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_FALLBACK);
-
-        gtk_style_context_save (context);
-        gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
-        gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL, "font", &free_font_desc, NULL);
-        gtk_style_context_restore (context);
-
-        font_desc = (const PangoFontDescription *) free_font_desc;
-    }
 
     pango_context_set_font_description (frame->pango_context, font_desc);
 
-    lang    = pango_context_get_language (frame->pango_context);
     metrics = pango_context_get_metrics (frame->pango_context, font_desc, lang);
+    ascent = pango_font_metrics_get_ascent (metrics);
+    descent = pango_font_metrics_get_descent (metrics);
 
-    frame->text_height = PANGO_PIXELS (pango_font_metrics_get_ascent (metrics) +
-				pango_font_metrics_get_descent (metrics));
-
-    gwd_decor_frame_unref (frame);
+    frame->text_height = PANGO_PIXELS (ascent + descent);
 
     pango_font_metrics_unref (metrics);
+    pango_font_description_free (font_desc);
 
-    if (free_font_desc)
-        pango_font_description_free (free_font_desc);
+    gwd_decor_frame_unref (frame);
 }
 
 void
