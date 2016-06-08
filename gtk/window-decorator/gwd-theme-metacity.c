@@ -332,10 +332,9 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
 #ifdef HAVE_METACITY_3_20_0
 static void
 update_titlebar_font_cb (GWDSettings      *settings,
-                         /*const gchar      *titlebar_font,*/
+                         const gchar      *titlebar_font,
                          GWDThemeMetacity *metacity)
 {
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
     PangoFontDescription *description = NULL;
 
     if (titlebar_font != NULL)
@@ -1065,13 +1064,13 @@ setup_titlebar_font (GWDThemeMetacity *metacity)
 {
 #ifdef HAVE_METACITY_3_20_0
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
-    /*const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);*/
+    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
 
     metacity->titlebar_font_id =
-        g_signal_connect (settings, "update-frames",
+        g_signal_connect (settings, "update-titlebar-font",
                           G_CALLBACK (update_titlebar_font_cb), metacity);
 
-    update_titlebar_font_cb (settings, /*titlebar_font,*/ metacity);
+    update_titlebar_font_cb (settings, titlebar_font, metacity);
 #endif
 }
 
