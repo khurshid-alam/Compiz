@@ -66,7 +66,6 @@ if (USE_GTK)
     add_executable (gtk-window-decorator
 		    gtk-window-decorator.c
 		    blurprops.c
-		    decorprops.c
 		    cairo.c
 		    frames.c
 		    gdk.c

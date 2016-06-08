@@ -787,11 +787,6 @@ decor_update_meta_window_property (decor_t        *d,
                                              left_stretch_offset, right_stretch_offset,
                                              top_stretch_offset, bottom_stretch_offset);
 
-    win_extents.top += d->frame->titlebar_height;
-    frame_win_extents.top += d->frame->titlebar_height;
-    max_win_extents.top += d->frame->max_titlebar_height;
-    frame_max_win_extents.top += d->frame->max_titlebar_height;
-
     data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
     decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
                              &frame_win_extents, &win_extents,
@@ -804,7 +799,6 @@ decor_update_meta_window_property (decor_t        *d,
     XChangeProperty (xdisplay, d->prop_xid, win_decor_atom, XA_INTEGER,
                      32, PropModeReplace, (guchar *) data,
                      PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
-    gdk_display_sync (display);
 
     gdk_error_trap_pop_ignored ();
 
@@ -1401,12 +1395,11 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, 0, &borders);
 #endif
-    frame->win_extents.top = frame->win_extents.top;
+
+    frame->win_extents.top = borders.visible.top;
     frame->win_extents.bottom = borders.visible.bottom;
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
-
-    frame->titlebar_height = borders.visible.top - frame->win_extents.top;
 
 #ifdef HAVE_METACITY_3_20_0
     /* Add `shadow` border */
@@ -1427,12 +1420,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                   &borders);
 #endif
 
-    frame->max_win_extents.top = frame->win_extents.top;
+    frame->max_win_extents.top = borders.visible.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
     frame->max_win_extents.left = borders.visible.left;
     frame->max_win_extents.right = borders.visible.right;
-
-    frame->max_titlebar_height = borders.visible.top - frame->max_win_extents.top;
 
 #ifdef HAVE_METACITY_3_20_0
     /* Add `shadow` border */

@@ -209,8 +209,6 @@ typedef void (*destroy_frame_proc) (decor_frame_t *);
 struct _decor_frame {
     decor_extents_t win_extents;
     decor_extents_t max_win_extents;
-    int		    titlebar_height;
-    int		    max_titlebar_height;
     decor_shadow_t *border_shadow_active;
     decor_shadow_t *border_shadow_inactive;
     decor_shadow_t *max_border_shadow_active;
@@ -390,7 +388,9 @@ int
 update_shadow (void);
 
 void
-update_titlebar_font ();
+update_frames_titlebar_fonts (gpointer key,
+                              gpointer value,
+                              gpointer user_data);
 
 void
 update_window_decoration (WnckWindow *win);
@@ -441,14 +441,6 @@ decor_update_blur_property (decor_t *d,
 			    int     left_offset,
 			    Region  right_region,
 			    int     right_offset);
-
-/* decorprops.c */
-
-void
-decor_update_window_property (decor_t *d);
-
-void
-decor_update_switcher_property (decor_t *d);
 
 /* cairo.c */
 

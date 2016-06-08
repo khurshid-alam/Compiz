@@ -128,13 +128,6 @@ update_frames_titlebar_fonts (gpointer key,
     frame_update_titlebar_font ((decor_frame_t *) value);
 }
 
-void
-update_titlebar_font ()
-{
-    gwd_frames_foreach (update_frames_titlebar_fonts, NULL);
-}
-
-
 /*
  * update_event_windows
  *
@@ -298,7 +291,6 @@ update_event_windows (WnckWindow *win)
 	}
     }
 
-    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 }
 
@@ -846,13 +838,13 @@ decor_frame_update_shadow (Display		  *xdisplay,
 						 1, 1,
 						 frame->win_extents.left,
 						 frame->win_extents.right,
-						 frame->win_extents.top + frame->titlebar_height,
+						 frame->win_extents.top,
 						 frame->win_extents.bottom,
 						 frame->win_extents.left -
 						 TRANSLUCENT_CORNER_SIZE,
 						 frame->win_extents.right -
 						 TRANSLUCENT_CORNER_SIZE,
-						 frame->win_extents.top + frame->titlebar_height -
+						 frame->win_extents.top -
 						 TRANSLUCENT_CORNER_SIZE,
 						 frame->win_extents.bottom -
 						 TRANSLUCENT_CORNER_SIZE,
@@ -877,12 +869,11 @@ decor_frame_update_shadow (Display		  *xdisplay,
 			     1, 1,
 			     frame->max_win_extents.left,
 			     frame->max_win_extents.right,
-			     frame->max_win_extents.top + frame->max_titlebar_height,
+			     frame->max_win_extents.top,
 			     frame->max_win_extents.bottom,
 			     frame->max_win_extents.left - TRANSLUCENT_CORNER_SIZE,
 			     frame->max_win_extents.right - TRANSLUCENT_CORNER_SIZE,
-			     frame->max_win_extents.top + frame->max_titlebar_height -
-			     TRANSLUCENT_CORNER_SIZE,
+			     frame->max_win_extents.top - TRANSLUCENT_CORNER_SIZE,
 			     frame->max_win_extents.bottom - TRANSLUCENT_CORNER_SIZE,
 			     opt_no_shadow,  /* No shadow when maximized */
 			     context_max,
@@ -1327,8 +1318,6 @@ update_default_decorations (GdkScreen *screen)
 
         default_frames[i].d->frame = frame;
         default_frames[i].d->active = i < WINDOW_TYPE_FRAMES_NUM ? TRUE : FALSE;
-
-        extents.top += frame->titlebar_height;
 
         default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
