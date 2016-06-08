@@ -18,6 +18,7 @@
  */
 
 #include "config.h"
+#include "gtk-window-decorator.h"
 #include "gwd-settings.h"
 #include "gwd-theme.h"
 #include "gwd-theme-cairo.h"
@@ -170,16 +171,16 @@ gwd_theme_real_get_button_position (GWDTheme *theme,
 }
 
 static void
-gwd_theme_real_update_titlebar_font_size (GWDTheme             *theme,
-                                          decor_frame_t        *frame,
-                                          PangoFontDescription *titlebar_font)
+gwd_theme_real_update_titlebar_font (GWDTheme                   *theme,
+                                     const PangoFontDescription *titlebar_font)
 {
 }
 
-static void
-gwd_theme_real_update_titlebar_font (GWDTheme             *theme,
-                                     PangoFontDescription *titlebar_font)
+static PangoFontDescription *
+gwd_theme_real_get_titlebar_font (GWDTheme      *theme,
+                                  decor_frame_t *frame)
 {
+    return NULL;
 }
 
 static void
@@ -199,8 +200,8 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     theme_class->update_border_extents = gwd_theme_real_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_real_get_event_window_position;
     theme_class->get_button_position = gwd_theme_real_get_button_position;
-    theme_class->update_titlebar_font_size = gwd_theme_real_update_titlebar_font_size;
     theme_class->update_titlebar_font = gwd_theme_real_update_titlebar_font;
+    theme_class->get_titlebar_font = gwd_theme_real_get_titlebar_font;
 
     properties[PROP_SETTINGS] =
         g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
@@ -328,15 +329,6 @@ gwd_theme_get_button_position (GWDTheme *theme,
 }
 
 void
-gwd_theme_update_titlebar_font_size (GWDTheme             *theme,
-                                     decor_frame_t        *frame,
-                                     PangoFontDescription *titlebar_font)
-{
-    GWD_THEME_GET_CLASS (theme)->update_titlebar_font_size (theme, frame,
-                                                            titlebar_font);
-}
-
-void
 gwd_theme_update_titlebar_font (GWDTheme *theme)
 {
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
@@ -349,4 +341,30 @@ gwd_theme_update_titlebar_font (GWDTheme *theme)
         priv->titlebar_font = pango_font_description_from_string (titlebar_font);
 
     GWD_THEME_GET_CLASS (theme)->update_titlebar_font (theme, priv->titlebar_font);
+}
+
+PangoFontDescription *
+gwd_theme_get_titlebar_font (GWDTheme      *theme,
+                             decor_frame_t *frame)
+{
+    PangoFontDescription *font_desc = NULL;
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (frame->style_window_rgba);
+
+    /* Check if Metacity or Cairo will create titlebar font */
+    font_desc = GWD_THEME_GET_CLASS (theme)->get_titlebar_font (theme, frame);
+    if (font_desc)
+        return font_desc;
+
+    /* Check if non-system font is in use */
+    if (priv->titlebar_font)
+        return pango_font_description_copy (priv->titlebar_font);
+
+    /* Use system titlebar font */
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
+    gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL, "font", &font_desc, NULL);
+    gtk_style_context_restore (context);
+
+    return font_desc;
 }

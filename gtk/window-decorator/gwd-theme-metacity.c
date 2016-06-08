@@ -36,14 +36,14 @@
 
 struct _GWDThemeMetacity
 {
-    GObject               parent;
+    GObject                     parent;
 
-    MetaTheme            *theme;
+    MetaTheme                  *theme;
 
-    gulong                button_layout_id;
-    MetaButtonLayout      button_layout;
+    gulong                      button_layout_id;
+    MetaButtonLayout            button_layout;
 
-    PangoFontDescription *titlebar_font;
+    const PangoFontDescription *titlebar_font;
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
@@ -929,6 +929,8 @@ gwd_theme_metacity_dispose (GObject *object)
         metacity->button_layout_id = 0;
     }
 
+    metacity->titlebar_font = NULL;
+
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
 
@@ -1398,27 +1400,30 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
 }
 
 static void
-gwd_theme_metacity_update_titlebar_font_size (GWDTheme             *theme,
-                                              decor_frame_t        *frame,
-                                              PangoFontDescription *titlebar_font)
-{
-    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    MetaFrameType type = frame_type_from_string (frame->type);
-    MetaFrameFlags flags = 0xc33; /* FIXME */
-    MetaFrameStyle *style;
-
-    style = meta_theme_get_frame_style (metacity->theme, type, flags);
-
-    meta_frame_style_apply_scale (style, titlebar_font);
-}
-
-static void
-gwd_theme_metacity_update_titlebar_font (GWDTheme             *theme,
-                                         PangoFontDescription *titlebar_font)
+gwd_theme_metacity_update_titlebar_font (GWDTheme                   *theme,
+                                         const PangoFontDescription *titlebar_font)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
     metacity->titlebar_font = titlebar_font;
+}
+
+static PangoFontDescription *
+gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
+                                      decor_frame_t *frame)
+{
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GdkScreen *screen = gtk_widget_get_screen (frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, NULL);
+    PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
+    MetaFrameType type = frame_type_from_string (frame->type);
+    MetaFrameFlags flags = 0xc33; /* FIXME */
+    MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
+
+    pango_font_description_merge (font_desc, metacity->titlebar_font, TRUE);
+    meta_frame_style_apply_scale (style, font_desc);
+
+    return font_desc;
 }
 
 static void
@@ -1435,8 +1440,8 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     theme_class->update_border_extents = gwd_theme_metacity_update_border_extents;
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
-    theme_class->update_titlebar_font_size = gwd_theme_metacity_update_titlebar_font_size;
     theme_class->update_titlebar_font = gwd_theme_metacity_update_titlebar_font;
+    theme_class->get_titlebar_font = gwd_theme_metacity_get_titlebar_font;
 }
 
 static void
