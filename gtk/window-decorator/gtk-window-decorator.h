@@ -279,7 +279,6 @@ extern GHashTable    *frame_table;
 /* action menu */
 extern GtkWidget     *action_menu;
 extern gboolean      action_menu_mapped;
-extern decor_color_t _title_color[2];
 extern gint	     double_click_timeout;
 
 
