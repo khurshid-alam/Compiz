@@ -412,7 +412,7 @@ gwd_theme_get_titlebar_font (GWDTheme      *theme,
 {
     PangoFontDescription *font_desc = NULL;
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
-    GtkStyleContext *context = gtk_widget_get_style_context (frame->style_window_rgba);
+    GtkStyleContext *context = gtk_widget_get_style_context (priv->style_window);
 
     /* Check if Metacity or Cairo will create titlebar font */
     font_desc = GWD_THEME_GET_CLASS (theme)->get_titlebar_font (theme, frame);

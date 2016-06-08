@@ -416,6 +416,7 @@ void
 update_window_decoration_icon (WnckWindow *win)
 {
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
 
     /* Destroy old stuff */
     if (d->icon)
@@ -441,8 +442,7 @@ update_window_decoration_icon (WnckWindow *win)
 
 	g_object_ref (G_OBJECT (d->icon_pixbuf));
 
-	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                           d->frame->style_window_rgba);
+	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf, style_window);
 
 	cr = cairo_create (d->icon_surface);
 	d->icon = cairo_pattern_create_for_surface (cairo_get_target (cr));
@@ -513,6 +513,7 @@ update_window_decoration_size (WnckWindow *win)
     cairo_surface_t   *surface, *buffer_surface = NULL;
     Picture           picture;
     Display           *xdisplay;
+    GtkWidget         *style_window;
 
     if (win == NULL)
 	return FALSE;
@@ -523,10 +524,11 @@ update_window_decoration_size (WnckWindow *win)
 	return FALSE;
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    style_window = gwd_theme_get_style_window (gwd_theme);
 
     gdk_error_trap_push ();
 
-    surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
+    surface = create_native_surface_and_wrap (d->width, d->height, style_window);
 
     gdk_flush ();
 
@@ -540,7 +542,7 @@ update_window_decoration_size (WnckWindow *win)
 
     gdk_error_trap_push ();
 
-    buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
+    buffer_surface = create_surface (d->width, d->height, style_window);
 
     gdk_flush ();
 
@@ -1173,20 +1175,18 @@ queue_decor_draw (decor_t *d)
 void
 update_default_decorations (GdkScreen *screen)
 {
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    Window xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
+    Atom bareAtom = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
+    Atom activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
     long	    *data;
-    Window	    xroot;
-    GdkDisplay	    *gdkdisplay = gdk_display_get_default ();
-    Display	    *xdisplay = gdk_x11_display_get_xdisplay (gdkdisplay);
-    Atom	    bareAtom, activeAtom;
     decor_frame_t   *frame;
     decor_frame_t   *bare_frame = gwd_get_decor_frame ("bare");
     decor_extents_t extents;
     unsigned int    i;
+    GtkWidget *style_window;
 
-    xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
-
-    bareAtom   = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
-    activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
 
     if (bare_frame->border_shadow_active)
     {
@@ -1246,6 +1246,7 @@ update_default_decorations (GdkScreen *screen)
                      activeAtom);
 
     data = decor_alloc_property (WINDOW_TYPE_FRAMES_NUM * 2, WINDOW_DECORATION_TYPE_PIXMAP);
+    style_window = gwd_theme_get_style_window (gwd_theme);
 
     /* All active states and all inactive states */
     for (i = 0; i < WINDOW_TYPE_FRAMES_NUM * 2; ++i)
@@ -1278,7 +1279,7 @@ update_default_decorations (GdkScreen *screen)
         default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
 	                                                               default_frames[i].d->height,
-	                                                               frame->style_window_rgba);
+	                                                               style_window);
 
 	unsigned int j, k;
 

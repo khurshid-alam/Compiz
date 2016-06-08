@@ -261,7 +261,7 @@ style_updated (GtkWidget *widget,
     decorations_changed (screen);
 }
 
-void
+static void
 decor_frame_refresh (decor_frame_t *frame)
 {
     decor_shadow_options_t active_o, inactive_o;
