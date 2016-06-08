@@ -1060,13 +1060,14 @@ static void
 gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
-    GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
 
 #ifdef HAVE_METACITY_3_20_0
     g_clear_object (&metacity->theme);
 #endif
 
     if (metacity->button_layout_id != 0) {
+        GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
+
         g_signal_handler_disconnect (settings, metacity->button_layout_id);
         metacity->button_layout_id = 0;
     }
