@@ -50,9 +50,30 @@ static GParamSpec *properties[LAST_PROP] = { NULL };
 G_DEFINE_TYPE_WITH_PRIVATE (GWDTheme, gwd_theme, G_TYPE_OBJECT)
 
 static void
+frames_update_pango_contexts (gpointer key,
+                              gpointer value,
+                              gpointer user_data)
+{
+    decor_frame_t *frame = (decor_frame_t *) value;
+    GdkDisplay *display = gdk_display_get_default ();
+    GdkScreen *screen = gdk_display_get_default_screen (display);
+    gdouble dpi = gdk_screen_get_resolution (screen);
+
+    if (frame->pango_context == NULL)
+        return;
+
+    /* FIXME: PangoContext created by gtk_widget_create_pango_context is not
+     * automatically updated. Resolution is not only thing that can change...
+     */
+    pango_cairo_context_set_resolution (frame->pango_context, dpi);
+}
+
+static void
 style_updated_cb (GtkWidget *widget,
                   GWDTheme  *theme)
 {
+    gwd_frames_foreach (frames_update_pango_contexts, NULL);
+
     GWD_THEME_GET_CLASS (theme)->style_updated (theme);
 
     decorations_changed (wnck_screen_get_default ());

@@ -55,15 +55,19 @@ destroy_bare_frame (decor_frame_t *frame)
 void
 frame_update_titlebar_font (decor_frame_t *frame)
 {
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     PangoFontDescription *font_desc = gwd_theme_get_titlebar_font (gwd_theme, frame);
-    PangoLanguage *lang = pango_context_get_language (frame->pango_context);
+    PangoLanguage *lang;
     PangoFontMetrics *metrics;
     gint ascent, descent;
 
     frame = gwd_decor_frame_ref (frame);
 
+    if (frame->pango_context == NULL)
+        frame->pango_context = gtk_widget_create_pango_context (style_window);
     pango_context_set_font_description (frame->pango_context, font_desc);
 
+    lang = pango_context_get_language (frame->pango_context);
     metrics = pango_context_get_metrics (frame->pango_context, font_desc, lang);
     ascent = pango_font_metrics_get_ascent (metrics);
     descent = pango_font_metrics_get_descent (metrics);

@@ -218,7 +218,6 @@ struct _decor_frame {
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
     PangoContext	 *pango_context;
-    GtkWidget	         *style_window_rgba;
     gint		 text_height;
     gchar		 *type;
 
