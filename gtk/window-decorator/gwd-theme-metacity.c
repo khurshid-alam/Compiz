@@ -69,6 +69,31 @@ get_style_info (GWDThemeMetacity *metacity,
     return style;
 }
 
+static void
+style_updated_cb (GtkWidget        *widget,
+                  GWDThemeMetacity *metacity)
+{
+    g_hash_table_remove_all (metacity->style_variants);
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static GtkWidget *
+create_style_window (GWDThemeMetacity *metacity)
+{
+    GtkWidget *widget = gtk_window_new (GTK_WINDOW_POPUP);
+    GtkWindow *window = GTK_WINDOW (widget);
+
+    gtk_window_move (window, -200, -200);
+    gtk_window_resize (window, 1, 1);
+
+    gtk_widget_show (widget);
+
+    g_signal_connect (widget, "style-updated",
+                      G_CALLBACK (style_updated_cb), metacity);
+
+    return widget;
+}
+
 static MetaFrameType
 frame_type_from_string (const gchar *str)
 {
@@ -1444,17 +1469,9 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
-    GtkWindow *window;
-
-    metacity->style_window = gtk_window_new (GTK_WINDOW_POPUP);
+    metacity->style_window = create_style_window (metacity);
     metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                       (GDestroyNotify) meta_style_info_unref);
-
-    window = GTK_WINDOW (metacity->style_window);
-
-    gtk_window_move (window, -200, -200);
-    gtk_window_resize (window, 1, 1);
-    gtk_widget_show (metacity->style_window);
 }
 
 /**
