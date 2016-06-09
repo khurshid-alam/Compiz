@@ -691,6 +691,7 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
     XChangeProperty (xdisplay, d->prop_xid, win_decor_atom, XA_INTEGER,
                      32, PropModeReplace, (guchar *) data,
                      PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
+    gdk_display_sync (display);
 
     gdk_error_trap_pop_ignored ();
 
