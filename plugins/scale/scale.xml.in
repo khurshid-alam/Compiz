@@ -139,6 +139,11 @@
 					<_name>On all output devices</_name>
 				</desc>
 			</option>
+			<option name="skip_animation" type="bool">
+				<_short>Skip Animation</_short>
+				<_long>Skips the scale plugin animation.</_long>
+				<default>false</default>
+			</option>
 	    </group>
 	    <group>
 		<_short>Bindings</_short>
