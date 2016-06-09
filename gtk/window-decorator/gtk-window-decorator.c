@@ -152,6 +152,8 @@ update_metacity_theme_cb (GWDSettings *settings,
         type = GWD_THEME_TYPE_METACITY;
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));
+
+    gwd_theme_update_titlebar_font (gwd_theme);
 }
 
 int
