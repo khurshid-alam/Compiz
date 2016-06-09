@@ -62,6 +62,7 @@ get_frame_type (WnckWindow *win)
 					 net_wm_state_atom,
 					 0L, 1024L, FALSE, XA_ATOM, &actual, &format,
 					 &n, &left, &data);
+	    gdk_flush ();
 	    gdk_error_trap_pop_ignored ();
 
 	    if (result == Success && data)
@@ -335,6 +336,7 @@ add_frame_window (WnckWindow *win,
 	}
     }
 
+    gdk_display_sync (gdk_display_get_default ());
     if (!gdk_error_trap_pop ())
     {
 	if (get_mwm_prop (xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE))
@@ -486,6 +488,7 @@ remove_frame_window (WnckWindow *win)
 
     gdk_error_trap_push ();
     XDeleteProperty (xdisplay, wnck_window_get_xid (win), win_decor_atom);
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 
     d->width  = 0;

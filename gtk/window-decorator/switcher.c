@@ -76,6 +76,7 @@ decor_update_switcher_property (decor_t *d)
 		     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
     XChangeProperty (xdisplay, d->prop_xid, switcher_fg_atom,
 		     XA_INTEGER, 32, PropModeReplace, (guchar *) fgColor, 4);
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 
     free (data);
@@ -318,6 +319,8 @@ draw_switcher_background (decor_t *d)
     gdk_error_trap_push ();
     XSetWindowBackground (xdisplay, d->prop_xid, pixel);
     XClearWindow (xdisplay, d->prop_xid);
+
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 
     d->prop_xid = 0;
