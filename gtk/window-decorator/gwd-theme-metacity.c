@@ -54,15 +54,9 @@ static MetaStyleInfo *
 get_style_info (GWDThemeMetacity *metacity,
                 decor_t          *decor)
 {
-    const gchar *variant = NULL;
-    const gchar *key;
-    MetaStyleInfo *style;
-
-    if (decor != NULL)
-        variant = decor->gtk_theme_variant;
-
-    key = variant != NULL ? variant : "default";
-    style = g_hash_table_lookup (metacity->style_variants, key);
+    const gchar *variant = decor != NULL ? decor->gtk_theme_variant : NULL;
+    const gchar *key = variant != NULL ? variant : "default";
+    MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
 
     if (style == NULL) {
         GWDTheme *theme = GWD_THEME (metacity);
