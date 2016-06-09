@@ -91,6 +91,7 @@ struct _GWDSettingsStorage
     GSettings   *marco;
 
     gulong       gtk_decoration_layout_id;
+    gulong       gtk_theme_name_id;
 };
 
 enum
@@ -209,8 +210,13 @@ update_metacity_theme (GWDSettingsStorage *storage)
         metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
     } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
 #ifdef HAVE_METACITY_3_20_0
-        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
         metacity_theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+
+        if (metacity_theme_type == META_THEME_TYPE_GTK) {
+            g_object_get (gtk_settings_get_default (), "gtk-theme-name", &metacity_theme_name, NULL);
+        } else {
+            metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
+        }
 #else
         metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
 #endif
@@ -413,6 +419,24 @@ gtk_decoration_layout_changed (GtkSettings        *settings,
     update_button_layout (storage);
 }
 
+#ifdef HAVE_METACITY_3_20_0
+static void
+gtk_theme_name_changed (GtkSettings        *settings,
+                        GParamSpec         *pspec,
+                        GWDSettingsStorage *storage)
+{
+    MetaThemeType type;
+
+    if (!storage->metacity)
+        return;
+
+    type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+
+    if (type == META_THEME_TYPE_GTK)
+        update_metacity_theme (storage);
+}
+#endif
+
 static void
 gwd_settings_storage_constructed (GObject *object)
 {
@@ -457,6 +481,7 @@ static void
 gwd_settings_storage_dispose (GObject *object)
 {
     GWDSettingsStorage *storage = GWD_SETTINGS_STORAGE (object);
+    GtkSettings *settings = gtk_settings_get_default ();
 
     g_clear_object (&storage->settings);
 
@@ -466,10 +491,13 @@ gwd_settings_storage_dispose (GObject *object)
     g_clear_object (&storage->marco);
 
     if (storage->gtk_decoration_layout_id > 0) {
-        GtkSettings *settings = gtk_settings_get_default ();
-
         g_signal_handler_disconnect (settings, storage->gtk_decoration_layout_id);
         storage->gtk_decoration_layout_id = 0;
+    }
+
+    if (storage->gtk_theme_name_id > 0) {
+        g_signal_handler_disconnect (settings, storage->gtk_theme_name_id);
+        storage->gtk_theme_name_id = 0;
     }
 
     G_OBJECT_CLASS (gwd_settings_storage_parent_class)->dispose (object);
@@ -551,6 +579,12 @@ gwd_settings_storage_init (GWDSettingsStorage *storage)
             storage->gtk_decoration_layout_id =
                 g_signal_connect (gtk_settings_get_default (), "notify::gtk-decoration-layout",
                                   G_CALLBACK (gtk_decoration_layout_changed), storage);
+
+#ifdef HAVE_METACITY_3_20_0
+            storage->gtk_theme_name_id =
+                g_signal_connect (gtk_settings_get_default (), "notify::gtk-theme-name",
+                                  G_CALLBACK (gtk_theme_name_changed), storage);
+#endif
             break;
 
         case GWD_DESKTOP_MATE:
