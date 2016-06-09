@@ -52,10 +52,17 @@ G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
 static MetaStyleInfo *
 get_style_info (GWDThemeMetacity *metacity,
-                const gchar      *variant)
+                decor_t          *decor)
 {
-    const gchar *key = variant != NULL ? variant : "default";
-    MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
+    const gchar *variant = NULL;
+    const gchar *key;
+    MetaStyleInfo *style;
+
+    if (decor != NULL)
+        variant = decor->gtk_theme_variant;
+
+    key = variant != NULL ? variant : "default";
+    style = g_hash_table_lookup (metacity->style_variants, key);
 
     if (style == NULL) {
         GWDTheme *theme = GWD_THEME (metacity);
@@ -631,7 +638,7 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
     {
         MetaFrameBorders borders;
 
-        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d->gtk_theme_variant),
+        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
                                       type, d->frame->text_height, flags, &borders);
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
@@ -765,7 +772,7 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
-    meta_theme_calc_geometry (metacity->theme, get_style_info (metacity, decor->gtk_theme_variant),
+    meta_theme_calc_geometry (metacity->theme, get_style_info (metacity, decor),
                               frame_type, decor->frame->text_height, *flags, client_width,
                               client_height, &metacity->button_layout, fgeom);
 }
@@ -1040,7 +1047,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-    meta_theme_draw_frame (metacity->theme, get_style_info (metacity, decor->gtk_theme_variant),
+    meta_theme_draw_frame (metacity->theme, get_style_info (metacity, decor),
                            cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
@@ -1182,12 +1189,13 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
-    meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, NULL),
+    meta_theme_get_frame_borders (metacity->theme, style_info,
                                   frame_type, frame->text_height, 0, &borders);
 
     frame->win_extents.top = borders.visible.top;
@@ -1195,7 +1203,7 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
 
-    meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, NULL),
+    meta_theme_get_frame_borders (metacity->theme, style_info,
                                   frame_type, frame->text_height,
                                   META_FRAME_MAXIMIZED, &borders);
 
@@ -1423,7 +1431,7 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
     MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
     MetaFrameType type = frame_type_from_string (frame->type);
-    MetaFrameFlags flags = 0xc33;
+    MetaFrameFlags flags = 0xc33; /* FIXME */
     MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
 
     pango_font_description_merge (font_desc, metacity->titlebar_font, TRUE);
