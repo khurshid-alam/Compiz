@@ -91,6 +91,7 @@ kill_window (WnckWindow *win)
 
     gdk_error_trap_push ();
     XKillClient (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), wnck_window_get_xid (win));
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 }
 
@@ -104,6 +105,7 @@ force_quit_dialog_realize (GtkWidget *dialog,
     XSetTransientForHint (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
 			  GDK_WINDOW_XID (gtk_widget_get_window (dialog)),
 			  wnck_window_get_xid (win));
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 }
 
