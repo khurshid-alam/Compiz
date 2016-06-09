@@ -24,6 +24,10 @@
 
 #include <gtk/gtk.h>
 
+#ifdef HAVE_METACITY_3_20_0
+#include <libmetacity/meta-theme.h>
+#endif
+
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
 
