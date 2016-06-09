@@ -964,6 +964,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    MetaStyleInfo *style_info = get_style_info (metacity, decor);
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_surface_t *surface;
     Picture src;
@@ -1047,8 +1048,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-    meta_theme_draw_frame (metacity->theme, get_style_info (metacity, decor),
-                           cr, frame_type, flags,
+    meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->layout, decor->frame->text_height, &metacity->button_layout,
