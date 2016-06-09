@@ -1195,17 +1195,17 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
 
     gwd_decor_frame_ref (frame);
 
-    meta_theme_get_frame_borders (metacity->theme, style_info,
-                                  frame_type, frame->text_height, 0, &borders);
+    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
+                                  frame->text_height, 0, &borders);
 
     frame->win_extents.top = borders.visible.top;
     frame->win_extents.bottom = borders.visible.bottom;
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
 
-    meta_theme_get_frame_borders (metacity->theme, style_info,
-                                  frame_type, frame->text_height,
-                                  META_FRAME_MAXIMIZED, &borders);
+    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
+                                  frame->text_height, META_FRAME_MAXIMIZED,
+                                  &borders);
 
     frame->max_win_extents.top = borders.visible.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
