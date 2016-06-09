@@ -247,6 +247,7 @@ update_event_windows (WnckWindow *win)
 	}
     }
 
+    gdk_display_sync (gdk_display_get_default ());
     gdk_error_trap_pop_ignored ();
 }
 
@@ -528,6 +529,8 @@ update_window_decoration_size (WnckWindow *win)
 
     surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
 
+    gdk_flush ();
+
     /* Handle failure */
     if (gdk_error_trap_pop () || !surface)
     {
@@ -539,6 +542,8 @@ update_window_decoration_size (WnckWindow *win)
     gdk_error_trap_push ();
 
     buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
+
+    gdk_flush ();
 
     /* Handle failure */
     if (gdk_error_trap_pop () || !buffer_surface)
