@@ -218,7 +218,6 @@ struct _decor_frame {
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
     PangoContext	 *pango_context;
-    GtkWidget	         *style_window_rgba;
     gint		 text_height;
     gchar		 *type;
 
@@ -279,7 +278,6 @@ extern GHashTable    *frame_table;
 /* action menu */
 extern GtkWidget     *action_menu;
 extern gboolean      action_menu_mapped;
-extern decor_color_t _title_color[2];
 extern gint	     double_click_timeout;
 
 
@@ -385,11 +383,6 @@ update_event_windows (WnckWindow *win);
 
 int
 update_shadow (void);
-
-void
-update_frames_titlebar_fonts (gpointer key,
-                              gpointer value,
-                              gpointer user_data);
 
 void
 update_window_decoration (WnckWindow *win);

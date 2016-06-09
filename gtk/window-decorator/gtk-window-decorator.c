@@ -107,7 +107,6 @@ GtkWidget     *switcher_label;
 GHashTable    *frame_table;
 GtkWidget     *action_menu = NULL;
 gboolean      action_menu_mapped = FALSE;
-decor_color_t _title_color[2];
 gint	     double_click_timeout = 250;
 
 GtkWidget     *tip_window;
