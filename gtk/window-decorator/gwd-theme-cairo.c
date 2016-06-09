@@ -38,6 +38,12 @@ struct _GWDThemeCairo
 
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
 
+static gint
+get_titlebar_height (decor_frame_t *frame)
+{
+    return frame->text_height < 17 ? 17 : frame->text_height;
+}
+
 static void
 decor_update_window_property (decor_t *d)
 {
@@ -558,7 +564,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     cairo_set_line_width (cr, 2.0);
 
     button_x = decor->width - decor->context->right_space - 13;
-    titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
+    titlebar_height = get_titlebar_height (decor->frame);
 
     if (decor->actions & WNCK_WINDOW_ACTION_CLOSE) {
         button_state_offsets (button_x,
@@ -754,7 +760,7 @@ gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
 {
     decor_extents_t win_extents = { 6, 6, 10, 6 };
     decor_extents_t max_win_extents = { 6, 6, 4, 6 };
-    gint titlebar_height = frame->text_height < 17 ? 17 : frame->text_height;
+    gint titlebar_height = get_titlebar_height (frame);
 
     frame = gwd_decor_frame_ref (frame);
 
@@ -779,7 +785,7 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
                                            gint     *w,
                                            gint     *h)
 {
-    gint titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
+    gint titlebar_height = get_titlebar_height (decor->frame);
 
     *x = pos[i][j].x + pos[i][j].xw * width;
     *y = pos[i][j].y +
@@ -810,7 +816,7 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
                                      gint     *w,
                                      gint     *h)
 {
-    gint titlebar_height = decor->frame->text_height < 17 ? 17 : decor->frame->text_height;
+    gint titlebar_height = get_titlebar_height (decor->frame);
 
     if (i > BUTTON_MENU)
         return FALSE;
