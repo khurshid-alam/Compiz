@@ -630,21 +630,33 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
 
     /* Add the invisible grab area padding */
     {
+        MetaFrameFlags tmp_flags;
         MetaFrameBorders borders;
 
+        tmp_flags = flags & ~META_FRAME_MAXIMIZED;
         meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
-                                      type, d->frame->text_height, flags, &borders);
+                                      type, d->frame->text_height, tmp_flags, &borders);
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
             frame_win_extents.left += borders.invisible.left;
             frame_win_extents.right += borders.invisible.right;
-            frame_max_win_extents.left += borders.invisible.left;
-            frame_max_win_extents.right += borders.invisible.right;
         }
 
         if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) {
             frame_win_extents.bottom += borders.invisible.bottom;
             frame_win_extents.top += borders.invisible.top;
+        }
+
+        tmp_flags = flags | META_FRAME_MAXIMIZED;
+        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
+                                      type, d->frame->text_height, tmp_flags, &borders);
+
+        if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
+            frame_max_win_extents.left += borders.invisible.left;
+            frame_max_win_extents.right += borders.invisible.right;
+        }
+
+        if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) {
             frame_max_win_extents.bottom += borders.invisible.bottom;
             frame_max_win_extents.top += borders.invisible.top;
         }
