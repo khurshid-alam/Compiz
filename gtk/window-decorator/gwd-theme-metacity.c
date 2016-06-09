@@ -44,7 +44,9 @@ struct _GWDThemeMetacity
 
     MetaTheme                  *theme;
 
+#ifndef HAVE_METACITY_3_20_0
     GHashTable                 *style_variants;
+#endif
 
     gulong                      button_layout_id;
     MetaButtonLayout            button_layout;
@@ -56,6 +58,7 @@ struct _GWDThemeMetacity
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
+#ifndef HAVE_METACITY_3_20_0
 static MetaStyleInfo *
 get_style_info (GWDThemeMetacity *metacity,
                 decor_t          *decor)
@@ -76,6 +79,7 @@ get_style_info (GWDThemeMetacity *metacity,
 
     return style;
 }
+#endif
 
 static MetaFrameType
 frame_type_from_string (const gchar *str)
@@ -980,10 +984,12 @@ gwd_theme_metacity_constructed (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
+    
 
     if (!setup_theme (metacity))
         return;
+
+    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
 
     setup_button_layout (metacity);
 }
@@ -995,9 +1001,9 @@ gwd_theme_metacity_dispose (GObject *object)
 
 #ifdef HAVE_METACITY_3_20_0
     g_clear_object (&metacity->theme);
-#endif
-
+#else
     g_clear_pointer (&metacity->style_variants, g_hash_table_destroy);
+#endif
 
     if (metacity->button_layout_id != 0) {
         GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
@@ -1033,8 +1039,8 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
-#ifndef HAVE_METACITY_3_20_0
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
+#ifndef HAVE_METACITY_3_20_0
     MetaStyleInfo *style_info = get_style_info (metacity, decor);
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
 #endif
@@ -1567,8 +1573,10 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
+#ifndef HAVE_METACITY_3_20_0
     metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                       (GDestroyNotify) meta_style_info_unref);
+#endif
 }
 
 /**
