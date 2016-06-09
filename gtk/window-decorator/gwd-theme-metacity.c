@@ -1018,7 +1018,11 @@ gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_invalidate (metacity->theme);
+#else
     g_hash_table_remove_all (metacity->style_variants);
+#endif
 }
 
 static void
