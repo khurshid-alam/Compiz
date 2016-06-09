@@ -984,12 +984,10 @@ gwd_theme_metacity_constructed (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-    
+    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
 
     if (!setup_theme (metacity))
         return;
-
-    G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->constructed (object);
 
     setup_button_layout (metacity);
 }
