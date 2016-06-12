@@ -51,9 +51,22 @@
 
 enum SpecificZoomTarget
 {
-    ZoomTargetFirst = 0,
-    ZoomTargetSecond,
-    ZoomTargetThird
+    ZoomTarget1 = 0,
+    ZoomTarget2,
+    ZoomTarget3,
+		ZoomTarget4,
+		ZoomTarget5,
+		ZoomTarget6,
+		ZoomTarget7,
+		ZoomTarget8,
+		ZoomTarget9,
+		ZoomTarget10,
+		ZoomTarget11,
+		ZoomTarget12,
+		ZoomTarget13,
+		ZoomTarget14,
+		ZoomTarget15,
+		ZoomTarget16
 };
 
 class EZoomScreen :
