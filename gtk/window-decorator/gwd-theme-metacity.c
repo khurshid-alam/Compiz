@@ -27,6 +27,7 @@
 
 #include "config.h"
 
+#include <metacity-private/theme.h>
 #include <metacity-private/theme-parser.h>
 
 #include "gtk-window-decorator.h"
@@ -196,7 +197,7 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
                                 new_layout.right_buttons[i++] = f;
                         } else {
                             g_warning ("Ignoring unknown or already-used "
-                                   "button name \"%s\"", buttons[b]);
+                                       "button name \"%s\"", buttons[b]);
                         }
                     }
 
@@ -598,12 +599,9 @@ decor_update_meta_window_property (decor_t        *d,
 
     /* Add the invisible grab area padding */
     {
-        GdkScreen *screen;
-        MetaStyleInfo *style_info;
+        GdkScreen *screen = gtk_widget_get_screen (d->frame->style_window_rgba);
+        MetaStyleInfo *style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
         MetaFrameBorders borders;
-
-        screen = gtk_widget_get_screen (d->frame->style_window_rgba);
-        style_info = meta_theme_create_style_info (screen, d->gtk_theme_variant);
 
         meta_theme_get_frame_borders (theme, style_info, type,
                                       d->frame->text_height,
@@ -686,8 +684,8 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
                          MetaFrameGeometry *fgeom,
                          MetaFrameType      frame_type)
 {
-    GdkScreen *screen;
-    MetaStyleInfo *style_info;
+    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
     gint client_width;
     gint client_height;
 
@@ -749,9 +747,6 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
         client_height = decor->border_layout.left.x2 - decor->border_layout.left.x1;
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
-
-    screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
 
     meta_theme_calc_geometry (metacity->theme, style_info, frame_type,
                               decor->frame->text_height, *flags, client_width,
@@ -858,19 +853,19 @@ static gboolean
 setup_theme (GWDThemeMetacity *metacity)
 {
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
-    const gchar *metacity_theme = gwd_settings_get_metacity_theme (settings);
+    const gchar *metacity_theme_name = gwd_settings_get_metacity_theme_name (settings);
     MetaTheme *theme;
 
     /* metacity_theme can be NULL only in one case - if user has disabled
      * metacity theme with use-metacity-theme setting. In that case
      * GWDThemeCairo will be created / should be created.
      */
-    g_assert (metacity_theme != NULL);
+    g_assert (metacity_theme_name != NULL);
 
     /* meta_theme_get_current returns the last good theme, so we will try to
      * load theme manually to know that theme is 100% valid.
      */
-    theme = meta_theme_load (metacity_theme, NULL);
+    theme = meta_theme_load (metacity_theme_name, NULL);
     if (theme == NULL)
         return FALSE;
 
@@ -881,7 +876,7 @@ setup_theme (GWDThemeMetacity *metacity)
     meta_theme_free (theme);
 
     /* If we are here then we know that this will not fail. */
-    meta_theme_set_current (metacity_theme, TRUE);
+    meta_theme_set_current (metacity_theme_name, TRUE);
     metacity->theme = meta_theme_get_current ();
 
     return TRUE;
@@ -934,17 +929,18 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    GdkDisplay *display;
-    GdkScreen *screen;
-    Display *xdisplay;
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    GdkScreen *screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
+    MetaStyleInfo *style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
+    GtkWidget *style_window = decor->frame->style_window_rgba;
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_surface_t *surface;
     Picture src;
     MetaButtonState button_states [META_BUTTON_TYPE_LAST];
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
-    MetaStyleInfo *style_info;
-    GtkStyleContext *context;
     cairo_t *cr;
     gint i;
     Region top_region;
@@ -954,14 +950,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     double alpha;
     gboolean shade_alpha;
     MetaFrameStyle *frame_style;
-    GtkWidget *style_window;
     GdkRGBA bg_rgba;
 
     if (!decor->surface || !decor->picture)
         return;
-
-    display = gdk_display_get_default ();
-    xdisplay = gdk_x11_display_get_xdisplay (display);
 
     top_region = NULL;
     bottom_region = NULL;
@@ -978,9 +970,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     if (decoration_alpha == 1.0)
         alpha = 1.0;
-
-    style_window = decor->frame->style_window_rgba;
-    context = gtk_widget_get_style_context (style_window);
 
     cr = cairo_create (decor->buffer_surface ? decor->buffer_surface : decor->surface);
 
@@ -1023,16 +1012,14 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     surface = create_surface (fgeom.width, fgeom.height, decor->frame->style_window_rgba);
 
     cr = cairo_create (surface);
+
     gdk_cairo_set_source_rgba (cr, &bg_rgba);
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-    screen = gtk_widget_get_screen (decor->frame->style_window_rgba);
-    style_info = meta_theme_create_style_info (screen, decor->gtk_theme_variant);
-
-    cairo_paint (cr);
     meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
