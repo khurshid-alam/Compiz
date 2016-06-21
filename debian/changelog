@@ -1,3 +1,17 @@
+compiz (1:0.9.12.2+16.10.20160621-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: add new metacity-theme-type setting in
+    GWDSettings.
+  * gtk-window-decorator: stop using meta_frame_type_from_string.
+  * gtk-window-decorator: more code cleanup.
+  * gtk-window-decorator: improve titlebar font handling.
+  * gtk-window-decorator: use only one style window.
+  * gtk-window-decorator: improve Metacity theme.
+  * gtk-window-decorator: support Metacity 3.20.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 21 Jun 2016 13:11:16 +0000
+
 compiz (1:0.9.12.2+16.10.20160606.2-0ubuntu1) yakkety; urgency=medium
 
   [ Eleni Maria Stea ]
