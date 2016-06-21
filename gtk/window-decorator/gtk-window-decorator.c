@@ -135,14 +135,10 @@ update_decorations_cb (GWDSettings *settings,
 }
 
 static void
-update_frames_cb (GWDSettings *settings,
-                  gpointer     user_data)
+update_titlebar_font_cb (GWDSettings *settings,
+                         gpointer     user_data)
 {
-    const gchar *titlebar_font;
-
-    titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+    gwd_theme_update_titlebar_font (gwd_theme);
 }
 
 static void
@@ -310,8 +306,8 @@ main (int argc, char *argv[])
 
     g_signal_connect (settings, "update-decorations",
                       G_CALLBACK (update_decorations_cb), NULL);
-    g_signal_connect (settings, "update-frames",
-                      G_CALLBACK (update_frames_cb), NULL);
+    g_signal_connect (settings, "update-titlebar-font",
+                      G_CALLBACK (update_titlebar_font_cb), NULL);
     g_signal_connect (settings, "update-metacity-theme",
                       G_CALLBACK (update_metacity_theme_cb), NULL);
 

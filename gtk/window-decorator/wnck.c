@@ -182,26 +182,16 @@ update_frames_border_extents (gpointer key,
 void
 decorations_changed (WnckScreen *screen)
 {
-    GdkDisplay *gdkdisplay;
-    GdkScreen  *gdkscreen;
-    GList      *windows;
-    Window     select;
+    GdkDisplay *display = gdk_display_get_default ();
+    GdkScreen *gdkscreen = gdk_display_get_default_screen (display);
+    GList *windows;
+    Window select;
 
-    gdkdisplay = gdk_display_get_default ();
-    gdkscreen  = gdk_display_get_default_screen (gdkdisplay);
+    gwd_frames_foreach (update_frames_titlebar_fonts, NULL);
+    gwd_process_frames (update_frames_border_extents, window_type_frames,
+                        WINDOW_TYPE_FRAMES_NUM, NULL);
 
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
-
-    update_titlebar_font ();
-    gwd_process_frames (update_frames_border_extents,
-                        window_type_frames,
-			WINDOW_TYPE_FRAMES_NUM,
-			NULL);
     update_shadow ();
-
     update_default_decorations (gdkscreen);
 
     if (minimal)
