@@ -437,8 +437,6 @@ decor_frame_new (const gchar *type)
 
     frame->type = strdup (type);
     frame->refcount = 0;
-    frame->titlebar_height = 17;
-    frame->max_titlebar_height = 17;
     frame->border_shadow_active = NULL;
     frame->border_shadow_inactive = NULL;
     frame->max_border_shadow_active = NULL;
