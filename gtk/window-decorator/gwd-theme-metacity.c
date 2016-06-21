@@ -27,8 +27,12 @@
 
 #include "config.h"
 
+#ifdef HAVE_METACITY_3_20_0
+#include <libmetacity/meta-theme.h>
+#else
 #include <metacity-private/theme.h>
 #include <metacity-private/theme-parser.h>
+#endif
 
 #include "gtk-window-decorator.h"
 #include "gwd-settings.h"
@@ -40,16 +44,21 @@ struct _GWDThemeMetacity
 
     MetaTheme                  *theme;
 
+#ifndef HAVE_METACITY_3_20_0
     GHashTable                 *style_variants;
+#endif
 
     gulong                      button_layout_id;
     MetaButtonLayout            button_layout;
 
+#ifndef HAVE_METACITY_3_20_0
     const PangoFontDescription *titlebar_font;
+#endif
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
 
+#ifndef HAVE_METACITY_3_20_0
 static MetaStyleInfo *
 get_style_info (GWDThemeMetacity *metacity,
                 decor_t          *decor)
@@ -70,6 +79,7 @@ get_style_info (GWDThemeMetacity *metacity,
 
     return style;
 }
+#endif
 
 static MetaFrameType
 frame_type_from_string (const gchar *str)
@@ -86,6 +96,7 @@ frame_type_from_string (const gchar *str)
     return META_FRAME_TYPE_NORMAL;
 }
 
+#ifndef HAVE_METACITY_3_20_0
 static void
 initialize_button_layout (MetaButtonLayout *layout)
 {
@@ -151,12 +162,18 @@ meta_button_opposite_function (MetaButtonFunction ofwhat)
             return META_BUTTON_FUNCTION_LAST;
     }
 }
+#endif
 
 static void
 update_metacity_button_layout_cb (GWDSettings      *settings,
                                   const gchar      *button_layout,
                                   GWDThemeMetacity *metacity)
 {
+#ifdef HAVE_METACITY_3_20_0
+    gboolean invert = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL;
+
+    metacity->button_layout = meta_button_layout_new (button_layout, invert);
+#else
     MetaButtonLayout new_layout;
 
     initialize_button_layout (&new_layout);
@@ -304,6 +321,7 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
     }
 
     metacity->button_layout = new_layout;
+#endif
 }
 
 static MetaButtonType
@@ -634,8 +652,13 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         MetaFrameBorders borders;
 
         tmp_flags = flags & ~META_FRAME_MAXIMIZED;
+#ifdef HAVE_METACITY_3_20_0
+        meta_theme_get_frame_borders (metacity->theme, d->gtk_theme_variant,
+                                      type, tmp_flags, &borders);
+#else
         meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
                                       type, d->frame->text_height, tmp_flags, &borders);
+#endif
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
             frame_win_extents.left += borders.invisible.left;
@@ -648,8 +671,13 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         }
 
         tmp_flags = flags | META_FRAME_MAXIMIZED;
+#ifdef HAVE_METACITY_3_20_0
+        meta_theme_get_frame_borders (metacity->theme, d->gtk_theme_variant,
+                                      type, tmp_flags, &borders);
+#else
         meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
                                       type, d->frame->text_height, tmp_flags, &borders);
+#endif
 
         if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
             frame_max_win_extents.left += borders.invisible.left;
@@ -779,9 +807,15 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
+                              frame_type, *flags, client_width, client_height,
+                              &metacity->button_layout, fgeom);
+#else
     meta_theme_calc_geometry (metacity->theme, get_style_info (metacity, decor),
                               frame_type, decor->frame->text_height, *flags, client_width,
                               client_height, &metacity->button_layout, fgeom);
+#endif
 }
 
 static void
@@ -834,11 +868,11 @@ button_present (GWDThemeMetacity   *metacity,
 {
     int i;
 
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
         if (metacity->button_layout.left_buttons[i] == function)
             return TRUE;
 
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i)
+    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
         if (metacity->button_layout.right_buttons[i] == function)
             return TRUE;
 
@@ -881,13 +915,35 @@ setup_theme (GWDThemeMetacity *metacity)
 {
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
     const gchar *metacity_theme_name = gwd_settings_get_metacity_theme_name (settings);
+#ifdef HAVE_METACITY_3_20_0
+    gint metacity_theme_type = gwd_settings_get_metacity_theme_type (settings);
+    GError *error = NULL;
+#else
     MetaTheme *theme;
+#endif
 
     /* metacity_theme can be NULL only in one case - if user has disabled
      * metacity theme with use-metacity-theme setting. In that case
      * GWDThemeCairo will be created / should be created.
      */
     g_assert (metacity_theme_name != NULL);
+
+#ifdef HAVE_METACITY_3_20_0
+    if (metacity_theme_type == -1)
+        metacity_theme_type = META_THEME_TYPE_METACITY;
+
+    metacity->theme = meta_theme_new (metacity_theme_type);
+
+    if (!meta_theme_load (metacity->theme, metacity_theme_name, &error)) {
+        g_warning ("Failed to load metacity theme '%s': %s",
+                   metacity_theme_name, error->message);
+
+        g_error_free (error);
+        g_clear_object (&metacity->theme);
+
+        return FALSE;
+    }
+#else
 
     /* meta_theme_get_current returns the last good theme, so we will try to
      * load theme manually to know that theme is 100% valid.
@@ -905,6 +961,7 @@ setup_theme (GWDThemeMetacity *metacity)
     /* If we are here then we know that this will not fail. */
     meta_theme_set_current (metacity_theme_name, TRUE);
     metacity->theme = meta_theme_get_current ();
+#endif
 
     return TRUE;
 }
@@ -940,7 +997,11 @@ gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
+#ifdef HAVE_METACITY_3_20_0
+    g_clear_object (&metacity->theme);
+#else
     g_clear_pointer (&metacity->style_variants, g_hash_table_destroy);
+#endif
 
     if (metacity->button_layout_id != 0) {
         GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
@@ -949,7 +1010,9 @@ gwd_theme_metacity_dispose (GObject *object)
         metacity->button_layout_id = 0;
     }
 
+#ifndef HAVE_METACITY_3_20_0
     metacity->titlebar_font = NULL;
+#endif
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
@@ -959,7 +1022,11 @@ gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_invalidate (metacity->theme);
+#else
     g_hash_table_remove_all (metacity->style_variants);
+#endif
 }
 
 static void
@@ -971,8 +1038,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
+#ifndef HAVE_METACITY_3_20_0
     MetaStyleInfo *style_info = get_style_info (metacity, decor);
     GtkStyleContext *context = gtk_widget_get_style_context (style_window);
+#endif
     cairo_surface_t *surface;
     Picture src;
     MetaButtonState button_states [META_BUTTON_TYPE_LAST];
@@ -987,8 +1056,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     Region right_region;
     double alpha;
     gboolean shade_alpha;
+#ifndef HAVE_METACITY_3_20_0
     MetaFrameStyle *frame_style;
     GdkRGBA bg_rgba;
+#endif
 
     if (!decor->surface || !decor->picture)
         return;
@@ -1023,6 +1094,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
 
+#ifndef HAVE_METACITY_3_20_0
     frame_style = meta_theme_get_frame_style (metacity->theme, frame_type, flags);
 
     gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg_rgba);
@@ -1034,6 +1106,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
         bg_rgba.alpha = frame_style->window_background_alpha / 255.0;
     }
+#endif
 
     /* Draw something that will be almost invisible to user. This is hacky way
      * to fix invisible decorations. */
@@ -1048,19 +1121,28 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     cr = cairo_create (surface);
 
+#ifndef HAVE_METACITY_3_20_0
     gdk_cairo_set_source_rgba (cr, &bg_rgba);
     cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
     cairo_paint (cr);
+#endif
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
+                           fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
+                           fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
+                           decor->name, &metacity->button_layout,
+                           button_states, decor->icon_pixbuf, NULL);
+#else
     meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->layout, decor->frame->text_height, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
-
+#endif
 
     if (fgeom.borders.visible.top) {
         top_region = get_top_border_region (&fgeom, fgeom.width);
@@ -1196,23 +1278,35 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+#ifndef HAVE_METACITY_3_20_0
     MetaStyleInfo *style_info = get_style_info (metacity, NULL);
+#endif
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
+                                  0, &borders);
+#else
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, 0, &borders);
+#endif
 
     frame->win_extents.top = borders.visible.top;
     frame->win_extents.bottom = borders.visible.bottom;
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
+                                  META_FRAME_MAXIMIZED, &borders);
+#else
     meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
                                   frame->text_height, META_FRAME_MAXIMIZED,
                                   &borders);
+#endif
 
     frame->max_win_extents.top = borders.visible.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
@@ -1427,13 +1521,20 @@ gwd_theme_metacity_update_titlebar_font (GWDTheme                   *theme,
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
+#ifdef HAVE_METACITY_3_20_0
+    meta_theme_set_titlebar_font (metacity->theme, titlebar_font);
+#else
     metacity->titlebar_font = titlebar_font;
+#endif
 }
 
 static PangoFontDescription *
 gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
                                       decor_frame_t *frame)
 {
+#ifdef HAVE_METACITY_3_20_0
+    return NULL;
+#else
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaStyleInfo *style_info = get_style_info (metacity, NULL);
     PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
@@ -1445,6 +1546,7 @@ gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
     meta_frame_style_apply_scale (style, font_desc);
 
     return font_desc;
+#endif
 }
 
 static void
@@ -1469,8 +1571,10 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
+#ifndef HAVE_METACITY_3_20_0
     metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                       (GDestroyNotify) meta_style_info_unref);
+#endif
 }
 
 /**

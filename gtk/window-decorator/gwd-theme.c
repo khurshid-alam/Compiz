@@ -109,7 +109,6 @@ gwd_theme_constructed (GObject *object)
 
     G_OBJECT_CLASS (gwd_theme_parent_class)->constructed (object);
 
-    gwd_theme_update_titlebar_font (theme);
     create_style_window (theme);
 }
 
