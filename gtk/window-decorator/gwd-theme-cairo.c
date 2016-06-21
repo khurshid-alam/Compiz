@@ -33,7 +33,9 @@
 
 struct _GWDThemeCairo
 {
-    GObject parent;
+    GObject       parent;
+
+    decor_color_t title_color[2];
 };
 
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
@@ -42,6 +44,195 @@ static gint
 get_titlebar_height (decor_frame_t *frame)
 {
     return frame->text_height < 17 ? 17 : frame->text_height;
+}
+
+static void
+rgb_to_hls (gdouble *r,
+            gdouble *g,
+            gdouble *b)
+{
+    gdouble red = *r;
+    gdouble green = *g;
+    gdouble blue = *b;
+    gdouble min;
+    gdouble max;
+    gdouble h, l, s;
+    gdouble delta;
+
+    if (red > green) {
+        if (red > blue)
+            max = red;
+        else
+            max = blue;
+
+        if (green < blue)
+            min = green;
+        else
+            min = blue;
+    } else {
+        if (green > blue)
+            max = green;
+        else
+            max = blue;
+
+        if (red < blue)
+            min = red;
+        else
+            min = blue;
+    }
+
+    l = (max + min) / 2;
+    s = 0;
+    h = 0;
+
+    if (max != min) {
+        if (l <= 0.5)
+            s = (max - min) / (max + min);
+        else
+            s = (max - min) / (2 - max - min);
+
+        delta = max -min;
+        if (red == max)
+            h = (green - blue) / delta;
+        else if (green == max)
+            h = 2 + (blue - red) / delta;
+        else if (blue == max)
+            h = 4 + (red - green) / delta;
+
+        h *= 60;
+        if (h < 0.0)
+            h += 360;
+    }
+
+    *r = h;
+    *g = l;
+    *b = s;
+}
+
+static void
+hls_to_rgb (gdouble *h,
+            gdouble *l,
+            gdouble *s)
+{
+    gdouble lightness = *l;
+    gdouble saturation = *s;
+    gdouble hue;
+    gdouble m1, m2;
+    gdouble r, g, b;
+
+    if (lightness <= 0.5)
+        m2 = lightness * (1 + saturation);
+    else
+        m2 = lightness + saturation - lightness * saturation;
+
+    m1 = 2 * lightness - m2;
+
+    if (saturation == 0) {
+        *h = lightness;
+        *l = lightness;
+        *s = lightness;
+    } else {
+        hue = *h + 120;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            r = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            r = m2;
+        else if (hue < 240)
+            r = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            r = m1;
+
+        hue = *h;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            g = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            g = m2;
+        else if (hue < 240)
+            g = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            g = m1;
+
+        hue = *h - 120;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            b = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            b = m2;
+        else if (hue < 240)
+            b = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            b = m1;
+
+        *h = r;
+        *l = g;
+        *s = b;
+    }
+}
+
+static void
+shade (const decor_color_t *a,
+       decor_color_t       *b,
+       gfloat               k)
+{
+    gdouble red = a->r;
+    gdouble green = a->g;
+    gdouble blue = a->b;
+
+    rgb_to_hls (&red, &green, &blue);
+
+    green *= k;
+    if (green > 1.0)
+        green = 1.0;
+    else if (green < 0.0)
+        green = 0.0;
+
+    blue *= k;
+    if (blue > 1.0)
+        blue = 1.0;
+    else if (blue < 0.0)
+        blue = 0.0;
+
+    hls_to_rgb (&red, &green, &blue);
+
+    b->r = red;
+    b->g = green;
+    b->b = blue;
+}
+
+static void
+update_title_colors (GWDThemeCairo *cairo)
+{
+    GWDTheme *theme = GWD_THEME (cairo);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
+    GdkRGBA bg;
+    decor_color_t spot_color;
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_SELECTED);
+    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_SELECTED, &bg);
+    gtk_style_context_restore (context);
+
+    spot_color.r = bg.red;
+    spot_color.g = bg.green;
+    spot_color.b = bg.blue;
+
+    shade (&spot_color, &cairo->title_color[0], 1.05);
+    shade (&cairo->title_color[0], &cairo->title_color[1], 0.85);
 }
 
 static void
@@ -320,11 +511,31 @@ button_present (decor_t *decor,
 }
 
 static void
+gwd_theme_cairo_constructed (GObject *object)
+{
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (object);
+
+    G_OBJECT_CLASS (gwd_theme_cairo_parent_class)->constructed (object);
+
+    update_title_colors (cairo);
+}
+
+static void
+gwd_theme_cairo_style_updated (GWDTheme *theme)
+{
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (theme);
+
+    update_title_colors (cairo);
+}
+
+static void
 gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
                                         decor_t  *decor)
 {
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (theme);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_t *cr;
-    GtkStyleContext *context;
     GdkRGBA bg, fg;
     cairo_surface_t *surface;
     decor_color_t color;
@@ -337,8 +548,6 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (!decor->surface)
         return;
-
-    context = gtk_widget_get_style_context (decor->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
@@ -380,7 +589,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
     if (decor->active) {
-        decor_color_t *title_color = _title_color;
+        decor_color_t *title_color = cairo->title_color;
 
         alpha = decoration_alpha + 0.3;
 
@@ -848,8 +1057,12 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
 static void
 gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (cairo_class);
     GWDThemeClass *theme_class = GWD_THEME_CLASS (cairo_class);
 
+    object_class->constructed = gwd_theme_cairo_constructed;
+
+    theme_class->style_updated = gwd_theme_cairo_style_updated;
     theme_class->draw_window_decoration = gwd_theme_cairo_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_cairo_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;

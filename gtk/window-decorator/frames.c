@@ -32,244 +32,13 @@ typedef struct _decor_frame_type_info
 GHashTable    *frame_info_table;
 GHashTable    *frames_table;
 
-/* from clearlooks theme */
 static void
-rgb_to_hls (gdouble *r,
-            gdouble *g,
-            gdouble *b)
-{
-    gdouble min;
-    gdouble max;
-    gdouble red;
-    gdouble green;
-    gdouble blue;
-    gdouble h, l, s;
-    gdouble delta;
-
-    red = *r;
-    green = *g;
-    blue = *b;
-
-    if (red > green)
-    {
-        if (red > blue)
-            max = red;
-        else
-            max = blue;
-
-        if (green < blue)
-            min = green;
-        else
-            min = blue;
-    }
-    else
-    {
-        if (green > blue)
-            max = green;
-        else
-            max = blue;
-
-        if (red < blue)
-            min = red;
-        else
-            min = blue;
-    }
-
-    l = (max + min) / 2;
-    s = 0;
-    h = 0;
-
-    if (max != min)
-    {
-        if (l <= 0.5)
-            s = (max - min) / (max + min);
-        else
-            s = (max - min) / (2 - max - min);
-
-        delta = max -min;
-        if (red == max)
-            h = (green - blue) / delta;
-        else if (green == max)
-            h = 2 + (blue - red) / delta;
-        else if (blue == max)
-            h = 4 + (red - green) / delta;
-
-        h *= 60;
-        if (h < 0.0)
-            h += 360;
-    }
-
-    *r = h;
-    *g = l;
-    *b = s;
-}
-
-static void
-hls_to_rgb (gdouble *h,
-            gdouble *l,
-            gdouble *s)
-{
-    gdouble hue;
-    gdouble lightness;
-    gdouble saturation;
-    gdouble m1, m2;
-    gdouble r, g, b;
-
-    lightness = *l;
-    saturation = *s;
-
-    if (lightness <= 0.5)
-        m2 = lightness * (1 + saturation);
-    else
-        m2 = lightness + saturation - lightness * saturation;
-
-    m1 = 2 * lightness - m2;
-
-    if (saturation == 0)
-    {
-        *h = lightness;
-        *l = lightness;
-        *s = lightness;
-    }
-    else
-    {
-        hue = *h + 120;
-        while (hue > 360)
-	          hue -= 360;
-        while (hue < 0)
-            hue += 360;
-
-        if (hue < 60)
-            r = m1 + (m2 - m1) * hue / 60;
-        else if (hue < 180)
-            r = m2;
-        else if (hue < 240)
-            r = m1 + (m2 - m1) * (240 - hue) / 60;
-        else
-            r = m1;
-
-        hue = *h;
-        while (hue > 360)
-            hue -= 360;
-        while (hue < 0)
-            hue += 360;
-
-        if (hue < 60)
-            g = m1 + (m2 - m1) * hue / 60;
-        else if (hue < 180)
-            g = m2;
-        else if (hue < 240)
-            g = m1 + (m2 - m1) * (240 - hue) / 60;
-        else
-            g = m1;
-
-        hue = *h - 120;
-        while (hue > 360)
-            hue -= 360;
-        while (hue < 0)
-            hue += 360;
-
-        if (hue < 60)
-            b = m1 + (m2 - m1) * hue / 60;
-        else if (hue < 180)
-            b = m2;
-        else if (hue < 240)
-            b = m1 + (m2 - m1) * (240 - hue) / 60;
-        else
-            b = m1;
-
-        *h = r;
-        *l = g;
-        *s = b;
-    }
-}
-
-static void
-shade (const decor_color_t *a,
-       decor_color_t       *b,
-       float                k)
-{
-    double red;
-    double green;
-    double blue;
-
-    red   = a->r;
-    green = a->g;
-    blue  = a->b;
-
-    rgb_to_hls (&red, &green, &blue);
-
-    green *= k;
-    if (green > 1.0)
-      green = 1.0;
-    else if (green < 0.0)
-      green = 0.0;
-
-    blue *= k;
-    if (blue > 1.0)
-        blue = 1.0;
-    else if (blue < 0.0)
-        blue = 0.0;
-
-    hls_to_rgb (&red, &green, &blue);
-
-    b->r = red;
-    b->g = green;
-    b->b = blue;
-}
-
-static void
-update_style (GtkWidget *widget)
-{
-    GtkStyleContext *context;
-    GdkRGBA bg;
-    decor_color_t spot_color;
-
-    context = gtk_widget_get_style_context (widget);
-
-    gtk_style_context_save (context);
-    gtk_style_context_set_state (context, GTK_STATE_FLAG_SELECTED);
-    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_SELECTED, &bg);
-    gtk_style_context_restore (context);
-
-    spot_color.r = bg.red;
-    spot_color.g = bg.green;
-    spot_color.b = bg.blue;
-
-    shade (&spot_color, &_title_color[0], 1.05);
-    shade (&_title_color[0], &_title_color[1], 0.85);
-}
-
-static void
-style_updated (GtkWidget *widget,
-               void      *user_data)
-{
-    GdkDisplay *gdkdisplay;
-    GdkScreen  *gdkscreen;
-    WnckScreen *screen;
-
-    PangoContext *context = (PangoContext *) user_data;
-
-    gdkdisplay = gdk_display_get_default ();
-    gdkscreen  = gdk_display_get_default_screen (gdkdisplay);
-    screen     = wnck_screen_get_default ();
-
-    update_style (widget);
-
-    pango_cairo_context_set_resolution (context, gdk_screen_get_resolution (gdkscreen));
-
-    decorations_changed (screen);
-}
-
-void
 decor_frame_refresh (decor_frame_t *frame)
 {
     decor_shadow_options_t active_o, inactive_o;
     decor_shadow_info_t *info;
 
     gwd_decor_frame_ref (frame);
-
-    update_style (frame->style_window_rgba);
 
     frame_update_titlebar_font (frame);
 
@@ -421,8 +190,6 @@ destroy_frame_type (gpointer data)
 decor_frame_t *
 decor_frame_new (const gchar *type)
 {
-    GdkScreen     *gdkscreen = gdk_screen_get_default ();
-    GdkVisual     *visual;
     decor_frame_t *frame = malloc (sizeof (decor_frame_t));
 
     if (!frame)
@@ -438,21 +205,7 @@ decor_frame_new (const gchar *type)
     frame->max_border_shadow_active = NULL;
     frame->max_border_shadow_inactive = NULL;
 
-    frame->style_window_rgba = gtk_window_new (GTK_WINDOW_POPUP);
-
-    visual = gdk_screen_get_rgba_visual (gdkscreen);
-    if (visual)
-	gtk_widget_set_visual (frame->style_window_rgba, visual);
-
-    gtk_widget_realize (frame->style_window_rgba);
-
-    gtk_window_move (GTK_WINDOW (frame->style_window_rgba), -100, -100);
-
-    frame->pango_context = gtk_widget_create_pango_context (frame->style_window_rgba);
-
-    g_signal_connect_data (frame->style_window_rgba, "style-updated",
-			   G_CALLBACK (style_updated),
-			   (gpointer) frame->pango_context, 0, 0);
+    frame->pango_context = NULL;
 
     return frame;
 }
@@ -473,9 +226,6 @@ decor_frame_destroy (decor_frame_t *frame)
 
     if (frame->max_border_shadow_inactive)
 	decor_shadow_destroy (xdisplay, frame->max_border_shadow_inactive);
-
-    if (frame->style_window_rgba)
-	gtk_widget_destroy (GTK_WIDGET (frame->style_window_rgba));
 
     if (frame->pango_context)
 	g_object_unref (G_OBJECT (frame->pango_context));

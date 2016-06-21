@@ -22,7 +22,7 @@
 
 #include <decoration.h>
 #include <glib-object.h>
-#include <pango/pango.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
@@ -36,6 +36,8 @@ G_DECLARE_DERIVABLE_TYPE (GWDTheme, gwd_theme, GWD, THEME, GObject)
 struct _GWDThemeClass
 {
     GObjectClass parent_class;
+
+    void     (* style_updated)                      (GWDTheme                   *theme);
 
     void     (* get_shadow)                         (GWDTheme                   *theme,
                                                      decor_frame_t              *frame,
@@ -96,6 +98,9 @@ gwd_theme_new                       (GWDThemeType            type,
 
 GWDSettings *
 gwd_theme_get_settings              (GWDTheme               *theme);
+
+GtkWidget *
+gwd_theme_get_style_window          (GWDTheme               *theme);
 
 void
 gwd_theme_get_shadow                (GWDTheme               *theme,

@@ -55,15 +55,19 @@ destroy_bare_frame (decor_frame_t *frame)
 void
 frame_update_titlebar_font (decor_frame_t *frame)
 {
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     PangoFontDescription *font_desc = gwd_theme_get_titlebar_font (gwd_theme, frame);
-    PangoLanguage *lang = pango_context_get_language (frame->pango_context);
+    PangoLanguage *lang;
     PangoFontMetrics *metrics;
     gint ascent, descent;
 
     frame = gwd_decor_frame_ref (frame);
 
+    if (frame->pango_context == NULL)
+        frame->pango_context = gtk_widget_create_pango_context (style_window);
     pango_context_set_font_description (frame->pango_context, font_desc);
 
+    lang = pango_context_get_language (frame->pango_context);
     metrics = pango_context_get_metrics (frame->pango_context, font_desc, lang);
     ascent = pango_font_metrics_get_ascent (metrics);
     descent = pango_font_metrics_get_descent (metrics);
@@ -74,14 +78,6 @@ frame_update_titlebar_font (decor_frame_t *frame)
     pango_font_description_free (font_desc);
 
     gwd_decor_frame_unref (frame);
-}
-
-void
-update_frames_titlebar_fonts (gpointer key,
-			      gpointer value,
-			      gpointer user_data)
-{
-    frame_update_titlebar_font ((decor_frame_t *) value);
 }
 
 /*
@@ -284,8 +280,6 @@ max_window_name_width (WnckWindow *win)
     if (!d->layout)
     {
 	d->layout = pango_layout_new (d->frame->pango_context);
-	if (!d->layout)
-	    return 0;
 
 	pango_layout_set_wrap (d->layout, PANGO_WRAP_CHAR);
     }
@@ -353,6 +347,10 @@ update_window_decoration_name (WnckWindow *win)
 		w = 1;
 	}
 
+        /* Ensure that a layout is created */
+        if (d->layout == NULL)
+            d->layout = pango_layout_new (d->frame->pango_context);
+
 	/* Set the maximum width for the layout (in case
 	 * decoration size < text width) since we
 	 * still need to show the buttons and the window name */
@@ -417,6 +415,7 @@ void
 update_window_decoration_icon (WnckWindow *win)
 {
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
 
     /* Destroy old stuff */
     if (d->icon)
@@ -442,8 +441,7 @@ update_window_decoration_icon (WnckWindow *win)
 
 	g_object_ref (G_OBJECT (d->icon_pixbuf));
 
-	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                           d->frame->style_window_rgba);
+	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf, style_window);
 
 	cr = cairo_create (d->icon_surface);
 	d->icon = cairo_pattern_create_for_surface (cairo_get_target (cr));
@@ -514,6 +512,7 @@ update_window_decoration_size (WnckWindow *win)
     cairo_surface_t   *surface, *buffer_surface = NULL;
     Picture           picture;
     Display           *xdisplay;
+    GtkWidget         *style_window;
 
     if (win == NULL)
 	return FALSE;
@@ -524,10 +523,11 @@ update_window_decoration_size (WnckWindow *win)
 	return FALSE;
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    style_window = gwd_theme_get_style_window (gwd_theme);
 
     gdk_error_trap_push ();
 
-    surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
+    surface = create_native_surface_and_wrap (d->width, d->height, style_window);
 
     gdk_flush ();
 
@@ -541,7 +541,7 @@ update_window_decoration_size (WnckWindow *win)
 
     gdk_error_trap_push ();
 
-    buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
+    buffer_surface = create_surface (d->width, d->height, style_window);
 
     gdk_flush ();
 
@@ -1174,20 +1174,17 @@ queue_decor_draw (decor_t *d)
 void
 update_default_decorations (GdkScreen *screen)
 {
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    Window xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
+    Atom bareAtom = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
+    Atom activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     long	    *data;
-    Window	    xroot;
-    GdkDisplay	    *gdkdisplay = gdk_display_get_default ();
-    Display	    *xdisplay = gdk_x11_display_get_xdisplay (gdkdisplay);
-    Atom	    bareAtom, activeAtom;
     decor_frame_t   *frame;
     decor_frame_t   *bare_frame = gwd_get_decor_frame ("bare");
     decor_extents_t extents;
     unsigned int    i;
-
-    xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
-
-    bareAtom   = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
-    activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
 
     if (bare_frame->border_shadow_active)
     {
@@ -1266,7 +1263,7 @@ update_default_decorations (GdkScreen *screen)
 
         default_frames[i].d->context = i < WINDOW_TYPE_FRAMES_NUM ? &frame->window_context_active : &frame->window_context_inactive;
         default_frames[i].d->shadow  =  i < WINDOW_TYPE_FRAMES_NUM ? frame->border_shadow_active : frame->border_shadow_inactive;
-        default_frames[i].d->layout  = pango_layout_new (frame->pango_context);
+        default_frames[i].d->layout = NULL;
 
         decor_get_default_layout (default_frames[i].d->context, 1, 1, &default_frames[i].d->border_layout);
 
@@ -1279,7 +1276,7 @@ update_default_decorations (GdkScreen *screen)
         default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
 	                                                               default_frames[i].d->height,
-	                                                               frame->style_window_rgba);
+	                                                               style_window);
 
 	unsigned int j, k;
 
