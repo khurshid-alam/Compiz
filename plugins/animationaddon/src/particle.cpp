@@ -81,7 +81,7 @@ ParticleSystem::~ParticleSystem ()
 }
 
 void
-ParticleSystem::draw (int offsetX, int offsetY)
+ParticleSystem::draw (const GLMatrix &transform, int offsetX, int offsetY)
 {
     // TODO
     // The part below should ideally be done in ParticleSystem constructor
@@ -95,9 +95,8 @@ ParticleSystem::draw (int offsetX, int offsetY)
 		 GL_RGBA, GL_UNSIGNED_BYTE, fireTex);
     glBindTexture (GL_TEXTURE_2D, 0);
 
-
-    glPushMatrix ();
-    glTranslated (offsetX - mX, offsetY - mY, 0);
+    GLMatrix translatedMatrix (transform);
+    //translatedMatrix.translate (offsetX - mX, offsetY - mY, 0);
 
     glEnable (GL_BLEND);
     if (mTex)
@@ -105,26 +104,27 @@ ParticleSystem::draw (int offsetX, int offsetY)
 	glBindTexture (GL_TEXTURE_2D, mTex);
 	glEnable (GL_TEXTURE_2D);
     }
-    mGScreen->setTexEnvMode (GL_MODULATE);
 
-    mVerticesCache.resize (4 * 3 * mParticles.size ());
-    mCoordsCache.resize (4 * 2 * mParticles.size ());
-    mColorsCache.resize (4 * 4 * mParticles.size ());
+    mVerticesCache.resize (6 * 3 * mParticles.size ());
+    mCoordsCache.resize (6 * 2 * mParticles.size ());
+    mColorsCache.resize (6 * 4 * mParticles.size ());
     if (mDarkenAmount > 0)
-	mDColorsCache.resize (4 * 4 * mParticles.size ());
+	mDColorsCache.resize (6 * 4 * mParticles.size ());
 
-    GLfloat *dcolors = &mDColorsCache[0];
+    GLushort *dcolors = &mDColorsCache[0];
     GLfloat *vertices = &mVerticesCache[0];
     GLfloat *coords = &mCoordsCache[0];
-    GLfloat *colors = &mColorsCache[0];
+    GLushort *colors = &mColorsCache[0];
 
-    int cornersSize = sizeof (GLfloat) * 8;
+    int cornersSize = sizeof (GLfloat) * 12;
     int colorSize = sizeof (GLfloat) * 4;
 
-    GLfloat cornerCoords[8] = {0.0, 0.0,
+    GLfloat cornerCoords[12] = {0.0, 0.0,
 			       0.0, 1.0,
 			       1.0, 1.0,
-			       1.0, 0.0};
+			       1.0, 1.0,
+			       1.0, 0.0,
+			       0.0, 0.0};
 
     int numActive = 0;
 
@@ -133,7 +133,7 @@ ParticleSystem::draw (int offsetX, int offsetY)
 	if (part.life <= 0.0f)	     // Ignore dead particles
 	    continue;
 
-	numActive += 4;
+	numActive += 6;
 
 	float w = part.width / 2;
 	float h = part.height / 2;
@@ -154,24 +154,34 @@ ParticleSystem::draw (int offsetX, int offsetY)
 	vertices[8] = part.z;
 
 	vertices[9] = part.x + w;
-	vertices[10] = part.y - h;
+	vertices[10] = part.y + h;
 	vertices[11] = part.z;
 
-	vertices += 12;
+	vertices[12] = part.x + w;
+	vertices[13] = part.y - h;
+	vertices[14] = part.z;
+
+	vertices[15] = part.x - w;
+	vertices[16] = part.y - h;
+	vertices[17] = part.z;
+
+	vertices += 18;
 
 	memcpy (coords, cornerCoords, cornersSize);
 
-	coords += 8;
+	coords += 12;
 
-	colors[0] = part.r;
-	colors[1] = part.g;
-	colors[2] = part.b;
-	colors[3] = part.life * part.a;
+	colors[0] = part.r * COLOR;
+	colors[1] = part.g * COLOR;
+	colors[2] = part.b * COLOR;
+	colors[3] = part.life * part.a * COLOR;
 	memcpy (colors + 4, colors, colorSize);
 	memcpy (colors + 8, colors, colorSize);
 	memcpy (colors + 12, colors, colorSize);
+	memcpy (colors + 16, colors, colorSize);
+	memcpy (colors + 20, colors, colorSize);
 
-	colors += 16;
+	colors += 24;
 
 	if (mDarkenAmount > 0)
 	{
@@ -182,34 +192,35 @@ ParticleSystem::draw (int offsetX, int offsetY)
 	    memcpy (dcolors + 4, dcolors, colorSize);
 	    memcpy (dcolors + 8, dcolors, colorSize);
 	    memcpy (dcolors + 12, dcolors, colorSize);
+	    memcpy (dcolors + 16, dcolors, colorSize);
+	    memcpy (dcolors + 20, dcolors, colorSize);
 
-	    dcolors += 16;
+	    dcolors += 24;
 	}
     }
 
-    glEnableClientState (GL_COLOR_ARRAY);
-
-    glTexCoordPointer (2, GL_FLOAT, 2 * sizeof (GLfloat), &mCoordsCache[0]);
-    glVertexPointer (3, GL_FLOAT, 3 * sizeof (GLfloat), &mVerticesCache[0]);
+    GLVertexBuffer *stream = GLVertexBuffer::streamingBuffer ();
 
     // darken the background
     if (mDarkenAmount > 0)
     {
 	glBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-	glColorPointer (4, GL_FLOAT, 4 * sizeof (GLfloat), &mDColorsCache[0]);
-	glDrawArrays (GL_QUADS, 0, numActive);
+	stream->begin (GL_TRIANGLES);
+	stream->addTexCoords (0, numActive, &mCoordsCache[0]);
+	stream->addVertices (numActive, &mVerticesCache[0]);
+	stream->addColors (numActive, &mDColorsCache[0]);
+	if (stream->end ())
+	    stream->render (translatedMatrix);
     }
     // draw particles
     glBlendFunc (GL_SRC_ALPHA, mBlendMode);
 
-    glColorPointer (4, GL_FLOAT, 4 * sizeof (GLfloat), &mColorsCache[0]);
-    glDrawArrays (GL_QUADS, 0, numActive);
-    glDisableClientState (GL_COLOR_ARRAY);
-
-    glPopMatrix ();
-    glColor4usv (defaultColor);
-
-    mGScreen->setTexEnvMode (GL_REPLACE);
+    stream->begin (GL_TRIANGLES);
+    stream->addTexCoords (0, numActive, &mCoordsCache[0]);
+    stream->addVertices (numActive, &mVerticesCache[0]);
+    stream->addColors (numActive, &mColorsCache[0]);
+    if (stream->end ())
+	stream->render (translatedMatrix);
 
     glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glDisable (GL_TEXTURE_2D);
@@ -217,12 +228,13 @@ ParticleSystem::draw (int offsetX, int offsetY)
 }
 
 void
-ParticleAnim::postPaintWindow ()
+ParticleAnim::postPaintWindow (const GLMatrix &transform)
 {
     foreach (ParticleSystem &ps, mParticleSystems)
 	if (ps.active ())
 	    // offset by window pos.
-	    ps.draw (mWindow->x () - mWindow->output ().left,
+	    ps.draw (transform,
+		     mWindow->x () - mWindow->output ().left,
 	             mWindow->y () - mWindow->output ().top);
 }
 

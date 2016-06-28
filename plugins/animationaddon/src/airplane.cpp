@@ -271,8 +271,8 @@ AirplaneAnim::tesselateIntoAirplane ()
 	pv[22] = topLeftY;
 	pv[23] = -halfThick;
 
-	// 16 indices for 4 sides (for quad strip)
-	p->sideIndices = (GLushort *) calloc (4 * 4, sizeof (GLushort));
+	// 24 indices for 4 sides (for triangle strip)
+	p->sideIndices = (GLushort *) calloc (6 * 4, sizeof (GLushort));
 	if (!p->sideIndices)
 	{
 	    compLogMessage ("animation", CompLogLevelError,
@@ -287,22 +287,30 @@ AirplaneAnim::tesselateIntoAirplane ()
 	ind[id++] = 0;
 	ind[id++] = 7;
 	ind[id++] = 6;
+	ind[id++] = 0;
 	ind[id++] = 1;
+	ind[id++] = 6;
 
 	ind[id++] = 1;
 	ind[id++] = 6;
 	ind[id++] = 5;
+	ind[id++] = 1;
 	ind[id++] = 2;
+	ind[id++] = 5;
 
 	ind[id++] = 2;
 	ind[id++] = 5;
 	ind[id++] = 4;
+	ind[id++] = 2;
 	ind[id++] = 3;
+	ind[id++] = 4;
 
 	ind[id++] = 3;
 	ind[id++] = 4;
 	ind[id++] = 7;
+	ind[id++] = 3;
 	ind[id++] = 0;
+	ind[id++] = 7;
 
 	if (i < 4)
 	{
@@ -318,6 +326,8 @@ AirplaneAnim::tesselateIntoAirplane ()
 	    p->boundingBox.x2 = ceil (p->centerPos.x () + bottomRightX);
 	    p->boundingBox.y2 = ceil (p->centerPos.y () + bottomLeftY);
 	}
+
+	p->normals = NULL;
 	
 	i++;
     }
@@ -692,41 +702,42 @@ AirplaneAnim::stepPolygon (PolygonObject *pol,
 }
 
 void
-AirplaneAnim::transformPolygon (const PolygonObject *pol)
+AirplaneAnim::transformPolygon (GLMatrix &matrix,
+				const PolygonObject *pol)
 {
     AirplanePolygonObject *p = (AirplanePolygonObject *) pol;
 
-    glRotatef (p->flyRotation.x (), 1, 0, 0);	//rotate on axis X
-    glRotatef (-p->flyRotation.y (), 0, 1, 0);	// rotate on axis Y
-    glRotatef (p->flyRotation.z (), 0, 0, 1);	// rotate on axis Z
+    matrix.rotate (p->flyRotation.x (), 1, 0, 0);	//rotate on axis X
+    matrix.rotate (-p->flyRotation.y (), 0, 1, 0);	// rotate on axis Y
+    matrix.rotate (p->flyRotation.z (), 0, 0, 1);	// rotate on axis Z
 
-    glScalef (1.0 / (1.0 + p->flyScale),
-	      1.0 / (1.0 + p->flyScale), 1.0 / (1.0 + p->flyScale));
+    matrix.scale (1.0 / (1.0 + p->flyScale),
+		  1.0 / (1.0 + p->flyScale), 1.0 / (1.0 + p->flyScale));
 
     // Move by "rotation axis offset A"
-    glTranslatef (p->rotAxisOffsetA.x (), p->rotAxisOffsetA.y (),
-		  p->rotAxisOffsetA.z ());
+    matrix.translate (p->rotAxisOffsetA.x (), p->rotAxisOffsetA.y (),
+		      p->rotAxisOffsetA.z ());
 
     // Rotate by desired angle A
-    glRotatef (p->rotAngleA, p->rotAxisA.x (), p->rotAxisA.y (),
-	       p->rotAxisA.z ());
+    matrix.rotate (p->rotAngleA, p->rotAxisA.x (), p->rotAxisA.y (),
+		   p->rotAxisA.z ());
 
     // Move back to center from  A
-    glTranslatef (-p->rotAxisOffsetA.x (), -p->rotAxisOffsetA.y (),
-		  -p->rotAxisOffsetA.z ());
+    matrix.translate (-p->rotAxisOffsetA.x (), -p->rotAxisOffsetA.y (),
+		      -p->rotAxisOffsetA.z ());
 
 
     // Move by "rotation axis offset B"
-    glTranslatef (p->rotAxisOffsetB.x (), p->rotAxisOffsetB.y (),
-		  p->rotAxisOffsetB.z ());
+    matrix.translate (p->rotAxisOffsetB.x (), p->rotAxisOffsetB.y (),
+		      p->rotAxisOffsetB.z ());
 
     // Rotate by desired angle B
-    glRotatef (p->rotAngleB, p->rotAxisB.x (), p->rotAxisB.y (),
-	       p->rotAxisB.z ());
+    matrix.rotate (p->rotAngleB, p->rotAxisB.x (), p->rotAxisB.y (),
+		   p->rotAxisB.z ());
 
     // Move back to center from B
-    glTranslatef (-p->rotAxisOffsetB.x (), -p->rotAxisOffsetB.y (),
-		  -p->rotAxisOffsetB.z ());
+    matrix.translate (-p->rotAxisOffsetB.x (), -p->rotAxisOffsetB.y (),
+		      -p->rotAxisOffsetB.z ());
 }
 
 

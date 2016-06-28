@@ -70,7 +70,7 @@ protected:
 };
 
 class AnimAddonWindow :
-    public PluginClassHandler<AnimAddonWindow, CompWindow>
+    public PluginClassHandler<AnimAddonWindow, CompWindow, ANIMATIONADDON_ABI>
 {
 public:
     AnimAddonWindow (CompWindow *);
@@ -224,7 +224,8 @@ class AirplaneAnim :
 	init ();
 
 	void
-	transformPolygon (const PolygonObject *p);
+	transformPolygon (GLMatrix &matrix,
+			  const PolygonObject *p);
 
 	bool
 	tesselateIntoAirplane ();
