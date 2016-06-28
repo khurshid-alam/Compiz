@@ -1,8 +1,12 @@
-compiz (1:0.9.13.0-0ubuntu1) UNRELEASED; urgency=medium
+compiz (1:0.9.13.0+16.10.20160628-0ubuntu1) yakkety; urgency=medium
 
+  [ Marco Trevisan (Treviño) ]
   * New upstream release 0.9.13.0
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 28 Jun 2016 14:52:23 +0000
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * animationaddon: Port the animationaddon plugin to use modern GL API.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 28 Jun 2016 14:57:42 +0000
 
 compiz (1:0.9.12.2+16.10.20160621-0ubuntu1) yakkety; urgency=medium
 
