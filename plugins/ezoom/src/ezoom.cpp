@@ -1604,56 +1604,56 @@ EZoomScreen::zoomSpecific (CompAction         *action,
 	    break;
 
 	case ZoomTarget4:
-		zoom_level = optionGetZoomSpecific4 ();
-		break;
+	    zoom_level = optionGetZoomSpecific4 ();
+	    break;
 
 	case ZoomTarget5:
-		zoom_level = optionGetZoomSpecific5 ();
-		break;
+	    zoom_level = optionGetZoomSpecific5 ();
+	    break;
 
 	case ZoomTarget6:
-		zoom_level = optionGetZoomSpecific6 ();
-		break;
+	    zoom_level = optionGetZoomSpecific6 ();
+	    break;
 
 	case ZoomTarget7:
-		zoom_level = optionGetZoomSpecific7 ();
-		break;
+	    zoom_level = optionGetZoomSpecific7 ();
+	    break;
 
 	case ZoomTarget8:
-		zoom_level = optionGetZoomSpecific8 ();
-		break;
+	    zoom_level = optionGetZoomSpecific8 ();
+	    break;
 
 	case ZoomTarget9:
-		zoom_level = optionGetZoomSpecific9 ();
-		break;
+	    zoom_level = optionGetZoomSpecific9 ();
+	    break;
 
 	case ZoomTarget10:
-		zoom_level = optionGetZoomSpecific10 ();
-		break;
+	    zoom_level = optionGetZoomSpecific10 ();
+	    break;
 
 	case ZoomTarget11:
-		zoom_level = optionGetZoomSpecific11 ();
-		break;
+	    zoom_level = optionGetZoomSpecific11 ();
+	    break;
 
 	case ZoomTarget12:
-		zoom_level = optionGetZoomSpecific12 ();
-		break;
+	    zoom_level = optionGetZoomSpecific12 ();
+	    break;
 
 	case ZoomTarget13:
-		zoom_level = optionGetZoomSpecific13 ();
-		break;
+	    zoom_level = optionGetZoomSpecific13 ();
+	    break;
 
 	case ZoomTarget14:
-		zoom_level = optionGetZoomSpecific14 ();
-		break;
+	    zoom_level = optionGetZoomSpecific14 ();
+	    break;
 
 	case ZoomTarget15:
-		zoom_level = optionGetZoomSpecific15 ();
-		break;
+	    zoom_level = optionGetZoomSpecific15 ();
+	    break;
 
 	case ZoomTarget16:
-		zoom_level = optionGetZoomSpecific16 ();
-		break;
+	    zoom_level = optionGetZoomSpecific16 ();
+	    break;
 
 	default:
 	    return false;
@@ -2018,23 +2018,54 @@ EZoomScreen::EZoomScreen (CompScreen *screen) :
     optionSetZoomOutKeyInitiate (boost::bind (&EZoomScreen::zoomOut, this, _1,
 						_2, _3));
 
-    optionSetZoomSpecific1KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget1));
-    optionSetZoomSpecific2KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget2));
-    optionSetZoomSpecific3KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget3));
-	optionSetZoomSpecific4KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget4));
-	optionSetZoomSpecific5KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget5));
-	optionSetZoomSpecific6KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget6));
-	optionSetZoomSpecific7KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget7));
-	optionSetZoomSpecific8KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget8));
-	optionSetZoomSpecific9KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget9));
-	optionSetZoomSpecific10KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget10));
-	optionSetZoomSpecific11KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget11));
-	optionSetZoomSpecific12KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget12));
-	optionSetZoomSpecific13KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget13));
-	optionSetZoomSpecific14KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget14));
-	optionSetZoomSpecific15KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget15));
-	optionSetZoomSpecific16KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, this, _1, _2, _3, ZoomTarget16));
-	
+    optionSetZoomSpecific1KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget1));
+    optionSetZoomSpecific2KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget2));
+    optionSetZoomSpecific3KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget3));
+    optionSetZoomSpecific4KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget4));
+    optionSetZoomSpecific5KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget5));
+    optionSetZoomSpecific6KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget6));
+    optionSetZoomSpecific7KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget7));
+    optionSetZoomSpecific8KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget8));
+    optionSetZoomSpecific9KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                       this, _1, _2, _3, 
+                                       ZoomTarget9));
+    optionSetZoomSpecific10KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget10));
+    optionSetZoomSpecific11KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget11));
+    optionSetZoomSpecific12KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget12));
+    optionSetZoomSpecific13KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget13));
+    optionSetZoomSpecific14KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget14));
+    optionSetZoomSpecific15KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget15));
+    optionSetZoomSpecific16KeyInitiate (boost::bind (&EZoomScreen::zoomSpecific, 
+                                        this, _1, _2, _3, 
+                                        ZoomTarget16));
     optionSetPanLeftKeyInitiate (boost::bind (&EZoomScreen::zoomPan, this, _1,
 					      _2, _3, -1, 0));
     optionSetPanRightKeyInitiate (boost::bind (&EZoomScreen::zoomPan, this, _1,
