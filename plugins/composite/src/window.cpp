@@ -115,18 +115,9 @@ PrivateCompositeWindow::PrivateCompositeWindow (CompWindow      *w,
     overlayWindow (false),
     opacity (OPAQUE),
     brightness (BRIGHT),
-    saturation (COLOR),
-    damageRects (0),
-    sizeDamage (0),
-    nDamage (0)
+    saturation (COLOR)
 {
     WindowInterface::setHandler (w);
-}
-
-PrivateCompositeWindow::~PrivateCompositeWindow ()
-{
-    if (sizeDamage)
-	free (damageRects);
 }
 
 bool
@@ -405,32 +396,14 @@ void
 CompositeWindow::processDamage (XDamageNotifyEvent *de)
 {
     if (priv->window->syncWait ())
-    {
-	if (priv->nDamage == priv->sizeDamage)
-	{
-	    priv->damageRects = (XRectangle *) realloc (priv->damageRects,
-				 (priv->sizeDamage + 1) *
-				 sizeof (XRectangle));
-	    priv->sizeDamage += 1;
-	}
-
-	priv->damageRects[priv->nDamage].x      = de->area.x;
-	priv->damageRects[priv->nDamage].y      = de->area.y;
-	priv->damageRects[priv->nDamage].width  = de->area.width;
-	priv->damageRects[priv->nDamage].height = de->area.height;
-	priv->nDamage++;
-    }
+	priv->damageRects.push_back (de->area);
     else
-	priv->handleDamageRect (this, de->area.x, de->area.y,
-				de->area.width, de->area.height);
+	priv->handleDamageRect (this, de->area);
 }
 
 void
 PrivateCompositeWindow::handleDamageRect (CompositeWindow *w,
-					  int             x,
-					  int             y,
-					  int             width,
-					  int             height)
+					  XRectangle const& rect)
 {
     if (!w->priv->redirected)
 	return;
@@ -440,15 +413,15 @@ PrivateCompositeWindow::handleDamageRect (CompositeWindow *w,
     if (!w->priv->damaged)
 	w->priv->damaged = initial = true;
 
-    if (!w->damageRect (initial, CompRect (x, y, width, height)))
+    if (!w->damageRect (initial, CompRect (rect.x, rect.y, rect.width, rect.height)))
     {
 	const CompWindow::Geometry &geom = w->priv->window->geometry ();
 
-	x += geom.x () + geom.border ();
-	y += geom.y () + geom.border ();
+	int x = rect.x + geom.x () + geom.border ();
+	int y = rect.y + geom.y () + geom.border ();
 
 	w->priv->cScreen->damageRegion (CompRegion (CompRect
-						    (x, y, width, height)));
+						    (x, y, rect.width, rect.height)));
     }
 
     if (initial)
@@ -565,17 +538,10 @@ PrivateCompositeWindow::windowNotify (CompWindowNotify n)
 
 	case CompWindowNotifySyncAlarm:
 	{
-	    XRectangle *rects;
+	    for (XRectangle const& rect : damageRects)
+		PrivateCompositeWindow::handleDamageRect (cWindow, rect);
 
-	    rects   = damageRects;
-	    while (nDamage--)
-	    {
-		PrivateCompositeWindow::handleDamageRect (cWindow,
-							  rects[nDamage].x,
-							  rects[nDamage].y,
-							  rects[nDamage].width,
-							  rects[nDamage].height);
-	    }
+	    damageRects.clear();
 	    break;
 	}
 

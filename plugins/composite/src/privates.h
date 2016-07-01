@@ -142,7 +142,6 @@ class PrivateCompositeWindow :
 {
     public:
 	PrivateCompositeWindow (CompWindow *w, CompositeWindow *cw);
-	~PrivateCompositeWindow ();
 
 	void windowNotify (CompWindowNotify n);
 	void resizeNotify (int dx, int dy, int dwidth, int dheight);
@@ -156,11 +155,7 @@ class PrivateCompositeWindow :
 	void allowFurtherRebindAttempts ();
 	bool frozen ();
 
-	static void handleDamageRect (CompositeWindow *w,
-				      int             x,
-				      int             y,
-				      int             width,
-				      int             height);
+	static void handleDamageRect (CompositeWindow *w, XRectangle const& rect);
 
     public:
 	CompWindow      *window;
@@ -179,9 +174,7 @@ class PrivateCompositeWindow :
 	unsigned short brightness;
 	unsigned short saturation;
 
-	XRectangle *damageRects;
-	int        sizeDamage;
-	int        nDamage;
+	std::vector<XRectangle> damageRects;
 
     private:
 
