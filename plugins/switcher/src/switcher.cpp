@@ -20,7 +20,9 @@
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * Author: David Reveman <davidr@novell.com>
+ * Author(s):
+ *  - David Reveman <davidr@novell.com>
+ *  - Auboyneau Vincent <ksamak@riseup.net> (size multiplier for A11Y)
  */
 
 #include "switcher.h"
@@ -35,36 +37,6 @@ const unsigned short BOX_WIDTH = 3;
 
 #define XWINDOWCHANGES_INIT {0, 0, 0, 0, 0, None, 0}
 
-static float _boxVertices[] =
-{
-    -(WIDTH >> 1), BOX_WIDTH, 0.0f,
-     (WIDTH >> 1), BOX_WIDTH, 0.0f,
-    -(WIDTH >> 1), 0.0f,      0.0f,
-    -(WIDTH >> 1), 0.0f,      0.0f,
-     (WIDTH >> 1), BOX_WIDTH, 0.0f,
-     (WIDTH >> 1), 0.0f,      0.0f,
-
-    -(WIDTH >> 1),             HEIGHT - BOX_WIDTH, 0.0f,
-    -(WIDTH >> 1) + BOX_WIDTH, HEIGHT - BOX_WIDTH, 0.0f,
-    -(WIDTH >> 1),             BOX_WIDTH,          0.0f,
-    -(WIDTH >> 1),             BOX_WIDTH,          0.0f,
-    -(WIDTH >> 1) + BOX_WIDTH, HEIGHT - BOX_WIDTH, 0.0f,
-    -(WIDTH >> 1) + BOX_WIDTH, BOX_WIDTH,          0.0f,
-
-     (WIDTH >> 1) - BOX_WIDTH, HEIGHT - BOX_WIDTH, 0.0f,
-     (WIDTH >> 1),             HEIGHT - BOX_WIDTH, 0.0f,
-     (WIDTH >> 1) - BOX_WIDTH, BOX_WIDTH,          0.0f,
-     (WIDTH >> 1) - BOX_WIDTH, BOX_WIDTH,          0.0f,
-     (WIDTH >> 1),             HEIGHT - BOX_WIDTH, 0.0f,
-     (WIDTH >> 1),             BOX_WIDTH,          0.0f,
-
-    -(WIDTH >> 1), HEIGHT,             0.0f,
-     (WIDTH >> 1), HEIGHT,             0.0f,
-    -(WIDTH >> 1), HEIGHT - BOX_WIDTH, 0.0f,
-    -(WIDTH >> 1), HEIGHT - BOX_WIDTH, 0.0f,
-     (WIDTH >> 1), HEIGHT,             0.0f,
-     (WIDTH >> 1), HEIGHT - BOX_WIDTH, 0.0f,
-};
 
 void
 SwitchScreen::updateWindowList (int count)
@@ -78,7 +50,7 @@ SwitchScreen::updateWindowList (int count)
 	    count = 3;
     }
 
-    pos  = ((count >> 1) - (int)windows.size ()) * WIDTH;
+    pos  = ((count >> 1) - (int)windows.size ()) * static_cast<int>(WIDTH * sm);
     move = 0;
 
     selectedWindow = windows.front ();
@@ -184,9 +156,9 @@ void
 SwitchScreen::handleSelectionChange (bool toNext, int nextIdx)
 {
     if (toNext)
-	move -= WIDTH;
+	move -= static_cast<int>(WIDTH * sm);
     else
-	move += WIDTH;
+	move += static_cast<int>(WIDTH * sm);
 
     moreAdjust = true;
 }
@@ -532,7 +504,7 @@ SwitchScreen::windowRemove (CompWindow *w)
 
 	updateWindowList (count);
 
-	allWindowsWidth = windows.size () * WIDTH;
+	allWindowsWidth = windows.size () * static_cast<int>(WIDTH * sm);
 
 	foreach (CompWindow *win, windows)
 	{
@@ -541,7 +513,7 @@ SwitchScreen::windowRemove (CompWindow *w)
 	    if (selectedWindow == selected)
 		break;
 
-	    pos -= WIDTH;
+	    pos -= static_cast<int>(WIDTH * sm);
 	    if (pos < -allWindowsWidth)
 		pos += allWindowsWidth;
 	}
@@ -650,7 +622,7 @@ SwitchScreen::preparePaint (int msSinceLastPaint)
 	float amount, chunk;
 	int   allWindowsWidth;
 
-	allWindowsWidth = windows.size () * WIDTH;
+	allWindowsWidth = windows.size () * static_cast<int>(WIDTH * sm);
 
 	amount = msSinceLastPaint * 0.05f * optionGetSpeed ();
 	steps  = amount / (0.5f * optionGetTimestep ());
@@ -878,10 +850,10 @@ SwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
     				  mask,
     				  x,
     				  y,
-    				  WIDTH  - (SPACE << 1),
-    				  HEIGHT - (SPACE << 1),
-    				  WIDTH  - (WIDTH  >> 2),
-    				  HEIGHT - (HEIGHT >> 2));
+				  static_cast<int>(WIDTH * sm)  - (SPACE << 1),
+				  static_cast<int>(HEIGHT * sm) - (SPACE << 1),
+				  static_cast<int>(WIDTH * sm)  - (static_cast<int>(WIDTH * sm)  >> 2),
+				  static_cast<int>(HEIGHT * sm) - (static_cast<int>(HEIGHT * sm) >> 2));
 }
 
 void
@@ -901,8 +873,8 @@ SwitchWindow::updateIconTexturedWindow (GLWindowPaintAttrib  &sAttrib,
     else
 	sAttrib.xScale = sAttrib.yScale;
 
-    wx = x + WIDTH  - icon->width ()  * sAttrib.xScale - SPACE;
-    wy = y + HEIGHT - icon->height () * sAttrib.yScale - SPACE;
+    wx = x + static_cast<int>(WIDTH * sm)  - icon->width ()  * sAttrib.xScale - SPACE;
+    wy = y + static_cast<int>(HEIGHT * sm) - icon->height () * sAttrib.yScale - SPACE;
 }
 
 void
@@ -931,8 +903,8 @@ SwitchWindow::updateIconNontexturedWindow (GLWindowPaintAttrib  &sAttrib,
     width  = icon->width ()  * sAttrib.xScale;
     height = icon->height () * sAttrib.yScale;
 
-    wx = x + SPACE + ((WIDTH  - (SPACE << 1)) - width)  / 2;
-    wy = y + SPACE + ((HEIGHT - (SPACE << 1)) - height) / 2;
+    wx = x + SPACE + ((static_cast<int>(WIDTH * sm)  - (SPACE << 1)) - width)  / 2;
+    wy = y + SPACE + ((static_cast<int>(HEIGHT * sm) - (SPACE << 1)) - height) / 2;
 }
 
 void
@@ -943,8 +915,8 @@ SwitchWindow::updateIconPos (int   &wx,
 			     float width,
 			     float height)
 {
-    wx = x + SPACE + ((WIDTH  - (SPACE << 1)) - width)  / 2;
-    wy = y + SPACE + ((HEIGHT - (SPACE << 1)) - height) / 2;
+    wx = x + SPACE + ((static_cast<int>(WIDTH * sm)  - (SPACE << 1)) - width)  / 2;
+    wy = y + SPACE + ((static_cast<int>(HEIGHT * sm) - (SPACE << 1)) - height) / 2;
 }
 
 
@@ -971,6 +943,7 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	int            x, y, x1, x2, cx;
 	unsigned short color[4];
 
+    sm = sScreen->sm;
 	const CompWindow::Geometry &g = window->geometry ();
 
 	if (mask & PAINT_WINDOW_OCCLUSION_DETECTION_MASK ||
@@ -993,21 +966,23 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 
 	foreach (CompWindow *w, sScreen->windows)
 	{
-	    if (x + WIDTH > x1)
-		SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
-		                                   transform, mask, x, y);
-	    x += WIDTH;
+	    if (x + static_cast<int>(WIDTH * sm) > x1) {
+            auto switchWin = SwitchWindow::get(w);
+            switchWin->sm = sm;
+            switchWin->paintThumb (gWindow->lastPaintAttrib (), transform, mask, x, y);
+        }
+	    x += static_cast<int>(WIDTH * sm);
 	}
 
-	foreach (CompWindow *w, sScreen->windows)
-	{
-	    if (x > x2)
-		break;
+    foreach (CompWindow *w, sScreen->windows)
+    {
+        if (x > x2) { break; }
 
-            SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
-	                                       transform, mask, x, y);
-	    x += WIDTH;
-	}
+        auto switchWin = SwitchWindow::get(w);
+        switchWin->sm = sm;
+        switchWin->paintThumb (gWindow->lastPaintAttrib (), transform, mask, x, y);
+        x += static_cast<int>(WIDTH * sm);
+    }
 
 	glDisable (GL_SCISSOR_TEST);
 
@@ -1025,7 +1000,7 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	streamingBuffer->begin (GL_TRIANGLES);
 
 	streamingBuffer->addColors (1, color);
-	streamingBuffer->addVertices (24, _boxVertices);
+	streamingBuffer->addVertices (24, sScreen->_boxVertices);
 
 	streamingBuffer->end ();
 	streamingBuffer->render (wTransform, attrib);
@@ -1102,6 +1077,58 @@ SwitchScreen::setZoom ()
 
 }
 
+void SwitchScreen::setSizeMultiplier() {
+    sm = optionGetSizeMultiplier();
+    float width = (WIDTH >> 1) * sm;
+    float height = HEIGHT * sm;
+    float box_width = BOX_WIDTH * sm;
+    float boxVertices[72] =
+    {
+        -width, box_width,  0.0f,
+        width,  box_width,  0.0f,
+        -width, 0.0f,       0.0f,
+        -width, 0.0f,       0.0f,
+        width,  box_width,  0.0f,
+        width,  0.0f,       0.0f,
+
+        -width,             height - box_width, 0.0f,
+        -width + box_width, height - box_width, 0.0f,
+        -width,             box_width,          0.0f,
+        -width,             box_width,          0.0f,
+        -width + box_width, height - box_width, 0.0f,
+        -width + box_width, box_width,          0.0f,
+
+        width - box_width,  height - box_width, 0.0f,
+        width,              height - box_width, 0.0f,
+        width - box_width,  box_width,          0.0f,
+        width - box_width,  box_width,          0.0f,
+        width,              height - box_width, 0.0f,
+        width,              box_width,          0.0f,
+
+        -width, height,             0.0f,
+        width, height,             0.0f,
+        -width, height - box_width, 0.0f,
+        -width, height - box_width, 0.0f,
+        width, height,             0.0f,
+        width, height - box_width, 0.0f,
+    };
+    std::copy(boxVertices, boxVertices + 72, _boxVertices);
+
+	foreach (CompWindow *w, windows)
+	{
+        auto switchWin = SwitchWindow::get(w);
+        switchWin->resetGraphics();
+	}
+}
+
+void SwitchWindow::resetGraphics() {
+    sm = sScreen->optionGetSizeMultiplier();
+    if (sScreen->popupWindow && sScreen->popupWindow == window->id ()) {
+        gWindow->glPaintSetEnabled (this, false);
+        gWindow->glPaintSetEnabled (this, true);
+    }
+}
+
 SwitchScreen::SwitchScreen (CompScreen *screen) :
     BaseSwitchScreen (screen),
     PluginClassHandler<SwitchScreen,CompScreen> (screen),
@@ -1115,13 +1142,15 @@ SwitchScreen::SwitchScreen (CompScreen *screen) :
     pos (0),
     move (0),
     translate (0.0),
-    sTranslate (0.0)
+    sTranslate (0.0),
+    sm(1)
 {
     zoom = optionGetZoom () / 30.0f;
-
     zooming = (optionGetZoom () > 0.05f);
-
     optionSetZoomNotify (boost::bind (&SwitchScreen::setZoom, this));
+
+    setSizeMultiplier();
+    optionSetSizeMultiplierNotify(boost::bind(&SwitchScreen::setSizeMultiplier, this));
 
     auto bgUpdater = [=] (...){ this->updateBackground (this->optionGetUseBackgroundColor (), this->optionGetBackgroundColor ());};
     optionSetUseBackgroundColorNotify (bgUpdater);
@@ -1182,8 +1211,10 @@ SwitchWindow::SwitchWindow (CompWindow *window) :
     BaseSwitchWindow (dynamic_cast<BaseSwitchScreen *>
     		      (SwitchScreen::get (screen)), window),
     PluginClassHandler<SwitchWindow,CompWindow> (window),
+    sm(1),
     sScreen (SwitchScreen::get (screen))
 {
+    sm = sScreen->optionGetSizeMultiplier();
     GLWindowInterface::setHandler (gWindow, false);
     CompositeWindowInterface::setHandler (cWindow, false);
 

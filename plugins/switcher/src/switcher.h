@@ -20,7 +20,9 @@
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * Author: David Reveman <davidr@novell.com>
+ * Author(s):
+ *  - David Reveman <davidr@novell.com>
+ *  - Auboyneau Vincent <ksamak@riseup.net> (size multiplier for A11Y)
  */
 
 #include <stdio.h>
@@ -96,6 +98,11 @@ class SwitchScreen :
 
 	float translate;
 	float sTranslate;
+
+    void setSizeMultiplier();
+    float sm;
+    float _boxVertices[72];
+
 };
 
 class SwitchWindow :
@@ -114,6 +121,8 @@ class SwitchWindow :
 
 	bool glPaint (const GLWindowPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, unsigned int);
+
+    void resetGraphics();
 
 	void paintThumb (const GLWindowPaintAttrib &attrib,
 			 const GLMatrix            &transform,
@@ -143,6 +152,8 @@ class SwitchWindow :
 
 	IconMode getIconMode ();
 
+    float sm; // sizeMultiplier
+
 	SwitchScreen    *sScreen;
 };
 
@@ -160,8 +171,8 @@ extern const unsigned short SPACE;
 
 extern const unsigned short BOX_WIDTH;
 
-#define WINDOW_WIDTH(count) (WIDTH * (count) + (SPACE << 1))
-#define WINDOW_HEIGHT (HEIGHT + (SPACE << 1))
+#define WINDOW_WIDTH(count) (static_cast<int>(WIDTH * optionGetSizeMultiplier()) * (count) + (SPACE << 1))
+#define WINDOW_HEIGHT (static_cast<int>(HEIGHT * optionGetSizeMultiplier()) + (SPACE << 1))
 
 #define SWITCH_SCREEN(s) \
     SwitchScreen *ss = SwitchScreen::get (s)
