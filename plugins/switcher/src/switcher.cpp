@@ -964,15 +964,15 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	glEnable (GL_SCISSOR_TEST);
 	glScissor (x1, 0, x2 - x1, screen->height ());
 
-	foreach (CompWindow *w, sScreen->windows)
-	{
-	    if (x + static_cast<int>(WIDTH * sm) > x1) {
+    foreach (CompWindow *w, sScreen->windows)
+    {
+        if (x + static_cast<int>(WIDTH * sm) > x1) {
             auto switchWin = SwitchWindow::get(w);
             switchWin->sm = sm;
             switchWin->paintThumb (gWindow->lastPaintAttrib (), transform, mask, x, y);
         }
-	    x += static_cast<int>(WIDTH * sm);
-	}
+        x += static_cast<int>(WIDTH * sm);
+    }
 
     foreach (CompWindow *w, sScreen->windows)
     {

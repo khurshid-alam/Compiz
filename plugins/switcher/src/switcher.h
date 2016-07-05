@@ -99,9 +99,9 @@ class SwitchScreen :
 	float translate;
 	float sTranslate;
 
-    void setSizeMultiplier();
-    float sm;
-    float _boxVertices[72];
+	void setSizeMultiplier();
+	float sm;
+	float _boxVertices[72];
 
 };
 
@@ -122,7 +122,7 @@ class SwitchWindow :
 	bool glPaint (const GLWindowPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, unsigned int);
 
-    void resetGraphics();
+	void resetGraphics();
 
 	void paintThumb (const GLWindowPaintAttrib &attrib,
 			 const GLMatrix            &transform,
@@ -152,7 +152,7 @@ class SwitchWindow :
 
 	IconMode getIconMode ();
 
-    float sm; // sizeMultiplier
+	float sm; // sizeMultiplier
 
 	SwitchScreen    *sScreen;
 };
