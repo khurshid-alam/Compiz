@@ -932,9 +932,11 @@ PrivateScaleScreen::preparePaint (int msSinceLastPaint)
     if (state != ScaleScreen::Idle && state != ScaleScreen::Wait)
     {
 	int   steps;
-	float amount, chunk;
+	float amount, chunk, speed;
 
-	amount = msSinceLastPaint * 0.05f * optionGetSpeed ();
+	speed = optionGetSkipAnimation() ? USHRT_MAX : optionGetSpeed();
+
+	amount = msSinceLastPaint * 0.05f * speed;
 	steps  = amount / (0.5f * optionGetTimestep ());
 
 	if (!steps)
