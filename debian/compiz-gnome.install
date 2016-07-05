@@ -1,6 +1,6 @@
 debian/65compiz_profile-on-session /etc/X11/Xsession.d
 debian/profile_upgrades/*.upgrade usr/share/compizconfig/upgrades
-debian/unity.ini /etc/compizconfig/
+debian/unity*.ini /etc/compizconfig/
 postinst/convert-files/*.convert usr/lib/compiz/migration/
 usr/bin/gtk-window-decorator
 usr/lib/*/compizconfig/backends/libgsettings.so

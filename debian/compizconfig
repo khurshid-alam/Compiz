@@ -20,3 +20,8 @@ integration = true
 plugin_list_autosort = true
 profile = unity
 
+[general_ubuntu-lowgfx]
+backend = gsettings
+integration = true
+plugin_list_autosort = true
+profile = unity-lowgfx
