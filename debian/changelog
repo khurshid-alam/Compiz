@@ -1,3 +1,15 @@
+compiz (1:0.9.13.0+16.10.20160705-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Added options for no animation in expo and scale plugins. They skip
+    the intermediate fading steps that force several redraws.
+
+  [ Marco Trevisan (Treviño) ]
+  * Composite: use C++ goodness for managing damaging rectangles
+  * debian: add unity-lowgfx profile to compizconfig (LP: #1598770)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 05 Jul 2016 01:12:10 +0000
+
 compiz (1:0.9.13.0+16.10.20160628-0ubuntu1) yakkety; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
