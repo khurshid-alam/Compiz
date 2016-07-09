@@ -6,8 +6,6 @@ usr/lib/*/compiz/*animationaddon.*
 usr/share/compiz/*animationaddon.*
 usr/lib/*/compiz/*animationjc.*
 usr/share/compiz/*animationjc.*
-usr/lib/*/compiz/*animationsim.*
-usr/share/compiz/*animationsim.*
 usr/lib/*/compiz/*bench.*
 usr/share/compiz/*bench.*
 usr/lib/*/compiz/*blur.*

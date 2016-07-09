@@ -678,12 +678,11 @@ int PrivateVertexBuffer::legacyRender (const GLMatrix            &projection,
 			  maxVertices) :
 		vertexData.size () / 3;
 
-    if (indices && nIndices) {
+    if (indices && nIndices)
 	glDrawElements (primitiveType,
 			nIndices,
 			GL_UNSIGNED_SHORT,
 			indices);
-    }
     else
  	glDrawArrays (primitiveType, vertexOffset, nVerticesToDraw);
 
