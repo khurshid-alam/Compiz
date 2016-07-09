@@ -1463,7 +1463,6 @@ PolygonAnim::drawPolygonClipIntersection (GLTexture *texture,
     // clipPlanes[1][3] = -(c.boxf.y1 - p->centerPosStart.y ());
     // clipPlanes[2][3] = (c.boxf.x2 - p->centerPosStart.x ());
     // clipPlanes[3][3] = (c.boxf.y2 - p->centerPosStart.y ());
-
     // Clip planes are not supported on Modern OpenGL
     //
     // glClipPlane (GL_CLIP_PLANE0, clipPlanes[0]);
@@ -1649,17 +1648,10 @@ PolygonAnim::drawGeometry (GLTexture                 *texture,
     }
 
     // Clip planes
-<<<<<<< TREE
     // GLdouble clipPlanes[4][4] = {{ 1, 0, 0, 0 },
     //				 { 0, 1, 0, 0 },
     //				 { -1, 0, 0, 0 },
     //				 { 0, -1, 0, 0 }};
-=======
-    GLdouble clipPlanes[4][4] = {{ 1, 0, 0, 0 },
-				 { 0, 1, 0, 0 },
-				 { -1, 0, 0, 0 },
-				 { 0, -1, 0, 0 }};
->>>>>>> MERGE-SOURCE
 
     float opacity = mCurPaintAttrib.opacity / 65535.0;
 
@@ -2005,10 +1997,7 @@ ExtensionPluginAnimAddon::prePaintOutput (CompOutput *output)
 	glClearDepthf (1000.0f);
 #else
 	glClearDepth (1000.0f);
-<<<<<<< TREE
 #endif
-=======
->>>>>>> MERGE-SOURCE
 	glDepthMask (GL_TRUE);
 	glClear (GL_DEPTH_BUFFER_BIT);
 	glDepthMask (GL_FALSE);
