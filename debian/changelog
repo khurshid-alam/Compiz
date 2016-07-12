@@ -1,3 +1,68 @@
+compiz (1:0.9.13.0+16.10.20160705-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Added options for no animation in expo and scale plugins. They skip
+    the intermediate fading steps that force several redraws.
+
+  [ Marco Trevisan (Treviño) ]
+  * Composite: use C++ goodness for managing damaging rectangles
+  * debian: add unity-lowgfx profile to compizconfig (LP: #1598770)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 05 Jul 2016 01:12:10 +0000
+
+compiz (1:0.9.13.0+16.10.20160628-0ubuntu1) yakkety; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * New upstream release 0.9.13.0
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * animationaddon: Port the animationaddon plugin to use modern GL API.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 28 Jun 2016 14:57:42 +0000
+
+compiz (1:0.9.12.2+16.10.20160621-0ubuntu1) yakkety; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: add new metacity-theme-type setting in
+    GWDSettings.
+  * gtk-window-decorator: stop using meta_frame_type_from_string.
+  * gtk-window-decorator: more code cleanup.
+  * gtk-window-decorator: improve titlebar font handling.
+  * gtk-window-decorator: use only one style window.
+  * gtk-window-decorator: improve Metacity theme.
+  * gtk-window-decorator: support Metacity 3.20.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 21 Jun 2016 13:11:16 +0000
+
+compiz (1:0.9.12.2+16.10.20160606.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * removed a line that includes a missing header file and breaks the
+    build
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 06 Jun 2016 14:28:30 +0000
+
+compiz (1:0.9.12.2+16.10.20160602.3-0ubuntu1) yakkety; urgency=medium
+
+  [ Graham Inggs ]
+  * Move libjpeg8-dev to libjpeg-dev
+
+  [ Gianfranco Costamagna ]
+  * Move libpng12-dev to libpng-dev, to ease libpng12 removal.
+  * Move libjpeg8-dev to libjpeg-dev and libpng12-dev to libpng-dev, to
+    ease libpng12 removal
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: remove broken 2D decoration mode.
+  * gtk-window-decorator: replace get_title_scale with
+    update_titlebar_font_size.
+  * gtk-window-decorator: improve GWDSettingsStorage
+
+  [ Marco Trevisan (Treviño) ]
+  * showmouse: add mouse vertical and horizontal guides (LP: #1541059)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 02 Jun 2016 01:30:40 +0000
+
 compiz (1:0.9.12.2+16.10.20160526-0ubuntu1) yakkety; urgency=medium
 
   [ Alberts Muktupāvels ]

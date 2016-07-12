@@ -167,7 +167,7 @@ GlideAnim::prePaintWindow ()
 }
 
 void
-GlideAnim::postPaintWindow ()
+GlideAnim::postPaintWindow (const GLMatrix &transform)
 {
     if (90 < glideModRotAngle &&
 	glideModRotAngle < 270)

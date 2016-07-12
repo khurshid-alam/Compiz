@@ -25,6 +25,7 @@
 
 #ifndef _GTK_WINDOW_DECORATOR_H
 #define _GTK_WINDOW_DECORATOR_H
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -41,21 +42,11 @@
 #include <gdk/gdkx.h>
 #include <gdk/gdk.h>
 
-#ifdef USE_DBUS_GLIB
-#define DBUS_API_SUBJECT_TO_CHANGE
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#endif
-
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 
 #include <cairo.h>
 #include <cairo-xlib.h>
-
-#if CAIRO_VERSION < CAIRO_VERSION_ENCODE(1, 1, 0)
-#define CAIRO_EXTEND_PAD CAIRO_EXTEND_NONE
-#endif
 
 #include <pango/pango-context.h>
 #include <pango/pangocairo.h>
@@ -104,7 +95,6 @@ extern GWDTheme *gwd_theme;
 extern gdouble decoration_alpha;
 
 extern Atom frame_input_window_atom;
-extern Atom frame_output_window_atom;
 extern Atom win_decor_atom;
 extern Atom win_blur_decor_atom;
 extern Atom wm_move_resize_atom;
@@ -160,7 +150,6 @@ typedef struct _decor_color {
     double g;
     double b;
 } decor_color_t;
-
 
 #define IN_EVENT_WINDOW      (1 << 0)
 #define PRESSED_EVENT_WINDOW (1 << 1)
@@ -220,24 +209,15 @@ typedef void (*destroy_frame_proc) (decor_frame_t *);
 struct _decor_frame {
     decor_extents_t win_extents;
     decor_extents_t max_win_extents;
-    int		    titlebar_height;
-    int		    max_titlebar_height;
     decor_shadow_t *border_shadow_active;
     decor_shadow_t *border_shadow_inactive;
-    decor_shadow_t *border_no_shadow;
     decor_shadow_t *max_border_shadow_active;
     decor_shadow_t *max_border_shadow_inactive;
-    decor_shadow_t *max_border_no_shadow;
     decor_context_t window_context_active;
     decor_context_t window_context_inactive;
-    decor_context_t window_context_no_shadow;
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
-    decor_context_t max_window_context_no_shadow;
-    PangoFontDescription *titlebar_font;
     PangoContext	 *pango_context;
-    GtkWidget	         *style_window_rgba;
-    GtkWidget		 *style_window_rgb;
     gint		 text_height;
     gchar		 *type;
 
@@ -250,15 +230,10 @@ typedef struct _decor {
     decor_frame_t     *frame;
     event_window      event_windows[3][3];
     event_window      button_windows[BUTTON_NUM];
-    Box		      *last_pos_entered;
     guint	      button_states[BUTTON_NUM];
     Pixmap            x11Pixmap;
     cairo_surface_t   *surface;
     cairo_surface_t   *buffer_surface;
-    GdkWindow	      *frame_window;
-    GtkWidget         *decor_window;
-    GtkWidget	      *decor_event_box;
-    GtkWidget         *decor_image;
     cairo_t	      *cr;
     decor_layout_t    border_layout;
     decor_context_t   *context;
@@ -303,7 +278,6 @@ extern GHashTable    *frame_table;
 /* action menu */
 extern GtkWidget     *action_menu;
 extern gboolean      action_menu_mapped;
-extern decor_color_t _title_color[2];
 extern gint	     double_click_timeout;
 
 
@@ -322,7 +296,6 @@ extern GtkWidget  *switcher_label;
 extern decor_t    *switcher_window;
 
 extern XRenderPictFormat *xformat_rgba;
-extern XRenderPictFormat *xformat_rgb;
 
 /* frames.c */
 
@@ -412,9 +385,6 @@ int
 update_shadow (void);
 
 void
-update_titlebar_font ();
-
-void
 update_window_decoration (WnckWindow *win);
 
 void
@@ -440,8 +410,7 @@ window_closed (WnckScreen *screen,
 
 void
 add_frame_window (WnckWindow *win,
-		  Window     frame,
-		  Bool	     mode);
+                  Window     frame);
 
 void
 remove_frame_window (WnckWindow *win);
@@ -464,14 +433,6 @@ decor_update_blur_property (decor_t *d,
 			    int     left_offset,
 			    Region  right_region,
 			    int     right_offset);
-
-/* decorprops.c */
-
-void
-decor_update_window_property (decor_t *d);
-
-void
-decor_update_switcher_property (decor_t *d);
 
 /* cairo.c */
 
@@ -516,12 +477,6 @@ rounded_rectangle (cairo_t *cr,
 
 /* gdk.c */
 
-GdkWindow *
-create_gdk_window (Window xframe);
-
-XRenderPictFormat *
-get_format_for_surface (decor_t *d, cairo_surface_t *surface);
-
 cairo_surface_t *
 create_surface (int	 w,
 	       int	 h,
@@ -531,9 +486,6 @@ cairo_surface_t *
 create_native_surface_and_wrap (int	  w,
 			       int	  h,
 			       GtkWidget *parent_style_window);
-
-cairo_surface_t *
-surface_new_from_pixbuf (GdkPixbuf *pixbuf, GtkWidget *parent);
 
 /* switcher.c */
 
@@ -655,25 +607,6 @@ bottom_right_event (WnckWindow *win,
 		    decor_event *gtkwd_event,
 		    decor_event_type gtkwd_type);
 
-void
-frame_window_realized (GtkWidget *widget,
-		       gpointer  data);
-
-void
-frame_handle_button_press (GtkWidget      *widget,
-			   GdkEventButton *event,
-			   gpointer       user_data);
-
-void
-frame_handle_button_release (GtkWidget      *widget,
-			     GdkEventButton *event,
-			     gpointer       user_data);
-
-void
-frame_handle_motion (GtkWidget      *widget,
-		     GdkEventMotion *event,
-		     gpointer       user_data);
-
 GdkFilterReturn
 selection_event_filter_func (GdkXEvent *gdkxevent,
 			     GdkEvent  *event,
@@ -726,15 +659,6 @@ gchar *
 get_gtk_theme_variant (Window xwindow);
 
 /* settings.c */
-
-void
-set_frame_scale (decor_frame_t *frame,
-		 const gchar *font_str);
-
-void
-set_frames_scales (gpointer key,
-		   gpointer value,
-		   gpointer user_data);
 
 void
 init_settings (GWDSettings *settings);

@@ -22,6 +22,7 @@
 
 #include <decoration.h>
 #include <glib-object.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
@@ -36,48 +37,53 @@ struct _GWDThemeClass
 {
     GObjectClass parent_class;
 
-    void     (* get_shadow)                (GWDTheme               *theme,
-                                            decor_frame_t          *frame,
-                                            decor_shadow_options_t *options,
-                                            gboolean                active);
+    void     (* style_updated)                      (GWDTheme                   *theme);
 
-    void     (* draw_window_decoration)    (GWDTheme               *theme,
-                                            decor_t                *decor);
+    void     (* get_shadow)                         (GWDTheme                   *theme,
+                                                     decor_frame_t              *frame,
+                                                     decor_shadow_options_t     *options,
+                                                     gboolean                    active);
 
-    gboolean (* calc_decoration_size)      (GWDTheme               *theme,
-                                            decor_t                *decor,
-                                            gint                    w,
-                                            gint                    h,
-                                            gint                    name_width,
-                                            gint                   *width,
-                                            gint                   *height);
+    void     (* draw_window_decoration)             (GWDTheme                   *theme,
+                                                     decor_t                    *decor);
 
-    void     (* update_border_extents)     (GWDTheme               *theme,
-                                            decor_frame_t          *frame);
+    gboolean (* calc_decoration_size)               (GWDTheme                   *theme,
+                                                     decor_t                    *decor,
+                                                     gint                        w,
+                                                     gint                        h,
+                                                     gint                        name_width,
+                                                     gint                       *width,
+                                                     gint                       *height);
 
-    void     (* get_event_window_position) (GWDTheme               *theme,
-                                            decor_t                *decor,
-                                            gint                    i,
-                                            gint                    j,
-                                            gint                    width,
-                                            gint                    height,
-                                            gint                   *x,
-                                            gint                   *y,
-                                            gint                   *w,
-                                            gint                   *h);
+    void     (* update_border_extents)              (GWDTheme                   *theme,
+                                                     decor_frame_t              *frame);
 
-    gboolean (* get_button_position)       (GWDTheme               *theme,
-                                            decor_t                *decor,
-                                            gint                    i,
-                                            gint                    width,
-                                            gint                    height,
-                                            gint                   *x,
-                                            gint                   *y,
-                                            gint                   *w,
-                                            gint                   *h);
+    void     (* get_event_window_position)          (GWDTheme                   *theme,
+                                                     decor_t                    *decor,
+                                                     gint                        i,
+                                                     gint                        j,
+                                                     gint                        width,
+                                                     gint                        height,
+                                                     gint                       *x,
+                                                     gint                       *y,
+                                                     gint                       *w,
+                                                     gint                       *h);
 
-    gfloat   (* get_title_scale)           (GWDTheme               *theme,
-                                            decor_frame_t          *frame);
+    gboolean (* get_button_position)                (GWDTheme                   *theme,
+                                                     decor_t                    *decor,
+                                                     gint                        i,
+                                                     gint                        width,
+                                                     gint                        height,
+                                                     gint                       *x,
+                                                     gint                       *y,
+                                                     gint                       *w,
+                                                     gint                       *h);
+
+    void                   (* update_titlebar_font) (GWDTheme                   *theme,
+                                                     const PangoFontDescription *titlebar_font);
+
+    PangoFontDescription * (* get_titlebar_font)    (GWDTheme                   *theme,
+                                                     decor_frame_t              *frame);
 };
 
 typedef enum
@@ -92,6 +98,9 @@ gwd_theme_new                       (GWDThemeType            type,
 
 GWDSettings *
 gwd_theme_get_settings              (GWDTheme               *theme);
+
+GtkWidget *
+gwd_theme_get_style_window          (GWDTheme               *theme);
 
 void
 gwd_theme_get_shadow                (GWDTheme               *theme,
@@ -139,8 +148,11 @@ gwd_theme_get_button_position       (GWDTheme               *theme,
                                      gint                   *w,
                                      gint                   *h);
 
-gfloat
-gwd_theme_get_title_scale           (GWDTheme               *theme,
+void
+gwd_theme_update_titlebar_font      (GWDTheme               *theme);
+
+PangoFontDescription *
+gwd_theme_get_titlebar_font         (GWDTheme               *theme,
                                      decor_frame_t          *frame);
 
 G_END_DECLS

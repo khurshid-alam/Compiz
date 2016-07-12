@@ -33,10 +33,291 @@
 
 struct _GWDThemeCairo
 {
-    GObject parent;
+    GObject       parent;
+
+    decor_color_t title_color[2];
 };
 
 G_DEFINE_TYPE (GWDThemeCairo, gwd_theme_cairo, GWD_TYPE_THEME)
+
+static gint
+get_titlebar_height (decor_frame_t *frame)
+{
+    return frame->text_height < 17 ? 17 : frame->text_height;
+}
+
+static void
+rgb_to_hls (gdouble *r,
+            gdouble *g,
+            gdouble *b)
+{
+    gdouble red = *r;
+    gdouble green = *g;
+    gdouble blue = *b;
+    gdouble min;
+    gdouble max;
+    gdouble h, l, s;
+    gdouble delta;
+
+    if (red > green) {
+        if (red > blue)
+            max = red;
+        else
+            max = blue;
+
+        if (green < blue)
+            min = green;
+        else
+            min = blue;
+    } else {
+        if (green > blue)
+            max = green;
+        else
+            max = blue;
+
+        if (red < blue)
+            min = red;
+        else
+            min = blue;
+    }
+
+    l = (max + min) / 2;
+    s = 0;
+    h = 0;
+
+    if (max != min) {
+        if (l <= 0.5)
+            s = (max - min) / (max + min);
+        else
+            s = (max - min) / (2 - max - min);
+
+        delta = max -min;
+        if (red == max)
+            h = (green - blue) / delta;
+        else if (green == max)
+            h = 2 + (blue - red) / delta;
+        else if (blue == max)
+            h = 4 + (red - green) / delta;
+
+        h *= 60;
+        if (h < 0.0)
+            h += 360;
+    }
+
+    *r = h;
+    *g = l;
+    *b = s;
+}
+
+static void
+hls_to_rgb (gdouble *h,
+            gdouble *l,
+            gdouble *s)
+{
+    gdouble lightness = *l;
+    gdouble saturation = *s;
+    gdouble hue;
+    gdouble m1, m2;
+    gdouble r, g, b;
+
+    if (lightness <= 0.5)
+        m2 = lightness * (1 + saturation);
+    else
+        m2 = lightness + saturation - lightness * saturation;
+
+    m1 = 2 * lightness - m2;
+
+    if (saturation == 0) {
+        *h = lightness;
+        *l = lightness;
+        *s = lightness;
+    } else {
+        hue = *h + 120;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            r = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            r = m2;
+        else if (hue < 240)
+            r = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            r = m1;
+
+        hue = *h;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            g = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            g = m2;
+        else if (hue < 240)
+            g = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            g = m1;
+
+        hue = *h - 120;
+        while (hue > 360)
+            hue -= 360;
+        while (hue < 0)
+            hue += 360;
+
+        if (hue < 60)
+            b = m1 + (m2 - m1) * hue / 60;
+        else if (hue < 180)
+            b = m2;
+        else if (hue < 240)
+            b = m1 + (m2 - m1) * (240 - hue) / 60;
+        else
+            b = m1;
+
+        *h = r;
+        *l = g;
+        *s = b;
+    }
+}
+
+static void
+shade (const decor_color_t *a,
+       decor_color_t       *b,
+       gfloat               k)
+{
+    gdouble red = a->r;
+    gdouble green = a->g;
+    gdouble blue = a->b;
+
+    rgb_to_hls (&red, &green, &blue);
+
+    green *= k;
+    if (green > 1.0)
+        green = 1.0;
+    else if (green < 0.0)
+        green = 0.0;
+
+    blue *= k;
+    if (blue > 1.0)
+        blue = 1.0;
+    else if (blue < 0.0)
+        blue = 0.0;
+
+    hls_to_rgb (&red, &green, &blue);
+
+    b->r = red;
+    b->g = green;
+    b->b = blue;
+}
+
+static void
+update_title_colors (GWDThemeCairo *cairo)
+{
+    GWDTheme *theme = GWD_THEME (cairo);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
+    GdkRGBA bg;
+    decor_color_t spot_color;
+
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_SELECTED);
+    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_SELECTED, &bg);
+    gtk_style_context_restore (context);
+
+    spot_color.r = bg.red;
+    spot_color.g = bg.green;
+    spot_color.b = bg.blue;
+
+    shade (&spot_color, &cairo->title_color[0], 1.05);
+    shade (&cairo->title_color[0], &cairo->title_color[1], 0.85);
+}
+
+static void
+decor_update_window_property (decor_t *d)
+{
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    decor_extents_t extents = d->frame->win_extents;
+    unsigned int nOffset = 1;
+    unsigned int frame_type = populate_frame_type (d);
+    unsigned int frame_state = populate_frame_state (d);
+    unsigned int frame_actions = populate_frame_actions (d);
+    long *data;
+    gint nQuad;
+    decor_quad_t quads[N_QUADS_MAX];
+    int w, h;
+    gint stretch_offset;
+    REGION top, bottom, left, right;
+
+    w = d->border_layout.top.x2 - d->border_layout.top.x1 -
+	d->context->left_space - d->context->right_space;
+
+    if (d->border_layout.rotation)
+        h = d->border_layout.left.x2 - d->border_layout.left.x1;
+    else
+        h = d->border_layout.left.y2 - d->border_layout.left.y1;
+
+    stretch_offset = w - d->button_width - 1;
+
+    nQuad = decor_set_lSrStXbS_window_quads (quads, d->context,
+                                             &d->border_layout,
+                                             stretch_offset);
+
+    data = decor_alloc_property (nOffset, WINDOW_DECORATION_TYPE_PIXMAP);
+    decor_quads_to_property (data, nOffset - 1, cairo_xlib_surface_get_drawable (d->surface),
+                             &extents, &extents,
+                             &extents, &extents,
+                             ICON_SPACE + d->button_width,
+                             0,
+                             quads, nQuad, frame_type, frame_state, frame_actions);
+
+    gdk_error_trap_push ();
+    XChangeProperty (xdisplay, d->prop_xid, win_decor_atom, XA_INTEGER,
+                     32, PropModeReplace, (guchar *) data,
+                     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
+    gdk_display_sync (display);
+    gdk_error_trap_pop_ignored ();
+
+    top.rects = &top.extents;
+    top.numRects = top.size = 1;
+
+    top.extents.x1 = -extents.left;
+    top.extents.y1 = -extents.top;
+    top.extents.x2 = w + extents.right;
+    top.extents.y2 = 0;
+
+    bottom.rects = &bottom.extents;
+    bottom.numRects = bottom.size = 1;
+
+    bottom.extents.x1 = -extents.left;
+    bottom.extents.y1 = 0;
+    bottom.extents.x2 = w + extents.right;
+    bottom.extents.y2 = extents.bottom;
+
+    left.rects = &left.extents;
+    left.numRects = left.size = 1;
+
+    left.extents.x1 = -extents.left;
+    left.extents.y1 = 0;
+    left.extents.x2 = 0;
+    left.extents.y2 = h;
+
+    right.rects = &right.extents;
+    right.numRects = right.size = 1;
+
+    right.extents.x1 = 0;
+    right.extents.y1 = 0;
+    right.extents.x2 = extents.right;
+    right.extents.y2 = h;
+
+    decor_update_blur_property (d, w, h, &top, stretch_offset,
+                                &bottom, w / 2, &left, h / 2, &right, h / 2);
+
+    free (data);
+}
 
 static void
 button_state_offsets (gdouble  x,
@@ -230,11 +511,31 @@ button_present (decor_t *decor,
 }
 
 static void
+gwd_theme_cairo_constructed (GObject *object)
+{
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (object);
+
+    G_OBJECT_CLASS (gwd_theme_cairo_parent_class)->constructed (object);
+
+    update_title_colors (cairo);
+}
+
+static void
+gwd_theme_cairo_style_updated (GWDTheme *theme)
+{
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (theme);
+
+    update_title_colors (cairo);
+}
+
+static void
 gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
                                         decor_t  *decor)
 {
+    GWDThemeCairo *cairo = GWD_THEME_CAIRO (theme);
+    GtkWidget *style_window = gwd_theme_get_style_window (theme);
+    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
     cairo_t *cr;
-    GtkStyleContext *context;
     GdkRGBA bg, fg;
     cairo_surface_t *surface;
     decor_color_t color;
@@ -243,11 +544,10 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     gint corners = SHADE_LEFT | SHADE_RIGHT | SHADE_TOP | SHADE_BOTTOM;
     gint top;
     gint button_x;
+    gint titlebar_height;
 
     if (!decor->surface)
         return;
-
-    context = gtk_widget_get_style_context (decor->frame->style_window_rgba);
 
     gtk_style_context_save (context);
     gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
@@ -275,10 +575,10 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
-    top = decor->frame->win_extents.top + decor->frame->titlebar_height;
+    top = decor->frame->win_extents.top;
 
     x1 = decor->context->left_space - decor->frame->win_extents.left;
-    y1 = decor->context->top_space - decor->frame->win_extents.top - decor->frame->titlebar_height;
+    y1 = decor->context->top_space - decor->frame->win_extents.top;
     x2 = decor->width - decor->context->right_space + decor->frame->win_extents.right;
     y2 = decor->height - decor->context->bottom_space + decor->frame->win_extents.bottom;
 
@@ -286,11 +586,10 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     cairo_set_line_width (cr, 1.0);
 
-    if (!decor->frame_window)
-        draw_shadow_background (decor, cr, decor->shadow, decor->context);
+    draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
     if (decor->active) {
-        decor_color_t *title_color = _title_color;
+        decor_color_t *title_color = cairo->title_color;
 
         alpha = decoration_alpha + 0.3;
 
@@ -475,10 +774,11 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     cairo_set_line_width (cr, 2.0);
 
     button_x = decor->width - decor->context->right_space - 13;
+    titlebar_height = get_titlebar_height (decor->frame);
 
     if (decor->actions & WNCK_WINDOW_ACTION_CLOSE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_CLOSE], &x, &y);
 
         button_x -= 17;
@@ -500,7 +800,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (decor->actions & WNCK_WINDOW_ACTION_MAXIMIZE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_MAX], &x, &y);
 
         button_x -= 17;
@@ -539,7 +839,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
     if (decor->actions & WNCK_WINDOW_ACTION_MINIMIZE) {
         button_state_offsets (button_x,
-                              y1 - 3.0 + decor->frame->titlebar_height / 2,
+                              y1 - 3.0 + titlebar_height / 2,
                               decor->button_states[BUTTON_MIN], &x, &y);
 
         button_x -= 17;
@@ -566,7 +866,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
         if (decor->active) {
             cairo_move_to (cr,
                            decor->context->left_space + 21.0,
-                           y1 + 2.0 + (decor->frame->titlebar_height - decor->frame->text_height) / 2.0);
+                           y1 + 2.0 + (titlebar_height - decor->frame->text_height) / 2.0);
 
             fg.alpha = STROKE_ALPHA;
             gdk_cairo_set_source_rgba (cr, &fg);
@@ -582,7 +882,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
 
         cairo_move_to (cr,
                        decor->context->left_space + 21.0,
-                        y1 + 2.0 + (decor->frame->titlebar_height - decor->frame->text_height) / 2.0);
+                        y1 + 2.0 + (titlebar_height - decor->frame->text_height) / 2.0);
 
         pango_cairo_show_layout (cr, decor->layout);
     }
@@ -590,7 +890,7 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     if (decor->icon) {
         cairo_translate (cr,
                          decor->context->left_space + 1,
-                         y1 - 5.0 + decor->frame->titlebar_height / 2);
+                         y1 - 5.0 + titlebar_height / 2);
         cairo_set_source (cr, decor->icon);
         cairo_rectangle (cr, 0.0, 0.0, 16.0, 16.0);
         cairo_clip (cr);
@@ -604,19 +904,6 @@ gwd_theme_cairo_draw_window_decoration (GWDTheme *theme,
     cairo_destroy (cr);
 
     copy_to_front_buffer (decor);
-
-    if (decor->frame_window) {
-        GdkWindow *gdk_frame_window = gtk_widget_get_window (decor->decor_window);
-        GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface (decor->surface, 0, 0,
-                                                         decor->width, decor->height);
-
-        gtk_image_set_from_pixbuf (GTK_IMAGE (decor->decor_image), pixbuf);
-        g_object_unref (pixbuf);
-
-        gtk_window_resize (GTK_WINDOW (decor->decor_window), decor->width, decor->height);
-        gdk_window_move (gdk_frame_window, 0, 0);
-        gdk_window_lower (gdk_frame_window);
-    }
 
     if (decor->prop_xid) {
         decor_update_window_property (decor);
@@ -644,50 +931,22 @@ gwd_theme_cairo_calc_decoration_size (GWDTheme *theme,
      * appropriate
      */
 
-    if (!decor->frame_window) {
-        calc_button_size (decor);
+    calc_button_size (decor);
 
-        if (w < ICON_SPACE + decor->button_width)
-            return FALSE;
+    if (w < ICON_SPACE + decor->button_width)
+        return FALSE;
 
-        top_width = name_width + decor->button_width + ICON_SPACE;
-        if (w < top_width)
-            top_width = MAX (ICON_SPACE + decor->button_width, w);
+    top_width = name_width + decor->button_width + ICON_SPACE;
+    if (w < top_width)
+        top_width = MAX (ICON_SPACE + decor->button_width, w);
 
-        if (decor->active)
-            decor_get_default_layout (&decor->frame->window_context_active, top_width, 1, &layout);
-        else
-            decor_get_default_layout (&decor->frame->window_context_inactive, top_width, 1, &layout);
+    if (decor->active)
+        decor_get_default_layout (&decor->frame->window_context_active, top_width, 1, &layout);
+    else
+        decor_get_default_layout (&decor->frame->window_context_inactive, top_width, 1, &layout);
 
-        if (!decor->context || memcmp (&layout, &decor->border_layout, sizeof (layout))) {
-            *width  = layout.width;
-            *height = layout.height;
-
-            decor->border_layout = layout;
-            if (decor->active) {
-                decor->context = &decor->frame->window_context_active;
-                decor->shadow = decor->frame->border_shadow_active;
-            } else {
-                decor->context = &decor->frame->window_context_inactive;
-                decor->shadow = decor->frame->border_shadow_inactive;
-            }
-
-            return TRUE;
-        }
-    } else {
-        calc_button_size (decor);
-
-        /* _default_win_extents + top height */
-
-        top_width = name_width + decor->button_width + ICON_SPACE;
-        if (w < top_width)
-            top_width = MAX (ICON_SPACE + decor->button_width, w);
-
-        decor_get_default_layout (&decor->frame->window_context_no_shadow,
-                                  decor->client_width, decor->client_height,
-                                  &layout);
-
-        *width = layout.width;
+    if (!decor->context || memcmp (&layout, &decor->border_layout, sizeof (layout))) {
+        *width  = layout.width;
         *height = layout.height;
 
         decor->border_layout = layout;
@@ -711,14 +970,15 @@ gwd_theme_cairo_update_border_extents (GWDTheme      *theme,
 {
     decor_extents_t win_extents = { 6, 6, 10, 6 };
     decor_extents_t max_win_extents = { 6, 6, 4, 6 };
+    gint titlebar_height = get_titlebar_height (frame);
 
     frame = gwd_decor_frame_ref (frame);
 
+    win_extents.top += titlebar_height;
+    max_win_extents.top += titlebar_height;
+
     frame->win_extents = win_extents;
     frame->max_win_extents = max_win_extents;
-
-    frame->titlebar_height = frame->max_titlebar_height =
-        (frame->text_height < 17) ? 17 : frame->text_height;
 
     gwd_decor_frame_unref (frame);
 }
@@ -735,18 +995,11 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
                                            gint     *w,
                                            gint     *h)
 {
-    if (decor->frame_window) {
-        *x = pos[i][j].x + pos[i][j].xw * width + decor->frame->win_extents.left;
-        *y = pos[i][j].y + decor->frame->win_extents.top +
-             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
+    gint titlebar_height = get_titlebar_height (decor->frame);
 
-        if (i == 0 && (j == 0 || j == 2))
-            *y -= decor->frame->titlebar_height;
-    } else {
-        *x = pos[i][j].x + pos[i][j].xw * width;
-        *y = pos[i][j].y +
-             pos[i][j].yh * height + pos[i][j].yth * (decor->frame->titlebar_height - 17);
-    }
+    *x = pos[i][j].x + pos[i][j].xw * width;
+    *y = pos[i][j].y +
+         pos[i][j].yh * height + pos[i][j].yth * (titlebar_height - 17);
 
     if ((decor->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY) && (j == 0 || j == 2)) {
         *w = 0;
@@ -758,7 +1011,7 @@ gwd_theme_cairo_get_event_window_position (GWDTheme *theme,
         *h = 0;
     } else {
         *h = pos[i][j].h +
-             pos[i][j].hh * height + pos[i][j].hth * (decor->frame->titlebar_height - 17);
+             pos[i][j].hh * height + pos[i][j].hth * (titlebar_height - 17);
     }
 }
 
@@ -773,22 +1026,16 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
                                      gint     *w,
                                      gint     *h)
 {
+    gint titlebar_height = get_titlebar_height (decor->frame);
+
     if (i > BUTTON_MENU)
         return FALSE;
 
-    if (decor->frame_window) {
-        *x = bpos[i].x + bpos[i].xw * width + decor->frame->win_extents.left + 4;
-        *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
-             (decor->frame->titlebar_height - 17) + decor->frame->win_extents.top + 2;
-    } else {
-        *x = bpos[i].x + bpos[i].xw * width;
-        *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth *
-             (decor->frame->titlebar_height - 17);
-    }
+    *x = bpos[i].x + bpos[i].xw * width;
+    *y = bpos[i].y + bpos[i].yh * height + bpos[i].yth * (titlebar_height - 17);
 
     *w = bpos[i].w + bpos[i].ww * width;
-    *h = bpos[i].h + bpos[i].hh * height + bpos[i].hth +
-         (decor->frame->titlebar_height - 17);
+    *h = bpos[i].h + bpos[i].hh * height + bpos[i].hth + (titlebar_height - 17);
 
     /* hack to position multiple buttons on the right */
     if (i != BUTTON_MENU) {
@@ -810,8 +1057,12 @@ gwd_theme_cairo_get_button_position (GWDTheme *theme,
 static void
 gwd_theme_cairo_class_init (GWDThemeCairoClass *cairo_class)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (cairo_class);
     GWDThemeClass *theme_class = GWD_THEME_CLASS (cairo_class);
 
+    object_class->constructed = gwd_theme_cairo_constructed;
+
+    theme_class->style_updated = gwd_theme_cairo_style_updated;
     theme_class->draw_window_decoration = gwd_theme_cairo_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_cairo_calc_decoration_size;
     theme_class->update_border_extents = gwd_theme_cairo_update_border_extents;

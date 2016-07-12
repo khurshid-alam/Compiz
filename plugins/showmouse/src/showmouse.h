@@ -7,6 +7,7 @@
  * Copyright : (C) 2008 by Dennis Kasprzyk
  * E-mail    : onestone@opencompositing.org
  *
+ * Updated in 2016 by Hypra (contact@hypra.fr): mouse guides support.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -110,6 +111,16 @@ class ShowmouseScreen :
     public CompositeScreenInterface,
     public GLScreenInterface
 {
+    private:
+
+        void
+        drawGuides (const GLMatrix &transform);
+
+        void
+        drawLine (const GLMatrix &transform,
+                  double x1, double y1, double x2, double y2,
+                  unsigned short *color);
+
     public:
 
 	ShowmouseScreen (CompScreen *);

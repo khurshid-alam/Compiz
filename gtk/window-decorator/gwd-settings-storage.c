@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 4; tab-width: 4 -*- */
+
 /*
  * Copyright © 2012 Canonical Ltd
  *
@@ -18,15 +20,27 @@
  * Authored By: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
 
-#include <glib-object.h>
-#include <glib.h>
+#include "config.h"
 
-#include <gio/gio.h>
+#include <gtk/gtk.h>
 
-#include <string.h>
+#ifdef HAVE_METACITY_3_20_0
+#include <libmetacity/meta-theme.h>
+#endif
 
 #include "gwd-settings.h"
 #include "gwd-settings-storage.h"
+
+static const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
+static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
+
+#ifdef HAVE_METACITY_3_20_0
+static const gchar * ORG_GNOME_METACITY_THEME = "org.gnome.metacity.theme";
+#else
+static const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
+#endif
+
+static const gchar * ORG_MATE_MARCO_GENERAL = "org.mate.Marco.general";
 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
 static const gchar * ORG_COMPIZ_GWD_KEY_BLUR_TYPE = "blur-type";
@@ -37,7 +51,12 @@ static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 static const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
 
+#ifdef HAVE_METACITY_3_20_0
+static const gchar * ORG_GNOME_METACITY_THEME_NAME = "name";
+static const gchar * ORG_GNOME_METACITY_THEME_TYPE = "type";
+#else
 static const gchar * ORG_GNOME_METACITY_THEME = "theme";
+#endif
 
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
@@ -55,18 +74,28 @@ static const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT = "titleba
 static const gchar * ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT = "titlebar-font";
 static const gchar * ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT = "button-layout";
 
+typedef enum
+{
+    GWD_DESKTOP_GNOME,
+    GWD_DESKTOP_GNOME_FLASHBACK,
+    GWD_DESKTOP_MATE
+} GWDDesktop;
+
 struct _GWDSettingsStorage
 {
     GObject      parent;
 
     GWDSettings *settings;
 
+    GWDDesktop   current_desktop;
+
     GSettings   *gwd;
     GSettings   *desktop;
     GSettings   *metacity;
     GSettings   *marco;
 
-    gboolean     is_mate_desktop;
+    gulong       gtk_decoration_layout_id;
+    gulong       gtk_theme_name_id;
 };
 
 enum
@@ -82,14 +111,48 @@ static GParamSpec *storage_properties[LAST_PROP] = { NULL };
 
 G_DEFINE_TYPE (GWDSettingsStorage, gwd_settings_storage, G_TYPE_OBJECT)
 
+static gchar *
+button_layout_from_gtk_decoration_layout (const gchar *gtk_decoration_layout)
+{
+    gchar **sides = g_strsplit (gtk_decoration_layout, ":", -1);
+    gchar *button_layout;
+    gint i;
+
+    for (i = 0; sides[i]; i++) {
+        gchar **buttons = g_strsplit (sides[i], ",", -1);
+        gint j;
+
+        for (j = 0; buttons[j]; j++) {
+            const gchar *button = NULL;
+
+            if (g_strcmp0 (buttons[j], "icon") == 0)
+                button = "menu";
+            else if (g_strcmp0 (buttons[j], "menu") == 0)
+                button = "appmenu";
+
+            if (button) {
+                g_free (buttons[j]);
+                buttons[j] = g_strdup (button);
+            }
+        }
+
+        g_free (sides[i]);
+        sides[i] = g_strjoinv (",", buttons);
+
+        g_strfreev (buttons);
+    }
+
+    button_layout = g_strjoinv (":", sides);
+    g_strfreev (sides);
+
+    return button_layout;
+}
+
 static inline GSettings *
 get_settings_no_abort (const gchar *schema)
 {
-    GSettingsSchemaSource *source;
-    GSettings *settings;
-
-    source = g_settings_schema_source_get_default ();
-    settings = NULL;
+    GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
+    GSettings *settings = NULL;
 
     if (g_settings_schema_source_lookup (source, schema, TRUE))
         settings = g_settings_new (schema);
@@ -138,22 +201,39 @@ void
 update_metacity_theme (GWDSettingsStorage *storage)
 {
     gboolean use_metacity_theme;
-    gchar *theme;
+    gint metacity_theme_type;
+    gchar *metacity_theme_name;
 
     if (!storage->gwd)
         return;
 
     use_metacity_theme = g_settings_get_boolean (storage->gwd, ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME);
+    metacity_theme_type = METACITY_THEME_TYPE_DEFAULT;
 
-    if (storage->is_mate_desktop)
-        theme = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
-    else if (storage->metacity)
-        theme = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
-    else
+    if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
+        metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
+    } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
+#ifdef HAVE_METACITY_3_20_0
+        metacity_theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+
+        if (metacity_theme_type == META_THEME_TYPE_GTK) {
+            g_object_get (gtk_settings_get_default (), "gtk-theme-name", &metacity_theme_name, NULL);
+        } else {
+            metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
+        }
+#else
+        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
+#endif
+    } else if (storage->desktop) {
+        metacity_theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
+    } else {
         return;
+    }
 
-    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme, theme);
-    g_free (theme);
+    gwd_settings_metacity_theme_changed (storage->settings, use_metacity_theme,
+                                         metacity_theme_type, metacity_theme_name);
+
+    g_free (metacity_theme_name);
 }
 
 void
@@ -181,12 +261,21 @@ update_button_layout (GWDSettingsStorage *storage)
 {
     gchar *button_layout;
 
-    if (storage->is_mate_desktop)
+    if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         button_layout = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_BUTTON_LAYOUT);
-    else if (storage->desktop)
+    } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK) {
+        GtkSettings *settings = gtk_settings_get_default ();
+        gchar *gtk_decoration_layout = NULL;
+
+        g_object_get (settings, "gtk-decoration-layout", &gtk_decoration_layout, NULL);
+
+        button_layout = button_layout_from_gtk_decoration_layout (gtk_decoration_layout);
+        g_free (gtk_decoration_layout);
+    } else if (storage->desktop) {
         button_layout = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_BUTTON_LAYOUT);
-    else
+    } else {
         return;
+    }
 
     gwd_settings_button_layout_changed (storage->settings, button_layout);
     g_free (button_layout);
@@ -195,17 +284,18 @@ update_button_layout (GWDSettingsStorage *storage)
 void
 update_font (GWDSettingsStorage *storage)
 {
-    gchar *titlebar_font;
     gboolean titlebar_system_font;
+    gchar *titlebar_font;
 
-    if (storage->is_mate_desktop) {
-        titlebar_font = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
+    if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         titlebar_system_font = g_settings_get_boolean (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_USES_SYSTEM_FONT);
+        titlebar_font = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_TITLEBAR_FONT);
     } else if (storage->desktop) {
-        titlebar_font = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT);
         titlebar_system_font = g_settings_get_boolean (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_USES_SYSTEM_FONT);
-    } else
+        titlebar_font = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_TITLEBAR_FONT);
+    } else {
         return;
+    }
 
     gwd_settings_font_changed (storage->settings, titlebar_system_font, titlebar_font);
     g_free (titlebar_font);
@@ -222,7 +312,7 @@ update_titlebar_actions (GWDSettingsStorage *storage)
     if (!storage->gwd)
         return;
 
-    if (storage->is_mate_desktop) {
+    if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         double_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_DOUBLE_CLICK_TITLEBAR);
         middle_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_MIDDLE_CLICK_TITLEBAR);
         right_click_action = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_ACTION_RIGHT_CLICK_TITLEBAR);
@@ -230,8 +320,9 @@ update_titlebar_actions (GWDSettingsStorage *storage)
         double_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR);
         middle_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR);
         right_click_action = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_RIGHT_CLICK_TITLEBAR);
-    } else
+    } else {
         return;
+    }
 
     translate_dashes_to_underscores (double_click_action);
     translate_dashes_to_underscores (middle_click_action);
@@ -294,8 +385,14 @@ org_gnome_metacity_settings_changed (GSettings          *settings,
                                      const gchar        *key,
                                      GWDSettingsStorage *storage)
 {
+#ifdef HAVE_METACITY_3_20_0
+    if (strcmp (key, ORG_GNOME_METACITY_THEME_NAME) == 0 ||
+        strcmp (key, ORG_GNOME_METACITY_THEME_TYPE) == 0)
+        update_metacity_theme (storage);
+#else
     if (strcmp (key, ORG_GNOME_METACITY_THEME) == 0)
         update_metacity_theme (storage);
+#endif
 }
 
 static void
@@ -319,11 +416,35 @@ org_mate_marco_general_settings_changed (GSettings          *settings,
 }
 
 static void
+gtk_decoration_layout_changed (GtkSettings        *settings,
+                               GParamSpec         *pspec,
+                               GWDSettingsStorage *storage)
+{
+    update_button_layout (storage);
+}
+
+#ifdef HAVE_METACITY_3_20_0
+static void
+gtk_theme_name_changed (GtkSettings        *settings,
+                        GParamSpec         *pspec,
+                        GWDSettingsStorage *storage)
+{
+    MetaThemeType type;
+
+    if (!storage->metacity)
+        return;
+
+    type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
+
+    if (type == META_THEME_TYPE_GTK)
+        update_metacity_theme (storage);
+}
+#endif
+
+static void
 gwd_settings_storage_constructed (GObject *object)
 {
-    GWDSettingsStorage *storage;
-
-    storage = GWD_SETTINGS_STORAGE (object);
+    GWDSettingsStorage *storage = GWD_SETTINGS_STORAGE (object);
 
     G_OBJECT_CLASS (gwd_settings_storage_parent_class)->constructed (object);
 
@@ -363,9 +484,8 @@ gwd_settings_storage_constructed (GObject *object)
 static void
 gwd_settings_storage_dispose (GObject *object)
 {
-    GWDSettingsStorage *storage;
-
-    storage = GWD_SETTINGS_STORAGE (object);
+    GWDSettingsStorage *storage = GWD_SETTINGS_STORAGE (object);
+    GtkSettings *settings = gtk_settings_get_default ();
 
     g_clear_object (&storage->settings);
 
@@ -373,6 +493,16 @@ gwd_settings_storage_dispose (GObject *object)
     g_clear_object (&storage->desktop);
     g_clear_object (&storage->metacity);
     g_clear_object (&storage->marco);
+
+    if (storage->gtk_decoration_layout_id > 0) {
+        g_signal_handler_disconnect (settings, storage->gtk_decoration_layout_id);
+        storage->gtk_decoration_layout_id = 0;
+    }
+
+    if (storage->gtk_theme_name_id > 0) {
+        g_signal_handler_disconnect (settings, storage->gtk_theme_name_id);
+        storage->gtk_theme_name_id = 0;
+    }
 
     G_OBJECT_CLASS (gwd_settings_storage_parent_class)->dispose (object);
 }
@@ -383,9 +513,7 @@ gwd_settings_storage_set_property (GObject      *object,
                                    const GValue *value,
                                    GParamSpec   *pspec)
 {
-    GWDSettingsStorage *storage;
-
-    storage = GWD_SETTINGS_STORAGE (object);
+    GWDSettingsStorage *storage = GWD_SETTINGS_STORAGE (object);
 
     switch (property_id) {
         case PROP_SETTINGS:
@@ -401,9 +529,7 @@ gwd_settings_storage_set_property (GObject      *object,
 static void
 gwd_settings_storage_class_init (GWDSettingsStorageClass *storage_class)
 {
-    GObjectClass *object_class;
-
-    object_class = G_OBJECT_CLASS (storage_class);
+    GObjectClass *object_class = G_OBJECT_CLASS (storage_class);
 
     object_class->constructed = gwd_settings_storage_constructed;
     object_class->dispose = gwd_settings_storage_dispose;
@@ -422,31 +548,59 @@ gwd_settings_storage_class_init (GWDSettingsStorageClass *storage_class)
 void
 gwd_settings_storage_init (GWDSettingsStorage *storage)
 {
-    storage->gwd = get_settings_no_abort ("org.compiz.gwd");
-    storage->desktop = get_settings_no_abort ("org.gnome.desktop.wm.preferences");
-    storage->metacity = get_settings_no_abort ("org.gnome.metacity");
-    storage->marco = get_settings_no_abort ("org.mate.Marco.general");
+    const gchar *xdg_current_desktop = g_getenv ("XDG_CURRENT_DESKTOP");
 
-    if (storage->marco) {
-        const gchar *xdg_current_desktop;
+    storage->current_desktop = GWD_DESKTOP_GNOME;
 
-        xdg_current_desktop = g_getenv ("XDG_CURRENT_DESKTOP");
+    if (xdg_current_desktop != NULL) {
+        gchar **desktops = g_strsplit (xdg_current_desktop, ":", -1);
+        gint i;
 
-        if (xdg_current_desktop) {
-            gchar **desktops;
-            gint i;
-
-            desktops = g_strsplit (xdg_current_desktop, ":", -1);
-
-            for (i = 0; desktops[i] != NULL; i++) {
-                if (g_strcmp0 (desktops[i], "MATE") == 0) {
-                    storage->is_mate_desktop = TRUE;
-                    break;
-                }
+        for (i = 0; desktops[i] != NULL; i++) {
+            if (g_strcmp0 (desktops[i], "GNOME-Flashback") == 0) {
+                storage->current_desktop = GWD_DESKTOP_GNOME_FLASHBACK;
+                break;
+            } else if (g_strcmp0 (desktops[i], "MATE") == 0) {
+                storage->current_desktop = GWD_DESKTOP_MATE;
+                break;
             }
-
-            g_strfreev (desktops);
         }
+
+        g_strfreev (desktops);
+    }
+
+    switch (storage->current_desktop) {
+        case GWD_DESKTOP_GNOME_FLASHBACK:
+            storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
+            storage->desktop = get_settings_no_abort (ORG_GNOME_DESKTOP_WM_PREFERENCES);
+
+#ifdef HAVE_METACITY_3_20_0
+            storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY_THEME);
+#else
+            storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY);
+#endif
+
+            storage->gtk_decoration_layout_id =
+                g_signal_connect (gtk_settings_get_default (), "notify::gtk-decoration-layout",
+                                  G_CALLBACK (gtk_decoration_layout_changed), storage);
+
+#ifdef HAVE_METACITY_3_20_0
+            storage->gtk_theme_name_id =
+                g_signal_connect (gtk_settings_get_default (), "notify::gtk-theme-name",
+                                  G_CALLBACK (gtk_theme_name_changed), storage);
+#endif
+            break;
+
+        case GWD_DESKTOP_MATE:
+            storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
+            storage->marco = get_settings_no_abort (ORG_MATE_MARCO_GENERAL);
+            break;
+
+        case GWD_DESKTOP_GNOME:
+        default:
+            storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
+            storage->desktop = get_settings_no_abort (ORG_GNOME_DESKTOP_WM_PREFERENCES);
+            break;
     }
 }
 

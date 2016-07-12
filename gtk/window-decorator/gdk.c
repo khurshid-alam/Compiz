@@ -22,50 +22,6 @@
 #include "gtk-window-decorator.h"
 
 cairo_surface_t *
-surface_new_from_pixbuf (GdkPixbuf *pixbuf,
-                         GtkWidget *parent)
-{
-    cairo_surface_t *surface;
-    guint            width;
-    guint            height;
-    cairo_t         *cr;
-
-    width  = gdk_pixbuf_get_width (pixbuf);
-    height = gdk_pixbuf_get_height (pixbuf);
-
-    surface = create_surface (width, height, parent);
-    if (!surface)
-	return NULL;
-
-    cr = cairo_create (surface);
-    gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint (cr);
-    cairo_destroy (cr);
-
-    return surface;
-}
-
-GdkWindow *
-create_gdk_window (Window xframe)
-{
-    GdkDisplay  *display = gdk_display_get_default ();
-    GdkWindow   *window  = gdk_x11_window_foreign_new_for_display (display, xframe);
-
-    return window;
-}
-
-XRenderPictFormat *
-get_format_for_surface (decor_t         *d,
-                        cairo_surface_t *surface)
-{
-    if (!d->frame_window || cairo_xlib_surface_get_depth (surface) == 32)
-	return xformat_rgba;
-
-    return xformat_rgb;
-}
-
-cairo_surface_t *
 create_native_surface_and_wrap (int        w,
                                 int        h,
                                 GtkWidget *parent_style_window)

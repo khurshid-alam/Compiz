@@ -1036,6 +1036,12 @@ class GLWindow :
 	                 std::string vertex_shader,
 	                 std::string fragment_shader);
 
+	/**
+	 * Use this if overriding glDrawTexture completely - used to clear
+	 * out any internal shader caches.
+	 */
+	void clearShaders ();
+
 	GLTexture *getIcon (int width, int height);
 
 	WRAPABLE_HND (0, GLWindowInterface, bool, glPaint,

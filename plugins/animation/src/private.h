@@ -588,7 +588,7 @@ protected:
 
     void prePaintWindow ();
     inline bool postPaintWindowUsed () { return true; }
-    void postPaintWindow ();
+    void postPaintWindow (const GLMatrix &);
     void adjustDuration ();
     bool zoomToIcon ();
     void applyTransform ();

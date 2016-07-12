@@ -375,6 +375,21 @@ GLWindow::addShaders (std::string name,
 }
 
 void
+GLWindow::clearShaders ()
+{
+    for (std::list<const GLShaderData*>::const_iterator it = priv->shaders.begin();
+         it != priv->shaders.end();
+         ++it)
+    {
+        if ((*it)->isCached != true)
+        {
+            delete *it;
+        }
+    }
+    priv->shaders.clear ();
+}
+
+void
 PrivateGLWindow::updateFrameRegion (CompRegion &region)
 {
     window->updateFrameRegion (region);

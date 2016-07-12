@@ -45,26 +45,6 @@ destroy_bare_frame (decor_frame_t *frame)
     decor_frame_destroy (frame);
 }
 
-
-/*
- * get_titlebar_font
- *
- * Returns: PangoFontDescription * or NULL if using system font
- * Description: Helper function to get the font for the titlebar
- */
-static const PangoFontDescription *
-get_titlebar_font (decor_frame_t *frame)
-{
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
-    const gchar *titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    /* Using system font */
-    if (!titlebar_font)
-	return NULL;
-    else
-	return frame->titlebar_font;
-}
-
 /*
  * frame_update_titlebar_font
  *
@@ -75,65 +55,30 @@ get_titlebar_font (decor_frame_t *frame)
 void
 frame_update_titlebar_font (decor_frame_t *frame)
 {
-    const PangoFontDescription *font_desc;
-    PangoFontDescription *free_font_desc;
-    PangoFontMetrics *metrics;
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
+    PangoFontDescription *font_desc = gwd_theme_get_titlebar_font (gwd_theme, frame);
     PangoLanguage *lang;
+    PangoFontMetrics *metrics;
+    gint ascent, descent;
 
-    free_font_desc = NULL;
     frame = gwd_decor_frame_ref (frame);
 
-    font_desc = get_titlebar_font (frame);
-    if (!font_desc)
-    {
-        GtkCssProvider *provider = gtk_css_provider_get_default ();
-        GtkStyleContext *context = gtk_style_context_new ();
-        GtkWidgetPath *path = gtk_widget_path_new ();
-
-        gtk_widget_path_prepend_type (path, GTK_TYPE_WIDGET);
-        gtk_style_context_set_path (context, path);
-        gtk_widget_path_free (path);
-
-        gtk_style_context_add_provider (context, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_FALLBACK);
-
-        gtk_style_context_save (context);
-        gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
-        gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL, "font", &free_font_desc, NULL);
-        gtk_style_context_restore (context);
-
-        font_desc = (const PangoFontDescription *) free_font_desc;
-    }
-
+    if (frame->pango_context == NULL)
+        frame->pango_context = gtk_widget_create_pango_context (style_window);
     pango_context_set_font_description (frame->pango_context, font_desc);
 
-    lang    = pango_context_get_language (frame->pango_context);
+    lang = pango_context_get_language (frame->pango_context);
     metrics = pango_context_get_metrics (frame->pango_context, font_desc, lang);
+    ascent = pango_font_metrics_get_ascent (metrics);
+    descent = pango_font_metrics_get_descent (metrics);
 
-    frame->text_height = PANGO_PIXELS (pango_font_metrics_get_ascent (metrics) +
-				pango_font_metrics_get_descent (metrics));
-
-    gwd_decor_frame_unref (frame);
+    frame->text_height = PANGO_PIXELS (ascent + descent);
 
     pango_font_metrics_unref (metrics);
+    pango_font_description_free (font_desc);
 
-    if (free_font_desc)
-        pango_font_description_free (free_font_desc);
+    gwd_decor_frame_unref (frame);
 }
-
-void
-update_frames_titlebar_fonts (gpointer key,
-			      gpointer value,
-			      gpointer user_data)
-{
-    frame_update_titlebar_font ((decor_frame_t *) value);
-}
-
-void
-update_titlebar_font ()
-{
-    gwd_frames_foreach (update_frames_titlebar_fonts, NULL);
-}
-
 
 /*
  * update_event_windows
@@ -241,24 +186,15 @@ update_event_windows (WnckWindow *win)
 		gwd_theme_get_event_window_position (gwd_theme, d, i, j, width, height,
 		                                     &x, &y, &w, &h);
 
-	    /* Reparenting mode - create boxes which we monitor motionnotify on */
-	    if (d->frame_window)
-	    {
-		BoxPtr box = &d->event_windows[i][j].pos;
-		box->x1  = x;
-		box->x2 = x + w;
-		box->y1 = y;
-		box->y2 = y + h;
-	    }
 	    /* Pixmap mode with window geometry - create small event windows */
-	    else if (!d->frame_window && w != 0 && h != 0)
+	    if (w != 0 && h != 0)
 	    {
 		XMapWindow (xdisplay, d->event_windows[i][j].window);
 		XMoveResizeWindow (xdisplay, d->event_windows[i][j].window,
 				   x, y, w, h);
 	    }
 	    /* No parent and no geometry - unmap all event windows */
-	    else if (!d->frame_window)
+	    else
 	    {
 		XUnmapWindow (xdisplay, d->event_windows[i][j].window);
 	    }
@@ -285,43 +221,23 @@ update_event_windows (WnckWindow *win)
 	    WNCK_WINDOW_ACTION_UNSTICK
 	};
 
-	/* Reparenting mode - if a box was set and we no longer need it reset its geometry */
-	if (d->frame_window &&
-	    button_actions[i] && !(actions & button_actions[i]))
-	{
-	    memset (&d->button_windows[i].pos, 0, sizeof (Box));
-	}
 	/* Pixmap mode - if a box was set and we no longer need it unmap its window */
-	else if (!d->frame_window &&
-		 button_actions[i] && !(actions & button_actions[i]))
+	if (button_actions[i] && !(actions & button_actions[i]))
 	{
 	    XUnmapWindow (xdisplay, d->button_windows[i].window);
 	    continue;
 	}
 
-	/* Reparenting mode - if there is a button position for this
-	 * button then set the geometry */
-	if (d->frame_window &&
-	    gwd_theme_get_button_position (gwd_theme, d, i, width, height,
-	                                   &x, &y, &w, &h))
-	{
-	    BoxPtr box = &d->button_windows[i].pos;
-	    box->x1 = x;
-	    box->y1 = y;
-	    box->x2 = x + w;
-	    box->y2 = y + h;
-	}
 	/* Pixmap mode - if there is a button position for this button then map the window
 	 * and resize it to this position */
-	else if (!d->frame_window &&
-		 gwd_theme_get_button_position (gwd_theme, d, i, width, height,
-		                                &x, &y, &w, &h))
+	if (gwd_theme_get_button_position (gwd_theme, d, i, width, height,
+	                                   &x, &y, &w, &h))
 	{
 	    Window x11_win = d->button_windows[i].window;
 	    XMapWindow (xdisplay, x11_win);
 	    XMoveResizeWindow (xdisplay, x11_win, x, y, w, h);
 	}
-	else if (!d->frame_window)
+	else
 	{
 	    XUnmapWindow (xdisplay, d->button_windows[i].window);
 	}
@@ -364,8 +280,6 @@ max_window_name_width (WnckWindow *win)
     if (!d->layout)
     {
 	d->layout = pango_layout_new (d->frame->pango_context);
-	if (!d->layout)
-	    return 0;
 
 	pango_layout_set_wrap (d->layout, PANGO_WRAP_CHAR);
     }
@@ -433,6 +347,10 @@ update_window_decoration_name (WnckWindow *win)
 		w = 1;
 	}
 
+        /* Ensure that a layout is created */
+        if (d->layout == NULL)
+            d->layout = pango_layout_new (d->frame->pango_context);
+
 	/* Set the maximum width for the layout (in case
 	 * decoration size < text width) since we
 	 * still need to show the buttons and the window name */
@@ -462,6 +380,31 @@ update_window_decoration_name (WnckWindow *win)
     }
 }
 
+static cairo_surface_t *
+surface_new_from_pixbuf (GdkPixbuf *pixbuf,
+                         GtkWidget *parent)
+{
+    guint width;
+    guint height;
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+    width  = gdk_pixbuf_get_width (pixbuf);
+    height = gdk_pixbuf_get_height (pixbuf);
+
+    surface = create_surface (width, height, parent);
+    if (!surface)
+        return NULL;
+
+    cr = cairo_create (surface);
+    gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+    cairo_destroy (cr);
+
+    return surface;
+}
+
 /*
  * update_window_decoration_icon
  *
@@ -472,6 +415,7 @@ void
 update_window_decoration_icon (WnckWindow *win)
 {
     decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
 
     /* Destroy old stuff */
     if (d->icon)
@@ -497,13 +441,8 @@ update_window_decoration_icon (WnckWindow *win)
 
 	g_object_ref (G_OBJECT (d->icon_pixbuf));
 
-	/* 32 bit pixmap on pixmap mode, 24 for reparenting */
-	if (d->frame_window)
-	    d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                               d->frame->style_window_rgb);
-	else
-	    d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf,
-	                                               d->frame->style_window_rgba);
+	d->icon_surface = surface_new_from_pixbuf (d->icon_pixbuf, style_window);
+
 	cr = cairo_create (d->icon_surface);
 	d->icon = cairo_pattern_create_for_surface (cairo_get_target (cr));
 	cairo_destroy (cr);
@@ -514,7 +453,6 @@ update_window_decoration_icon (WnckWindow *win)
  * request_update_window_decoration_size
  * Description: asks the rendering process to allow a size update
  * for pixmap synchronization */
-
 
 gboolean
 request_update_window_decoration_size (WnckWindow *win)
@@ -574,7 +512,7 @@ update_window_decoration_size (WnckWindow *win)
     cairo_surface_t   *surface, *buffer_surface = NULL;
     Picture           picture;
     Display           *xdisplay;
-    XRenderPictFormat *format;
+    GtkWidget         *style_window;
 
     if (win == NULL)
 	return FALSE;
@@ -585,20 +523,16 @@ update_window_decoration_size (WnckWindow *win)
 	return FALSE;
 
     xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+    style_window = gwd_theme_get_style_window (gwd_theme);
 
     gdk_error_trap_push ();
 
-    /* Get the correct depth for the frame window in reparenting mode, otherwise
-     * enforce 32 */
-    if (d->frame_window)
-	surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgb);
-    else
-	surface = create_native_surface_and_wrap (d->width, d->height, d->frame->style_window_rgba);
+    surface = create_native_surface_and_wrap (d->width, d->height, style_window);
 
     gdk_flush ();
 
     /* Handle failure */
-    if (!surface || gdk_error_trap_pop ())
+    if (gdk_error_trap_pop () || !surface)
     {
 	if (surface)
 	    cairo_surface_destroy (surface);
@@ -607,15 +541,12 @@ update_window_decoration_size (WnckWindow *win)
 
     gdk_error_trap_push ();
 
-    if (d->frame_window)
-	buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgb);
-    else
-	buffer_surface = create_surface (d->width, d->height, d->frame->style_window_rgba);
+    buffer_surface = create_surface (d->width, d->height, style_window);
 
     gdk_flush ();
 
     /* Handle failure */
-    if (!buffer_surface || gdk_error_trap_pop ())
+    if (gdk_error_trap_pop () || !buffer_surface)
     {
 	if (buffer_surface)
 	    cairo_surface_destroy (buffer_surface);
@@ -624,9 +555,8 @@ update_window_decoration_size (WnckWindow *win)
     }
 
     /* Create XRender context */
-    format = get_format_for_surface (d, buffer_surface);
     picture = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (buffer_surface),
-				    format, 0, NULL);
+                                    xformat_rgba, 0, NULL);
 
     /* Destroy the old pixmaps and pictures */
     if (d->surface)
@@ -865,13 +795,13 @@ decor_frame_update_shadow (Display		  *xdisplay,
 						 1, 1,
 						 frame->win_extents.left,
 						 frame->win_extents.right,
-						 frame->win_extents.top + frame->titlebar_height,
+						 frame->win_extents.top,
 						 frame->win_extents.bottom,
 						 frame->win_extents.left -
 						 TRANSLUCENT_CORNER_SIZE,
 						 frame->win_extents.right -
 						 TRANSLUCENT_CORNER_SIZE,
-						 frame->win_extents.top + frame->titlebar_height -
+						 frame->win_extents.top -
 						 TRANSLUCENT_CORNER_SIZE,
 						 frame->win_extents.bottom -
 						 TRANSLUCENT_CORNER_SIZE,
@@ -896,12 +826,11 @@ decor_frame_update_shadow (Display		  *xdisplay,
 			     1, 1,
 			     frame->max_win_extents.left,
 			     frame->max_win_extents.right,
-			     frame->max_win_extents.top + frame->max_titlebar_height,
+			     frame->max_win_extents.top,
 			     frame->max_win_extents.bottom,
 			     frame->max_win_extents.left - TRANSLUCENT_CORNER_SIZE,
 			     frame->max_win_extents.right - TRANSLUCENT_CORNER_SIZE,
-			     frame->max_win_extents.top + frame->max_titlebar_height -
-			     TRANSLUCENT_CORNER_SIZE,
+			     frame->max_win_extents.top - TRANSLUCENT_CORNER_SIZE,
 			     frame->max_win_extents.bottom - TRANSLUCENT_CORNER_SIZE,
 			     opt_no_shadow,  /* No shadow when maximized */
 			     context_max,
@@ -1245,20 +1174,17 @@ queue_decor_draw (decor_t *d)
 void
 update_default_decorations (GdkScreen *screen)
 {
+    GdkDisplay *display = gdk_display_get_default ();
+    Display *xdisplay = gdk_x11_display_get_xdisplay (display);
+    Window xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
+    Atom bareAtom = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
+    Atom activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
+    GtkWidget *style_window = gwd_theme_get_style_window (gwd_theme);
     long	    *data;
-    Window	    xroot;
-    GdkDisplay	    *gdkdisplay = gdk_display_get_default ();
-    Display	    *xdisplay = gdk_x11_display_get_xdisplay (gdkdisplay);
-    Atom	    bareAtom, activeAtom;
     decor_frame_t   *frame;
     decor_frame_t   *bare_frame = gwd_get_decor_frame ("bare");
     decor_extents_t extents;
     unsigned int    i;
-
-    xroot = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
-
-    bareAtom   = XInternAtom (xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
-    activeAtom = XInternAtom (xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
 
     if (bare_frame->border_shadow_active)
     {
@@ -1337,7 +1263,7 @@ update_default_decorations (GdkScreen *screen)
 
         default_frames[i].d->context = i < WINDOW_TYPE_FRAMES_NUM ? &frame->window_context_active : &frame->window_context_inactive;
         default_frames[i].d->shadow  =  i < WINDOW_TYPE_FRAMES_NUM ? frame->border_shadow_active : frame->border_shadow_inactive;
-        default_frames[i].d->layout  = pango_layout_new (frame->pango_context);
+        default_frames[i].d->layout = NULL;
 
         decor_get_default_layout (default_frames[i].d->context, 1, 1, &default_frames[i].d->border_layout);
 
@@ -1347,12 +1273,10 @@ update_default_decorations (GdkScreen *screen)
         default_frames[i].d->frame = frame;
         default_frames[i].d->active = i < WINDOW_TYPE_FRAMES_NUM ? TRUE : FALSE;
 
-        extents.top += frame->titlebar_height;
-
         default_frames[i].d->draw = draw_window_decoration;
 	default_frames[i].d->surface = create_native_surface_and_wrap (default_frames[i].d->width,
 	                                                               default_frames[i].d->height,
-	                                                               frame->style_window_rgba);
+	                                                               style_window);
 
 	unsigned int j, k;
 
@@ -1439,10 +1363,8 @@ create_bare_frame (const gchar *type)
     frame->win_extents = _shadow_extents;
     frame->window_context_active = _shadow_context;
     frame->window_context_inactive = _shadow_context;
-    frame->window_context_no_shadow = _shadow_context;
     frame->max_window_context_active = _shadow_context;
     frame->max_window_context_inactive = _shadow_context;
-    frame->max_window_context_no_shadow = _shadow_context;
     frame->update_shadow = bare_frame_update_shadow;
 
     return frame;
@@ -1465,18 +1387,6 @@ create_normal_frame (const gchar *type)
         0, 0, 0, 0
     };
 
-    decor_context_t _window_context_no_shadow = {
-        { 0, 0, 0, 0 },
-        6, 6, 4, 6,
-        0, 0, 0, 0
-    };
-
-    decor_context_t _max_window_context_no_shadow = {
-        { 0, 0, 0, 0 },
-        6, 6, 4, 6,
-        0, 0, 0, 0
-    };
-
     decor_extents_t _win_extents         = { 6, 6, 6, 6 };
     decor_extents_t _max_win_extents     = { 6, 6, 4, 6 };
 
@@ -1485,10 +1395,8 @@ create_normal_frame (const gchar *type)
     frame->update_shadow = decor_frame_update_shadow;
     frame->window_context_active = _window_context;
     frame->window_context_inactive = _window_context;
-    frame->window_context_no_shadow = _window_context_no_shadow;
     frame->max_window_context_active = _max_window_context;
     frame->max_window_context_inactive = _max_window_context;
-    frame->max_window_context_no_shadow = _max_window_context_no_shadow;
 
     return frame;
 }

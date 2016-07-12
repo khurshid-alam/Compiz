@@ -117,14 +117,6 @@ common_button_event (WnckWindow *win,
     if (use_tooltips)
 	handle_tooltip_event (win, gtkwd_event, gtkwd_type, state, tooltip);
 
-    if (d->frame_window && gtkwd_type == GEnterNotify)
-    {
-	GdkCursor* cursor;
-	cursor = gdk_cursor_new (GDK_LEFT_PTR);
-	gdk_window_set_cursor (d->frame_window, cursor);
-	g_object_unref (cursor);
-    }
-
     switch (gtkwd_type) {
     case GButtonPress:
 	if (gtkwd_event->button <= max)
@@ -487,15 +479,6 @@ title_event (WnckWindow       *win,
     static Time	  last_button_time = 0;
     gint	  titlebar_action = 0;
 
-    decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
-
-    if (d->frame_window && gtkwd_type == GEnterNotify)
-    {
-	GdkCursor* cursor = gdk_cursor_new (GDK_LEFT_PTR);
-	gdk_window_set_cursor (d->frame_window, cursor);
-	g_object_unref (cursor);
-    }
-
     if (gtkwd_type != GButtonPress)
 	return;
 
@@ -560,48 +543,6 @@ frame_common_event (WnckWindow       *win,
 {
     GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
     gint    titlebar_action = 0;
-    decor_t *d = g_object_get_data (G_OBJECT (win), "decor");
-
-    if (d->frame_window && gtkwd_type == GEnterNotify)
-    {
-	GdkCursor *cursor = NULL;
-
-	switch (direction)
-	{
-	    case WM_MOVERESIZE_SIZE_TOPLEFT:
-		cursor = gdk_cursor_new (GDK_TOP_LEFT_CORNER);
-		break;
-	    case WM_MOVERESIZE_SIZE_LEFT:
-		cursor = gdk_cursor_new (GDK_LEFT_SIDE);
-		break;
-	    case WM_MOVERESIZE_SIZE_BOTTOMLEFT:
-		cursor = gdk_cursor_new (GDK_BOTTOM_LEFT_CORNER);
-		break;
-	    case WM_MOVERESIZE_SIZE_BOTTOM:
-		cursor = gdk_cursor_new (GDK_BOTTOM_SIDE);
-	        break;
-	    case WM_MOVERESIZE_SIZE_BOTTOMRIGHT:
-		cursor = gdk_cursor_new (GDK_BOTTOM_RIGHT_CORNER);
-		break;
-	    case WM_MOVERESIZE_SIZE_RIGHT:
-		cursor = gdk_cursor_new (GDK_RIGHT_SIDE);
-		break;
-	    case WM_MOVERESIZE_SIZE_TOPRIGHT:
-		cursor = gdk_cursor_new (GDK_TOP_RIGHT_CORNER);
-		break;
-	    case WM_MOVERESIZE_SIZE_TOP:
-		cursor = gdk_cursor_new (GDK_TOP_SIDE);
-		break;
-	    default:
-		break;
-	}
-
-	if (cursor)
-	{
-	    gdk_window_set_cursor (d->frame_window, cursor);
-	    g_object_unref (cursor);
-	}
-    }
 
     if (gtkwd_type != GButtonPress)
 	return;
@@ -696,240 +637,6 @@ bottom_right_event (WnckWindow *win,
 			gtkwd_event, gtkwd_type);
 }
 
-void
-frame_window_realized (GtkWidget *widget,
-		       gpointer  data)
-{
-    decor_t *d = (decor_t *) data;
-
-    if (d)
-    {
-	GdkWindow *gdk_frame_window = gtk_widget_get_window (d->decor_window);
-	gdk_window_reparent (gdk_frame_window, d->frame_window, 0, 0);
-	gdk_window_lower (gdk_frame_window);
-
-    }
-}
-
-static event_callback
-find_event_callback_for_point (decor_t *d,
-			       int     x,
-			       int     y,
-			       Bool    *enter,
-			       Bool    *leave,
-			       BoxPtr  *entered_box)
-{
-    int    i, j;
-    BoxPtr box;
-
-    for (i = 0; i < BUTTON_NUM; ++i)
-    {
-	box = &d->button_windows[i].pos;
-	if (x >= box->x1 && x <= box->x2 &&
-	    y >= box->y1 && y <= box->y2)
-	{
-	    if (d->last_pos_entered != box)
-	    {
-		if (enter)
-		    *enter = TRUE;
-		if (leave && d->last_pos_entered)
-		    *leave = TRUE;
-		if (entered_box)
-		    *entered_box = box;
-	    }
-	    return d->button_windows[i].callback;
-	}
-    }
-
-    for (i = 0; i < 3; ++i)
-    {
-	for (j = 0; j < 3; ++j)
-	{
-	    box = &d->event_windows[i][j].pos;
-	    if (x >= box->x1 && x <= box->x2 &&
-		y >= box->y1 && y <= box->y2)
-	    {
-		if (d->last_pos_entered != box)
-		{
-		    if (enter)
-			*enter = TRUE;
-		    if (leave && d->last_pos_entered)
-			*leave = TRUE;
-		    if (entered_box)
-			*entered_box = box;
-		}
-		return d->event_windows[i][j].callback;
-	    }
-	}
-    }
-
-    return NULL;
-}
-
-static event_callback
-find_leave_event_callback (decor_t *d)
-{
-    int i, j;
-
-    for (i = 0; i < BUTTON_NUM; ++i)
-    {
-	if (d->last_pos_entered == &d->button_windows[i].pos)
-	    return d->button_windows[i].callback;
-    }
-
-    for (i = 0; i < 3; ++i)
-    {
-	for (j = 0; j < 3; ++j)
-	{
-	    if (d->last_pos_entered == &d->event_windows[i][j].pos)
-		return d->event_windows[i][j].callback;
-	}
-    }
-
-    return NULL;
-}
-
-void
-frame_handle_button_press (GtkWidget      *widget,
-			   GdkEventButton *event,
-			   gpointer       user_data)
-{
-    decor_t *d = (decor_t *) user_data;
-
-    if (d)
-    {
-	/* Check to see where the event happened and fill out an appropriate
-	 * struct
-	 */
-	event_callback cb;
-
-	cb = find_event_callback_for_point (d, event->x, event->y,
-					    NULL, NULL, NULL);
-
-	if (cb && d->decorated)
-	{
-	    decor_event gtkwd_event;
-
-	    gtkwd_event.window = GDK_WINDOW_XID (d->frame_window);
-	    gtkwd_event.button = event->button;
-	    gtkwd_event.x      = event->x;
-	    gtkwd_event.y      = event->y;
-	    gtkwd_event.x_root = event->x_root;
-	    gtkwd_event.y_root = event->y_root;
-	    gtkwd_event.time   = event->time;
-
-	    (*cb) (d->win, &gtkwd_event, GButtonPress);
-	}
-    }
-}
-
-void
-frame_handle_button_release (GtkWidget      *widget,
-			     GdkEventButton *event,
-			     gpointer       user_data)
-{
-    decor_t *d = (decor_t *) user_data;
-
-    if (d)
-    {
-	event_callback cb;
-
-	cb = find_event_callback_for_point (d, event->x, event->y,
-					    NULL, NULL, NULL);
-
-	if (cb && d->decorated)
-	{
-	    decor_event gtkwd_event;
-
-	    gtkwd_event.window = GDK_WINDOW_XID (d->frame_window);
-	    gtkwd_event.button = event->button;
-	    gtkwd_event.x      = event->x;
-	    gtkwd_event.y      = event->y;
-	    gtkwd_event.x_root = event->x_root;
-	    gtkwd_event.y_root = event->y_root;
-	    gtkwd_event.time   = event->time;
-
-	    (*cb) (d->win, &gtkwd_event, GButtonRelease);
-	}
-    }
-}
-
-void
-frame_handle_motion (GtkWidget      *widget,
-		     GdkEventMotion *event,
-		     gpointer       user_data)
-{
-    decor_t *d = (decor_t *) user_data;
-
-    if (d)
-    {
-	event_callback cb = NULL;
-	Bool           send_enter = FALSE;
-	Bool           send_leave = FALSE;
-	BoxPtr         entered_box;
-
-	cb = find_event_callback_for_point (d, event->x, event->y,
-					    &send_enter, &send_leave,
-					    &entered_box);
-
-	if (cb && d->decorated)
-	{
-	    decor_event gtkwd_event;
-
-	    gtkwd_event.window = GDK_WINDOW_XID (d->frame_window);
-	    gtkwd_event.x      = event->x;
-	    gtkwd_event.y      = event->y;
-	    gtkwd_event.x_root = event->x_root;
-	    gtkwd_event.y_root = event->y_root;
-	    gtkwd_event.time   = event->time;
-
-	    if (send_enter)
-		(*cb) (d->win, &gtkwd_event, GEnterNotify);
-
-	    if (send_leave)
-	    {
-		event_callback leave_cb;
-
-		leave_cb = find_leave_event_callback (d);
-
-		if (leave_cb)
-		    (*leave_cb) (d->win, &gtkwd_event, GLeaveNotify);
-
-	    }
-
-	    if (send_enter)
-		d->last_pos_entered = entered_box;
-	}
-	else if (d->last_pos_entered && d->decorated)
-	{
-	    /* We are not in an event / button window but last_pos_entered
-	     * is still set, so send a GLeaveNotify to last_pos_entered
-	     * and set it to NULL
-	     */
-
-	    event_callback leave_cb;
-
-	    leave_cb = find_leave_event_callback (d);
-
-	    if (leave_cb)
-	    {
-		decor_event    gtkwd_event;
-
-		gtkwd_event.window = GDK_WINDOW_XID (d->frame_window);
-		gtkwd_event.x      = event->x;
-		gtkwd_event.y      = event->y;
-		gtkwd_event.x_root = event->x_root;
-		gtkwd_event.y_root = event->y_root;
-		gtkwd_event.time   = event->time;
-
-		(*leave_cb) (d->win, &gtkwd_event, GLeaveNotify);
-	    }
-
-	    d->last_pos_entered = NULL;
-	}
-    }
-}
-
 GdkFilterReturn
 event_filter_func (GdkXEvent *gdkxevent,
 		   GdkEvent  *event,
@@ -997,27 +704,7 @@ event_filter_func (GdkXEvent *gdkxevent,
 		if (!get_window_prop (xid, select_window_atom, &select))
 		{
 		    if (get_window_prop (xid, frame_input_window_atom, &frame))
-			add_frame_window (win, frame, FALSE);
-		    else
-			remove_frame_window (win);
-		}
-	    }
-	}
-	if (xevent->xproperty.atom == frame_output_window_atom)
-	{
-	    WnckWindow *win;
-
-	    xid = xevent->xproperty.window;
-
-	    win = wnck_window_get (xid);
-	    if (win)
-	    {
-		Window frame;
-
-		if (!get_window_prop (xid, select_window_atom, &select))
-		{
-		    if (get_window_prop (xid, frame_output_window_atom, &frame))
-			add_frame_window (win, frame, TRUE);
+			add_frame_window (win, frame);
 		    else
 			remove_frame_window (win);
 		}

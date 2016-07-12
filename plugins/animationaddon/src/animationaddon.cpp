@@ -81,7 +81,7 @@
 #include "private.h"
 
 class AnimAddonPluginVTable :
-    public CompPlugin::VTableForScreenAndWindow<AnimAddonScreen, AnimAddonWindow>
+    public CompPlugin::VTableForScreenAndWindow<AnimAddonScreen, AnimAddonWindow, ANIMATIONADDON_ABI>
 {
 public:
     bool init ();
@@ -232,7 +232,7 @@ AnimAddonScreen::setOption (const CompString  &name,
 }
 
 AnimAddonWindow::AnimAddonWindow (CompWindow *w) :
-    PluginClassHandler<AnimAddonWindow, CompWindow> (w),
+    PluginClassHandler<AnimAddonWindow, CompWindow, ANIMATIONADDON_ABI> (w),
     mWindow (w),
     aWindow (AnimWindow::get (w))
 {

@@ -142,7 +142,7 @@ public:
     virtual void updateAttrib (GLWindowPaintAttrib &) {}
     virtual void updateTransform (GLMatrix &) {}
     virtual void prePaintWindow () {}
-    virtual void postPaintWindow () {}
+    virtual void postPaintWindow (const GLMatrix &) {}
     virtual bool postPaintWindowUsed () { return false; }
 
     /// Returns true if the animation is still in progress.
@@ -174,7 +174,10 @@ public:
 			    const CompRegion            &clip,
 			    unsigned int                maxGridWidth,
 			    unsigned int                maxGridHeight);
-    virtual void drawGeometry ();
+    virtual void drawGeometry (GLTexture                 *texture,
+			       const GLMatrix            &transform,
+			       const GLWindowPaintAttrib &attrib,
+			       unsigned int              mask);
 
     virtual bool paintWindowUsed () { return false; }
     virtual bool paintWindow (GLWindow			*gWindow,

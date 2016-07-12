@@ -35,7 +35,6 @@ gboolean minimal = FALSE;
 const unsigned short ICON_SPACE = 20;
 
 Atom frame_input_window_atom;
-Atom frame_output_window_atom;
 Atom win_decor_atom;
 Atom win_blur_decor_atom;
 Atom wm_move_resize_atom;
@@ -108,7 +107,6 @@ GtkWidget     *switcher_label;
 GHashTable    *frame_table;
 GtkWidget     *action_menu = NULL;
 gboolean      action_menu_mapped = FALSE;
-decor_color_t _title_color[2];
 gint	     double_click_timeout = 250;
 
 GtkWidget     *tip_window;
@@ -123,7 +121,6 @@ Window    switcher_selected_window = None;
 decor_t   *switcher_window = NULL;
 
 XRenderPictFormat *xformat_rgba;
-XRenderPictFormat *xformat_rgb;
 
 const gchar * window_type_frames[WINDOW_TYPE_FRAMES_NUM] = {
     "normal", "modal_dialog", "dialog", "menu", "utility"
@@ -137,27 +134,26 @@ update_decorations_cb (GWDSettings *settings,
 }
 
 static void
-update_frames_cb (GWDSettings *settings,
-                  gpointer     user_data)
+update_titlebar_font_cb (GWDSettings *settings,
+                         gpointer     user_data)
 {
-    const gchar *titlebar_font;
-
-    titlebar_font = gwd_settings_get_titlebar_font (settings);
-
-    gwd_frames_foreach (set_frames_scales, (gpointer) titlebar_font);
+    gwd_theme_update_titlebar_font (gwd_theme);
 }
 
 static void
 update_metacity_theme_cb (GWDSettings *settings,
-                          const gchar *metacity_theme,
+                          gint         metacity_theme_type,
+                          const gchar *metacity_theme_name,
                           gpointer     user_data)
 {
     GWDThemeType type = GWD_THEME_TYPE_CAIRO;
 
-    if (metacity_theme != NULL)
+    if (metacity_theme_name != NULL)
         type = GWD_THEME_TYPE_METACITY;
 
     g_set_object (&gwd_theme, gwd_theme_new (type, settings));
+
+    gwd_theme_update_titlebar_font (gwd_theme);
 }
 
 int
@@ -240,8 +236,6 @@ main (int argc, char *argv[])
 
     frame_input_window_atom  = XInternAtom (xdisplay,
 					    DECOR_INPUT_FRAME_ATOM_NAME, FALSE);
-    frame_output_window_atom = XInternAtom (xdisplay,
-					    DECOR_OUTPUT_FRAME_ATOM_NAME, FALSE);
 
     win_decor_atom	= XInternAtom (xdisplay, DECOR_WINDOW_ATOM_NAME, FALSE);
     win_blur_decor_atom	= XInternAtom (xdisplay, DECOR_BLUR_ATOM_NAME, FALSE);
@@ -313,8 +307,8 @@ main (int argc, char *argv[])
 
     g_signal_connect (settings, "update-decorations",
                       G_CALLBACK (update_decorations_cb), NULL);
-    g_signal_connect (settings, "update-frames",
-                      G_CALLBACK (update_frames_cb), NULL);
+    g_signal_connect (settings, "update-titlebar-font",
+                      G_CALLBACK (update_titlebar_font_cb), NULL);
     g_signal_connect (settings, "update-metacity-theme",
                       G_CALLBACK (update_metacity_theme_cb), NULL);
 
@@ -333,7 +327,6 @@ main (int argc, char *argv[])
     }
 
     xformat_rgba = XRenderFindStandardFormat (xdisplay, PictStandardARGB32);
-    xformat_rgb  = XRenderFindStandardFormat (xdisplay, PictStandardRGB24);
 
     frame_table = g_hash_table_new (NULL, NULL);
 
@@ -384,8 +377,7 @@ main (int argc, char *argv[])
     }
 
     decor_set_dm_check_hint (xdisplay, gdk_screen_get_number (gdkscreen),
-			     WINDOW_DECORATION_TYPE_PIXMAP |
-			     WINDOW_DECORATION_TYPE_WINDOW);
+                             WINDOW_DECORATION_TYPE_PIXMAP);
 
     /* Update the decorations based on the settings */
     gwd_settings_thaw_updates (settings);
