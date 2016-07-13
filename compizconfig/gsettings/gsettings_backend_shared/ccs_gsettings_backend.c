@@ -93,7 +93,8 @@ ccsGSettingsValueChanged (GSettings   *settings,
 
     g_value_unset (&schemaNameValue);
 
-    updateSettingWithGSettingsKeyName (backend, wrapper, keyName, backendInterface->updateSetting);
+    if (wrapper)
+	updateSettingWithGSettingsKeyName (backend, wrapper, keyName, backendInterface->updateSetting);
 }
 
 static CCSGSettingsWrapper *
