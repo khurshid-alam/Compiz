@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2015 Canonical
+# Copyright (C) 2014-2016 Canonical
 #
 # Authors:
 #  Marco Trevisan <marco.trevisan@canonical.com>
@@ -23,26 +23,28 @@ from gi.repository import Gio
 import os,sys
 
 COMPIZ_SCHEMA = "org.compiz"
-COMPIZ_CORE_PATH = "/org/compiz/profiles/unity/plugins/core/"
+COMPIZ_CORE_PATH = "/org/compiz/profiles/%s/plugins/core/"
+UNITY_PROFILES = ["unity", "unity-lowgfx"]
 
 if COMPIZ_SCHEMA not in Gio.Settings.list_schemas():
     print("No compiz schemas found, no migration needed")
     sys.exit(0)
 
-core_settings = Gio.Settings(schema=COMPIZ_SCHEMA+".core", path=COMPIZ_CORE_PATH)
-active_plugins = core_settings.get_strv("active-plugins")
+for core_profile_path in [(COMPIZ_CORE_PATH % p) for p in UNITY_PROFILES]:
+    core_settings = Gio.Settings(schema=COMPIZ_SCHEMA+".core", path=core_profile_path)
+    active_plugins = core_settings.get_strv("active-plugins")
 
-if not "gnomecompat" in active_plugins:
-    print("No gnomecompat plugin active, no migration needed")
-    sys.exit(0)
+    if not "gnomecompat" in active_plugins:
+        print("No gnomecompat plugin active, no migration needed")
+        sys.exit(0)
 
-try:
-    active_plugins.remove("gnomecompat")
-except ValueError:
-    pass
+    try:
+        active_plugins.remove("gnomecompat")
+    except ValueError:
+        pass
 
-# gsettings doesn't work directly, the key is somewhat reverted. Work one level under then: dconf!
-# gsettings.set_strv("active-plugins", active_plugins)
-from subprocess import Popen, PIPE, STDOUT
-p = Popen(("dconf load "+COMPIZ_CORE_PATH).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
+    # gsettings doesn't work directly, the key is somewhat reverted. Work one level under then: dconf!
+    # gsettings.set_strv("active-plugins", active_plugins)
+    from subprocess import Popen, PIPE, STDOUT
+    p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
