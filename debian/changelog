@@ -1,3 +1,17 @@
+compiz (1:0.9.13.0+16.10.20160714.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Added a new option in show desktop plugin that skips the fade
+    animation: useful when performance is more important than eyecandy.
+
+  [ Marco Trevisan (Treviño) ]
+  * ccsGSettingsBackend: don't try to update setting if wrapper is not
+    found (LP: #1599900)
+  * migration scripts: remove unsupported plugins for all the unity
+    profiles
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 14 Jul 2016 15:52:00 +0000
+
 compiz (1:0.9.13.0+16.10.20160705-0ubuntu1) yakkety; urgency=medium
 
   [ Eleni Maria Stea ]
