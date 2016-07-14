@@ -100,6 +100,11 @@
           <_long>Window types that should be moved out of sight when entering showdesktop-mode.</_long>
           <default>type=toolbar | type=utility | type=dialog | type=normal</default>
         </option>
+	<option name="skip_animation" type="bool">
+          <_short>Skip Animation</_short>
+	  <_long>Skips the showdesktop animation.</_long>
+	  <default>false</default>
+	</option>
       </group>
       <group>
         <_short>Appearance</_short>

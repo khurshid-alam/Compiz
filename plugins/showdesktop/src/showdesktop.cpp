@@ -614,10 +614,21 @@ ShowdesktopScreen::preparePaint (int msSinceLastPaint)
 	(state == SD_STATE_DEACTIVATING))
     {
 	int steps;
-	float amount, chunk;
+	float amount, chunk, speed, timestep;
 
-	amount = msSinceLastPaint * 0.05f * optionGetSpeed ();
-	steps = amount / (0.5f * optionGetTimestep ());
+	if (optionGetSkipAnimation())
+	{
+	    speed = USHRT_MAX;
+	    timestep = 0.1;
+	}
+	else
+	{
+	    speed = optionGetSpeed();
+	    timestep = optionGetTimestep();
+	}
+
+	amount = msSinceLastPaint * 0.05f * speed;
+	steps = amount / (0.5f * timestep);
 	if (!steps)
     	    steps = 1;
 	chunk = amount / (float)steps;
