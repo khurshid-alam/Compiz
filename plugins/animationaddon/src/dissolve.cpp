@@ -33,7 +33,7 @@ DissolveSingleAnim::updateAttrib (GLWindowPaintAttrib &attrib)
     float o = 0.2;
     float factor = (4 - layer) * o;
     
-    attrib.opacity *= o / (1.0 - factor);
+    attrib.opacity *= (o / (1.0 - factor)) * (1.0 - getDissolveSingleProgress ());
 }
 
 void
@@ -62,5 +62,14 @@ DissolveSingleAnim::updateTransform (GLMatrix &transform)
 void
 DissolveSingleAnim::updateBB (CompOutput &output)
 {
-    mAWindow->expandBBWithWindow ();
+    CompRect outRect (mAWindow->mWindow->outputRect ());
+
+    Box windowBox =
+    {
+	static_cast <short int> (outRect.x () - 4),
+	static_cast <short int> (outRect.x () + outRect.width () + 4),
+	static_cast <short int> (outRect.y () - 4),
+	static_cast <short int> (outRect.y () + outRect.height () + 4)
+    };
+    mAWindow->expandBBWithBox (windowBox);
 }

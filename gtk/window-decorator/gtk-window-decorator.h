@@ -209,8 +209,6 @@ typedef void (*destroy_frame_proc) (decor_frame_t *);
 struct _decor_frame {
     decor_extents_t win_extents;
     decor_extents_t max_win_extents;
-    int		    titlebar_height;
-    int		    max_titlebar_height;
     decor_shadow_t *border_shadow_active;
     decor_shadow_t *border_shadow_inactive;
     decor_shadow_t *max_border_shadow_active;
@@ -219,9 +217,7 @@ struct _decor_frame {
     decor_context_t window_context_inactive;
     decor_context_t max_window_context_active;
     decor_context_t max_window_context_inactive;
-    PangoFontDescription *titlebar_font;
     PangoContext	 *pango_context;
-    GtkWidget	         *style_window_rgba;
     gint		 text_height;
     gchar		 *type;
 
@@ -282,7 +278,6 @@ extern GHashTable    *frame_table;
 /* action menu */
 extern GtkWidget     *action_menu;
 extern gboolean      action_menu_mapped;
-extern decor_color_t _title_color[2];
 extern gint	     double_click_timeout;
 
 
@@ -390,9 +385,6 @@ int
 update_shadow (void);
 
 void
-update_titlebar_font ();
-
-void
 update_window_decoration (WnckWindow *win);
 
 void
@@ -442,14 +434,6 @@ decor_update_blur_property (decor_t *d,
 			    Region  right_region,
 			    int     right_offset);
 
-/* decorprops.c */
-
-void
-decor_update_window_property (decor_t *d);
-
-void
-decor_update_switcher_property (decor_t *d);
-
 /* cairo.c */
 
 #define CORNER_TOPLEFT     (1 << 0)
@@ -492,9 +476,6 @@ rounded_rectangle (cairo_t *cr,
 		   int	   corner);
 
 /* gdk.c */
-
-GdkWindow *
-create_gdk_window (Window xframe);
 
 cairo_surface_t *
 create_surface (int	 w,
@@ -678,15 +659,6 @@ gchar *
 get_gtk_theme_variant (Window xwindow);
 
 /* settings.c */
-
-void
-set_frame_scale (decor_frame_t *frame,
-		 const gchar *font_str);
-
-void
-set_frames_scales (gpointer key,
-		   gpointer value,
-		   gpointer user_data);
 
 void
 init_settings (GWDSettings *settings);

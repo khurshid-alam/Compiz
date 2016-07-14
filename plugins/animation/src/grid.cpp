@@ -388,12 +388,6 @@ GridAnim::addGeometry (const GLTexture::MatrixList &matrix,
     }
 }
 
-void
-GridAnim::drawGeometry ()
-{
-    // Deprecated
-}
-
 GridTransformAnim::GridTransformAnim (CompWindow       *w,
 				      WindowEvent      curWindowEvent,
 				      float            duration,

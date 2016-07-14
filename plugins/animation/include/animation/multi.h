@@ -1,6 +1,8 @@
 #ifndef ANIMATION_MULTI_H
 #define ANIMATION_MULTI_H
 #include "animation.h"
+#include <opengl/opengl.h>
+#include <composite/composite.h>
 /// Special class, allows multiple copies of an animation to happen
 /// at any one time. Create your "single copy" animation class first
 /// and then create a new animation which derives from this template
@@ -140,9 +142,8 @@ public:
 	    foreach (SingleAnim *a, animList)
 	    {
 		setCurrAnimNumber (mAWindow, count);
-		GLWindowPaintAttrib attr (attrib);
-		a->updateAttrib (attr);
-		mGlPaintAttribs.at (count) = attr;
+		mGlPaintAttribs[count] = attrib;
+		a->updateAttrib (mGlPaintAttribs[count]);
 		++count;
 	    }
 	}
@@ -172,14 +173,14 @@ public:
 	    }
 	}
 
-	void postPaintWindow ()
+	void postPaintWindow (const GLMatrix &transform)
 	{
 	    int count = 0;
 	    foreach (SingleAnim *a, animList)
 	    {
 		setCurrAnimNumber (mAWindow, count);
 		++count;
-		a->postPaintWindow ();
+		a->postPaintWindow (transform);
 	    }
 	}
 
@@ -377,11 +378,20 @@ public:
 		++count;
 
 		if (animList.at (currentAnim)->paintWindowUsed ())
-		    status |= animList.at (currentAnim)->paintWindow
-			    (gWindow, wAttrib, wTransform, region, mask);
+		    status |= animList.at (currentAnim)->paintWindow (gWindow,
+								      wAttrib,
+								      wTransform,
+								      region,
+								      mask);
 		else
-		    status |= gWindow->glPaint
-			    (wAttrib, wTransform, region, mask);
+		{
+		    unsigned int index = gWindow->glPaintGetCurrentIndex ();
+		    status |= gWindow->glPaint (wAttrib,
+						wTransform,
+						region,
+						mask);
+		    gWindow->glPaintSetCurrentIndex (index);
+		}
 	    }
 
 	    return status;

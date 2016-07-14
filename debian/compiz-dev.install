@@ -1,6 +1,7 @@
 debian/tmp/usr/include/compiz/[!d]*
 debian/tmp/usr/lib/*/libcompiz_core.so
 debian/tmp/usr/lib/*/pkgconfig/compiz-animation.pc
+debian/tmp/usr/lib/*/pkgconfig/compiz-animationaddon.pc
 debian/tmp/usr/lib/*/pkgconfig/compiz-compiztoolbox.pc
 debian/tmp/usr/lib/*/pkgconfig/compiz-composite.pc
 debian/tmp/usr/lib/*/pkgconfig/compiz-cube.pc

@@ -69,7 +69,8 @@ extern const gchar    *INACTIVE_SHADOW_COLOR_DEFAULT;
 
 extern const gint      BLUR_TYPE_DEFAULT;
 
-extern const gchar    *METACITY_THEME_DEFAULT;
+extern const gchar    *METACITY_THEME_NAME_DEFAULT;
+extern const gint      METACITY_THEME_TYPE_DEFAULT;
 extern const gdouble   METACITY_ACTIVE_OPACITY_DEFAULT;
 extern const gdouble   METACITY_INACTIVE_OPACITY_DEFAULT;
 extern const gboolean  METACITY_ACTIVE_SHADE_OPACITY_DEFAULT;
@@ -88,8 +89,8 @@ extern const gchar    *TITLEBAR_FONT_DEFAULT;
 G_DECLARE_FINAL_TYPE (GWDSettings, gwd_settings, GWD, SETTINGS, GObject)
 
 GWDSettings *
-gwd_settings_new                                 (gint                 blur,
-                                                  const gchar         *metacity_theme);
+gwd_settings_new                                 (gint                 blur_type,
+                                                  const gchar         *metacity_theme_name);
 
 gint
 gwd_settings_get_blur_type                       (GWDSettings         *settings);
@@ -98,7 +99,10 @@ const gchar *
 gwd_settings_get_metacity_button_layout          (GWDSettings         *settings);
 
 const gchar *
-gwd_settings_get_metacity_theme                  (GWDSettings         *settings);
+gwd_settings_get_metacity_theme_name             (GWDSettings         *settings);
+
+gint
+gwd_settings_get_metacity_theme_type             (GWDSettings         *settings);
 
 const gchar *
 gwd_settings_get_titlebar_font                   (GWDSettings         *settings);
@@ -166,7 +170,8 @@ gwd_settings_blur_changed                        (GWDSettings         *settings,
 gboolean
 gwd_settings_metacity_theme_changed              (GWDSettings         *settings,
                                                   gboolean             use_metacity_theme,
-                                                  const gchar         *metacity_theme);
+                                                  gint                 metacity_theme_type,
+                                                  const gchar         *metacity_theme_name);
 
 gboolean
 gwd_settings_opacity_changed                     (GWDSettings         *settings,

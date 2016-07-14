@@ -26,6 +26,8 @@
 #ifndef _GLMATRIX_H
 #define _GLMATRIX_H
 
+#include <core/point.h>
+#include <core/rect.h>
 #include <opengl/vector.h>
 
 class CompOutput;
@@ -64,5 +66,30 @@ class GLMatrix {
 
 	float m[16];
 };
+
+namespace compiz
+{
+    namespace opengl
+    {
+	namespace matrix
+	{
+	    /* This function returns co-ordinates into viewport space. In order
+	     * to convert into something like damage rectangles please remember
+	     * to flip on the y axis. */
+	    inline CompPoint projectIntoViewport (const GLMatrix &modelview,
+						  const GLMatrix &projection,
+						  const CompRect &vp,
+						  const GLVector &vector)
+            {
+		    GLVector projected (projection * modelview * vector);
+		    projected.homogenize ();
+		    projected[0] = projected[0] * 0.5 + 0.5;
+		    projected[1] = projected[1] * 0.5 + 0.5;
+		    return CompPoint (projected[0] * vp.width () + vp.x (),
+				      projected[1] * vp.height () + vp.y ());
+	    }
+	}
+    }
+}
 
 #endif

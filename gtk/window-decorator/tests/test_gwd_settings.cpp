@@ -136,8 +136,8 @@ class GWDMockSettingsNotifiedGMock
         {
             g_signal_connect (settings.get (), "update-decorations",
                               G_CALLBACK (GWDMockSettingsNotifiedGMock::updateDecorationsCb), this);
-            g_signal_connect (settings.get (), "update-frames",
-                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateFramesCb), this);
+            g_signal_connect (settings.get (), "update-titlebar-font",
+                              G_CALLBACK (GWDMockSettingsNotifiedGMock::updateTitlebarFontCb), this);
             g_signal_connect (settings.get (), "update-metacity-theme",
                               G_CALLBACK (GWDMockSettingsNotifiedGMock::updateMetacityThemeCb), this);
             g_signal_connect (settings.get (), "update-metacity-button-layout",
@@ -145,7 +145,7 @@ class GWDMockSettingsNotifiedGMock
         }
 
         MOCK_METHOD0 (updateDecorations, void ());
-        MOCK_METHOD0 (updateFrames, void ());
+        MOCK_METHOD0 (updateTitlebarFont, void ());
         MOCK_METHOD0 (updateMetacityTheme, void ());
         MOCK_METHOD0 (updateMetacityButtonLayout, void ());
 
@@ -157,14 +157,15 @@ class GWDMockSettingsNotifiedGMock
             gmock->updateDecorations ();
         }
 
-        static void updateFramesCb (GWDSettings                  *settings,
-                                    GWDMockSettingsNotifiedGMock *gmock)
+        static void updateTitlebarFontCb (GWDSettings                  *settings,
+                                          GWDMockSettingsNotifiedGMock *gmock)
         {
-            gmock->updateFrames ();
+            gmock->updateTitlebarFont ();
         }
 
         static void updateMetacityThemeCb (GWDSettings                  *settings,
-                                           const gchar                  *metacity_theme,
+                                           gint                          metacity_theme_type,
+                                           const gchar                  *metacity_theme_name,
                                            GWDMockSettingsNotifiedGMock *gmock)
         {
             gmock->updateMetacityTheme ();
@@ -205,7 +206,7 @@ class GWDSettingsTest :
         {
             EXPECT_CALL (*mGMockNotified, updateMetacityTheme ()).Times (1);
             EXPECT_CALL (*mGMockNotified, updateMetacityButtonLayout ()).Times (1);
-            EXPECT_CALL (*mGMockNotified, updateFrames ()).Times (1);
+            EXPECT_CALL (*mGMockNotified, updateTitlebarFont ()).Times (1);
             EXPECT_CALL (*mGMockNotified, updateDecorations ()).Times (1);
 
             gwd_settings_thaw_updates (mSettings.get ());
@@ -376,9 +377,10 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChanged)
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                       testing_values::USE_METACITY_THEME_VALUE,
+                                                      METACITY_THEME_TYPE_DEFAULT,
                                                       testing_values::METACITY_THEME_VALUE.c_str ()));
 
-    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+    EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (testing_values::METACITY_THEME_VALUE.c_str ()));
 }
 
@@ -389,9 +391,10 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedNoUseMetacityTheme)
     EXPECT_CALL (*mGMockNotified, updateMetacityTheme ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_metacity_theme_changed (mSettings.get (), FALSE,
-                                                      METACITY_THEME_DEFAULT));
+                                                      METACITY_THEME_TYPE_DEFAULT,
+                                                      METACITY_THEME_NAME_DEFAULT));
 
-    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+    EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (metacityTheme));
 }
 
@@ -399,7 +402,8 @@ TEST_F(GWDSettingsTest, TestMetacityThemeChangedIsDefault)
 {
     EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                        testing_values::USE_METACITY_THEME_VALUE,
-                                                       METACITY_THEME_DEFAULT));
+                                                       METACITY_THEME_TYPE_DEFAULT,
+                                                       METACITY_THEME_NAME_DEFAULT));
 }
 
 TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
@@ -411,9 +415,10 @@ TEST_F(GWDSettingsTest, TestMetacityThemeSetCommandLine)
 
     EXPECT_FALSE (gwd_settings_metacity_theme_changed (mSettings.get (),
                                                        testing_values::USE_METACITY_THEME_VALUE,
+                                                       METACITY_THEME_TYPE_DEFAULT,
                                                        testing_values::METACITY_THEME_VALUE.c_str ()));
 
-    EXPECT_THAT (gwd_settings_get_metacity_theme (mSettings.get ()),
+    EXPECT_THAT (gwd_settings_get_metacity_theme_name (mSettings.get ()),
                  IsStringsEqual (metacityTheme));
 }
 
@@ -467,7 +472,7 @@ TEST_F(GWDSettingsTest, TestButtonLayoutChangedIsDefault)
 
 TEST_F(GWDSettingsTest, TestTitlebarFontChanged)
 {
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateTitlebarFont ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::NO_USE_SYSTEM_FONT_VALUE,
@@ -481,7 +486,7 @@ TEST_F(GWDSettingsTest, TestTitlebarFontChangedUseSystemFont)
 {
     const gchar *titlebarFont = NULL;
 
-    EXPECT_CALL (*mGMockNotified, updateFrames ());
+    EXPECT_CALL (*mGMockNotified, updateTitlebarFont ());
     EXPECT_CALL (*mGMockNotified, updateDecorations ());
     EXPECT_TRUE (gwd_settings_font_changed (mSettings.get (),
                                             testing_values::USE_SYSTEM_FONT_VALUE,
