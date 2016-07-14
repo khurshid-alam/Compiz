@@ -1,3 +1,1 @@
-debian/00_remove_decor_in_unity_session.py
-debian/00_remove_scalefilter_in_unity_session.py
-debian/00_remove_gnomecompat_in_unity_session.py
+debian/00_remove_obsolete_plugins_in_unity_session_v1.py
