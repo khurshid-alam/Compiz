@@ -6,6 +6,8 @@ usr/lib/*/compiz/*animationaddon.*
 usr/share/compiz/*animationaddon.*
 usr/lib/*/compiz/*animationjc.*
 usr/share/compiz/*animationjc.*
+usr/lib/*/compiz/*animationsplus.*
+usr/share/compiz/*animationsplus.*
 usr/lib/*/compiz/*animationsim.*
 usr/share/compiz/*animationsim.*
 usr/lib/*/compiz/*clone.*
