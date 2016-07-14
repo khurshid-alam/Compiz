@@ -11,6 +11,9 @@
 		<plugin>opengl</plugin>
 		<plugin>decor</plugin>
 	    </relation>
+	    <conflict>
+		<plugin>unityshell</plugin>
+	    </conflict>
 	</deps>
 	<options>
 	    <option name="main_menu_key" type="key">
