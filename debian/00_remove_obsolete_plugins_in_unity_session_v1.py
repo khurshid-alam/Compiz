@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2016 Canonical
+# Copyright (C) 2016 Canonical
 #
 # Authors:
 #  Marco Trevisan <marco.trevisan@canonical.com>
-#  William Hua <william.hua@canonical.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -23,28 +22,31 @@ from gi.repository import Gio
 import os,sys
 
 COMPIZ_SCHEMA = "org.compiz"
-COMPIZ_CORE_PATH = "/org/compiz/profiles/%s/plugins/core/"
+COMPIZ_CORE_PATH = "/org/compiz/profiles/{}/plugins/core/"
 UNITY_PROFILES = ["unity", "unity-lowgfx"]
+OBSOLETE_PLUGINS = ["decor", "gnomecompat", "scalefilter"]
 
 if COMPIZ_SCHEMA not in Gio.Settings.list_schemas():
     print("No compiz schemas found, no migration needed")
     sys.exit(0)
 
-for core_profile_path in [(COMPIZ_CORE_PATH % p) for p in UNITY_PROFILES]:
+for profile in UNITY_PROFILES:
+    core_profile_path = COMPIZ_CORE_PATH.format(profile)
     core_settings = Gio.Settings(schema=COMPIZ_SCHEMA+".core", path=core_profile_path)
     active_plugins = core_settings.get_strv("active-plugins")
 
-    if not "gnomecompat" in active_plugins:
-        print("No gnomecompat plugin active, no migration needed")
-        sys.exit(0)
+    for plugin in OBSOLETE_PLUGINS:
+        if not plugin in active_plugins:
+            print("No '{}' plugin active in '{}' profile, no migration needed".format(plugin, profile))
+            continue
 
-    try:
-        active_plugins.remove("gnomecompat")
-    except ValueError:
-        pass
+        try:
+            active_plugins.remove(plugin)
+        except ValueError:
+            pass
 
-    # gsettings doesn't work directly, the key is somewhat reverted. Work one level under then: dconf!
-    # gsettings.set_strv("active-plugins", active_plugins)
-    from subprocess import Popen, PIPE, STDOUT
-    p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
+        # gsettings doesn't work directly, the key is somewhat reverted. Work one level under then: dconf!
+        # gsettings.set_strv("active-plugins", active_plugins)
+        from subprocess import Popen, PIPE, STDOUT
+        p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
