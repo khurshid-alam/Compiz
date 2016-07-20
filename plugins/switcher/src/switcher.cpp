@@ -851,9 +851,9 @@ SwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
     				  x,
     				  y,
     				  sScreen->modifiedWidth  - (SPACE << 1),
-    				  Screen->modifiedHeight - (SPACE << 1),
-    				  Screen->modifiedWidth  - (sScreen->modifiedWidth  >> 2),
-    				  Screen->modifiedHeight - (sScreen->modifiedHeight >> 2));
+    				  sScreen->modifiedHeight - (SPACE << 1),
+    				  sScreen->modifiedWidth  - (sScreen->modifiedWidth  >> 2),
+    				  sScreen->modifiedHeight - (sScreen->modifiedHeight >> 2));
 }
 
 void
