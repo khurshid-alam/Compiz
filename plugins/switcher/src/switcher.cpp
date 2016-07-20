@@ -850,10 +850,10 @@ SwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
     				  mask,
     				  x,
     				  y,
-					  sScreen->modifiedWidth  - (SPACE << 1),
-					  sScreen->modifiedHeight - (SPACE << 1),
-					  sScreen->modifiedWidth  - (sScreen->modifiedWidth  >> 2),
-					  sScreen->modifiedHeight - (sScreen->modifiedHeight >> 2));
+    				  sScreen->modifiedWidth  - (SPACE << 1),
+    				  Screen->modifiedHeight - (SPACE << 1),
+    				  Screen->modifiedWidth  - (sScreen->modifiedWidth  >> 2),
+    				  Screen->modifiedHeight - (sScreen->modifiedHeight >> 2));
 }
 
 void
@@ -965,11 +965,11 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 
 	foreach (CompWindow *w, sScreen->windows)
 	{
-		if (x + sScreen->modifiedWidth > x1) {
-			SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
-			                                   transform, mask, x, y);
+	    if (x + sScreen->modifiedWidth > x1) {
+		SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
+		                                   transform, mask, x, y);
 		}
-		x += sScreen->modifiedWidth;
+	    x += sScreen->modifiedWidth;
 	}
 
 	foreach (CompWindow *w, sScreen->windows)
@@ -1136,7 +1136,9 @@ SwitchScreen::SwitchScreen (CompScreen *screen) :
     modifiedHeight (HEIGHT)
 {
     zoom = optionGetZoom () / 30.0f;
+
     zooming = (optionGetZoom () > 0.05f);
+
     optionSetZoomNotify (boost::bind (&SwitchScreen::setZoom, this));
 
     setSizeMultiplier ();
