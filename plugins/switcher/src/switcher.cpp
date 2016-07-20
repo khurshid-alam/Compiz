@@ -968,7 +968,7 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	    if (x + sScreen->modifiedWidth > x1) {
 		SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
 		                                   transform, mask, x, y);
-		}
+	    }
 	    x += sScreen->modifiedWidth;
 	}
 
@@ -979,7 +979,7 @@ SwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 
             SwitchWindow::get (w)->paintThumb (gWindow->lastPaintAttrib (),
 	                                       transform, mask, x, y);
-		x += sScreen->modifiedWidth;
+	    x += sScreen->modifiedWidth;
 	}
 
 	glDisable (GL_SCISSOR_TEST);
