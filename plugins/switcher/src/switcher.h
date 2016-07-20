@@ -99,8 +99,10 @@ class SwitchScreen :
 	float translate;
 	float sTranslate;
 
-	void setSizeMultiplier();
-	float sm;
+	void setSizeMultiplier ();
+	float sizeMultiplier;
+	int modifiedWidth;
+	int modifiedHeight;
 	float _boxVertices[72];
 
 };
@@ -121,8 +123,6 @@ class SwitchWindow :
 
 	bool glPaint (const GLWindowPaintAttrib &, const GLMatrix &,
 		      const CompRegion &, unsigned int);
-
-	void resetGraphics();
 
 	void paintThumb (const GLWindowPaintAttrib &attrib,
 			 const GLMatrix            &transform,
@@ -152,8 +152,6 @@ class SwitchWindow :
 
 	IconMode getIconMode ();
 
-	float sm; // sizeMultiplier
-
 	SwitchScreen    *sScreen;
 };
 
@@ -171,8 +169,8 @@ extern const unsigned short SPACE;
 
 extern const unsigned short BOX_WIDTH;
 
-#define WINDOW_WIDTH(count) (static_cast<int>(WIDTH * optionGetSizeMultiplier()) * (count) + (SPACE << 1))
-#define WINDOW_HEIGHT (static_cast<int>(HEIGHT * optionGetSizeMultiplier()) + (SPACE << 1))
+#define WINDOW_WIDTH(count) (static_cast<int>(WIDTH * sizeMultiplier) * (count) + (SPACE << 1))
+#define WINDOW_HEIGHT (static_cast<int>(HEIGHT * sizeMultiplier) + (SPACE << 1))
 
 #define SWITCH_SCREEN(s) \
     SwitchScreen *ss = SwitchScreen::get (s)
