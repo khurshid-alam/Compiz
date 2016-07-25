@@ -22,7 +22,6 @@
 #endif
 
 #include <limits.h>
-#include <GL/glu.h>
 #include "private.h"
 
 COMPIZ_PLUGIN_20090315 (animationplus, AnimPlusPluginVTable);
