@@ -64,7 +64,7 @@
 	  <option name="flyin_fade" type="bool">
 	    <_short>Fade</_short>
 	    <_long>Fade when flying in</_long>
-	    <default>True</default>
+	    <default>true</default>
 	  </option>
 	  <option name="flyin_distance" type="float">
 	    <_short>Distance</_short>
@@ -134,7 +134,7 @@
 	  <option name="bounce_fade" type="bool">
 	    <_short>Fade</_short>
 	    <_long>Fade when flying in</_long>
-	    <default>True</default>
+	    <default>true</default>
 	  </option>
 	</subgroup>
 	<subgroup>
@@ -163,7 +163,7 @@
 	  <option name="expandpw_horiz_first" type="bool">
 	    <_short>First expand horizontally</_short>
 	    <_long>If checked, initially expand horizontally, then vertically</_long>
-	    <default>True</default>
+	    <default>true</default>
 	  </option>
 	  <option name="expandpw_initial_horiz" type="int">
 	    <_short>Initial horizontal size</_short>
