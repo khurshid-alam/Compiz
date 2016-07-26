@@ -458,7 +458,7 @@ checkReadVariantIsValid (GVariant *gsettingsValue, CCSSettingType type, const gc
     if (!gsettingsValue)
     {
 	ccsWarning ("There is no key '%s' at the path %s. "
-		"Settings from this path won't be read. Default value will be used."
+		"Settings from this path won't be read. efault value will be used."
 		"Ensure this setting is available or the setting backend is properly configured.",
 		key, pathName);
 	return FALSE;
@@ -483,7 +483,8 @@ getVariantAtKey (CCSGSettingsWrapper *settings, const char *key, const char *pat
 
     if (!checkReadVariantIsValid (gsettingsValue, type, pathName, key))
     {
-	g_variant_unref (gsettingsValue);
+	if (gsettingsValue)
+	    g_variant_unref (gsettingsValue);
 	return NULL;
     }
 
