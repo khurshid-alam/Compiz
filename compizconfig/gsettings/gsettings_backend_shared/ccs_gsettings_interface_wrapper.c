@@ -18,12 +18,20 @@ struct _CCSGSettingsWrapperPrivate
 static Bool keyIsValid (GSettings *settings, const char *key)
 {
     GSettingsSchema *schema;
+    Bool valid = FALSE;
 
     if (!settings)
-        return FALSE;
+        return valid;
 
     g_object_get (settings, "settings-schema", &schema, NULL);
-    return schema && g_settings_schema_has_key (schema, key);
+
+    if (schema)
+    {
+	valid = g_settings_schema_has_key (schema, key);
+	g_settings_schema_unref (schema);
+    }
+
+    return valid;
 }
 
 static GVariant * ccsGSettingsWrapperGetValueDefault (CCSGSettingsWrapper *wrapper, const char *key)
