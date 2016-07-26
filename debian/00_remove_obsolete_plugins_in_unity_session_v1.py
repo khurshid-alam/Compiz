@@ -45,8 +45,14 @@ for profile in UNITY_PROFILES:
         except ValueError:
             pass
 
-        # gsettings doesn't work directly, the key is somewhat reverted. Work one level under then: dconf!
-        # gsettings.set_strv("active-plugins", active_plugins)
-        from subprocess import Popen, PIPE, STDOUT
-        p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
+        gsettings.set_strv("active-plugins", active_plugins)
+        Gio.Settings.sync()
+
+        # Sometimes settings don't get written correctly, so in case we fallback to dconf
+        if core_settings.get_strv("active-plugins") != active_plugins:
+            try:
+                from subprocess import Popen, PIPE, STDOUT
+                p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                p.communicate(input=bytes("[/]\nactive-plugins={}".format(active_plugins), 'utf-8'))
+            except:
+                pass
