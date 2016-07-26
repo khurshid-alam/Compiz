@@ -4,6 +4,10 @@ usr/lib/*/compiz/*annotate.*
 usr/share/compiz/*annotate.*
 usr/lib/*/compiz/*animationaddon.*
 usr/share/compiz/*animationaddon.*
+usr/lib/*/compiz/*animationjc.*
+usr/share/compiz/*animationjc.*
+usr/lib/*/compiz/*animationsim.*
+usr/share/compiz/*animationsim.*
 usr/lib/*/compiz/*clone.*
 usr/share/compiz/*clone.*
 usr/lib/*/compiz/*crashhandler.*
