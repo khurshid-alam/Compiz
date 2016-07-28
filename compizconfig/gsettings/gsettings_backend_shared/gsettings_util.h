@@ -109,7 +109,7 @@ gchar *
 getNameForCCSSetting (CCSSetting *setting);
 
 Bool
-checkReadVariantIsValid (GVariant *gsettingsValue, CCSSettingType type, const gchar *pathName);
+checkReadVariantIsValid (GVariant *gsettingsValue, CCSSettingType type, const gchar *pathName, const gchar *key);
 
 GVariant *
 getVariantAtKey (CCSGSettingsWrapper *settings, const char *key, const char *pathName, CCSSettingType type);

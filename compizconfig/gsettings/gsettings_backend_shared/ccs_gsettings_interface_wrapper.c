@@ -15,25 +15,49 @@ struct _CCSGSettingsWrapperPrivate
 #define GSETTINGS_WRAPPER_PRIVATE(w) \
     CCSGSettingsWrapperPrivate *gswPrivate = (CCSGSettingsWrapperPrivate *) ccsObjectGetPrivate (w);
 
+static Bool keyIsValid (GSettings *settings, const char *key)
+{
+    GSettingsSchema *schema;
+    Bool valid = FALSE;
+
+    if (!settings)
+        return valid;
+
+    g_object_get (settings, "settings-schema", &schema, NULL);
+
+    if (schema)
+    {
+	valid = g_settings_schema_has_key (schema, key);
+	g_settings_schema_unref (schema);
+    }
+
+    return valid;
+}
+
 static GVariant * ccsGSettingsWrapperGetValueDefault (CCSGSettingsWrapper *wrapper, const char *key)
 {
     GSETTINGS_WRAPPER_PRIVATE (wrapper);
 
-    return g_settings_get_value (gswPrivate->settings, key);
+    if (keyIsValid (gswPrivate->settings, key))
+	return g_settings_get_value (gswPrivate->settings, key);
+    else
+	return NULL;
 }
 
 static void ccsGSettingsWrapperSetValueDefault (CCSGSettingsWrapper *wrapper, const char *key, GVariant *variant)
 {
     GSETTINGS_WRAPPER_PRIVATE (wrapper);
 
-    g_settings_set_value (gswPrivate->settings, key, variant);
+    if (keyIsValid (gswPrivate->settings, key))
+	g_settings_set_value (gswPrivate->settings, key, variant);
 }
 
 static void ccsGSettingsWrapperResetKeyDefault (CCSGSettingsWrapper *wrapper, const char *key)
 {
     GSETTINGS_WRAPPER_PRIVATE (wrapper);
 
-    g_settings_reset (gswPrivate->settings, key);
+    if (keyIsValid (gswPrivate->settings, key))
+	g_settings_reset (gswPrivate->settings, key);
 }
 
 static char ** ccsGSettingsWrapperListKeysDefault (CCSGSettingsWrapper *wrapper)
