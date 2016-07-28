@@ -269,110 +269,111 @@ GridScreen::initiateCommon (CompAction          *action,
 
 	    if (props.numCellsX == 2) /* keys (1, 4, 7, 3, 6, 9) */
 	    {
-			if ((currentRect.width () ==  desiredRect.width ()  &&
-			     currentRect.x ()     ==  desiredRect.x ())     ||
-			    (gw->resizeCount < 1) || (gw->resizeCount > 6))
-			{
-			    gw->resizeCount = 2;
-			}
-			/* tricky, have to allow for window constraints when
-			 * computing what the 33% and 66% offsets would be
-			 */
-			switch (gw->resizeCount)
-			{
-			    case 1:
-			    desiredSlot.setWidth (slotWidth50);
-			    desiredSlot.setX (workarea.x () +  props.gravityRight * slotWidth50);
-			    ++gw->resizeCount;
-			    break;
+		if ((currentRect.width () ==  desiredRect.width ()  &&
+		     currentRect.x ()     ==  desiredRect.x ())     ||
+		    (gw->resizeCount < 1) || (gw->resizeCount > 6))
+		{
+		    gw->resizeCount = 2;
+		}
+		/* tricky, have to allow for window constraints when
+		 * computing what the 33% and 66% offsets would be
+		 */
+		switch (gw->resizeCount)
+		{
+		    case 1:
+		    desiredSlot.setWidth (slotWidth50);
+		    desiredSlot.setX (workarea.x () +  props.gravityRight * slotWidth50);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 2:
-			    desiredSlot.setWidth (slotWidth33);
-			    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth66);
-			    ++gw->resizeCount;
-			    break;
+		    case 2:
+		    desiredSlot.setWidth (slotWidth33);
+		    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth66);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 3:
-			    desiredSlot.setWidth (slotWidth25);
-			    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth75);
-			    ++gw->resizeCount;
-			    break;
+		    case 3:
+		    desiredSlot.setWidth (slotWidth25);
+		    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth75);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 4:
-			    desiredSlot.setWidth (slotWidth100);
-			    desiredSlot.setX (workarea.x ());
-			    ++gw->resizeCount;
-			    break;
+		    case 4:
+		    desiredSlot.setWidth (slotWidth100);
+		    desiredSlot.setX (workarea.x ());
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 5:
-			    desiredSlot.setWidth (slotWidth75);
-			    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth25);
-			    ++gw->resizeCount;
-			    break;
+		    case 5:
+		    desiredSlot.setWidth (slotWidth75);
+		    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth25);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 6:
-			    desiredSlot.setWidth (slotWidth66);
-			    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth33);
-			    ++gw->resizeCount;
-			    break;
+		    case 6:
+		    desiredSlot.setWidth (slotWidth66);
+		    desiredSlot.setX (workarea.x () + props.gravityRight * slotWidth33);
+		    ++gw->resizeCount;
+		    break;
                 
-			    default:
-			    break;
-			}
+		    default:
+		    break;
+		}
 	    }
 	    else /* keys (2, 5, 8) */
 	    {
-			if ((currentRect.width () ==  desiredRect.width ()  &&
-			     currentRect.x ()     ==  desiredRect.x ())     ||
-			    (gw->resizeCount < 1) || (gw->resizeCount > 6))
-			{
-			    gw->resizeCount = 2;
-			}
-			switch (gw->resizeCount)
-			{
-			    case 1:
-			    desiredSlot.setWidth (slotWidth100);
-			    desiredSlot.setX (workarea.x ());
-			    ++gw->resizeCount;
-			    break;
-			    
-			    case 2:
-			    desiredSlot.setWidth (slotWidth75);
-			    desiredSlot.setX (workarea.x () + slotWidth12);
-			    ++gw->resizeCount;
-			    break;
+		if ((currentRect.width () ==  desiredRect.width ()  &&
+		     currentRect.x ()     ==  desiredRect.x ())     ||
+		    (gw->resizeCount < 1) || (gw->resizeCount > 6))
+		{
+		    gw->resizeCount = 2;
+		}
+		switch (gw->resizeCount)
+		{
+		    case 1:
+		    desiredSlot.setWidth (slotWidth100);
+		    desiredSlot.setX (workarea.x ());
+		    ++gw->resizeCount;
+		    break;
+		    
+		    case 2:
+		    desiredSlot.setWidth (slotWidth75);
+		    desiredSlot.setX (workarea.x () + slotWidth12);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 3:
-			    desiredSlot.setWidth (slotWidth66);
-			    desiredSlot.setX (workarea.x () + slotWidth17);
-			    ++gw->resizeCount;
-			    break;
+		    case 3:
+		    desiredSlot.setWidth (slotWidth66);
+		    desiredSlot.setX (workarea.x () + slotWidth17);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 4:
-			    desiredSlot.setWidth ((slotWidth50));
-			    desiredSlot.setX (workarea.x () + slotWidth25);
-			    ++gw->resizeCount;
-			    break;
+		    case 4:
+		    desiredSlot.setWidth ((slotWidth50));
+		    desiredSlot.setX (workarea.x () + slotWidth25);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 5:
-			    desiredSlot.setWidth (slotWidth33 - (cw->border ().left + cw->border ().right));
-			    desiredSlot.setX (workarea.x () + slotWidth33);
-			    ++gw->resizeCount;
-			    break;
+		    case 5:
+		    desiredSlot.setWidth (slotWidth33 - (cw->border ().left + cw->border ().right));
+		    desiredSlot.setX (workarea.x () + slotWidth33);
+		    ++gw->resizeCount;
+		    break;
                 
-			    case 6:
-			    desiredSlot.setWidth ((slotWidth25));
-			    desiredSlot.setX (workarea.x () + slotWidth37);
-			    ++gw->resizeCount;
-			    break;
+		    case 6:
+		    desiredSlot.setWidth ((slotWidth25));
+		    desiredSlot.setX (workarea.x () + slotWidth37);
+		    ++gw->resizeCount;
+		    break;
                 
-			    default:
-			    break;
-			}
+		    default:
+		    break;
+		}
 	    }
-	    if (gw->resizeCount > 6){
-		    gw->resizeCount = 1;
-        }
+	    if (gw->resizeCount > 6)
+	    {
+		gw->resizeCount = 1;
+	    }
 	    desiredRect = constrainSize (cw, desiredSlot);
 	}
 
