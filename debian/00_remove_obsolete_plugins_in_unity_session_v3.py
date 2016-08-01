@@ -24,6 +24,7 @@ import os,sys
 COMPIZ_SCHEMA = "org.compiz"
 COMPIZ_CORE_PATH = "/org/compiz/profiles/{}/plugins/core/"
 UNITY_PROFILES = ["unity", "unity-lowgfx"]
+ACTIVE_PLUGINS_KEY = "active-plugins"
 OBSOLETE_PLUGINS = ["decor", "gnomecompat", "scalefilter"]
 
 if COMPIZ_SCHEMA not in Gio.Settings.list_schemas():
@@ -33,7 +34,7 @@ if COMPIZ_SCHEMA not in Gio.Settings.list_schemas():
 for profile in UNITY_PROFILES:
     core_profile_path = COMPIZ_CORE_PATH.format(profile)
     core_settings = Gio.Settings(schema=COMPIZ_SCHEMA+".core", path=core_profile_path)
-    active_plugins = core_settings.get_strv("active-plugins")
+    active_plugins = core_settings.get_strv(ACTIVE_PLUGINS_KEY)
 
     for plugin in OBSOLETE_PLUGINS:
         if not plugin in active_plugins:
@@ -45,11 +46,11 @@ for profile in UNITY_PROFILES:
         except ValueError:
             pass
 
-        gsettings.set_strv("active-plugins", active_plugins)
+        core_settings.set_strv(ACTIVE_PLUGINS_KEY, active_plugins)
         Gio.Settings.sync()
 
         # Sometimes settings don't get written correctly, so in case we fallback to dconf
-        if core_settings.get_strv("active-plugins") != active_plugins:
+        if core_settings.get_strv(ACTIVE_PLUGINS_KEY) != active_plugins:
             try:
                 from subprocess import Popen, PIPE, STDOUT
                 p = Popen(("dconf load "+core_profile_path).split(), stdout=PIPE, stdin=PIPE, stderr=STDOUT)
