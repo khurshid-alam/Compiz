@@ -49,7 +49,10 @@ struct _GWDThemeMetacity
 #endif
 
     gulong                      button_layout_id;
+
+#ifndef HAVE_METACITY_3_22_0
     MetaButtonLayout            button_layout;
+#endif
 
 #ifndef HAVE_METACITY_3_20_0
     const PangoFontDescription *titlebar_font;
@@ -169,9 +172,13 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
                                   const gchar      *button_layout,
                                   GWDThemeMetacity *metacity)
 {
-#ifdef HAVE_METACITY_3_20_0
+#if defined(HAVE_METACITY_3_20_0) || defined(HAVE_METACITY_3_22_0)
     gboolean invert = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL;
+#endif
 
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_set_button_layout (metacity->theme, button_layout, invert);
+#elif defined(HAVE_METACITY_3_20_0)
     metacity->button_layout = meta_button_layout_new (button_layout, invert);
 #else
     MetaButtonLayout new_layout;
@@ -324,6 +331,53 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
 #endif
 }
 
+static MetaButtonState
+meta_button_state (gint state)
+{
+    if (state & IN_EVENT_WINDOW) {
+        if (state & PRESSED_EVENT_WINDOW)
+            return META_BUTTON_STATE_PRESSED;
+
+        return META_BUTTON_STATE_PRELIGHT;
+    }
+
+    return META_BUTTON_STATE_NORMAL;
+}
+
+#ifdef HAVE_METACITY_3_22_0
+static MetaButtonState
+meta_button_state_for_button_function (GWDThemeMetacity   *metacity,
+                                       decor_t            *decor,
+                                       MetaButtonFunction  function)
+{
+    switch (function) {
+        case META_BUTTON_FUNCTION_CLOSE:
+            return meta_button_state (decor->button_states[BUTTON_CLOSE]);
+        case META_BUTTON_FUNCTION_MAXIMIZE:
+            return meta_button_state (decor->button_states[BUTTON_MAX]);
+        case META_BUTTON_FUNCTION_MINIMIZE:
+            return meta_button_state (decor->button_states[BUTTON_MIN]);
+        case META_BUTTON_FUNCTION_MENU:
+            return meta_button_state (decor->button_states[BUTTON_MENU]);
+        case META_BUTTON_FUNCTION_SHADE:
+            return meta_button_state (decor->button_states[BUTTON_SHADE]);
+        case META_BUTTON_FUNCTION_ABOVE:
+            return meta_button_state (decor->button_states[BUTTON_ABOVE]);
+        case META_BUTTON_FUNCTION_STICK:
+            return meta_button_state (decor->button_states[BUTTON_STICK]);
+        case META_BUTTON_FUNCTION_UNSHADE:
+            return meta_button_state (decor->button_states[BUTTON_UNSHADE]);
+        case META_BUTTON_FUNCTION_UNABOVE:
+            return meta_button_state (decor->button_states[BUTTON_UNABOVE]);
+        case META_BUTTON_FUNCTION_UNSTICK:
+            return meta_button_state (decor->button_states[BUTTON_UNSTICK]);
+        default:
+            break;
+    }
+
+    return META_BUTTON_STATE_NORMAL;
+}
+#else
 static MetaButtonType
 meta_function_to_type (MetaButtonFunction function)
 {
@@ -353,19 +407,6 @@ meta_function_to_type (MetaButtonFunction function)
     }
 
     return META_BUTTON_TYPE_LAST;
-}
-
-static MetaButtonState
-meta_button_state (gint state)
-{
-    if (state & IN_EVENT_WINDOW) {
-        if (state & PRESSED_EVENT_WINDOW)
-            return META_BUTTON_STATE_PRESSED;
-
-        return META_BUTTON_STATE_PRELIGHT;
-    }
-
-    return META_BUTTON_STATE_NORMAL;
 }
 
 static MetaButtonState
@@ -422,6 +463,7 @@ meta_button_state_for_button_type (GWDThemeMetacity *metacity,
 
     return META_BUTTON_STATE_NORMAL;
 }
+#endif
 
 static gint
 radius_to_width (gint radius,
@@ -807,7 +849,11 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
-#ifdef HAVE_METACITY_3_20_0
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
+                              frame_type, *flags, client_width, client_height,
+                              fgeom);
+#elif defined (HAVE_METACITY_3_20_0)
     meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
                               frame_type, *flags, client_width, client_height,
                               &metacity->button_layout, fgeom);
@@ -866,6 +912,10 @@ static gboolean
 button_present (GWDThemeMetacity   *metacity,
                 MetaButtonFunction  function)
 {
+#ifdef HAVE_METACITY_3_22_0
+    /* FIXME: new api? */
+    return TRUE;
+#else
     int i;
 
     for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
@@ -877,6 +927,7 @@ button_present (GWDThemeMetacity   *metacity,
             return TRUE;
 
     return FALSE;
+#endif
 }
 
 static MetaButtonFunction
@@ -1044,7 +1095,11 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 #endif
     cairo_surface_t *surface;
     Picture src;
+#ifdef HAVE_METACITY_3_22_0
+    MetaButtonState button_states [META_BUTTON_FUNCTION_LAST];
+#else
     MetaButtonState button_states [META_BUTTON_TYPE_LAST];
+#endif
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
@@ -1091,8 +1146,13 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     if (decor->prop_xid || !decor->buffer_surface)
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
+#ifdef HAVE_METACITY_3_22_0
+    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
+        button_states[i] = meta_button_state_for_button_function (metacity, decor, i);
+#else
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
+#endif
 
 #ifndef HAVE_METACITY_3_20_0
     frame_style = meta_theme_get_frame_style (metacity->theme, frame_type, flags);
@@ -1130,7 +1190,12 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
-#ifdef HAVE_METACITY_3_20_0
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
+                           fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
+                           fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
+                           decor->name, button_states, decor->icon_pixbuf, NULL);
+#elif defined(HAVE_METACITY_3_20_0)
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,

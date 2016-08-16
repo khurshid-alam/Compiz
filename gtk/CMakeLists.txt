@@ -29,7 +29,13 @@ if (USE_GTK)
 
             if (LIBMETACITY_FOUND)
                 compiz_set (HAVE_METACITY_3_20_0 1)
-                pkg_check_modules (HAVE_METACITY_2_22_0 libmetacity>=3.21.0)
+                pkg_check_modules (LIBMETACITY_3_22_0 libmetacity>=3.21.0)
+
+                if (LIBMETACITY_3_22_0_FOUND)
+                    compiz_set (HAVE_METACITY_3_22_0 1)
+                else (LIBMETACITY_3_22_0_FOUND)
+                    compiz_set (HAVE_METACITY_3_22_0 0)
+                endif (LIBMETACITY_3_22_0_FOUND)
 
                 set (METACITY_INCLUDE_DIRS ${LIBMETACITY_INCLUDE_DIRS})
                 set (METACITY_LIBRARIES ${LIBMETACITY_LIBRARIES})
