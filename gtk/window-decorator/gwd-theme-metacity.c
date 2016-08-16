@@ -346,8 +346,7 @@ meta_button_state (gint state)
 
 #ifdef HAVE_METACITY_3_22_0
 static MetaButtonState
-meta_button_state_for_button_function (GWDThemeMetacity   *metacity,
-                                       decor_t            *decor,
+meta_button_state_for_button_function (decor_t            *decor,
                                        MetaButtonFunction  function)
 {
     switch (function) {
@@ -377,6 +376,17 @@ meta_button_state_for_button_function (GWDThemeMetacity   *metacity,
 
     return META_BUTTON_STATE_NORMAL;
 }
+
+static MetaButtonState
+update_button_state (MetaButtonFunction function,
+                     GdkRectangle        rect,
+                     gpointer           user_data)
+{
+    decor_t *decor = (decor_t *) user_data;
+
+    return meta_button_state_for_button_function (decor, function);
+}
+
 #else
 static MetaButtonType
 meta_function_to_type (MetaButtonFunction function)
@@ -1095,9 +1105,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 #endif
     cairo_surface_t *surface;
     Picture src;
-#ifdef HAVE_METACITY_3_22_0
-    MetaButtonState button_states [META_BUTTON_FUNCTION_LAST];
-#else
+#ifndef HAVE_METACITY_3_22_0
     MetaButtonState button_states [META_BUTTON_TYPE_LAST];
 #endif
     MetaFrameGeometry fgeom;
@@ -1146,10 +1154,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     if (decor->prop_xid || !decor->buffer_surface)
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
 
-#ifdef HAVE_METACITY_3_22_0
-    for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
-        button_states[i] = meta_button_state_for_button_function (metacity, decor, i);
-#else
+#ifndef HAVE_METACITY_3_22_0
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
 #endif
@@ -1194,7 +1199,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
-                           decor->name, button_states, decor->icon_pixbuf, NULL);
+                           decor->name, update_button_state, metacity, decor->icon_pixbuf, NULL);
 #elif defined(HAVE_METACITY_3_20_0)
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
