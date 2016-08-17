@@ -346,29 +346,29 @@ meta_button_state (gint state)
 
 #ifdef HAVE_METACITY_3_22_0
 static MetaButtonState
-meta_button_state_for_button_function (decor_t            *decor,
-                                       MetaButtonFunction  function)
+meta_button_state_for_button_type (decor_t        *decor,
+                                   MetaButtonType  type)
 {
-    switch (function) {
-        case META_BUTTON_FUNCTION_CLOSE:
+    switch (type) {
+        case META_BUTTON_TYPE_CLOSE:
             return meta_button_state (decor->button_states[BUTTON_CLOSE]);
-        case META_BUTTON_FUNCTION_MAXIMIZE:
+        case META_BUTTON_TYPE_MAXIMIZE:
             return meta_button_state (decor->button_states[BUTTON_MAX]);
-        case META_BUTTON_FUNCTION_MINIMIZE:
+        case META_BUTTON_TYPE_MINIMIZE:
             return meta_button_state (decor->button_states[BUTTON_MIN]);
-        case META_BUTTON_FUNCTION_MENU:
+        case META_BUTTON_TYPE_MENU:
             return meta_button_state (decor->button_states[BUTTON_MENU]);
-        case META_BUTTON_FUNCTION_SHADE:
+        case META_BUTTON_TYPE_SHADE:
             return meta_button_state (decor->button_states[BUTTON_SHADE]);
-        case META_BUTTON_FUNCTION_ABOVE:
+        case META_BUTTON_TYPE_ABOVE:
             return meta_button_state (decor->button_states[BUTTON_ABOVE]);
-        case META_BUTTON_FUNCTION_STICK:
+        case META_BUTTON_TYPE_STICK:
             return meta_button_state (decor->button_states[BUTTON_STICK]);
-        case META_BUTTON_FUNCTION_UNSHADE:
+        case META_BUTTON_TYPE_UNSHADE:
             return meta_button_state (decor->button_states[BUTTON_UNSHADE]);
-        case META_BUTTON_FUNCTION_UNABOVE:
+        case META_BUTTON_TYPE_UNABOVE:
             return meta_button_state (decor->button_states[BUTTON_UNABOVE]);
-        case META_BUTTON_FUNCTION_UNSTICK:
+        case META_BUTTON_TYPE_UNSTICK:
             return meta_button_state (decor->button_states[BUTTON_UNSTICK]);
         default:
             break;
@@ -378,13 +378,13 @@ meta_button_state_for_button_function (decor_t            *decor,
 }
 
 static MetaButtonState
-update_button_state (MetaButtonFunction function,
-                     GdkRectangle        rect,
-                     gpointer           user_data)
+update_button_state (MetaButtonType type,
+                     GdkRectangle   rect,
+                     gpointer       user_data)
 {
     decor_t *decor = (decor_t *) user_data;
 
-    return meta_button_state_for_button_function (decor, function);
+    return meta_button_state_for_button_type (decor, type);
 }
 
 #else
@@ -918,14 +918,50 @@ calc_button_size (GWDTheme *theme,
     decor->button_width = width - min_x;
 }
 
+#ifdef HAVE_METACITY_3_22_0
+static gboolean
+button_present (GWDThemeMetacity *metacity,
+                MetaButtonType    type)
+{
+    /* FIXME: new api? */
+    return TRUE;
+}
+
+static MetaButtonType
+button_to_meta_button_type (gint i)
+{
+    switch (i) {
+        case BUTTON_MENU:
+            return META_BUTTON_TYPE_MENU;
+        case BUTTON_MIN:
+            return META_BUTTON_TYPE_MINIMIZE;
+        case BUTTON_MAX:
+            return META_BUTTON_TYPE_MAXIMIZE;
+        case BUTTON_CLOSE:
+            return META_BUTTON_TYPE_CLOSE;
+        case BUTTON_SHADE:
+            return META_BUTTON_TYPE_SHADE;
+        case BUTTON_ABOVE:
+            return META_BUTTON_TYPE_ABOVE;
+        case BUTTON_STICK:
+            return META_BUTTON_TYPE_STICK;
+        case BUTTON_UNSHADE:
+            return META_BUTTON_TYPE_UNSHADE;
+        case BUTTON_UNABOVE:
+            return META_BUTTON_TYPE_UNABOVE;
+        case BUTTON_UNSTICK:
+            return META_BUTTON_TYPE_UNSTICK;
+        default:
+            break;
+    }
+
+    return META_BUTTON_TYPE_LAST;
+}
+#else
 static gboolean
 button_present (GWDThemeMetacity   *metacity,
                 MetaButtonFunction  function)
 {
-#ifdef HAVE_METACITY_3_22_0
-    /* FIXME: new api? */
-    return TRUE;
-#else
     int i;
 
     for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
@@ -937,7 +973,6 @@ button_present (GWDThemeMetacity   *metacity,
             return TRUE;
 
     return FALSE;
-#endif
 }
 
 static MetaButtonFunction
@@ -970,6 +1005,7 @@ button_to_meta_button_function (gint i)
 
     return META_BUTTON_FUNCTION_LAST;
 }
+#endif
 
 static gboolean
 setup_theme (GWDThemeMetacity *metacity)
@@ -1523,7 +1559,11 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
+#ifdef HAVE_METACITY_3_22_0
+    MetaButtonType button_type;
+#else
     MetaButtonFunction button_function;
+#endif
     MetaButtonSpace *space;
 
     if (!decor->context) {
@@ -1535,9 +1575,15 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
+#ifdef HAVE_METACITY_3_22_0
+    button_type = button_to_meta_button_type (i);
+    if (!button_present (metacity, button_type))
+        return FALSE;
+#else
     button_function = button_to_meta_button_function (i);
     if (!button_present (metacity, button_function))
         return FALSE;
+#endif
 
     switch (i) {
         case BUTTON_MENU:
