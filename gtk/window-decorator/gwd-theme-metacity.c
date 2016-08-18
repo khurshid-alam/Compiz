@@ -919,14 +919,6 @@ calc_button_size (GWDTheme *theme,
 }
 
 #ifdef HAVE_METACITY_3_22_0
-static gboolean
-button_present (GWDThemeMetacity *metacity,
-                MetaButtonType    type)
-{
-    /* FIXME: new api? */
-    return TRUE;
-}
-
 static MetaButtonType
 button_to_meta_button_type (gint i)
 {
@@ -1148,7 +1140,9 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     MetaFrameFlags flags;
     MetaFrameType frame_type;
     cairo_t *cr;
+#ifndef HAVE_METACITY_3_22_0
     gint i;
+#endif
     Region top_region;
     Region bottom_region;
     Region left_region;
@@ -1235,7 +1229,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
-                           decor->name, update_button_state, metacity, decor->icon_pixbuf, NULL);
+                           decor->name, update_button_state, decor, decor->icon_pixbuf, NULL);
 #elif defined(HAVE_METACITY_3_20_0)
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
@@ -1561,10 +1555,12 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     MetaFrameFlags flags;
 #ifdef HAVE_METACITY_3_22_0
     MetaButtonType button_type;
+    MetaButton **buttons;
+    gint index;
 #else
     MetaButtonFunction button_function;
-#endif
     MetaButtonSpace *space;
+#endif
 
     if (!decor->context) {
         /* undecorated windows implicitly have no buttons */
@@ -1577,13 +1573,32 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
 
 #ifdef HAVE_METACITY_3_22_0
     button_type = button_to_meta_button_type (i);
-    if (!button_present (metacity, button_type))
-        return FALSE;
+    buttons = meta_theme_get_buttons (metacity->theme);
+
+    for (index = 0; buttons[index]; index++) {
+        if (meta_button_get_type (buttons[index]) == button_type) {
+            GdkRectangle rect;
+
+            meta_button_get_event_rect (buttons[index], &rect);
+
+            if (!rect.width && !rect.height) {
+                *x = rect.x;
+                *y = rect.y;
+                *w = rect.width;
+                *h = rect.height;
+
+                g_free (buttons);
+                return TRUE;
+            }
+        }
+    }
+
+    g_free (buttons);
+    return FALSE;
 #else
     button_function = button_to_meta_button_function (i);
     if (!button_present (metacity, button_function))
         return FALSE;
-#endif
 
     switch (i) {
         case BUTTON_MENU:
@@ -1629,6 +1644,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     *h = space->clickable.height;
 
     return TRUE;
+#endif
 }
 
 static void
