@@ -195,7 +195,8 @@ TrailfocusScreen::popWindow (TrailfocusWindow *tw)
 	}
 	else
 	{
-	    distance = abs (cur->activeNum () - best->activeNum ());
+	    distance = abs (static_cast<int> (cur->activeNum ()) -
+	                    static_cast<int> (best->activeNum ()));
 	    if (distance < bestDist)
 	    {
 		best     = cur;
