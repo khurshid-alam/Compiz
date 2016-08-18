@@ -132,60 +132,6 @@ cloaderUnloadPlugin (CompPlugin *p)
 }
 
 static bool
-setOpenGLPluginEnvironment ()
-{
-    /*
-     * Check if the hardware is adequate for Unity and if not, use LLVMpipe.
-     * Unfortunately the design of Mesa requires that this be done before
-     * libGL is loaded, which means before the opengl plugin is loaded.
-     */
-    bool toggledLLVM = false;
-
-    if (!getenv ("LIBGL_ALWAYS_SOFTWARE"))
-    {
-	const char *profile = getenv ("COMPIZ_CONFIG_PROFILE");
-	if (profile && strcmp (profile, "ubuntu") == 0)
-	{
-	    int result = system ("/usr/lib/nux/unity_support_test");
-	    int status = WEXITSTATUS (result);
-	    compLogMessage ("core", CompLogLevelInfo,
-		"Unity is %s",
-		status == 0 ?   "fully supported by your hardware." :
-		status == 127 ? "undetectable" :
-		                "not supported by your hardware. "
-		                "Enabling software rendering instead (slow).");
-	    if (status > 0 && status < 127)
-	    {
-		setenv ("LIBGL_ALWAYS_SOFTWARE", "1", 1);
-		toggledLLVM = true;
-	    }
-	}
-    }
-
-    return toggledLLVM;
-}
-
-static void
-unsetUnityshellPluginEnvironment ()
-{
-    unsetenv ("LIBGL_ALWAYS_SOFTWARE");
-}
-
-static void
-setPluginEnvironment (const char *name)
-{
-    if (strcmp (name, "opengl") == 0)
-	setOpenGLPluginEnvironment ();
-}
-
-static void
-unsetPluginEnvironment (const char *name)
-{
-    if (strcmp (name, "unityshell") == 0)
-	unsetUnityshellPluginEnvironment ();
-}
-
-static bool
 dlloaderLoadPlugin (CompPlugin *p,
 		    const char *path,
 		    const char *name)
@@ -196,8 +142,6 @@ dlloaderLoadPlugin (CompPlugin *p,
 
     if (cloaderLoadPlugin (p, path, name))
 	return true;
-
-    setPluginEnvironment (name);
 
     if (path)
     {
@@ -268,8 +212,6 @@ dlloaderLoadPlugin (CompPlugin *p,
 
     if (!loaded && dlhand)
 	dlclose (dlhand);
-
-    unsetPluginEnvironment (name);
 
     return loaded;
 }

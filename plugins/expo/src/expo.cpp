@@ -92,7 +92,8 @@ ExpoScreen::doExpo (CompAction         *action,
 		    CompAction::State  state,
 		    CompOption::Vector &options)
 {
-    if (screen->otherGrabExist ("expo", NULL))
+    if (screen->otherGrabExist ("expo", NULL) || 
+	(screen->vpSize ().width () == 1 && screen->vpSize ().height () == 1))
 	return false;
 
     if (!expoMode)

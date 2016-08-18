@@ -452,24 +452,24 @@ getNameForCCSSetting (CCSSetting *setting)
 }
 
 Bool
-checkReadVariantIsValid (GVariant *gsettingsValue, CCSSettingType type, const gchar *pathName)
+checkReadVariantIsValid (GVariant *gsettingsValue, CCSSettingType type, const gchar *pathName, const gchar *key)
 {
     /* first check if the key is set */
     if (!gsettingsValue)
     {
-	ccsWarning ("There is no key at the path %s. "
-		"Settings from this path won't be read. Try to remove "
-		"that value so that operation can continue properly.",
-		pathName);
+	ccsWarning ("There is no key '%s' at the path %s. "
+		"Settings from this path won't be read. Default value will be used."
+		"Ensure this setting is available or the setting backend is properly configured.",
+		key, pathName);
 	return FALSE;
     }
 
     if (!variantIsValidForCCSType (gsettingsValue, type))
     {
-	ccsWarning ("There is an unsupported value at path %s. "
-		"Settings from this path won't be read. Try to remove "
-		"that value so that operation can continue properly.",
-		pathName);
+	ccsWarning ("There is an unsupported value for key '%s' at path %s. "
+		"Settings from this path won't be read. Default value will be used. "
+		"Ensure this setting is available or the setting backend is properly configured.",
+		key, pathName);
 	return FALSE;
     }
 
@@ -481,9 +481,10 @@ getVariantAtKey (CCSGSettingsWrapper *settings, const char *key, const char *pat
 {
     GVariant *gsettingsValue = ccsGSettingsWrapperGetValue (settings, key);
 
-    if (!checkReadVariantIsValid (gsettingsValue, type, pathName))
+    if (!checkReadVariantIsValid (gsettingsValue, type, pathName, key))
     {
-	g_variant_unref (gsettingsValue);
+	if (gsettingsValue)
+	    g_variant_unref (gsettingsValue);
 	return NULL;
     }
 

@@ -10,4 +10,3 @@ constrain-y=true
 
 [org.compiz.animation]
 unminimize-effects=['animation:Glide 2']
-

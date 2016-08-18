@@ -1,3 +1,78 @@
+compiz (1:0.9.13.0+16.10.20160801.3-0ubuntu1) yakkety; urgency=medium
+
+  [ Andrea Azzarone ]
+  * focusDefaultWindow: focus Most Recently Used (MRU) window and
+    fallback to the top window in case MRU list is not available. (LP:
+    #1073488, #1459671)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 01 Aug 2016 13:25:42 +0000
+
+compiz (1:0.9.13.0+16.10.20160728-0ubuntu1) yakkety; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Don't activate expo if not needed (1x1 setup) (LP: #1606254)
+  * Don't crash if gsettings key is not found. Default value will be
+    used. (LP: #1044662)
+
+  [ BryanFRitt ]
+  * Added in 100% to Grid's 'Cycle Through Multiple Sizes' and
+
+  [ Marco Trevisan (Treviño) ]
+  * Unity MigrationScript: sync gsettings on exit, and only use dconf on
+    failure (LP: #1605011)
+  * Animationsim: fix typo in default bool value
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * Re-add the animationsjc plugin
+  * Add back simple-animations plugin
+  * Re-add the animationsplus plugn
+
+  [ ksamak ]
+  * switcher: adds a size multiplier for A11Y purposes (sight impaired
+    people)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 28 Jul 2016 16:57:46 +0000
+
+compiz (1:0.9.13.0+16.10.20160726.4-0ubuntu1) yakkety; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Don't activate expo if not needed (1x1 setup) (LP: #1606254)
+  * Don't crash if gsettings key is not found. Default value will be
+    used. (LP: #1044662)
+
+  [ BryanFRitt ]
+  * Added in 100% to Grid's 'Cycle Through Multiple Sizes' and
+
+  [ Marco Trevisan (Treviño) ]
+  * Unity MigrationScript: sync gsettings on exit, and only use dconf on
+    failure (LP: #1605011)
+  * Animationsim: fix typo in default bool value
+
+  [ Sam Spilsbury smspillaz@gmail.com ]
+  * Re-add the animationsjc plugin
+  * Add back simple-animations plugin
+  * Re-add the animationsplus plugn
+
+  [ ksamak ]
+  * switcher: adds a size multiplier for A11Y purposes (sight impaired
+    people)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 28 Jul 2016 16:57:46 +0000
+
+compiz (1:0.9.13.0+16.10.20160714.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Added a new option in show desktop plugin that skips the fade
+    animation: useful when performance is more important than eyecandy.
+
+  [ Marco Trevisan (Treviño) ]
+  * ccsGSettingsBackend: don't try to update setting if wrapper is not
+    found (LP: #1599900)
+  * migration scripts: remove unsupported plugins for all the unity
+    profiles
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 14 Jul 2016 15:52:00 +0000
+
 compiz (1:0.9.13.0+16.10.20160705-0ubuntu1) yakkety; urgency=medium
 
   [ Eleni Maria Stea ]
