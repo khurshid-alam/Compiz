@@ -24,7 +24,7 @@
 
 #include <gtk/gtk.h>
 
-#ifdef HAVE_METACITY_3_20_0
+#ifdef USE_METACITY
 #include <libmetacity/meta-theme.h>
 #endif
 
@@ -33,13 +33,7 @@
 
 static const gchar * ORG_COMPIZ_GWD = "org.compiz.gwd";
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES = "org.gnome.desktop.wm.preferences";
-
-#ifdef HAVE_METACITY_3_20_0
 static const gchar * ORG_GNOME_METACITY_THEME = "org.gnome.metacity.theme";
-#else
-static const gchar * ORG_GNOME_METACITY = "org.gnome.metacity";
-#endif
-
 static const gchar * ORG_MATE_MARCO_GENERAL = "org.mate.Marco.general";
 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_TOOLTIPS = "use-tooltips";
@@ -51,12 +45,8 @@ static const gchar * ORG_COMPIZ_GWD_KEY_METACITY_THEME_INACTIVE_SHADE_OPACITY = 
 static const gchar * ORG_COMPIZ_GWD_KEY_USE_METACITY_THEME = "use-metacity-theme";
 static const gchar * ORG_COMPIZ_GWD_KEY_MOUSE_WHEEL_ACTION = "mouse-wheel-action";
 
-#ifdef HAVE_METACITY_3_20_0
 static const gchar * ORG_GNOME_METACITY_THEME_NAME = "name";
 static const gchar * ORG_GNOME_METACITY_THEME_TYPE = "type";
-#else
-static const gchar * ORG_GNOME_METACITY_THEME = "theme";
-#endif
 
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_DOUBLE_CLICK_TITLEBAR = "action-double-click-titlebar";
 static const gchar * ORG_GNOME_DESKTOP_WM_PREFERENCES_ACTION_MIDDLE_CLICK_TITLEBAR = "action-middle-click-titlebar";
@@ -213,7 +203,6 @@ update_metacity_theme (GWDSettingsStorage *storage)
     if (storage->current_desktop == GWD_DESKTOP_MATE && storage->marco) {
         metacity_theme_name = g_settings_get_string (storage->marco, ORG_MATE_MARCO_GENERAL_THEME);
     } else if (storage->current_desktop == GWD_DESKTOP_GNOME_FLASHBACK && storage->metacity) {
-#ifdef HAVE_METACITY_3_20_0
         metacity_theme_type = g_settings_get_enum (storage->metacity, ORG_GNOME_METACITY_THEME_TYPE);
 
         if (metacity_theme_type == META_THEME_TYPE_GTK) {
@@ -221,9 +210,6 @@ update_metacity_theme (GWDSettingsStorage *storage)
         } else {
             metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME_NAME);
         }
-#else
-        metacity_theme_name = g_settings_get_string (storage->metacity, ORG_GNOME_METACITY_THEME);
-#endif
     } else if (storage->desktop) {
         metacity_theme_name = g_settings_get_string (storage->desktop, ORG_GNOME_DESKTOP_WM_PREFERENCES_THEME);
     } else {
@@ -385,14 +371,9 @@ org_gnome_metacity_settings_changed (GSettings          *settings,
                                      const gchar        *key,
                                      GWDSettingsStorage *storage)
 {
-#ifdef HAVE_METACITY_3_20_0
     if (strcmp (key, ORG_GNOME_METACITY_THEME_NAME) == 0 ||
         strcmp (key, ORG_GNOME_METACITY_THEME_TYPE) == 0)
         update_metacity_theme (storage);
-#else
-    if (strcmp (key, ORG_GNOME_METACITY_THEME) == 0)
-        update_metacity_theme (storage);
-#endif
 }
 
 static void
@@ -423,12 +404,12 @@ gtk_decoration_layout_changed (GtkSettings        *settings,
     update_button_layout (storage);
 }
 
-#ifdef HAVE_METACITY_3_20_0
 static void
 gtk_theme_name_changed (GtkSettings        *settings,
                         GParamSpec         *pspec,
                         GWDSettingsStorage *storage)
 {
+#ifdef USE_METACITY
     MetaThemeType type;
 
     if (!storage->metacity)
@@ -438,8 +419,8 @@ gtk_theme_name_changed (GtkSettings        *settings,
 
     if (type == META_THEME_TYPE_GTK)
         update_metacity_theme (storage);
-}
 #endif
+}
 
 static void
 gwd_settings_storage_constructed (GObject *object)
@@ -573,22 +554,15 @@ gwd_settings_storage_init (GWDSettingsStorage *storage)
         case GWD_DESKTOP_GNOME_FLASHBACK:
             storage->gwd = get_settings_no_abort (ORG_COMPIZ_GWD);
             storage->desktop = get_settings_no_abort (ORG_GNOME_DESKTOP_WM_PREFERENCES);
-
-#ifdef HAVE_METACITY_3_20_0
             storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY_THEME);
-#else
-            storage->metacity = get_settings_no_abort (ORG_GNOME_METACITY);
-#endif
 
             storage->gtk_decoration_layout_id =
                 g_signal_connect (gtk_settings_get_default (), "notify::gtk-decoration-layout",
                                   G_CALLBACK (gtk_decoration_layout_changed), storage);
 
-#ifdef HAVE_METACITY_3_20_0
             storage->gtk_theme_name_id =
                 g_signal_connect (gtk_settings_get_default (), "notify::gtk-theme-name",
                                   G_CALLBACK (gtk_theme_name_changed), storage);
-#endif
             break;
 
         case GWD_DESKTOP_MATE:
