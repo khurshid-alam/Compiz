@@ -193,8 +193,7 @@ get_corner_radius (const MetaFrameGeometry *fgeom,
 }
 
 static Region
-get_top_border_region (const MetaFrameGeometry *fgeom,
-                       gint                     width)
+get_top_border_region (const MetaFrameGeometry *fgeom)
 {
     Region corners_xregion;
     Region border_xregion;
@@ -205,6 +204,7 @@ get_top_border_region (const MetaFrameGeometry *fgeom,
     gint bottom_right_radius;
     gint w;
     gint i;
+    gint width;
     gint height;
 
     corners_xregion = XCreateRegion ();
@@ -212,7 +212,7 @@ get_top_border_region (const MetaFrameGeometry *fgeom,
     get_corner_radius (fgeom, &top_left_radius, &top_right_radius,
                        &bottom_left_radius, &bottom_right_radius);
 
-    width = width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
+    width = fgeom->width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
     height = fgeom->borders.visible.top;
 
     if (top_left_radius) {
@@ -257,8 +257,7 @@ get_top_border_region (const MetaFrameGeometry *fgeom,
 }
 
 static Region
-get_bottom_border_region (const MetaFrameGeometry *fgeom,
-                          gint                     width)
+get_bottom_border_region (const MetaFrameGeometry *fgeom)
 {
     Region corners_xregion;
     Region border_xregion;
@@ -269,6 +268,7 @@ get_bottom_border_region (const MetaFrameGeometry *fgeom,
     gint bottom_right_radius;
     gint w;
     gint i;
+    gint width;
     gint height;
 
     corners_xregion = XCreateRegion ();
@@ -276,7 +276,7 @@ get_bottom_border_region (const MetaFrameGeometry *fgeom,
     get_corner_radius (fgeom, &top_left_radius, &top_right_radius,
                        &bottom_left_radius, &bottom_right_radius);
 
-    width = width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
+    width = fgeom->width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
     height = fgeom->borders.visible.bottom;
 
     if (bottom_left_radius) {
@@ -321,8 +321,7 @@ get_bottom_border_region (const MetaFrameGeometry *fgeom,
 }
 
 static Region
-get_left_border_region (const MetaFrameGeometry *fgeom,
-                        gint                     height)
+get_left_border_region (const MetaFrameGeometry *fgeom)
 {
     Region border_xregion;
     XRectangle xrect;
@@ -332,7 +331,7 @@ get_left_border_region (const MetaFrameGeometry *fgeom,
     xrect.x = 0;
     xrect.y = 0;
     xrect.width = fgeom->borders.visible.left;
-    xrect.height = height - fgeom->borders.total.top - fgeom->borders.total.bottom;
+    xrect.height = fgeom->height - fgeom->borders.total.top - fgeom->borders.total.bottom;
 
     XUnionRectWithRegion (&xrect, border_xregion, border_xregion);
 
@@ -340,8 +339,7 @@ get_left_border_region (const MetaFrameGeometry *fgeom,
 }
 
 static Region
-get_right_border_region (const MetaFrameGeometry *fgeom,
-                         gint                     height)
+get_right_border_region (const MetaFrameGeometry *fgeom)
 {
     Region border_xregion;
     XRectangle xrect;
@@ -351,7 +349,7 @@ get_right_border_region (const MetaFrameGeometry *fgeom,
     xrect.x = 0;
     xrect.y = 0;
     xrect.width = fgeom->borders.visible.right;
-    xrect.height = height - fgeom->borders.total.top - fgeom->borders.total.bottom;
+    xrect.height = fgeom->height - fgeom->borders.total.top - fgeom->borders.total.bottom;
 
     XUnionRectWithRegion (&xrect, border_xregion, border_xregion);
 
@@ -802,7 +800,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                            button_states, decor->icon_pixbuf, NULL);
 
     if (fgeom.borders.visible.top) {
-        top_region = get_top_border_region (&fgeom, fgeom.width);
+        top_region = get_top_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
                                     fgeom.borders.invisible.left,
@@ -813,7 +811,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     }
 
     if (fgeom.borders.visible.bottom) {
-        bottom_region = get_bottom_border_region (&fgeom, fgeom.width);
+        bottom_region = get_bottom_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
                                     fgeom.borders.invisible.left,
@@ -824,7 +822,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     }
 
     if (fgeom.borders.visible.left) {
-        left_region = get_left_border_region (&fgeom, fgeom.height);
+        left_region = get_left_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
                                     fgeom.borders.invisible.left,
@@ -835,7 +833,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     }
 
     if (fgeom.borders.visible.right) {
-        right_region = get_right_border_region (&fgeom, fgeom.height);
+        right_region = get_right_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
                                     fgeom.width - fgeom.borders.total.right,
