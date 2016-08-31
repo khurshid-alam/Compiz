@@ -1,3 +1,22 @@
+compiz (1:0.9.13.0+16.10.20160818.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Andrea Azzarone ]
+  * [expo] limit scroll to workarea. (LP: #913880)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 18 Aug 2016 18:53:33 +0000
+
+compiz (1:0.9.13.0+16.10.20160801.3-0ubuntu3) yakkety; urgency=medium
+
+  * Fix subtraction of unsigned ints in trailfocus plugin, to fix FTBFS.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Wed, 10 Aug 2016 20:51:32 +0300
+
+compiz (1:0.9.13.0+16.10.20160801.3-0ubuntu2) yakkety; urgency=medium
+
+  * No-change rebuild against new libmetacity.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Wed, 10 Aug 2016 20:23:05 +0300
+
 compiz (1:0.9.13.0+16.10.20160801.3-0ubuntu1) yakkety; urgency=medium
 
   [ Andrea Azzarone ]

@@ -28,28 +28,12 @@ if (USE_GTK)
             pkg_check_modules (LIBMETACITY libmetacity>=3.20.0)
 
             if (LIBMETACITY_FOUND)
-                compiz_set (HAVE_METACITY_3_20_0 1)
-                pkg_check_modules (LIBMETACITY_3_22_0 libmetacity>=3.21.0)
-
-                if (LIBMETACITY_3_22_0_FOUND)
-                    compiz_set (HAVE_METACITY_3_22_0 1)
-                else (LIBMETACITY_3_22_0_FOUND)
-                    compiz_set (HAVE_METACITY_3_22_0 0)
-                endif (LIBMETACITY_3_22_0_FOUND)
+                compiz_pkg_check_modules (HAVE_METACITY_3_22_0 libmetacity-private>=3.21.0)
 
                 set (METACITY_INCLUDE_DIRS ${LIBMETACITY_INCLUDE_DIRS})
                 set (METACITY_LIBRARIES ${LIBMETACITY_LIBRARIES})
             else (LIBMETACITY_FOUND)
-                pkg_check_modules (LIBMETACITY_PRIVATE libmetacity-private>=3.16.0)
-
-                if (LIBMETACITY_PRIVATE_FOUND)
-                    compiz_set (HAVE_METACITY_3_20_0 0)
-
-                    set (METACITY_INCLUDE_DIRS ${LIBMETACITY_PRIVATE_INCLUDE_DIRS})
-                    set (METACITY_LIBRARIES ${LIBMETACITY_PRIVATE_LIBRARIES})
-                else (LIBMETACITY_PRIVATE_FOUND)
-                    compiz_set (USE_METACITY 0)
-                endif (LIBMETACITY_PRIVATE_FOUND)
+                compiz_set (USE_METACITY 0)
             endif (LIBMETACITY_FOUND)
         endif (USE_METACITY)
 

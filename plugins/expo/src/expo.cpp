@@ -187,6 +187,10 @@ ExpoScreen::nextVp (CompAction         *action,
     if (!expoMode)
 	return false;
 
+    CompPoint pointer (pointerX, pointerY);
+    if (!screen->workArea ().contains (pointer))
+	return false;
+
     unsigned int newX = selectedVp.x () + 1;
     unsigned int newY = selectedVp.y ();
 
@@ -212,6 +216,10 @@ ExpoScreen::prevVp (CompAction         *action,
 		    CompOption::Vector &options)
 {
     if (!expoMode)
+	return false;
+
+    CompPoint pointer (pointerX, pointerY);
+    if (!screen->workArea ().contains (pointer))
 	return false;
 
     int newX = selectedVp.x () - 1;

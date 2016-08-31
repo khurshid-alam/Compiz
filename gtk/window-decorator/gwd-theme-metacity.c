@@ -27,12 +27,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_METACITY_3_20_0
 #include <libmetacity/meta-theme.h>
-#else
-#include <metacity-private/theme.h>
-#include <metacity-private/theme-parser.h>
-#endif
 
 #include "gtk-window-decorator.h"
 #include "gwd-settings.h"
@@ -40,49 +35,18 @@
 
 struct _GWDThemeMetacity
 {
-    GObject                     parent;
+    GObject           parent;
 
-    MetaTheme                  *theme;
+    MetaTheme        *theme;
 
-#ifndef HAVE_METACITY_3_20_0
-    GHashTable                 *style_variants;
-#endif
-
-    gulong                      button_layout_id;
+    gulong            button_layout_id;
 
 #ifndef HAVE_METACITY_3_22_0
-    MetaButtonLayout            button_layout;
-#endif
-
-#ifndef HAVE_METACITY_3_20_0
-    const PangoFontDescription *titlebar_font;
+    MetaButtonLayout  button_layout;
 #endif
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
-
-#ifndef HAVE_METACITY_3_20_0
-static MetaStyleInfo *
-get_style_info (GWDThemeMetacity *metacity,
-                decor_t          *decor)
-{
-    const gchar *variant = decor != NULL ? decor->gtk_theme_variant : NULL;
-    const gchar *key = variant != NULL ? variant : "default";
-    MetaStyleInfo *style = g_hash_table_lookup (metacity->style_variants, key);
-
-    if (style == NULL) {
-        GWDTheme *theme = GWD_THEME (metacity);
-        GtkWidget *style_window = gwd_theme_get_style_window (theme);
-        GdkScreen *screen = gtk_widget_get_screen (style_window);
-
-        style = meta_theme_create_style_info (screen, variant);
-
-        g_hash_table_insert (metacity->style_variants, g_strdup (key), style);
-    }
-
-    return style;
-}
-#endif
 
 static MetaFrameType
 frame_type_from_string (const gchar *str)
@@ -99,235 +63,17 @@ frame_type_from_string (const gchar *str)
     return META_FRAME_TYPE_NORMAL;
 }
 
-#ifndef HAVE_METACITY_3_20_0
-static void
-initialize_button_layout (MetaButtonLayout *layout)
-{
-    gint i;
-
-    for (i = 0; i < MAX_BUTTONS_PER_CORNER; ++i) {
-        layout->left_buttons[i] = META_BUTTON_FUNCTION_LAST;
-        layout->right_buttons[i] = META_BUTTON_FUNCTION_LAST;
-        layout->left_buttons_has_spacer[i] = FALSE;
-        layout->right_buttons_has_spacer[i] = FALSE;
-    }
-}
-
-static MetaButtonFunction
-meta_button_function_from_string (const char *str)
-{
-    if (strcmp (str, "menu") == 0)
-        return META_BUTTON_FUNCTION_MENU;
-    else if (strcmp (str, "appmenu") == 0)
-        return META_BUTTON_FUNCTION_APPMENU;
-    else if (strcmp (str, "minimize") == 0)
-        return META_BUTTON_FUNCTION_MINIMIZE;
-    else if (strcmp (str, "maximize") == 0)
-        return META_BUTTON_FUNCTION_MAXIMIZE;
-    else if (strcmp (str, "close") == 0)
-        return META_BUTTON_FUNCTION_CLOSE;
-    else if (strcmp (str, "shade") == 0)
-        return META_BUTTON_FUNCTION_SHADE;
-    else if (strcmp (str, "above") == 0)
-        return META_BUTTON_FUNCTION_ABOVE;
-    else if (strcmp (str, "stick") == 0)
-        return META_BUTTON_FUNCTION_STICK;
-    else if (strcmp (str, "unshade") == 0)
-        return META_BUTTON_FUNCTION_UNSHADE;
-    else if (strcmp (str, "unabove") == 0)
-        return META_BUTTON_FUNCTION_UNABOVE;
-    else if (strcmp (str, "unstick") == 0)
-        return META_BUTTON_FUNCTION_UNSTICK;
-    else
-        return META_BUTTON_FUNCTION_LAST;
-}
-
-static MetaButtonFunction
-meta_button_opposite_function (MetaButtonFunction ofwhat)
-{
-    switch (ofwhat) {
-        case META_BUTTON_FUNCTION_SHADE:
-            return META_BUTTON_FUNCTION_UNSHADE;
-        case META_BUTTON_FUNCTION_UNSHADE:
-            return META_BUTTON_FUNCTION_SHADE;
-
-        case META_BUTTON_FUNCTION_ABOVE:
-            return META_BUTTON_FUNCTION_UNABOVE;
-        case META_BUTTON_FUNCTION_UNABOVE:
-            return META_BUTTON_FUNCTION_ABOVE;
-
-        case META_BUTTON_FUNCTION_STICK:
-            return META_BUTTON_FUNCTION_UNSTICK;
-        case META_BUTTON_FUNCTION_UNSTICK:
-            return META_BUTTON_FUNCTION_STICK;
-
-        default:
-            return META_BUTTON_FUNCTION_LAST;
-    }
-}
-#endif
-
 static void
 update_metacity_button_layout_cb (GWDSettings      *settings,
                                   const gchar      *button_layout,
                                   GWDThemeMetacity *metacity)
 {
-#if defined(HAVE_METACITY_3_20_0) || defined(HAVE_METACITY_3_22_0)
     gboolean invert = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL;
-#endif
 
 #ifdef HAVE_METACITY_3_22_0
     meta_theme_set_button_layout (metacity->theme, button_layout, invert);
-#elif defined(HAVE_METACITY_3_20_0)
-    metacity->button_layout = meta_button_layout_new (button_layout, invert);
 #else
-    MetaButtonLayout new_layout;
-
-    initialize_button_layout (&new_layout);
-
-    if (button_layout != NULL) {
-        gint i;
-        gchar **sides;
-        MetaButtonFunction f;
-
-        sides = g_strsplit (button_layout, ":", 2);
-
-        if (sides[0] != NULL) {
-            gchar **buttons;
-            gint b;
-            gboolean used[META_BUTTON_FUNCTION_LAST];
-
-            for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
-                used[i] = FALSE;
-
-            buttons = g_strsplit (sides[0], ",", -1);
-
-            i = b = 0;
-            while (buttons[b] != NULL) {
-                f = meta_button_function_from_string (buttons[b]);
-
-                if (i > 0 && strcmp ("spacer", buttons[b]) == 0) {
-                    new_layout.left_buttons_has_spacer[i - 1] = TRUE;
-                    f = meta_button_opposite_function (f);
-
-                    if (f != META_BUTTON_FUNCTION_LAST)
-                        new_layout.left_buttons_has_spacer[i - 2] = TRUE;
-                } else {
-                    if (f != META_BUTTON_FUNCTION_LAST && !used[f]) {
-                        used[f] = TRUE;
-                        new_layout.left_buttons[i++] = f;
-
-                        f = meta_button_opposite_function (f);
-
-                        if (f != META_BUTTON_FUNCTION_LAST)
-                            new_layout.left_buttons[i++] = f;
-                    } else {
-                        g_warning ("Ignoring unknown or already-used "
-                                   "button name \"%s\"", buttons[b]);
-                    }
-                }
-
-                ++b;
-            }
-
-            new_layout.left_buttons[i] = META_BUTTON_FUNCTION_LAST;
-
-            g_strfreev (buttons);
-
-            if (sides[1] != NULL) {
-                for (i = 0; i < META_BUTTON_FUNCTION_LAST; ++i)
-                    used[i] = FALSE;
-
-                buttons = g_strsplit (sides[1], ",", -1);
-
-                i = b = 0;
-                while (buttons[b] != NULL) {
-                    f = meta_button_function_from_string (buttons[b]);
-
-                    if (i > 0 && strcmp ("spacer", buttons[b]) == 0) {
-                        new_layout.right_buttons_has_spacer[i - 1] = TRUE;
-                        f = meta_button_opposite_function (f);
-
-                        if (f != META_BUTTON_FUNCTION_LAST)
-                            new_layout.right_buttons_has_spacer[i - 2] = TRUE;
-                    } else {
-                        if (f != META_BUTTON_FUNCTION_LAST && !used[f]) {
-                            used[f] = TRUE;
-                            new_layout.right_buttons[i++] = f;
-
-                            f = meta_button_opposite_function (f);
-
-                            if (f != META_BUTTON_FUNCTION_LAST)
-                                new_layout.right_buttons[i++] = f;
-                        } else {
-                            g_warning ("Ignoring unknown or already-used "
-                                       "button name \"%s\"", buttons[b]);
-                        }
-                    }
-
-                    ++b;
-                }
-
-                new_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
-
-                g_strfreev (buttons);
-            }
-        }
-
-        g_strfreev (sides);
-
-        /* Invert the button layout for RTL languages */
-        if (gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL) {
-            MetaButtonLayout rtl_layout;
-            gint j;
-
-            initialize_button_layout (&rtl_layout);
-
-            i = 0;
-            while (new_layout.left_buttons[i] != META_BUTTON_FUNCTION_LAST)
-                ++i;
-
-            for (j = 0; j < i; ++j) {
-                rtl_layout.right_buttons[j] = new_layout.left_buttons[i - j - 1];
-
-                if (j == 0)
-                    rtl_layout.right_buttons_has_spacer[i - 1] = new_layout.left_buttons_has_spacer[i - j - 1];
-                else
-                    rtl_layout.right_buttons_has_spacer[j - 1] = new_layout.left_buttons_has_spacer[i - j - 1];
-            }
-
-            i = 0;
-            while (new_layout.right_buttons[i] != META_BUTTON_FUNCTION_LAST)
-                ++i;
-
-            for (j = 0; j < i; ++j) {
-                rtl_layout.left_buttons[j] = new_layout.right_buttons[i - j - 1];
-
-                if (j == 0)
-                    rtl_layout.left_buttons_has_spacer[i - 1] = new_layout.right_buttons_has_spacer[i - j - 1];
-                else
-                    rtl_layout.left_buttons_has_spacer[j - 1] = new_layout.right_buttons_has_spacer[i - j - 1];
-            }
-
-            new_layout = rtl_layout;
-        }
-    } else {
-        gint i;
-
-        new_layout.left_buttons[0] = META_BUTTON_FUNCTION_MENU;
-
-        for (i = 1; i < MAX_BUTTONS_PER_CORNER; ++i)
-            new_layout.left_buttons[i] = META_BUTTON_FUNCTION_LAST;
-
-        new_layout.right_buttons[0] = META_BUTTON_FUNCTION_MINIMIZE;
-        new_layout.right_buttons[1] = META_BUTTON_FUNCTION_MAXIMIZE;
-        new_layout.right_buttons[2] = META_BUTTON_FUNCTION_CLOSE;
-
-        for (i = 3; i < MAX_BUTTONS_PER_CORNER; ++i)
-            new_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
-    }
-
-    metacity->button_layout = new_layout;
+    metacity->button_layout = meta_button_layout_new (button_layout, invert);
 #endif
 }
 
@@ -722,13 +468,8 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         MetaFrameBorders borders;
 
         tmp_flags = flags & ~META_FRAME_MAXIMIZED;
-#ifdef HAVE_METACITY_3_20_0
         meta_theme_get_frame_borders (metacity->theme, d->gtk_theme_variant,
                                       type, tmp_flags, &borders);
-#else
-        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
-                                      type, d->frame->text_height, tmp_flags, &borders);
-#endif
 
 #ifdef HAVE_METACITY_3_22_0
         /* Remove `shadow` border */
@@ -762,13 +503,8 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         }
 
         tmp_flags = flags | META_FRAME_MAXIMIZED;
-#ifdef HAVE_METACITY_3_20_0
         meta_theme_get_frame_borders (metacity->theme, d->gtk_theme_variant,
                                       type, tmp_flags, &borders);
-#else
-        meta_theme_get_frame_borders (metacity->theme, get_style_info (metacity, d),
-                                      type, d->frame->text_height, tmp_flags, &borders);
-#endif
 
 #ifdef HAVE_METACITY_3_22_0
         /* Remove `shadow` border */
@@ -923,14 +659,10 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
                               frame_type, *flags, client_width, client_height,
                               fgeom);
-#elif defined (HAVE_METACITY_3_20_0)
+#else
     meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
                               frame_type, *flags, client_width, client_height,
                               &metacity->button_layout, fgeom);
-#else
-    meta_theme_calc_geometry (metacity->theme, get_style_info (metacity, decor),
-                              frame_type, decor->frame->text_height, *flags, client_width,
-                              client_height, &metacity->button_layout, fgeom);
 #endif
 }
 
@@ -1064,12 +796,8 @@ setup_theme (GWDThemeMetacity *metacity)
 {
     GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
     const gchar *metacity_theme_name = gwd_settings_get_metacity_theme_name (settings);
-#ifdef HAVE_METACITY_3_20_0
     gint metacity_theme_type = gwd_settings_get_metacity_theme_type (settings);
     GError *error = NULL;
-#else
-    MetaTheme *theme;
-#endif
 
     /* metacity_theme can be NULL only in one case - if user has disabled
      * metacity theme with use-metacity-theme setting. In that case
@@ -1077,7 +805,6 @@ setup_theme (GWDThemeMetacity *metacity)
      */
     g_assert (metacity_theme_name != NULL);
 
-#ifdef HAVE_METACITY_3_20_0
     if (metacity_theme_type == -1)
         metacity_theme_type = META_THEME_TYPE_METACITY;
 
@@ -1092,25 +819,6 @@ setup_theme (GWDThemeMetacity *metacity)
 
         return FALSE;
     }
-#else
-
-    /* meta_theme_get_current returns the last good theme, so we will try to
-     * load theme manually to know that theme is 100% valid.
-     */
-    theme = meta_theme_load (metacity_theme_name, NULL);
-    if (theme == NULL)
-        return FALSE;
-
-    /* We can not use this manually loaded theme because Metacity internaly
-     * also use meta_theme_get_current wich in this case will return NULL,
-     * boom - segfault...
-     */
-    meta_theme_free (theme);
-
-    /* If we are here then we know that this will not fail. */
-    meta_theme_set_current (metacity_theme_name, TRUE);
-    metacity->theme = meta_theme_get_current ();
-#endif
 
     return TRUE;
 }
@@ -1146,11 +854,7 @@ gwd_theme_metacity_dispose (GObject *object)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (object);
 
-#ifdef HAVE_METACITY_3_20_0
     g_clear_object (&metacity->theme);
-#else
-    g_clear_pointer (&metacity->style_variants, g_hash_table_destroy);
-#endif
 
     if (metacity->button_layout_id != 0) {
         GWDSettings *settings = gwd_theme_get_settings (GWD_THEME (metacity));
@@ -1158,10 +862,6 @@ gwd_theme_metacity_dispose (GObject *object)
         g_signal_handler_disconnect (settings, metacity->button_layout_id);
         metacity->button_layout_id = 0;
     }
-
-#ifndef HAVE_METACITY_3_20_0
-    metacity->titlebar_font = NULL;
-#endif
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
 }
@@ -1171,11 +871,7 @@ gwd_theme_metacity_style_updated (GWDTheme *theme)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
-#ifdef HAVE_METACITY_3_20_0
     meta_theme_invalidate (metacity->theme);
-#else
-    g_hash_table_remove_all (metacity->style_variants);
-#endif
 }
 
 static void
@@ -1187,10 +883,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
-#ifndef HAVE_METACITY_3_20_0
-    MetaStyleInfo *style_info = get_style_info (metacity, decor);
-    GtkStyleContext *context = gtk_widget_get_style_context (style_window);
-#endif
     cairo_surface_t *surface;
     Picture src;
 #ifndef HAVE_METACITY_3_22_0
@@ -1209,10 +901,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     Region right_region;
     double alpha;
     gboolean shade_alpha;
-#ifndef HAVE_METACITY_3_20_0
-    MetaFrameStyle *frame_style;
-    GdkRGBA bg_rgba;
-#endif
     GtkBorder shadow = { 0, 0, 0, 0 };
     gboolean gtk_theme = FALSE;
 
@@ -1256,20 +944,6 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
 #endif
 
-#ifndef HAVE_METACITY_3_20_0
-    frame_style = meta_theme_get_frame_style (metacity->theme, frame_type, flags);
-
-    gtk_style_context_get_background_color (context, GTK_STATE_FLAG_NORMAL, &bg_rgba);
-    bg_rgba.alpha = 1.0;
-
-    if (frame_style->window_background_color) {
-        meta_color_spec_render (frame_style->window_background_color,
-                                context, &bg_rgba);
-
-        bg_rgba.alpha = frame_style->window_background_alpha / 255.0;
-    }
-#endif
-
     /* Draw something that will be almost invisible to user. This is hacky way
      * to fix invisible decorations. */
     cairo_set_source_rgba (cr, 0, 0, 0, 0.01);
@@ -1280,14 +954,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     cairo_destroy (cr);
 
     surface = create_surface (fgeom.width, fgeom.height, style_window);
-
     cr = cairo_create (surface);
-
-#ifndef HAVE_METACITY_3_20_0
-    gdk_cairo_set_source_rgba (cr, &bg_rgba);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-    cairo_paint (cr);
-#endif
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
@@ -1297,17 +964,11 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->name, update_button_state, decor, decor->icon_pixbuf, NULL);
-#elif defined(HAVE_METACITY_3_20_0)
+#else
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->name, &metacity->button_layout,
-                           button_states, decor->icon_pixbuf, NULL);
-#else
-    meta_theme_draw_frame (metacity->theme, style_info, cr, frame_type, flags,
-                           fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
-                           fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
-                           decor->layout, decor->frame->text_height, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
 #endif
 
@@ -1445,21 +1106,13 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-#ifndef HAVE_METACITY_3_20_0
-    MetaStyleInfo *style_info = get_style_info (metacity, NULL);
-#endif
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
 
-#ifdef HAVE_METACITY_3_20_0
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
                                   0, &borders);
-#else
-    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-                                  frame->text_height, 0, &borders);
-#endif
 
     frame->win_extents.top = borders.visible.top;
     frame->win_extents.bottom = borders.visible.bottom;
@@ -1475,14 +1128,8 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->win_extents.right += borders.shadow.right;
 #endif
 
-#ifdef HAVE_METACITY_3_20_0
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
                                   META_FRAME_MAXIMIZED, &borders);
-#else
-    meta_theme_get_frame_borders (metacity->theme, style_info, frame_type,
-                                  frame->text_height, META_FRAME_MAXIMIZED,
-                                  &borders);
-#endif
 
     frame->max_win_extents.top = borders.visible.top;
     frame->max_win_extents.bottom = borders.visible.bottom;
@@ -1738,32 +1385,7 @@ gwd_theme_metacity_update_titlebar_font (GWDTheme                   *theme,
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
 
-#ifdef HAVE_METACITY_3_20_0
     meta_theme_set_titlebar_font (metacity->theme, titlebar_font);
-#else
-    metacity->titlebar_font = titlebar_font;
-#endif
-}
-
-static PangoFontDescription *
-gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
-                                      decor_frame_t *frame)
-{
-#ifdef HAVE_METACITY_3_20_0
-    return NULL;
-#else
-    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    MetaStyleInfo *style_info = get_style_info (metacity, NULL);
-    PangoFontDescription *font_desc = meta_style_info_create_font_desc (style_info);
-    MetaFrameType type = frame_type_from_string (frame->type);
-    MetaFrameFlags flags = 0xc33; /* FIXME */
-    MetaFrameStyle *style = meta_theme_get_frame_style (metacity->theme, type, flags);
-
-    pango_font_description_merge (font_desc, metacity->titlebar_font, TRUE);
-    meta_frame_style_apply_scale (style, font_desc);
-
-    return font_desc;
-#endif
 }
 
 static void
@@ -1782,16 +1404,11 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
     theme_class->update_titlebar_font = gwd_theme_metacity_update_titlebar_font;
-    theme_class->get_titlebar_font = gwd_theme_metacity_get_titlebar_font;
 }
 
 static void
 gwd_theme_metacity_init (GWDThemeMetacity *metacity)
 {
-#ifndef HAVE_METACITY_3_20_0
-    metacity->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                                      (GDestroyNotify) meta_style_info_unref);
-#endif
 }
 
 /**
