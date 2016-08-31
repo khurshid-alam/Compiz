@@ -1167,13 +1167,6 @@ gwd_theme_metacity_update_titlebar_font (GWDTheme                   *theme,
     meta_theme_set_titlebar_font (metacity->theme, titlebar_font);
 }
 
-static PangoFontDescription *
-gwd_theme_metacity_get_titlebar_font (GWDTheme      *theme,
-                                      decor_frame_t *frame)
-{
-    return NULL;
-}
-
 static void
 gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
 {
@@ -1190,7 +1183,6 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     theme_class->get_event_window_position = gwd_theme_metacity_get_event_window_position;
     theme_class->get_button_position = gwd_theme_metacity_get_button_position;
     theme_class->update_titlebar_font = gwd_theme_metacity_update_titlebar_font;
-    theme_class->get_titlebar_font = gwd_theme_metacity_get_titlebar_font;
 }
 
 static void

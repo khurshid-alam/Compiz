@@ -37,53 +37,50 @@ struct _GWDThemeClass
 {
     GObjectClass parent_class;
 
-    void     (* style_updated)                      (GWDTheme                   *theme);
+    void     (* style_updated)             (GWDTheme                   *theme);
 
-    void     (* get_shadow)                         (GWDTheme                   *theme,
-                                                     decor_frame_t              *frame,
-                                                     decor_shadow_options_t     *options,
-                                                     gboolean                    active);
+    void     (* get_shadow)                (GWDTheme                   *theme,
+                                            decor_frame_t              *frame,
+                                            decor_shadow_options_t     *options,
+                                            gboolean                    active);
 
-    void     (* draw_window_decoration)             (GWDTheme                   *theme,
-                                                     decor_t                    *decor);
+    void     (* draw_window_decoration)    (GWDTheme                   *theme,
+                                            decor_t                    *decor);
 
-    gboolean (* calc_decoration_size)               (GWDTheme                   *theme,
-                                                     decor_t                    *decor,
-                                                     gint                        w,
-                                                     gint                        h,
-                                                     gint                        name_width,
-                                                     gint                       *width,
-                                                     gint                       *height);
+    gboolean (* calc_decoration_size)      (GWDTheme                   *theme,
+                                            decor_t                    *decor,
+                                            gint                        w,
+                                            gint                        h,
+                                            gint                        name_width,
+                                            gint                       *width,
+                                            gint                       *height);
 
-    void     (* update_border_extents)              (GWDTheme                   *theme,
-                                                     decor_frame_t              *frame);
+    void     (* update_border_extents)     (GWDTheme                   *theme,
+                                            decor_frame_t              *frame);
 
-    void     (* get_event_window_position)          (GWDTheme                   *theme,
-                                                     decor_t                    *decor,
-                                                     gint                        i,
-                                                     gint                        j,
-                                                     gint                        width,
-                                                     gint                        height,
-                                                     gint                       *x,
-                                                     gint                       *y,
-                                                     gint                       *w,
-                                                     gint                       *h);
+    void     (* get_event_window_position) (GWDTheme                   *theme,
+                                            decor_t                    *decor,
+                                            gint                        i,
+                                            gint                        j,
+                                            gint                        width,
+                                            gint                        height,
+                                            gint                       *x,
+                                            gint                       *y,
+                                            gint                       *w,
+                                            gint                       *h);
 
-    gboolean (* get_button_position)                (GWDTheme                   *theme,
-                                                     decor_t                    *decor,
-                                                     gint                        i,
-                                                     gint                        width,
-                                                     gint                        height,
-                                                     gint                       *x,
-                                                     gint                       *y,
-                                                     gint                       *w,
-                                                     gint                       *h);
+    gboolean (* get_button_position)       (GWDTheme                   *theme,
+                                            decor_t                    *decor,
+                                            gint                        i,
+                                            gint                        width,
+                                            gint                        height,
+                                            gint                       *x,
+                                            gint                       *y,
+                                            gint                       *w,
+                                            gint                       *h);
 
-    void                   (* update_titlebar_font) (GWDTheme                   *theme,
-                                                     const PangoFontDescription *titlebar_font);
-
-    PangoFontDescription * (* get_titlebar_font)    (GWDTheme                   *theme,
-                                                     decor_frame_t              *frame);
+    void     (* update_titlebar_font)      (GWDTheme                   *theme,
+                                            const PangoFontDescription *titlebar_font);
 };
 
 typedef enum
