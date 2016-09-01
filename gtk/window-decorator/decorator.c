@@ -778,10 +778,25 @@ decor_frame_update_shadow (Display		  *xdisplay,
 			   decor_shadow_options_t *opt_shadow,
 			   decor_shadow_options_t *opt_no_shadow)
 {
+    gint left, right, top, bottom;
+
     if (*shadow_normal)
     {
 	decor_shadow_destroy (xdisplay, *shadow_normal);
 	*shadow_normal = NULL;
+    }
+    
+    left = frame->win_extents.left;
+    right = frame->win_extents.right;
+    top = frame->win_extents.top;
+    bottom = frame->win_extents.bottom;
+
+    if (frame->has_shadow_extents)
+    {
+	left += frame->shadow_extents.left;
+	right += frame->shadow_extents.right;
+	top += frame->shadow_extents.top;
+	bottom += frame->shadow_extents.bottom;
     }
 
     /*
@@ -793,14 +808,11 @@ decor_frame_update_shadow (Display		  *xdisplay,
     *shadow_normal = decor_shadow_create (xdisplay,
 						 screen,
 						 1, 1,
-						 frame->win_extents.left + frame->shadow_extents.left,
-						 frame->win_extents.right + frame->shadow_extents.right,
-						 frame->win_extents.top + frame->shadow_extents.top,
-						 frame->win_extents.bottom + frame->shadow_extents.bottom,
-						 frame->win_extents.left + frame->shadow_extents.left - TRANSLUCENT_CORNER_SIZE,
-						 frame->win_extents.right + frame->shadow_extents.right - TRANSLUCENT_CORNER_SIZE,
-						 frame->win_extents.top + frame->shadow_extents.top - TRANSLUCENT_CORNER_SIZE,
-						 frame->win_extents.bottom + frame->shadow_extents.bottom - TRANSLUCENT_CORNER_SIZE,
+						 left, right, top, bottom,
+						 left - TRANSLUCENT_CORNER_SIZE,
+						 right - TRANSLUCENT_CORNER_SIZE,
+						 top - TRANSLUCENT_CORNER_SIZE,
+						 bottom - TRANSLUCENT_CORNER_SIZE,
 						 frame->has_shadow_extents ? opt_no_shadow : opt_shadow,
 						 context_normal,
 						 draw_border_shape,
@@ -813,6 +825,19 @@ decor_frame_update_shadow (Display		  *xdisplay,
 	*shadow_max = NULL;
     }
 
+    left = frame->max_win_extents.left;
+    right = frame->max_win_extents.right;
+    top = frame->max_win_extents.top;
+    bottom = frame->max_win_extents.bottom;
+
+    if (frame->has_shadow_extents)
+    {
+	left += frame->max_shadow_extents.left;
+	right += frame->max_shadow_extents.right;
+	top += frame->max_shadow_extents.top;
+	bottom += frame->max_shadow_extents.bottom;
+    }
+
     info->state = (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY |
 		   WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY);
 
@@ -820,14 +845,11 @@ decor_frame_update_shadow (Display		  *xdisplay,
 	decor_shadow_create (xdisplay,
 			     screen,
 			     1, 1,
-			     frame->max_win_extents.left + frame->max_shadow_extents.left,
-			     frame->max_win_extents.right + frame->max_shadow_extents.right,
-			     frame->max_win_extents.top + frame->max_shadow_extents.top,
-			     frame->max_win_extents.bottom + frame->max_shadow_extents.bottom,
-			     frame->max_win_extents.left + frame->max_shadow_extents.left - TRANSLUCENT_CORNER_SIZE,
-			     frame->max_win_extents.right + frame->max_shadow_extents.right - TRANSLUCENT_CORNER_SIZE,
-			     frame->max_win_extents.top + frame->max_shadow_extents.top - TRANSLUCENT_CORNER_SIZE,
-			     frame->max_win_extents.bottom + frame->max_shadow_extents.right - TRANSLUCENT_CORNER_SIZE,
+			     left, right, top, bottom,
+			     left - TRANSLUCENT_CORNER_SIZE,
+			     right - TRANSLUCENT_CORNER_SIZE,
+			     top - TRANSLUCENT_CORNER_SIZE,
+			     bottom - TRANSLUCENT_CORNER_SIZE,
 			     opt_no_shadow,  /* No shadow when maximized */
 			     context_max,
 			     draw_border_shape,
