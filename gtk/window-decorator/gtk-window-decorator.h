@@ -221,6 +221,10 @@ struct _decor_frame {
     gint		 text_height;
     gchar		 *type;
 
+    gboolean has_shadow_extents;
+    decor_extents_t shadow_extents;
+    decor_extents_t max_shadow_extents;
+
     frame_update_shadow_proc update_shadow;
     gint		refcount;
 };
