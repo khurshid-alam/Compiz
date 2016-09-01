@@ -1256,10 +1256,13 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
             meta_button_get_event_rect (buttons[index], &rect);
 
             if (rect.width != 0 && rect.height != 0) {
-                *x = rect.x - fgeom.borders.invisible.left + fgeom.borders.resize.left;
-                *y = rect.y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
+                *x = rect.x;
+                *y = rect.y;
                 *w = rect.width;
                 *h = rect.height;
+
+                *x = *x - fgeom.borders.invisible.left + fgeom.borders.resize.left;
+                *y = *y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
 
                 g_free (buttons);
                 return TRUE;
