@@ -1057,13 +1057,6 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->shadow_extents.left = borders.shadow.left;
     frame->shadow_extents.right = borders.shadow.right;
 
-#ifdef HAVE_METACITY_3_22_0
-    frame->shadow_extents.top = borders.shadow.top;
-    frame->shadow_extents.bottom = borders.shadow.bottom;
-    frame->shadow_extents.left = borders.shadow.left;
-    frame->shadow_extents.right = borders.shadow.right;
-#endif
-
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
                                   META_FRAME_MAXIMIZED, &borders);
 
@@ -1075,15 +1068,6 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->max_shadow_extents.bottom = borders.shadow.bottom;
     frame->max_shadow_extents.left = borders.shadow.left;
     frame->max_shadow_extents.right = borders.shadow.right;
-
-#ifdef HAVE_METACITY_3_22_0
-    frame->max_shadow_extents.top = borders.shadow.top;
-    frame->max_shadow_extents.bottom = borders.shadow.bottom;
-    frame->max_shadow_extents.left = borders.shadow.left;
-    frame->max_shadow_extents.right = borders.shadow.right;
-#endif
-
-    frame->has_shadow_extents = theme_type == META_THEME_TYPE_GTK;
 
     gwd_decor_frame_unref (frame);
 }
