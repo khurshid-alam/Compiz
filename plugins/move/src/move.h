@@ -32,7 +32,6 @@
 #include <composite/composite.h>
 #include <opengl/opengl.h>
 
-
 #define NUM_KEYS (sizeof (mKeys) / sizeof (mKeys[0]))
 
 struct _MoveKeys
@@ -49,6 +48,7 @@ struct _MoveKeys
 };
 
 class MoveScreen :
+    public GLScreenInterface,
     public ScreenInterface,
     public CompositeScreenInterface,
     public PluginClassHandler<MoveScreen,CompScreen>,
@@ -59,6 +59,7 @@ class MoveScreen :
 	~MoveScreen ();
 
 	CompositeScreen *cScreen;
+	GLScreen *gScreen;
 
 	void updateOpacity ();
 
@@ -66,6 +67,16 @@ class MoveScreen :
 
 	bool registerPaintHandler (compiz::composite::PaintHandler *pHnd);
 	void unregisterPaintHandler ();
+
+	bool glPaintOutput (const GLScreenPaintAttrib &,
+			    const GLMatrix &,
+			    const CompRegion &,
+			    CompOutput *,
+			    unsigned int);
+
+	bool getMovingRectangle (BoxPtr pbox);
+	void damageMovingRectangle (BoxPtr pbox);
+	bool glPaintMovingRectangle (const GLMatrix &transform, CompOutput *output, unsigned short *borderColor, unsigned short *fillColor);
 
 	CompWindow *w;
 	int        savedX;
