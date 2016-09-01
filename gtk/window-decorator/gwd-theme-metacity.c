@@ -482,25 +482,10 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         frame_win_extents = win_extents;
 #endif
 
-        if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
-#ifdef HAVE_METACITY_3_22_0
-            frame_win_extents.left += borders.resize.left;
-            frame_win_extents.right += borders.resize.right;
-#else
-            frame_win_extents.left += borders.invisible.left;
-            frame_win_extents.right += borders.invisible.right;
-#endif
-        }
-
-        if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) {
-#ifdef HAVE_METACITY_3_22_0
-            frame_win_extents.bottom += borders.resize.bottom;
-            frame_win_extents.top += borders.resize.top;
-#else
-            frame_win_extents.bottom += borders.invisible.bottom;
-            frame_win_extents.top += borders.invisible.top;
-#endif
-        }
+        frame_win_extents.left += borders.resize.left;
+        frame_win_extents.right += borders.resize.right;
+        frame_win_extents.bottom += borders.resize.bottom;
+        frame_win_extents.top += borders.resize.top;
 
         tmp_flags = flags | META_FRAME_MAXIMIZED;
         meta_theme_get_frame_borders (metacity->theme, d->gtk_theme_variant,
@@ -517,25 +502,10 @@ decor_update_meta_window_property (GWDThemeMetacity *metacity,
         frame_max_win_extents = max_win_extents;
 #endif
 
-        if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) {
-#ifdef HAVE_METACITY_3_22_0
-            frame_max_win_extents.left += borders.resize.left;
-            frame_max_win_extents.right += borders.resize.right;
-#else
-            frame_max_win_extents.left += borders.invisible.left;
-            frame_max_win_extents.right += borders.invisible.right;
-#endif
-        }
-
-        if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) {
-#ifdef HAVE_METACITY_3_22_0
-            frame_max_win_extents.bottom += borders.resize.bottom;
-            frame_max_win_extents.top += borders.resize.top;
-#else
-            frame_max_win_extents.bottom += borders.invisible.bottom;
-            frame_max_win_extents.top += borders.invisible.top;
-#endif
-        }
+        frame_max_win_extents.left += borders.resize.left;
+        frame_max_win_extents.right += borders.resize.right;
+        frame_max_win_extents.bottom += borders.resize.bottom;
+        frame_max_win_extents.top += borders.resize.top;
     }
 
     w = d->border_layout.top.x2 - d->border_layout.top.x1 -
@@ -879,7 +849,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                                            decor_t  *decor)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    GWDSettings *settings = gwd_theme_get_settings (theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
@@ -1163,12 +1133,30 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
+    GtkBorder visible;
+    GtkBorder resize;
+    GtkBorder total;
+    gint top_border;
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom,
                              frame_type_from_string (decor->frame->type));
 
-    width += fgeom.borders.total.right + fgeom.borders.total.left;
-    height += fgeom.borders.total.top  + fgeom.borders.total.bottom;
+    visible = fgeom.borders.visible;
+    resize = fgeom.borders.resize;
+
+    /* We can not use `fgeom->borders.total` border here - it includes also
+     * `shadow` border, but it is not included in frame extents! Create new
+     * `total` border that includes only `visible` border and `resize` border.
+     */
+    total.left = visible.left + resize.left;
+    total.right = visible.right + resize.right;
+    total.top = visible.top + resize.top;
+    total.bottom = visible.bottom + resize.bottom;
+
+    width += total.left + total.right;
+    height += total.top + total.bottom;
+
+    top_border = fgeom.title_rect.y - fgeom.borders.invisible.top;
 
 #define TOP_RESIZE_HEIGHT 2
 #define RESIZE_EXTENDS 15
@@ -1177,51 +1165,51 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
         case 2: /* bottom */
             switch (j) {
                 case 2: /* bottom right */
-                    *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
-                    *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
+                    *x = width - total.right - RESIZE_EXTENDS;
+                    *y = height - total.bottom - RESIZE_EXTENDS;
 
-                    *w = fgeom.borders.total.right + RESIZE_EXTENDS;
-                    *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
+                    *w = total.right + RESIZE_EXTENDS;
+                    *h = total.bottom + RESIZE_EXTENDS;
                     break;
                 case 1: /* bottom */
-                    *x = fgeom.borders.total.left + RESIZE_EXTENDS;
-                    *y = height - fgeom.borders.total.bottom;
+                    *x = total.left + RESIZE_EXTENDS;
+                    *y = height - total.bottom;
 
-                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
-                    *h = fgeom.borders.total.bottom;
+                    *w = width - total.left - total.right - (2 * RESIZE_EXTENDS);
+                    *h = total.bottom;
                     break;
                 case 0: /* bottom left */
                 default:
                     *x = 0;
-                    *y = height - fgeom.borders.total.bottom - RESIZE_EXTENDS;
+                    *y = height - total.bottom - RESIZE_EXTENDS;
 
-                    *w = fgeom.borders.total.left + RESIZE_EXTENDS;
-                    *h = fgeom.borders.total.bottom + RESIZE_EXTENDS;
+                    *w = total.left + RESIZE_EXTENDS;
+                    *h = total.bottom + RESIZE_EXTENDS;
                     break;
             }
             break;
         case 1: /* middle */
             switch (j) {
                 case 2: /* right */
-                    *x = width - fgeom.borders.total.right;
-                    *y = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    *x = width - total.right;
+                    *y = resize.top + top_border + RESIZE_EXTENDS;
 
-                    *w = fgeom.borders.total.right;
-                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
+                    *w = total.right;
+                    *h = height - resize.top - top_border - total.bottom - (2 * RESIZE_EXTENDS);
                     break;
                 case 1: /* middle */
-                    *x = fgeom.borders.total.left;
-                    *y = fgeom.title_rect.y + TOP_RESIZE_HEIGHT;
-                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right;
-                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom;
+                    *x = total.left;
+                    *y = resize.top + top_border + TOP_RESIZE_HEIGHT;
+                    *w = width - total.left - total.right;
+                    *h = visible.top - top_border - TOP_RESIZE_HEIGHT;
                     break;
                 case 0: /* left */
                 default:
                     *x = 0;
-                    *y = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    *y = resize.top + top_border + RESIZE_EXTENDS;
 
-                    *w = fgeom.borders.total.left;
-                    *h = height - fgeom.borders.total.top - fgeom.borders.total.bottom - (2 * RESIZE_EXTENDS);
+                    *w = total.left;
+                    *h = height - resize.top - top_border - total.bottom - (2 * RESIZE_EXTENDS);
                     break;
             }
             break;
@@ -1229,26 +1217,26 @@ gwd_theme_metacity_get_event_window_position (GWDTheme *theme,
         default:
             switch (j) {
                 case 2: /* top right */
-                    *x = width - fgeom.borders.total.right - RESIZE_EXTENDS;
+                    *x = width - total.right - RESIZE_EXTENDS;
                     *y = 0;
 
-                    *w = fgeom.borders.total.right + RESIZE_EXTENDS;
-                    *h = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    *w = total.right + RESIZE_EXTENDS;
+                    *h = resize.top + top_border + RESIZE_EXTENDS;
                     break;
                 case 1: /* top */
-                    *x = fgeom.borders.total.left + RESIZE_EXTENDS;
+                    *x = total.left + RESIZE_EXTENDS;
                     *y = 0;
 
-                    *w = width - fgeom.borders.total.left - fgeom.borders.total.right - (2 * RESIZE_EXTENDS);
-                    *h = fgeom.borders.total.top - fgeom.title_rect.height;
+                    *w = width - total.left - total.right - (2 * RESIZE_EXTENDS);
+                    *h = resize.top + top_border + TOP_RESIZE_HEIGHT;
                     break;
                 case 0: /* top left */
                 default:
                     *x = 0;
                     *y = 0;
 
-                    *w = fgeom.borders.total.left + RESIZE_EXTENDS;
-                    *h = fgeom.borders.total.top + RESIZE_EXTENDS;
+                    *w = total.left + RESIZE_EXTENDS;
+                    *h = resize.top + top_border + RESIZE_EXTENDS;
                     break;
             }
             break;
@@ -1314,8 +1302,8 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
             meta_button_get_event_rect (buttons[index], &rect);
 
             if (rect.width != 0 && rect.height != 0) {
-                *x = rect.x;
-                *y = rect.y;
+                *x = rect.x - fgeom.borders.invisible.left + fgeom.borders.resize.left;
+                *y = rect.y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
                 *w = rect.width;
                 *h = rect.height;
 
