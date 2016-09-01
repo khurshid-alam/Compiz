@@ -1317,6 +1317,9 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     *w = space->clickable.width;
     *h = space->clickable.height;
 
+    *x = *x - fgeom.borders.invisible.left + fgeom.borders.resize.left;
+    *y = *y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
+
     return TRUE;
 #endif
 }
