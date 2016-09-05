@@ -560,13 +560,10 @@ moveHandleMotionEvent (CompScreen *s,
 	{
 	    if (ms->optionGetMode () == 0)
 	    {
-		paint_rectangle = false;
 		w->move (wX + dx - w->geometry ().x (), wY + dy - w->geometry ().y (), false);
 	    }
 	    else
 	    {
-		paint_rectangle = true;
-
 		pos_x += wX + dx - w->geometry ().x ();
 		pos_y += wY + dy - w->geometry ().y ();
 	    }
@@ -580,6 +577,10 @@ moveHandleMotionEvent (CompScreen *s,
 void
 MoveScreen::handleEvent (XEvent *event)
 {
+    Box box;
+    getMovingRectangle (&box);
+    damageMovingRectangle (&box);
+
     switch (event->type)
     {
 	case ButtonPress:
@@ -870,6 +871,22 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     GLfloat vertexData[12];
     GLfloat vertexData2[24];
     GLushort fc[4], bc[4];
+    GLint origSrc, origDst;
+
+    bool blend = optionGetBlend ();
+    if (blend)
+    {
+#ifdef USE_GLES
+	GLint           origSrcAlpha, origDstAlpha;
+	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
+	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
+	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);
+	glGetIntegerv (GL_BLEND_DST_ALPHA, &origDstAlpha);
+#else
+	glGetIntegerv (GL_BLEND_SRC, &origSrc);
+	glGetIntegerv (GL_BLEND_DST, &origDst);
+#endif
+    }
 
     bc[3] = (float) borderColor[3] / (float) 65535.0f;
     bc[0] = ((float) borderColor[0] / 65535.0f) * bc[3];
@@ -916,6 +933,12 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 
     sTransform.toScreenSpace (output, -DEFAULT_Z_CAMERA);
 
+    if (blend)
+    {
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
     /* fill rectangle */
     if (fillColor)
     {
@@ -940,6 +963,12 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     streamingBuffer->addVertices (8, &vertexData2[0]);
     streamingBuffer->end ();
     streamingBuffer->render (sTransform);
+
+    if (blend)
+    {
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
     CompositeScreen *cScreen = CompositeScreen::get (screen);
     if (cScreen)
