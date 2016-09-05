@@ -892,6 +892,8 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     bc[0] = ((float) borderColor[0] / 65535.0f) * bc[3];
     bc[1] = ((float) borderColor[1] / 65535.0f) * bc[3];
     bc[2] = ((float) borderColor[2] / 65535.0f) * bc[3];
+    if (!blend)
+	bc[3] = 1;
 
     vertexData[0] = box.x1;
     vertexData[1] = box.y1;
@@ -943,9 +945,11 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (fillColor)
     {
 	fc[3] = fillColor[3];
-	fc[0] = fillColor[0] * (unsigned long) fc[3] / 65535;
-	fc[1] = fillColor[1] * (unsigned long) fc[3] / 65535;
-	fc[2] = fillColor[2] * (unsigned long) fc[3] / 65535;
+	fc[0] = fillColor[0] * (unsigned long) fillColor[3] / 65535;
+	fc[1] = fillColor[1] * (unsigned long) fillColor[3] / 65535;
+	fc[2] = fillColor[2] * (unsigned long) fillColor[3] / 65535;
+	if (!blend)
+	    fc[3] = 1;
 
 	streamingBuffer->begin (GL_TRIANGLE_STRIP);
 	streamingBuffer->addColors (1, fc);
