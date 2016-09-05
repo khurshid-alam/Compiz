@@ -836,7 +836,7 @@ bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
     bool status = gScreen->glPaintOutput (attrib, transform, region, output, mask);
 
     if (status && paint_rectangle)
-	return glPaintMovingRectangle (transform, output, optionGetBorderColor (), optionGetFillColor ());
+	return glPaintMovingRectangle (transform, output, optionGetBorderColor (), (optionGetMode() == 2) ?optionGetFillColor () : NULL);
 
     return status;
 }
