@@ -813,8 +813,8 @@ MoveScreen::getMovingRectangle (BoxPtr pBox)
     if (!w)
 	return false;
 
-    int wX      = w->geometry ().x ();
-    int wY      = w->geometry ().y ();
+    int wX      = w->geometry ().x () - w->border ().left;
+    int wY      = w->geometry ().y () - w->border ().top;
     int wWidth  = w->geometry ().widthIncBorders ();
     int wHeight = w->geometry ().heightIncBorders ();
 
@@ -877,7 +877,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (blend)
     {
 #ifdef USE_GLES
-	GLint           origSrcAlpha, origDstAlpha;
+	GLint origSrcAlpha, origDstAlpha;
 	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
 	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
 	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);
@@ -945,9 +945,9 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (fillColor)
     {
 	fc[3] = fillColor[3];
-	fc[0] = fillColor[0] * (unsigned long) fillColor[3] / 65535;
-	fc[1] = fillColor[1] * (unsigned long) fillColor[3] / 65535;
-	fc[2] = fillColor[2] * (unsigned long) fillColor[3] / 65535;
+	fc[0] = fillColor[0] * (unsigned long) fc[3] / 65535;
+	fc[1] = fillColor[1] * (unsigned long) fc[3] / 65535;
+	fc[2] = fillColor[2] * (unsigned long) fc[3] / 65535;
 	if (!blend)
 	    fc[3] = 1;
 
