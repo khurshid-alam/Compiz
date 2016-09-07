@@ -113,8 +113,8 @@
 		    </default>
 		</option>
 		<option name="blend" type="bool">
-		    <_short>Enable Blend</_short>
-		    <_long>Enable or disable blend.</_long>
+		    <_short>Enable Transparency</_short>
+		    <_long>Enable or disable blending.</_long>
 		    <default>true</default>
 		</option>
 	    </group>
