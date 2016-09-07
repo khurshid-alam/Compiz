@@ -589,6 +589,11 @@
 			    <alpha>0x4f4f</alpha>
 			</default>
 		</option>
+		<option name="disable_blend" type="bool">
+			<_short>Disable Blend</_short>
+			<_long>Disable blend when performance is critical (eg in software rendering).</_long>
+			<default>false</default>
+		</option>
 	    </group>
 	</options>
     </plugin>
