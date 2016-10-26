@@ -819,16 +819,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
     cairo_surface_t *surface;
     Picture src;
-#ifndef HAVE_METACITY_3_22_0
-    MetaButtonState button_states [META_BUTTON_TYPE_LAST];
-#endif
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
     cairo_t *cr;
-#ifndef HAVE_METACITY_3_22_0
-    gint i;
-#endif
     Region top_region;
     Region bottom_region;
     Region left_region;
@@ -869,7 +863,9 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     }
 
 #ifndef HAVE_METACITY_3_22_0
-    for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
+    MetaButtonState button_states [META_BUTTON_TYPE_LAST];
+
+    for (gint i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
 #endif
 
@@ -1227,11 +1223,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
-#ifdef HAVE_METACITY_3_22_0
-    MetaButtonType button_type;
-    MetaButton **buttons;
-    gint index;
-#else
+#ifndef HAVE_METACITY_3_22_0
     MetaButtonFunction button_function;
     MetaButtonSpace *space;
 #endif
@@ -1246,10 +1238,10 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
 #ifdef HAVE_METACITY_3_22_0
-    button_type = button_type_to_meta_button_type (i);
-    buttons = meta_theme_get_buttons (metacity->theme);
+    MetaButtonType button_type = button_type_to_meta_button_type (i);
+    MetaButton **buttons = meta_theme_get_buttons (metacity->theme);
 
-    for (index = 0; buttons[index]; index++) {
+    for (gint index = 0; buttons[index]; index++) {
         if (meta_button_get_type (buttons[index]) == button_type) {
             GdkRectangle rect;
 
