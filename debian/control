@@ -55,7 +55,7 @@ Build-Depends: cmake (>= 2.8.5),
                python-pyrex,
                gsettings-desktop-schemas-dev,
                xserver-xorg-dev (>= 0.7.0),
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 X-Python-Version: >= 2.7
 # If you aren't a member of ~compiz-team but need to upload packaging changes,
 # just go ahead.  ~compiz-team will notice and sync up the code again.
