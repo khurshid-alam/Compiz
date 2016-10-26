@@ -646,9 +646,9 @@ calc_button_size (GWDTheme *theme,
 
 #ifdef HAVE_METACITY_3_22_0
 static MetaButtonType
-button_to_meta_button_type (gint i)
+button_type_to_meta_button_type (gint button_type)
 {
-    switch (i) {
+    switch (button_type) {
         case BUTTON_MENU:
             return META_BUTTON_TYPE_MENU;
         case BUTTON_MIN:
@@ -1246,7 +1246,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
 #ifdef HAVE_METACITY_3_22_0
-    button_type = button_to_meta_button_type (i);
+    button_type = button_type_to_meta_button_type (i);
     buttons = meta_theme_get_buttons (metacity->theme);
 
     for (index = 0; buttons[index]; index++) {
