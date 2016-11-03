@@ -437,7 +437,7 @@ NegScreen::NegScreen (CompScreen *screen) :
     NegOptions (),
     negFunction (0),
     negAlphaFunction (0),
-    isNeg (false),
+    isNeg (optionGetActivateAtStartup()),
     gScreen (GLScreen::get (screen))
 {
     optionSetWindowToggleKeyInitiate (boost::bind (&NegScreen::toggle, this,
@@ -471,7 +471,7 @@ NegWindow::NegWindow (CompWindow *window) :
     /* Taken from ObjectAdd, since there is no equavilent
      * we check for screenNeg == true in ctor */
 
-    if ((ns->isNeg || ns->optionGetWindowNegAtSpawn()) && ns->optionGetNegMatch ().evaluate (window))
+    if (ns->isNeg && ns->optionGetNegMatch ().evaluate (window))
 	toggle ();
 }
 
