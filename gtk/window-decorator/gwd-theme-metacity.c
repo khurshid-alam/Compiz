@@ -40,7 +40,10 @@ struct _GWDThemeMetacity
     MetaTheme        *theme;
 
     gulong            button_layout_id;
+
+#ifndef HAVE_METACITY_3_22_0
     MetaButtonLayout  button_layout;
+#endif
 };
 
 G_DEFINE_TYPE (GWDThemeMetacity, gwd_theme_metacity, GWD_TYPE_THEME)
@@ -67,9 +70,70 @@ update_metacity_button_layout_cb (GWDSettings      *settings,
 {
     gboolean invert = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL;
 
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_set_button_layout (metacity->theme, button_layout, invert);
+#else
     metacity->button_layout = meta_button_layout_new (button_layout, invert);
+#endif
 }
 
+static MetaButtonState
+meta_button_state (gint state)
+{
+    if (state & IN_EVENT_WINDOW) {
+        if (state & PRESSED_EVENT_WINDOW)
+            return META_BUTTON_STATE_PRESSED;
+
+        return META_BUTTON_STATE_PRELIGHT;
+    }
+
+    return META_BUTTON_STATE_NORMAL;
+}
+
+#ifdef HAVE_METACITY_3_22_0
+static MetaButtonState
+meta_button_state_for_button_type (decor_t        *decor,
+                                   MetaButtonType  type)
+{
+    switch (type) {
+        case META_BUTTON_TYPE_CLOSE:
+            return meta_button_state (decor->button_states[BUTTON_CLOSE]);
+        case META_BUTTON_TYPE_MAXIMIZE:
+            return meta_button_state (decor->button_states[BUTTON_MAX]);
+        case META_BUTTON_TYPE_MINIMIZE:
+            return meta_button_state (decor->button_states[BUTTON_MIN]);
+        case META_BUTTON_TYPE_MENU:
+            return meta_button_state (decor->button_states[BUTTON_MENU]);
+        case META_BUTTON_TYPE_SHADE:
+            return meta_button_state (decor->button_states[BUTTON_SHADE]);
+        case META_BUTTON_TYPE_ABOVE:
+            return meta_button_state (decor->button_states[BUTTON_ABOVE]);
+        case META_BUTTON_TYPE_STICK:
+            return meta_button_state (decor->button_states[BUTTON_STICK]);
+        case META_BUTTON_TYPE_UNSHADE:
+            return meta_button_state (decor->button_states[BUTTON_UNSHADE]);
+        case META_BUTTON_TYPE_UNABOVE:
+            return meta_button_state (decor->button_states[BUTTON_UNABOVE]);
+        case META_BUTTON_TYPE_UNSTICK:
+            return meta_button_state (decor->button_states[BUTTON_UNSTICK]);
+        default:
+            break;
+    }
+
+    return META_BUTTON_STATE_NORMAL;
+}
+
+static MetaButtonState
+update_button_state (MetaButtonType type,
+                     GdkRectangle   rect,
+                     gpointer       user_data)
+{
+    decor_t *decor = (decor_t *) user_data;
+
+    return meta_button_state_for_button_type (decor, type);
+}
+
+#else
 static MetaButtonType
 meta_function_to_type (MetaButtonFunction function)
 {
@@ -99,19 +163,6 @@ meta_function_to_type (MetaButtonFunction function)
     }
 
     return META_BUTTON_TYPE_LAST;
-}
-
-static MetaButtonState
-meta_button_state (gint state)
-{
-    if (state & IN_EVENT_WINDOW) {
-        if (state & PRESSED_EVENT_WINDOW)
-            return META_BUTTON_STATE_PRESSED;
-
-        return META_BUTTON_STATE_PRELIGHT;
-    }
-
-    return META_BUTTON_STATE_NORMAL;
 }
 
 static MetaButtonState
@@ -168,6 +219,7 @@ meta_button_state_for_button_type (GWDThemeMetacity *metacity,
 
     return META_BUTTON_STATE_NORMAL;
 }
+#endif
 
 static gint
 radius_to_width (gint radius,
@@ -537,9 +589,15 @@ get_decoration_geometry (GWDThemeMetacity  *metacity,
     else
         client_height = decor->border_layout.left.y2 - decor->border_layout.left.y1;
 
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
+                              frame_type, *flags, client_width, client_height,
+                              fgeom);
+#else
     meta_theme_calc_geometry (metacity->theme, decor->gtk_theme_variant,
                               frame_type, *flags, client_width, client_height,
                               &metacity->button_layout, fgeom);
+#endif
 }
 
 static void
@@ -586,6 +644,38 @@ calc_button_size (GWDTheme *theme,
     decor->button_width = width - min_x;
 }
 
+#ifdef HAVE_METACITY_3_22_0
+static MetaButtonType
+button_type_to_meta_button_type (gint button_type)
+{
+    switch (button_type) {
+        case BUTTON_MENU:
+            return META_BUTTON_TYPE_MENU;
+        case BUTTON_MIN:
+            return META_BUTTON_TYPE_MINIMIZE;
+        case BUTTON_MAX:
+            return META_BUTTON_TYPE_MAXIMIZE;
+        case BUTTON_CLOSE:
+            return META_BUTTON_TYPE_CLOSE;
+        case BUTTON_SHADE:
+            return META_BUTTON_TYPE_SHADE;
+        case BUTTON_ABOVE:
+            return META_BUTTON_TYPE_ABOVE;
+        case BUTTON_STICK:
+            return META_BUTTON_TYPE_STICK;
+        case BUTTON_UNSHADE:
+            return META_BUTTON_TYPE_UNSHADE;
+        case BUTTON_UNABOVE:
+            return META_BUTTON_TYPE_UNABOVE;
+        case BUTTON_UNSTICK:
+            return META_BUTTON_TYPE_UNSTICK;
+        default:
+            break;
+    }
+
+    return META_BUTTON_TYPE_LAST;
+}
+#else
 static gboolean
 button_present (GWDThemeMetacity   *metacity,
                 MetaButtonFunction  function)
@@ -633,6 +723,7 @@ button_to_meta_button_function (gint i)
 
     return META_BUTTON_FUNCTION_LAST;
 }
+#endif
 
 static gboolean
 setup_theme (GWDThemeMetacity *metacity)
@@ -728,12 +819,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
     cairo_surface_t *surface;
     Picture src;
-    MetaButtonState button_states [META_BUTTON_TYPE_LAST];
     MetaFrameGeometry fgeom;
     MetaFrameFlags flags;
     MetaFrameType frame_type;
     cairo_t *cr;
-    gint i;
     Region top_region;
     Region bottom_region;
     Region left_region;
@@ -773,8 +862,12 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
     }
 
-    for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
+#ifndef HAVE_METACITY_3_22_0
+    MetaButtonState button_states [META_BUTTON_TYPE_LAST];
+
+    for (gint i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
+#endif
 
     /* Draw something that will be almost invisible to user. This is hacky way
      * to fix invisible decorations. */
@@ -791,11 +884,18 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
                                 xformat_rgba, 0, NULL);
 
+#ifdef HAVE_METACITY_3_22_0
+    meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
+                           fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
+                           fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
+                           decor->name, update_button_state, decor, decor->icon_pixbuf, NULL);
+#else
     meta_theme_draw_frame (metacity->theme, decor->gtk_theme_variant, cr, frame_type, flags,
                            fgeom.width - fgeom.borders.total.left - fgeom.borders.total.right,
                            fgeom.height - fgeom.borders.total.top - fgeom.borders.total.bottom,
                            decor->name, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
+#endif
 
     if (fgeom.borders.visible.top + fgeom.borders.shadow.top) {
         top_region = get_top_border_region (&fgeom, !decor->frame->has_shadow_extents);
@@ -1123,8 +1223,10 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     MetaFrameGeometry fgeom;
     MetaFrameType frame_type;
     MetaFrameFlags flags;
+#ifndef HAVE_METACITY_3_22_0
     MetaButtonFunction button_function;
     MetaButtonSpace *space;
+#endif
 
     if (!decor->context) {
         /* undecorated windows implicitly have no buttons */
@@ -1135,6 +1237,34 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
+#ifdef HAVE_METACITY_3_22_0
+    MetaButtonType button_type = button_type_to_meta_button_type (i);
+    MetaButton **buttons = meta_theme_get_buttons (metacity->theme);
+
+    for (gint index = 0; buttons[index]; index++) {
+        if (meta_button_get_type (buttons[index]) == button_type) {
+            GdkRectangle rect;
+
+            meta_button_get_event_rect (buttons[index], &rect);
+
+            if (rect.width != 0 && rect.height != 0) {
+                *x = rect.x;
+                *y = rect.y;
+                *w = rect.width;
+                *h = rect.height;
+
+                *x = *x - fgeom.borders.invisible.left + fgeom.borders.resize.left;
+                *y = *y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
+
+                g_free (buttons);
+                return TRUE;
+            }
+        }
+    }
+
+    g_free (buttons);
+    return FALSE;
+#else
     button_function = button_to_meta_button_function (i);
     if (!button_present (metacity, button_function))
         return FALSE;
@@ -1186,6 +1316,7 @@ gwd_theme_metacity_get_button_position (GWDTheme *theme,
     *y = *y - fgeom.borders.invisible.top + fgeom.borders.resize.top;
 
     return TRUE;
+#endif
 }
 
 static void
