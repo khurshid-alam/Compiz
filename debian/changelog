@@ -1,3 +1,17 @@
+compiz (1:0.9.13.0+17.04.20161103-0ubuntu1) zesty; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * gtk-window-decorator: require libmetacity 3.20 or newer.
+  * gtk-window-decorator: improve GTK+ theme support, full support will
+    require Metacity 3.22.
+  * gtk-window-decorator: use `resize` not `invisible` border
+  * GWD: add support for metacity 3.22 (LP: #1629749)
+
+  [ Eleni Maria Stea ]
+  * Added option to disable blend in grid plugin
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 03 Nov 2016 18:31:18 +0000
+
 compiz (1:0.9.13.0+17.04.20161026-0ubuntu1) zesty; urgency=medium
 
   * Rebuild against cmake 3.6
