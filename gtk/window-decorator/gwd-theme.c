@@ -248,13 +248,6 @@ gwd_theme_real_update_titlebar_font (GWDTheme                   *theme,
 {
 }
 
-static PangoFontDescription *
-gwd_theme_real_get_titlebar_font (GWDTheme      *theme,
-                                  decor_frame_t *frame)
-{
-    return NULL;
-}
-
 static void
 gwd_theme_class_init (GWDThemeClass *theme_class)
 {
@@ -275,7 +268,6 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     theme_class->get_event_window_position = gwd_theme_real_get_event_window_position;
     theme_class->get_button_position = gwd_theme_real_get_button_position;
     theme_class->update_titlebar_font = gwd_theme_real_update_titlebar_font;
-    theme_class->get_titlebar_font = gwd_theme_real_get_titlebar_font;
 
     properties[PROP_SETTINGS] =
         g_param_spec_object ("settings", "GWDSettings", "GWDSettings",
@@ -432,11 +424,6 @@ gwd_theme_get_titlebar_font (GWDTheme      *theme,
     PangoFontDescription *font_desc = NULL;
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
     GtkStyleContext *context = gtk_widget_get_style_context (priv->style_window);
-
-    /* Check if Metacity or Cairo will create titlebar font */
-    font_desc = GWD_THEME_GET_CLASS (theme)->get_titlebar_font (theme, frame);
-    if (font_desc)
-        return font_desc;
 
     /* Check if non-system font is in use */
     if (priv->titlebar_font)
