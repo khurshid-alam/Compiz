@@ -193,8 +193,11 @@ get_corner_radius (const MetaFrameGeometry *fgeom,
 }
 
 static Region
-get_top_border_region (const MetaFrameGeometry *fgeom)
+get_top_border_region (const MetaFrameGeometry *fgeom,
+                       gboolean                 subtract_borders)
 {
+    GtkBorder invisible = fgeom->borders.invisible;
+    GtkBorder shadow = fgeom->borders.shadow;
     Region corners_xregion;
     Region border_xregion;
     XRectangle xrect;
@@ -212,10 +215,10 @@ get_top_border_region (const MetaFrameGeometry *fgeom)
     get_corner_radius (fgeom, &top_left_radius, &top_right_radius,
                        &bottom_left_radius, &bottom_right_radius);
 
-    width = fgeom->width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
-    height = fgeom->borders.visible.top;
+    width = fgeom->width - invisible.left - invisible.right + shadow.left + shadow.right;
+    height = fgeom->borders.visible.top + shadow.top;
 
-    if (top_left_radius) {
+    if (top_left_radius && subtract_borders) {
         for (i = 0; i < top_left_radius; ++i) {
             w = radius_to_width (top_left_radius, i);
 
@@ -228,7 +231,7 @@ get_top_border_region (const MetaFrameGeometry *fgeom)
         }
     }
 
-    if (top_right_radius) {
+    if (top_right_radius && subtract_borders) {
         for (i = 0; i < top_right_radius; ++i) {
             w = radius_to_width (top_right_radius, i);
 
@@ -257,8 +260,11 @@ get_top_border_region (const MetaFrameGeometry *fgeom)
 }
 
 static Region
-get_bottom_border_region (const MetaFrameGeometry *fgeom)
+get_bottom_border_region (const MetaFrameGeometry *fgeom,
+                          gboolean                 subtract_borders)
 {
+    GtkBorder invisible = fgeom->borders.invisible;
+    GtkBorder shadow = fgeom->borders.shadow;
     Region corners_xregion;
     Region border_xregion;
     XRectangle xrect;
@@ -276,10 +282,10 @@ get_bottom_border_region (const MetaFrameGeometry *fgeom)
     get_corner_radius (fgeom, &top_left_radius, &top_right_radius,
                        &bottom_left_radius, &bottom_right_radius);
 
-    width = fgeom->width - fgeom->borders.invisible.left - fgeom->borders.invisible.right;
-    height = fgeom->borders.visible.bottom;
+    width = fgeom->width - invisible.left - invisible.right + shadow.left + shadow.right;
+    height = fgeom->borders.visible.bottom + shadow.bottom;
 
-    if (bottom_left_radius) {
+    if (bottom_left_radius && subtract_borders) {
         for (i = 0; i < bottom_left_radius; ++i) {
             w = radius_to_width (bottom_left_radius, i);
 
@@ -292,7 +298,7 @@ get_bottom_border_region (const MetaFrameGeometry *fgeom)
         }
     }
 
-    if (bottom_right_radius) {
+    if (bottom_right_radius && subtract_borders) {
         for (i = 0; i < bottom_right_radius; ++i) {
             w = radius_to_width (bottom_right_radius, i);
 
@@ -330,7 +336,7 @@ get_left_border_region (const MetaFrameGeometry *fgeom)
 
     xrect.x = 0;
     xrect.y = 0;
-    xrect.width = fgeom->borders.visible.left;
+    xrect.width = fgeom->borders.visible.left + fgeom->borders.shadow.left;
     xrect.height = fgeom->height - fgeom->borders.total.top - fgeom->borders.total.bottom;
 
     XUnionRectWithRegion (&xrect, border_xregion, border_xregion);
@@ -348,7 +354,7 @@ get_right_border_region (const MetaFrameGeometry *fgeom)
 
     xrect.x = 0;
     xrect.y = 0;
-    xrect.width = fgeom->borders.visible.right;
+    xrect.width = fgeom->borders.visible.right + fgeom->borders.shadow.right;
     xrect.height = fgeom->height - fgeom->borders.total.top - fgeom->borders.total.bottom;
 
     XUnionRectWithRegion (&xrect, border_xregion, border_xregion);
@@ -726,7 +732,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                                            decor_t  *decor)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
-    GWDSettings *settings = gwd_theme_get_settings (gwd_theme);
+    GWDSettings *settings = gwd_theme_get_settings (theme);
     GdkDisplay *display = gdk_display_get_default ();
     Display *xdisplay = gdk_x11_display_get_xdisplay (display);
     GtkWidget *style_window = gwd_theme_get_style_window (theme);
@@ -772,8 +778,10 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
 
     get_decoration_geometry (metacity, decor, &flags, &fgeom, frame_type);
 
-    if (decor->prop_xid || !decor->buffer_surface)
+    if (!decor->frame->has_shadow_extents &&
+        (decor->prop_xid || !decor->buffer_surface)) {
         draw_shadow_background (decor, cr, decor->shadow, decor->context);
+    }
 
     for (i = 0; i < META_BUTTON_TYPE_LAST; ++i)
         button_states[i] = meta_button_state_for_button_type (metacity, decor, i);
@@ -799,40 +807,40 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
                            decor->name, &metacity->button_layout,
                            button_states, decor->icon_pixbuf, NULL);
 
-    if (fgeom.borders.visible.top) {
-        top_region = get_top_border_region (&fgeom);
+    if (fgeom.borders.visible.top + fgeom.borders.shadow.top) {
+        top_region = get_top_border_region (&fgeom, !decor->frame->has_shadow_extents);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
-                                    fgeom.borders.invisible.left,
-                                    fgeom.borders.invisible.top,
+                                    fgeom.borders.invisible.left - fgeom.borders.shadow.left,
+                                    fgeom.borders.invisible.top - fgeom.borders.shadow.top,
                                     decor->picture, &decor->border_layout,
                                     BORDER_TOP, top_region,
                                     alpha * 0xffff, shade_alpha, 0);
     }
 
-    if (fgeom.borders.visible.bottom) {
-        bottom_region = get_bottom_border_region (&fgeom);
+    if (fgeom.borders.visible.bottom + fgeom.borders.shadow.bottom) {
+        bottom_region = get_bottom_border_region (&fgeom, !decor->frame->has_shadow_extents);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
-                                    fgeom.borders.invisible.left,
+                                    fgeom.borders.invisible.left - fgeom.borders.shadow.left,
                                     fgeom.height - fgeom.borders.total.bottom,
                                     decor->picture, &decor->border_layout,
                                     BORDER_BOTTOM, bottom_region,
                                     alpha * 0xffff, shade_alpha, 0);
     }
 
-    if (fgeom.borders.visible.left) {
+    if (fgeom.borders.visible.left + fgeom.borders.shadow.left) {
         left_region = get_left_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
-                                    fgeom.borders.invisible.left,
+                                    fgeom.borders.invisible.left - fgeom.borders.shadow.left,
                                     fgeom.borders.total.top,
                                     decor->picture, &decor->border_layout,
                                     BORDER_LEFT, left_region,
                                     alpha * 0xffff, shade_alpha, 0);
     }
 
-    if (fgeom.borders.visible.right) {
+    if (fgeom.borders.visible.right + fgeom.borders.shadow.right) {
         right_region = get_right_border_region (&fgeom);
 
         decor_blend_border_picture (xdisplay, decor->context, src,
@@ -933,10 +941,15 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
                                           decor_frame_t *frame)
 {
     GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+    GWDSettings *settings = gwd_theme_get_settings (theme);
+    gint theme_type = gwd_settings_get_metacity_theme_type (settings);
     MetaFrameType frame_type = frame_type_from_string (frame->type);
     MetaFrameBorders borders;
 
     gwd_decor_frame_ref (frame);
+
+    /* Shadow extents is used only with GTK+ theme */
+    frame->has_shadow_extents = theme_type == META_THEME_TYPE_GTK;
 
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
                                   0, &borders);
@@ -945,6 +958,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->win_extents.bottom = borders.visible.bottom;
     frame->win_extents.left = borders.visible.left;
     frame->win_extents.right = borders.visible.right;
+    frame->shadow_extents.top = borders.shadow.top;
+    frame->shadow_extents.bottom = borders.shadow.bottom;
+    frame->shadow_extents.left = borders.shadow.left;
+    frame->shadow_extents.right = borders.shadow.right;
 
     meta_theme_get_frame_borders (metacity->theme, NULL, frame_type,
                                   META_FRAME_MAXIMIZED, &borders);
@@ -953,6 +970,10 @@ gwd_theme_metacity_update_border_extents (GWDTheme      *theme,
     frame->max_win_extents.bottom = borders.visible.bottom;
     frame->max_win_extents.left = borders.visible.left;
     frame->max_win_extents.right = borders.visible.right;
+    frame->max_shadow_extents.top = borders.shadow.top;
+    frame->max_shadow_extents.bottom = borders.shadow.bottom;
+    frame->max_shadow_extents.left = borders.shadow.left;
+    frame->max_shadow_extents.right = borders.shadow.right;
 
     gwd_decor_frame_unref (frame);
 }
