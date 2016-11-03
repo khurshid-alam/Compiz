@@ -510,6 +510,7 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     GLushort        colorData[4];
     GLushort        *color;
     GLboolean       isBlendingEnabled;
+    bool            blend = !optionGetDisableBlend ();
 
     const float MaxUShortFloat = std::numeric_limits <unsigned short>::max ();
 
@@ -520,8 +521,11 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 
     sTransform.toScreenSpace (output, -DEFAULT_Z_CAMERA);
 
-    glGetBooleanv (GL_BLEND, &isBlendingEnabled);
-    glEnable (GL_BLEND);
+    if (blend)
+    {
+	glGetBooleanv (GL_BLEND, &isBlendingEnabled);
+	glEnable (GL_BLEND);
+    }
 
     for (iter = animations.begin (); iter != animations.end () && animating; ++iter)
     {
@@ -661,8 +665,11 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 	streamingBuffer->render (sTransform);
     }
 
-    if (!isBlendingEnabled)
-	glDisable (GL_BLEND);
+    if (blend)
+    {
+	if (!isBlendingEnabled)
+	    glDisable (GL_BLEND);
+    }
 }
 
 bool
