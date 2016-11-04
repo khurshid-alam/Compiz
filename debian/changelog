@@ -1,8 +1,8 @@
-compiz (1:0.9.13.0+17.04.20161103-0ubuntu2) zesty; urgency=medium
+compiz (1:0.9.13.0+17.04.20161104-0ubuntu1) zesty; urgency=medium
 
   * No-change rebuild against Metacity 3.22.
 
- -- Dmitry Shachnev <mitya57@ubuntu.com>  Fri, 04 Nov 2016 21:08:46 +0300
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Fri, 04 Nov 2016 19:28:03 +0000
 
 compiz (1:0.9.13.0+17.04.20161103-0ubuntu1) zesty; urgency=medium
 
