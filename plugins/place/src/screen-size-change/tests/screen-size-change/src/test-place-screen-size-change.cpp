@@ -64,12 +64,16 @@ class StubScreenSizeChangeObject :
 	const cw::extents::Extents & getExtents () const;
 	unsigned int getState () const;
 
+/*
 	void setVp (const CompPoint &);
+*/
 	void setWorkArea (const CompRect &);
+/*
 	void setExtents (unsigned int left,
 			 unsigned int right,
 			 unsigned int top,
 			 unsigned int bottom);
+*/
 
 	void setGeometry (const cw::Geometry &g);
 	cw::Geometry sizeAdjustTest (const CompSize &oldSize,
