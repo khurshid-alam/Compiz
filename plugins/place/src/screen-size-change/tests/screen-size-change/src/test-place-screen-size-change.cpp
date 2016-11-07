@@ -221,11 +221,13 @@ StubScreenSizeChangeObject::getState () const
     return 0;
 }
 
+/*
 void
 StubScreenSizeChangeObject::setVp (const CompPoint &p)
 {
     mCurrentVp = p;
 }
+*/
 
 void
 StubScreenSizeChangeObject::setWorkArea (const CompRect &wa)
@@ -233,6 +235,7 @@ StubScreenSizeChangeObject::setWorkArea (const CompRect &wa)
     mCurrentWorkArea = wa;
 }
 
+/*
 void
 StubScreenSizeChangeObject::setExtents (unsigned int left,
 				        unsigned int right,
@@ -244,6 +247,7 @@ StubScreenSizeChangeObject::setExtents (unsigned int left,
     mCurrentExtents.top = top;
     mCurrentExtents.bottom = bottom;
 }
+*/
 
 void
 StubScreenSizeChangeObject::setGeometry (const cw::Geometry &g)
