@@ -1,3 +1,9 @@
+compiz (1:0.9.13.1) UNRELEASED; urgency=medium
+
+  * New upstream release 0.9.13.1
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 11 Nov 2016 17:16:06 +0100
+
 compiz (1:0.9.13.0+17.04.20161107-0ubuntu1) zesty; urgency=medium
 
   [ Eleni Maria Stea ]
