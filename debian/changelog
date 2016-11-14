@@ -1,8 +1,16 @@
-compiz (1:0.9.13.1) UNRELEASED; urgency=medium
+compiz (1:0.9.13.1+17.04.20161114.1-0ubuntu1) zesty; urgency=medium
 
+  [ Marco Trevisan (Treviño) ]
   * New upstream release 0.9.13.1
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 11 Nov 2016 17:16:06 +0100
+  [ Alberts Muktupāvels ]
+  * Fix build with -DUSE_METACITY=OFF.
+
+  [ ksamak ]
+  * Negative: add option to ensure windows are negative by default on
+    startup
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 14 Nov 2016 18:20:26 +0000
 
 compiz (1:0.9.13.0+17.04.20161107-0ubuntu1) zesty; urgency=medium
 
