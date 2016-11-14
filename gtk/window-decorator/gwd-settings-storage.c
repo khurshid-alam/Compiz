@@ -190,6 +190,7 @@ update_blur (GWDSettingsStorage *storage)
 void
 update_metacity_theme (GWDSettingsStorage *storage)
 {
+#ifdef USE_METACITY
     gboolean use_metacity_theme;
     gint metacity_theme_type;
     gchar *metacity_theme_name;
@@ -220,6 +221,9 @@ update_metacity_theme (GWDSettingsStorage *storage)
                                          metacity_theme_type, metacity_theme_name);
 
     g_free (metacity_theme_name);
+#else
+    gwd_settings_metacity_theme_changed (storage->settings, FALSE, METACITY_THEME_TYPE_DEFAULT, NULL);
+#endif
 }
 
 void
