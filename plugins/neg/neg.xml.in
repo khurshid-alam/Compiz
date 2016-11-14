@@ -21,6 +21,11 @@
 		<_long>Toggle active window negative</_long>
 		<default>&lt;Super&gt;n</default>
 	    </option>
+	    <option name="activate_at_startup" type="bool">
+	    <_short>plugin should be active at startup</_short>
+	    <_long>if active, the plugin will start active, with windows inverted</_long>
+	    <default>false</default>
+	    </option>
 	    <option name="screen_toggle_key" type="key">
 		<_short>Toggle Screen Negative</_short>
 		<_long>Toggle screen negative</_long>

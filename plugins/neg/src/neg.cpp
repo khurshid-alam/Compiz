@@ -437,7 +437,7 @@ NegScreen::NegScreen (CompScreen *screen) :
     NegOptions (),
     negFunction (0),
     negAlphaFunction (0),
-    isNeg (false),
+    isNeg (optionGetActivateAtStartup()),
     gScreen (GLScreen::get (screen))
 {
     optionSetWindowToggleKeyInitiate (boost::bind (&NegScreen::toggle, this,
