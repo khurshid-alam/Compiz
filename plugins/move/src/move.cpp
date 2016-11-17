@@ -46,7 +46,7 @@ moveInitiate (CompAction         *action,
 
     MOVE_SCREEN (screen);
 
-    if (ms->optionGetMode () != 0)
+    if (ms->optionGetMode () != MoveOptions::ModeNormal)
     {
 	ms->gScreen->glPaintOutputSetEnabled (ms, true);
 	paint_rectangle = true;
@@ -188,7 +188,7 @@ moveTerminate (CompAction         *action,
 {
     MOVE_SCREEN (screen);
 
-    if (ms->optionGetMode () != 0)
+    if (ms->optionGetMode () != MoveOptions::ModeNormal)
     {
 	ms->gScreen->glPaintOutputSetEnabled (ms, true);
 	paint_rectangle = true;
@@ -203,7 +203,7 @@ moveTerminate (CompAction         *action,
     {
 	MOVE_WINDOW (ms->w);
 
-	if (ms->optionGetMode () != 0) {
+	if (ms->optionGetMode () != MoveOptions::ModeNormal) {
 	    ms->gScreen->glPaintOutputSetEnabled (ms, false);
 	    paint_rectangle = false;
 
@@ -558,7 +558,7 @@ moveHandleMotionEvent (CompScreen *s,
 
 	if (dx || dy)
 	{
-	    if (ms->optionGetMode () == 0)
+	    if (ms->optionGetMode () == MoveOptions::ModeNormal)
 	    {
 		w->move (wX + dx - w->geometry ().x (), wY + dy - w->geometry ().y (), false);
 	    }
@@ -784,7 +784,7 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     ScreenInterface::setHandler (screen);
     GLScreenInterface::setHandler (gScreen);
 
-    if (optionGetMode () != 0)
+    if (optionGetMode () != MoveOptions::ModeNormal)
     {
 	paint_rectangle = true;
 	gScreen->glPaintOutputSetEnabled (this, true);
@@ -805,6 +805,9 @@ MoveScreen::~MoveScreen ()
 bool
 MoveScreen::getMovingRectangle (BoxPtr pBox)
 {
+    if (optionGetMode () == MoveOptions::ModeNormal)
+	return false;
+
     MOVE_SCREEN (screen);
     if (!ms)
 	return false;
@@ -836,8 +839,12 @@ bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
     bool status = gScreen->glPaintOutput (attrib, transform, region, output, mask);
 
     if (status && paint_rectangle)
-	return glPaintMovingRectangle (transform, output, optionGetBorderColor (), (optionGetMode() == 2) ?optionGetFillColor () : NULL);
+    {
+	unsigned short *borderColor = optionGetBorderColor ();
+	unsigned short *fillColor = optionGetFillColor ();
 
+	return glPaintMovingRectangle (transform, output, borderColor, (optionGetMode() == MoveOptions::ModeRectangle) ? fillColor : NULL);
+    }
     return status;
 }
 
