@@ -578,8 +578,8 @@ void
 MoveScreen::handleEvent (XEvent *event)
 {
     Box box;
-    getMovingRectangle (&box);
-    damageMovingRectangle (&box);
+    if (getMovingRectangle (&box))
+	damageMovingRectangle (&box);
 
     switch (event->type)
     {
