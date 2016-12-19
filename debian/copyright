@@ -20,6 +20,19 @@ Copyright: 2010-2014 Canonical Ltd
            1999-2000, Daniel M. Duley <mosfet@kde.org> 
 License: GPL-2+
 
+Files: po/*
+Copyright: 1999-2001 SuSE GmbH
+           2002-2004 SuSE Linux AG
+           2005-2008 SUSE Linux Products GmbH
+           2007-2009 The Free Software Foundation, Inc.
+License: GPL-2+
+
+Files: cmake/EnableCoverageReport.cmake
+       cmake/FindLcov.cmake
+       cmake/Findgcovr.cmake
+Copyright: 2010-2011, Johannes Wienke
+License: GPL-2+
+
 Files: compizconfig/libcompizconfig/* compizconfig/compizconfig-python/*
 Copyright: 2010, Sam Spilsbury
            2007, Dennis Kasprzyk <onestone@opencompositing.org>
@@ -40,6 +53,15 @@ Copyright: 2010-2011, Canonical Ltd.
            2005-2007, Novell, Inc.
 License: LGPL-2+
 
+Files: gtk/window-decorator/gwd-theme-cairo.*
+       gtk/window-decorator/gwd-theme-metacity.*
+       gtk/window-decorator/gwd-theme.*
+Copyright: 2006, Novell, Inc.
+           2010, Sam Spilsbury
+           2011, Canonical Ltd.
+           2016, Alberts Muktupāvels
+License: GPL-2+
+
 Files: include/*
        kde/window-decorator-kde4/kdecorationbridge.h
        kde/window-decorator-kde4/kdecoration_plugins.*
@@ -51,6 +73,11 @@ Copyright: 2010-2012, Canonical Ltd
            2003-2009, Lubos Lunak <l.lunak@kde.org>
            1999-2000, Daniel M. Duley <mosfet@kde.org> 
 License: MIT/X11
+
+Files: libdecoration/decoration.c
+Copyright: 1999, Matthias Clasen
+           1999-2007, Dominik Vogt
+License: GPL-2+
 
 Files: plugins/* plugins/decor/src/clip-groups/include/clip-groups.*
 Copyright: 2011, Daniel van Vugt <vanvugt@gmail.com>
@@ -86,6 +113,12 @@ Copyright: 2011, Daniel van Vugt <vanvugt@gmail.com>
            2003, Rob Adams
            2002-2003 Red Hat, Inc
            2001, Havoc Pennington
+           2011-2012, Linaro Limited
+           2007, CyberOrg
+           2007, Rodolfo Granata
+           2006, Rivo Laks
+           2008, Lucas Murray
+           2016, Hypra
 License: GPL-2+
 
 Files: plugins/annotate/*
@@ -114,6 +147,7 @@ Files: plugins/annotate/*
        plugins/screenshot/*
        plugins/switcher/*
        plugins/water/*
+       plugins/window/*
        plugins/wobbly/*
        plugins/place/src/*/tests/*
        plugins/wall/src/*/tests/*
@@ -126,11 +160,47 @@ Copyright: 2011-2015 Canonical Ltd
            2007 Diogo "playerX" Ferreira
            2005-2007, Novell, Inc
            1999-2005, Brian Paul
+           2013, Sami Jaktholm
+           2011, Collabora, Ltd.
+           1993, Robert Nation
+           2011, NVIDIA Corporation
 License: MIT/X11
 
 Files: plugins/ccp/*
 Copyright: 2007, Dennis Kasprzyk <onestone@opencompositing.org>
 License: LGPL-2.1+
+
+Files: plugins/animationplus/src/blinds.cpp
+       plugins/animationplus/src/bonanza.cpp
+       plugins/animationplus/src/helix.cpp
+       plugins/animationplus/src/shatter.cpp
+Copyright: 2008, Kevin DuBois
+License: GPL-2+
+
+Files: compizconfig/libcompizconfig/src/iniparser.h
+Copyright: 2000 Nicolas Devillard <ndevilla@free.fr>
+License: custom-license
+ Written by Nicolas Devillard. Not derived from licensed software.
+ .
+ Permission is granted to anyone to use this software for any
+ purpose on any computer system, and to redistribute it freely,
+ subject to the following restrictions:
+ .
+ 1. The author is not responsible for the consequences of use of
+ this software, no matter how awful, even if they arise
+ from defects in it.
+ .
+ 2. The origin of this software must not be misrepresented, either
+ by explicit claim or by omission.
+ .
+ 3. Altered versions must be plainly marked as such, and must not
+ be misrepresented as being the original software.
+ .
+ 4. This notice may not be removed or altered.
+
+Files: debian/00_remove_obsolete_plugins_in_unity_session_v3.py
+Copyright: 2016 Canonical
+License: GPL-3
 
 License: GPL-2+
  This program is free software; you can redistribute it
@@ -213,3 +283,19 @@ License: MIT/X11
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  DEALINGS IN THE SOFTWARE.
 
+License: GPL-3
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation; version 3.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ details.
+ .
+ You should have received a copy of the GNU General Public License along with
+ this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ .
+ On Debian systems, the full text of the GNU General Public License
+ version 3 can be found in the file `/usr/share/common-licenses/GPL-3'.
