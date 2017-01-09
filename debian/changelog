@@ -1,3 +1,10 @@
+compiz (1:0.9.13.1+17.04.20170109-0ubuntu1) zesty; urgency=medium
+
+  [ Eleni Maria Stea ]
+  * Move: add options for showing only the window shape (filled or not)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 09 Jan 2017 15:09:13 +0000
+
 compiz (1:0.9.13.1+17.04.20161114.1-0ubuntu1) zesty; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
