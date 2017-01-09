@@ -34,6 +34,9 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
+static float pos_x, pos_y;
+static bool paint_rectangle;
+
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -42,6 +45,18 @@ moveInitiate (CompAction         *action,
     CompWindow *w;
 
     MOVE_SCREEN (screen);
+
+    if (ms->optionGetMode () != MoveOptions::ModeNormal)
+    {
+	ms->gScreen->glPaintOutputSetEnabled (ms, true);
+	paint_rectangle = true;
+	pos_x = pos_y = 0;
+    }
+    else
+    {
+	ms->gScreen->glPaintOutputSetEnabled (ms, false);
+	paint_rectangle = false;
+    }
 
     Window xid = CompOption::getIntOptionNamed (options, "window");
 
@@ -173,13 +188,33 @@ moveTerminate (CompAction         *action,
 {
     MOVE_SCREEN (screen);
 
+    if (ms->optionGetMode () != MoveOptions::ModeNormal)
+    {
+	ms->gScreen->glPaintOutputSetEnabled (ms, true);
+	paint_rectangle = true;
+    }
+    else
+    {
+	ms->gScreen->glPaintOutputSetEnabled (ms, false);
+	paint_rectangle = false;
+    }
+
     if (ms->w)
     {
 	MOVE_WINDOW (ms->w);
 
+	if (ms->optionGetMode () != MoveOptions::ModeNormal) {
+	    ms->gScreen->glPaintOutputSetEnabled (ms, false);
+	    paint_rectangle = false;
+
+	    mw->window->move (pos_x, pos_y, true);
+	}
+
 	if (state & CompAction::StateCancel)
+	{
 	    ms->w->move (ms->savedX - ms->w->geometry ().x (),
 			 ms->savedY - ms->w->geometry ().y (), false);
+	}
 
 	/* update window attributes as window constraints may have
 	   changed - needed e.g. if a maximized window was moved
@@ -318,6 +353,7 @@ moveHandleMotionEvent (CompScreen *s,
 
 	int wX      = w->geometry ().x ();
 	int wY      = w->geometry ().y ();
+
 	int wWidth  = w->geometry ().widthIncBorders ();
 	int wHeight = w->geometry ().heightIncBorders ();
 
@@ -522,8 +558,15 @@ moveHandleMotionEvent (CompScreen *s,
 
 	if (dx || dy)
 	{
-	    w->move (wX + dx - w->geometry ().x (),
-		     wY + dy - w->geometry ().y (), false);
+	    if (ms->optionGetMode () == MoveOptions::ModeNormal)
+	    {
+		w->move (wX + dx - w->geometry ().x (), wY + dy - w->geometry ().y (), false);
+	    }
+	    else
+	    {
+		pos_x += wX + dx - w->geometry ().x ();
+		pos_y += wY + dy - w->geometry ().y ();
+	    }
 
 	    ms->x -= dx;
 	    ms->y -= dy;
@@ -534,6 +577,10 @@ moveHandleMotionEvent (CompScreen *s,
 void
 MoveScreen::handleEvent (XEvent *event)
 {
+    Box box;
+    if (getMovingRectangle (&box))
+	damageMovingRectangle (&box);
+
     switch (event->type)
     {
 	case ButtonPress:
@@ -704,6 +751,7 @@ MoveScreen::unregisterPaintHandler()
 MoveScreen::MoveScreen (CompScreen *screen) :
     PluginClassHandler<MoveScreen,CompScreen> (screen),
     cScreen (CompositeScreen::get (screen)),
+    gScreen (GLScreen::get (screen)),
     w (0),
     region (NULL),
     status (RectangleOut),
@@ -734,12 +782,216 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     optionSetInitiateKeyTerminate (moveTerminate);
 
     ScreenInterface::setHandler (screen);
+    GLScreenInterface::setHandler (gScreen);
+
+    if (optionGetMode () != MoveOptions::ModeNormal)
+    {
+	paint_rectangle = true;
+	gScreen->glPaintOutputSetEnabled (this, true);
+    }
+    else
+    {
+	paint_rectangle = false;
+	gScreen->glPaintOutputSetEnabled (this, false);
+    }
 }
 
 MoveScreen::~MoveScreen ()
 {
     if (region)
 	XDestroyRegion (region);
+}
+
+bool
+MoveScreen::getMovingRectangle (BoxPtr pBox)
+{
+    if (optionGetMode () == MoveOptions::ModeNormal)
+	return false;
+
+    MOVE_SCREEN (screen);
+    if (!ms)
+	return false;
+
+    CompWindow *w = ms->w;
+    if (!w)
+	return false;
+
+    int wX      = w->geometry ().x () - w->border ().left;
+    int wY      = w->geometry ().y () - w->border ().top;
+    int wWidth  = w->geometry ().widthIncBorders ();
+    int wHeight = w->geometry ().heightIncBorders ();
+
+    pBox->x1 = wX + pos_x;
+    pBox->y1 = wY + pos_y;
+
+    pBox->x2 = pBox->x1 + wWidth;
+    pBox->y2 = pBox->y1 + wHeight;
+
+    return true;
+}
+
+bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
+				const GLMatrix &transform,
+				const CompRegion &region,
+				CompOutput *output,
+				unsigned int mask)
+{
+    bool status = gScreen->glPaintOutput (attrib, transform, region, output, mask);
+
+    if (status && paint_rectangle)
+    {
+	unsigned short *borderColor = optionGetBorderColor ();
+	unsigned short *fillColor = optionGetFillColor ();
+
+	return glPaintMovingRectangle (transform, output, borderColor, (optionGetMode() == MoveOptions::ModeRectangle) ? fillColor : NULL);
+    }
+    return status;
+}
+
+void
+MoveScreen::damageMovingRectangle (BoxPtr pBox)
+{
+    int x1, x2, y1, y2;
+
+    x1 = pBox->x1 - 1;
+    y1 = pBox->y1 - 1;
+    x2 = pBox->x2 + 1;
+    y2 = pBox->y2 + 1;
+
+    if (cScreen)
+	cScreen->damageRegion (CompRect (x1, y1, x2 - x1, y2 - y1));
+}
+
+bool
+MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
+				    CompOutput *output,
+				    unsigned short *borderColor,
+				    unsigned short *fillColor)
+{
+    BoxRec box;
+    if (!getMovingRectangle(&box))
+	return false;
+
+    GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
+    GLMatrix sTransform (transform);
+
+    GLfloat vertexData[12];
+    GLfloat vertexData2[24];
+    GLushort fc[4], bc[4];
+    GLint origSrc, origDst;
+
+    bool blend = optionGetBlend ();
+    if (blend)
+    {
+#ifdef USE_GLES
+	GLint origSrcAlpha, origDstAlpha;
+	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
+	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
+	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);
+	glGetIntegerv (GL_BLEND_DST_ALPHA, &origDstAlpha);
+#else
+	glGetIntegerv (GL_BLEND_SRC, &origSrc);
+	glGetIntegerv (GL_BLEND_DST, &origDst);
+#endif
+    }
+
+    bc[3] = (float) borderColor[3] / (float) 65535.0f;
+    bc[0] = ((float) borderColor[0] / 65535.0f) * bc[3];
+    bc[1] = ((float) borderColor[1] / 65535.0f) * bc[3];
+    bc[2] = ((float) borderColor[2] / 65535.0f) * bc[3];
+    if (!blend)
+	bc[3] = 1;
+
+    vertexData[0] = box.x1;
+    vertexData[1] = box.y1;
+    vertexData[2] = 0.0f;
+    vertexData[3] = box.x1;
+    vertexData[4] = box.y2;
+    vertexData[5] = 0.0f;
+    vertexData[6] = box.x2;
+    vertexData[7] = box.y1;
+    vertexData[8] = 0.0f;
+    vertexData[9] = box.x2;
+    vertexData[10] = box.y2;
+    vertexData[11] = 0.0f;
+
+    vertexData2[0] = box.x1;
+    vertexData2[1] = box.y1;
+    vertexData2[2] = 0.0f;
+    vertexData2[3] = box.x1;
+    vertexData2[4] = box.y2;
+    vertexData2[5] = 0.0f;
+    vertexData2[6] = box.x1;
+    vertexData2[7] = box.y2;
+    vertexData2[8] = 0.0f;
+    vertexData2[9] = box.x2;
+    vertexData2[10] = box.y2;
+    vertexData2[11] = 0.0f;
+    vertexData2[12] = box.x2;
+    vertexData2[13] = box.y2;
+    vertexData2[14] = 0.0f;
+    vertexData2[15] = box.x2;
+    vertexData2[16] = box.y1;
+    vertexData2[17] = 0.0f;
+    vertexData2[18] = box.x2;
+    vertexData2[19] = box.y1;
+    vertexData2[20] = 0.0f;
+    vertexData2[21] = box.x1;
+    vertexData2[22] = box.y1;
+    vertexData2[23] = 0.0f;
+
+    sTransform.toScreenSpace (output, -DEFAULT_Z_CAMERA);
+
+    if (blend)
+    {
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    /* fill rectangle */
+    if (fillColor)
+    {
+	fc[3] = fillColor[3];
+	fc[0] = fillColor[0] * (unsigned long) fc[3] / 65535;
+	fc[1] = fillColor[1] * (unsigned long) fc[3] / 65535;
+	fc[2] = fillColor[2] * (unsigned long) fc[3] / 65535;
+	if (!blend)
+	    fc[3] = 1;
+
+	streamingBuffer->begin (GL_TRIANGLE_STRIP);
+	streamingBuffer->addColors (1, fc);
+	streamingBuffer->addVertices (4, &vertexData[0]);
+	streamingBuffer->end ();
+	streamingBuffer->render (sTransform);
+    }
+
+    /* draw outline */
+    static const int borderWidth = 2;
+
+    glLineWidth (borderWidth);
+    streamingBuffer->begin (GL_LINES);
+    streamingBuffer->addColors (1, borderColor);
+    streamingBuffer->addVertices (8, &vertexData2[0]);
+    streamingBuffer->end ();
+    streamingBuffer->render (sTransform);
+
+    if (blend)
+    {
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    CompositeScreen *cScreen = CompositeScreen::get (screen);
+    if (cScreen)
+    {
+	CompRect damage (box.x1 - borderWidth,
+			 box.y1 - borderWidth,
+			 box.x2 - box.x1 + 2,
+			 box.y2 - box.y1 + 2);
+	cScreen->damageRegion (damage);
+    }
+
+    return true;
 }
 
 bool
