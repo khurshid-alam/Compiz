@@ -428,13 +428,13 @@ NegScreen::optionChanged (CompOption          *opt,
 				NegWindow::get (w)->cWindow->addDamage ();
 	}
 	break;
-    case NegOptions::ActivateAtStartup:
+	case NegOptions::ActivateAtStartup:
 	{
 	    isNeg = optionGetActivateAtStartup();
 	    foreach (CompWindow *w, screen->windows ())
 	    {
 		NEG_WINDOW (w);
-        nw->toggle ();
+		nw->toggle ();
         }
 	}
     default:
