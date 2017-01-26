@@ -19,10 +19,10 @@
 		<options>
 			<group>
 				<_short>General</_short>
-                <option name="activate_at_startup" type="bool">
-                    <_short>plugin should be active at startup</_short>
-                    <_long>if active, the plugin will start active, with the mouse enhanced</_long>
-                    <default>false</default>
+				<option name="activate_at_startup" type="bool">
+					<_short>plugin should be active at startup</_short>
+					<_long>If active, the plugin will start active, with the mouse enhanced</_long>
+					<default>false</default>
                 </option>
 				<option name="initiate" type="key">
 					<_short>Initiate</_short>
