@@ -23,7 +23,7 @@
 					<_short>plugin should be active at startup</_short>
 					<_long>If active, the plugin will start active, with the mouse enhanced</_long>
 					<default>false</default>
-                </option>
+				</option>
 				<option name="initiate" type="key">
 					<_short>Initiate</_short>
 					<_long>Toggle the mouse pointer trail.</_long>
