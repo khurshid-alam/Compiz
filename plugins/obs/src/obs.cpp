@@ -281,9 +281,9 @@ ObsWindow::ObsWindow (CompWindow *w) :
 {
     GLWindowInterface::setHandler (gWindow, false);
     OBS_SCREEN(screen);
-    startFactor[MODIFIER_OPACITY] = os->optionGetDefaultOpacitySpawnValue();
-    startFactor[MODIFIER_BRIGHTNESS] = os->optionGetDefaultBrightnessSpawnValue();
-    startFactor[MODIFIER_SATURATION] = os->optionGetDefaultSaturationSpawnValue();
+    startFactor[MODIFIER_OPACITY] = os->optionGetDefaultOpacitySpawnValue ();
+    startFactor[MODIFIER_BRIGHTNESS] = os->optionGetDefaultBrightnessSpawnValue ();
+    startFactor[MODIFIER_SATURATION] = os->optionGetDefaultSaturationSpawnValue ();
 
     for (unsigned int i = 0; i < MODIFIER_COUNT; ++i)
     {
