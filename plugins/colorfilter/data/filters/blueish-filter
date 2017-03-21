@@ -1,10 +1,5 @@
-!!ARBfp1.0
-TEMP temp, neg;
-TEX temp, fragment.texcoord[0], texture[0], RECT;
-RCP neg.a, temp.a;
-MAD temp.rgb, -neg.a, temp, 1.0;
-MUL temp.rgb, temp.a, temp;
-MUL temp, fragment.color, temp;
-SUB_SAT temp.b, 0.8, -temp.b;
-MOV result.color, temp;
-END
+void blueish_filter_fragment () {
+    vec3 color = vec3(1.0, 1.0, 1.0) - gl_FragColor.rgb;
+    color.b = clamp(0.8 + color.b, 0.0, 1.0);
+    gl_FragColor.rgb = color;
+}

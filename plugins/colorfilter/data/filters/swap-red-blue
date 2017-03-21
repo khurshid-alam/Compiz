@@ -1,5 +1,3 @@
-!!ARBfp1.0
-TEMP tex;
-TEX tex, fragment.texcoord[0], texture[0], RECT;
-MOV result.color, tex.bgra;
-END
+void swap_red_blue_fragment () {
+    gl_FragColor.rb = gl_FragColor.br;
+}
