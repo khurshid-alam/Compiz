@@ -22,6 +22,7 @@
  */
 #include "colorfilter.h"
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 COMPIZ_PLUGIN_20090315 (colorfilter, ColorfilterPluginVTable);
 
@@ -204,12 +205,15 @@ ColorfilterFunction::programCleanName (CompString &name)
  * File reader function
  */
 bool
-ColorfilterFunction::load (const CompString &fname)
+ColorfilterFunction::load (CompString fname)
 {
     std::ifstream fp;
     int length;
     char *buffer;
     CompString path, home = CompString (getenv ("HOME"));
+
+    if (!boost::algorithm::ends_with (fname, ".frag"))
+	fname += ".frag";
 
     /* Try to open file fname as is */
     fp.open (fname.c_str ());
@@ -279,6 +283,8 @@ ColorfilterScreen::loadFilters ()
     for (int i = 0; i < count; i++)
     {
 	name = CompString (basename (filters.at (i).s ().c_str ()));
+	if (boost::algorithm::ends_with (name, ".frag"))
+	    name.erase (name.end () - 5, name.end ());
 	file = filters.at (i).s ();
 	if (name.empty ())
 	{

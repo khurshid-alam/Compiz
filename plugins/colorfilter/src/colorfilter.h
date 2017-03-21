@@ -42,7 +42,7 @@ class ColorfilterFunction
 
 	ColorfilterFunction (const CompString &name);
 
-	bool load (const CompString &fname);
+	bool load (CompString fname);
 	bool loaded () const { return !shader.empty (); }
 
     private:
