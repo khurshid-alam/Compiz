@@ -37,6 +37,7 @@
         <type>string</type>
         <default>
 	    <value>negative</value>
+	    <value>negative-lightness</value>
 	    <value>negative-green</value>
 	    <value>blueish-filter</value>
 	    <value>sepia</value>
