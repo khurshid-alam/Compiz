@@ -240,6 +240,8 @@ ColorfilterFunction::load (CompString fname)
 
     shader = buffer;
 
+    delete[] buffer;
+
     return true;
 }
 
