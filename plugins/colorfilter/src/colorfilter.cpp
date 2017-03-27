@@ -371,20 +371,6 @@ ColorfilterWindow::glDrawTexture (GLTexture                 *texture,
     gWindow->glDrawTexture (texture, transform, attrib, mask);
 }
 
-/*
- * Filter windows when they are open if they match the filtering rules
- */
-void
-ColorfilterScreen::windowAdd (CompWindow *w)
-{
-    FILTER_WINDOW (w);
-
-    /* cfw->isFiltered is initialized to false in InitWindow, so we only
-       have to toggle it to true if necessary */
-    if (cfw->isFiltered && optionGetFilterMatch ().evaluate (w))
-	cfw->toggle ();
-}
-
 /* Internal stuff ----------------------------------------------------------- */
 
 /*
@@ -495,6 +481,13 @@ ColorfilterWindow::ColorfilterWindow (CompWindow *window) :
     isFiltered (false)
 {
     GLWindowInterface::setHandler (gWindow, false);
+
+    FILTER_SCREEN (screen);
+
+    /* Filter windows when they are open if the screen is filtered and they
+     * match the filtering rules */
+    if (cfs->isFiltered && cfs->optionGetFilterMatch ().evaluate (window))
+	toggle ();
 }
 
 bool

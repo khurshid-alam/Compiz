@@ -96,9 +96,6 @@ class ColorfilterScreen :
 	loadFilters ();
 
 	void
-	windowAdd (CompWindow *w);
-
-	void
 	matchsChanged (CompOption		      *opt,
 		       ColorfilterOptions::Options num);
 
