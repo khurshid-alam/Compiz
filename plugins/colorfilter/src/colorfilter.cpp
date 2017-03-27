@@ -327,27 +327,26 @@ ColorfilterWindow::glDrawTexture (GLTexture                 *texture,
 {
     FILTER_SCREEN (screen);
 
-    bool shouldFilter = isFiltered;
+    bool shouldFilter = false;
 
-    foreach (GLTexture *tex, gWindow->textures ())
+    if (isFiltered && !cfs->filtersFunctions.empty ())
     {
-	if (tex->name () != texture->name ())
-	    shouldFilter = false;
+	if (cfs->optionGetFilterDecorations ())
+	    shouldFilter = true;
+	else
+	{
+	    foreach (GLTexture *tex, gWindow->textures ())
+	    {
+		if (tex->name () == texture->name ())
+		{
+		    shouldFilter = true;
+		    break;
+		}
+	    }
+	}
     }
 
-    /* We are filtering a decoration */
-    if ((cfs->optionGetFilterDecorations () &&
-	isFiltered &&
-	!cfs->filtersFunctions.empty ()))
-	shouldFilter = true;
-
-    /* Filter texture if :
-     *   o GL_ARB_fragment_program available
-     *   o Filters are loaded
-     *   o Texture's window is filtered */
-    /* Note : if required, filter window contents only and not decorations
-     * (use that w->texture->name != texture->name for decorations) */
-    if (shouldFilter) // ???
+    if (shouldFilter)
     {
 	if (cfs->currentFilter == 0) /* Cumulative filters mode */
 	{
