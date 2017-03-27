@@ -28,12 +28,6 @@ COMPIZ_PLUGIN_20090315 (colorfilter, ColorfilterPluginVTable);
 
 /* Actions handling functions ----------------------------------------------- */
 
-void
-toggleWindowFunctions (ColorfilterWindow *cfw, bool enabled)
-{
-    cfw->gWindow->glDrawTextureSetEnabled (cfw, enabled);
-}
-
 /*
  * Toggle filtering for a specific window
  */
@@ -51,7 +45,7 @@ ColorfilterWindow::toggle ()
 
     /* Ensure window is going to be repainted */
     cWindow->addDamage ();
-    toggleWindowFunctions (this, isFiltered);
+    gWindow->glDrawTextureSetEnabled (this, isFiltered);
 }
 
 /*
