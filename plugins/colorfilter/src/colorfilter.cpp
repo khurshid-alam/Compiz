@@ -125,8 +125,6 @@ ColorfilterScreen::toggleScreen (CompAction         *action,
 				 CompAction::State  state,
 				 CompOption::Vector options)
 {
-    screen->findWindow (CompOption::getIntOptionNamed (options, "root", 0));
-
     if (GL::shaders)
 	toggle ();
 
