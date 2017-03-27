@@ -22,6 +22,7 @@
  */
 #include "colorfilter.h"
 #include <fstream>
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 
 COMPIZ_PLUGIN_20090315 (colorfilter, ColorfilterPluginVTable);
@@ -181,16 +182,8 @@ ColorfilterFunction::ColorfilterFunction (const CompString &name_) :
 void
 ColorfilterFunction::programCleanName (CompString &name)
 {
-    unsigned int pos = 0;
-
-    /* Replace every non alphanumeric char by '_' */
-    while (!(pos >= name.size ()))
-    {
-	if (!isalnum (name.at (pos)))
-	    name[pos] = '_';
-
-	pos++;
-    }
+    std::replace_if (name.begin (), name.end (),
+		     [] (char c) { return !isalnum (c); }, '_');
 }
 
 /*
