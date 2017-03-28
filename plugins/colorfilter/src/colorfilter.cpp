@@ -77,7 +77,7 @@ ColorfilterScreen::switchFilter ()
 			"Cumulative filters mode");
     else
     {
-	ColorfilterFunction *func = filtersFunctions.at (currentFilter - 1);
+	std::shared_ptr <ColorfilterFunction> func = filtersFunctions.at (currentFilter - 1);
 	if (func && func->loaded ())
 	{
 	    compLogMessage ("colorfilter", CompLogLevelInfo,
@@ -154,20 +154,9 @@ ColorfilterScreen::filterSwitch (CompAction         *action,
 void
 ColorfilterScreen::unloadFilters ()
 {
-    if (!filtersFunctions.empty ())
-    {
-	/* Destroy loaded filters one by one */
-	while (!filtersFunctions.empty ())
-	{
-	    ColorfilterFunction *function = filtersFunctions.back ();
-
-	    delete function;
-
-	    filtersFunctions.pop_back ();
-	}
-	/* Reset current filter */
-	currentFilter = 0;
-    }
+    filtersFunctions.clear ();
+    /* Reset current filter */
+    currentFilter = 0;
 }
 
 ColorfilterFunction::ColorfilterFunction (const CompString &name_) :
@@ -255,7 +244,7 @@ ColorfilterScreen::loadFilters ()
     int loaded, count;
     CompString name, file;
     CompOption::Value::Vector filters;
-    ColorfilterFunction *func;
+    std::shared_ptr <ColorfilterFunction> func;
 
     /* Free previously loaded filters and malloc */
     unloadFilters ();
@@ -284,7 +273,7 @@ ColorfilterScreen::loadFilters ()
 			"Loading filter %s (item %s).", name.c_str (),
 			file.c_str ());
 
-	func = new ColorfilterFunction (name);
+	func = std::shared_ptr <ColorfilterFunction> (new ColorfilterFunction (name));
 	if (!func)
 	    continue;
 
@@ -347,7 +336,7 @@ ColorfilterWindow::glDrawTexture (GLTexture                 *texture,
 	if (cfs->currentFilter == 0) /* Cumulative filters mode */
 	{
 	    /* Enable each filter one by one */
-	    foreach (ColorfilterFunction *func, cfs->filtersFunctions)
+	    foreach (std::shared_ptr <ColorfilterFunction> func, cfs->filtersFunctions)
 	    {
 		if (func->loaded ())
 		    gWindow->addShaders (func->name, "", func->shader);
@@ -358,7 +347,7 @@ ColorfilterWindow::glDrawTexture (GLTexture                 *texture,
 	{
 	    /* Enable the currently selected filter if possible (i.e. if it
 	     * was successfully loaded) */
-	    ColorfilterFunction *func = cfs->filtersFunctions.at (cfs->currentFilter - 1);
+	    std::shared_ptr <ColorfilterFunction> func = cfs->filtersFunctions.at (cfs->currentFilter - 1);
 	    if (func && func->loaded ())
 		gWindow->addShaders (func->name, "", func->shader);
 	}

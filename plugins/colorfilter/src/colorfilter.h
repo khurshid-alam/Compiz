@@ -66,7 +66,7 @@ class ColorfilterScreen :
 	int  currentFilter; /* 0 : cumulative mode
 			       0 < c <= count : single mode */
 
-	std::vector <ColorfilterFunction *> filtersFunctions;
+	std::vector <std::shared_ptr <ColorfilterFunction> > filtersFunctions;
 
 	void
 	toggle ();
