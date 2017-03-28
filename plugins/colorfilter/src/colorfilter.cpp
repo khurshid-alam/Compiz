@@ -195,7 +195,8 @@ ColorfilterFunction::load (CompString fname)
     std::ifstream fp;
     int length;
     char *buffer;
-    CompString path, home = CompString (getenv ("HOME"));
+    const char *home = getenv ("HOME");
+    CompString path;
 
     if (!boost::algorithm::ends_with (fname, ".frag"))
 	fname += ".frag";
@@ -204,9 +205,9 @@ ColorfilterFunction::load (CompString fname)
     fp.open (fname.c_str ());
 
     /* If failed, try as user filter file (in ~/.compiz/data/filters) */
-    if (!fp.is_open () && !home.empty ())
+    if (!fp.is_open () && home && home[0] != '\0')
     {
-	path = home + "/.compiz/data/filters/" + fname;
+	path = CompString (home) + "/.compiz/data/filters/" + fname;
 	fp.open (path.c_str ());
     }
 
