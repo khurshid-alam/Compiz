@@ -879,6 +879,7 @@ gwd_theme_metacity_draw_window_decoration (GWDTheme *theme,
     cairo_destroy (cr);
 
     surface = create_surface (fgeom.width, fgeom.height, style_window);
+    cairo_surface_set_device_scale (surface, 1, 1);
     cr = cairo_create (surface);
 
     src = XRenderCreatePicture (xdisplay, cairo_xlib_surface_get_drawable (surface),
