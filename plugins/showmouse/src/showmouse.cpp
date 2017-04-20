@@ -660,14 +660,12 @@ ShowmouseScreen::initiate (CompAction         *action,
     return true;
 }
 
-bool ShowmouseScreen::checkStartup () {
+void ShowmouseScreen::startupToggle () {
     if (optionGetActivateAtStartup()) {
         active = true;
         toggleFunctions (true);
         gScreen->glPaintOutputSetEnabled (gScreen, true);
     }
-    timeoutHandle.stop();
-    return false;
 }
 
 
@@ -699,10 +697,8 @@ ShowmouseScreen::ShowmouseScreen (CompScreen *screen) :
     optionSetInitiateEdgeTerminate (boost::bind (&ShowmouseScreen::terminate,
 						 this,  _1, _2, _3));
 
-
-    timeoutHandle.setTimes (1, 2);
-    timeoutHandle.setCallback (boost::bind (&ShowmouseScreen::checkStartup, this));
-    timeoutHandle.start ();
+    optionSetActivateAtStartupNotify (boost::bind (&ShowmouseScreen::startupToggle, this));
+				      //_1, _2);
 }
 
 ShowmouseScreen::~ShowmouseScreen ()

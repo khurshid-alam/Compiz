@@ -138,9 +138,8 @@ class ShowmouseScreen :
 	float	       rot;
 
 	MousePoller    pollHandle;
-	CompTimer      timeoutHandle;
 
-	bool checkStartup ();
+	void startupToggle();
 
 	void
 	preparePaint (int);
