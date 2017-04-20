@@ -6921,8 +6921,8 @@ PrivateWindow::reparent ()
     /* Gravity here is assumed to be SouthEast, clients can update
      * that if need be */
 
-    serverFrameGeometry.set (serverInput.left - border.left,
-			     serverInput.top - border.top,
+    serverFrameGeometry.set (wa.x + (serverInput.left - border.left),
+			     wa.y + (serverInput.top - border.top),
 			     wa.width + (serverInput.left +
 					 serverInput.right),
 			     wa.height + (serverInput.top +
