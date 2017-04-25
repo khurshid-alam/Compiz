@@ -34,6 +34,9 @@ typedef struct
     PangoFontDescription *titlebar_font;
 
     GtkWidget            *style_window;
+
+    gulong                monitors_changed_id;
+    gint                  scale;
 } GWDThemePrivate;
 
 enum
@@ -103,6 +106,36 @@ create_style_window (GWDTheme *theme)
 }
 
 static void
+monitors_changed_cb (GdkScreen *screen,
+                     GWDTheme  *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    gint scale = gtk_widget_get_scale_factor (priv->style_window);
+
+    if (priv->scale == scale)
+        return;
+
+    priv->scale = scale;
+
+    GWD_THEME_GET_CLASS (theme)->scale_changed (theme);
+
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+track_window_scale (GWDTheme *theme)
+{
+    GdkScreen *screen = gdk_screen_get_default ();
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+ 
+    priv->monitors_changed_id = g_signal_connect (screen, "monitors-changed",
+                                                  G_CALLBACK (monitors_changed_cb),
+                                                  theme);
+
+    priv->scale = gtk_widget_get_scale_factor (priv->style_window);
+}
+
+static void
 gwd_theme_constructed (GObject *object)
 {
     GWDTheme *theme = GWD_THEME (object);
@@ -110,6 +143,7 @@ gwd_theme_constructed (GObject *object)
     G_OBJECT_CLASS (gwd_theme_parent_class)->constructed (object);
 
     create_style_window (theme);
+    track_window_scale (theme);
 }
 
 static void
@@ -124,6 +158,13 @@ gwd_theme_dispose (GObject *object)
     priv->titlebar_font = NULL;
 
     g_clear_pointer (&priv->style_window, gtk_widget_destroy);
+
+    if (priv->monitors_changed_id != 0) {
+        GdkScreen *screen = gdk_screen_get_default ();
+
+        g_signal_handler_disconnect (screen, priv->monitors_changed_id);
+        priv->monitors_changed_id = 0;
+    }
 
     G_OBJECT_CLASS (gwd_theme_parent_class)->dispose (object);
 }
@@ -166,6 +207,11 @@ gwd_theme_set_property (GObject      *object,
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
     }
+}
+
+static void
+gwd_theme_real_scale_changed (GWDTheme *theme)
+{
 }
 
 static void
@@ -260,6 +306,7 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     object_class->get_property = gwd_theme_get_property;
     object_class->set_property = gwd_theme_set_property;
 
+    theme_class->scale_changed = gwd_theme_real_scale_changed;
     theme_class->style_updated = gwd_theme_real_style_updated;
     theme_class->get_shadow = gwd_theme_real_get_shadow;
     theme_class->draw_window_decoration = gwd_theme_real_draw_window_decoration;
@@ -322,6 +369,14 @@ gwd_theme_get_settings (GWDTheme *theme)
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     return priv->settings;
+}
+
+gint
+gwd_theme_get_scale (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+
+    return priv->scale;
 }
 
 GtkWidget *

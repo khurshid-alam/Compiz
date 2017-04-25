@@ -37,6 +37,8 @@ struct _GWDThemeClass
 {
     GObjectClass parent_class;
 
+    void     (* scale_changed)             (GWDTheme                   *theme);
+
     void     (* style_updated)             (GWDTheme                   *theme);
 
     void     (* get_shadow)                (GWDTheme                   *theme,
@@ -95,6 +97,9 @@ gwd_theme_new                       (GWDThemeType            type,
 
 GWDSettings *
 gwd_theme_get_settings              (GWDTheme               *theme);
+
+gint
+gwd_theme_get_scale                 (GWDTheme               *theme);
 
 GtkWidget *
 gwd_theme_get_style_window          (GWDTheme               *theme);
