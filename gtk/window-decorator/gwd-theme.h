@@ -37,6 +37,8 @@ struct _GWDThemeClass
 {
     GObjectClass parent_class;
 
+    void     (* dpi_changed)               (GWDTheme                   *theme);
+
     void     (* scale_changed)             (GWDTheme                   *theme);
 
     void     (* style_updated)             (GWDTheme                   *theme);
@@ -97,6 +99,9 @@ gwd_theme_new                       (GWDThemeType            type,
 
 GWDSettings *
 gwd_theme_get_settings              (GWDTheme               *theme);
+
+gdouble
+gwd_theme_get_dpi                   (GWDTheme               *theme);
 
 gint
 gwd_theme_get_scale                 (GWDTheme               *theme);
