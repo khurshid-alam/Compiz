@@ -178,6 +178,8 @@ get_unscaled_dpi (GWDTheme *theme)
             if (scale != 0)
                 dpi *= scale;
         }
+    } else {
+        dpi = 96.0;
     }
 
     return dpi;
