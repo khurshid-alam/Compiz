@@ -628,6 +628,10 @@ gwd_theme_metacity_constructed (GObject *object)
         return;
 
     setup_button_layout (metacity);
+
+#ifdef HAVE_METACITY_3_26_0
+    meta_theme_set_scale (metacity->theme, gwd_theme_get_scale (GWD_THEME (object)));
+#endif
 }
 
 static void
@@ -645,6 +649,16 @@ gwd_theme_metacity_dispose (GObject *object)
     }
 
     G_OBJECT_CLASS (gwd_theme_metacity_parent_class)->dispose (object);
+}
+
+static void
+gwd_theme_metacity_scale_changed (GWDTheme *theme)
+{
+#ifdef HAVE_METACITY_3_26_0
+    GWDThemeMetacity *metacity = GWD_THEME_METACITY (theme);
+
+    meta_theme_set_scale (metacity->theme, gwd_theme_get_scale (theme));
+#endif
 }
 
 static void
@@ -1112,6 +1126,7 @@ gwd_theme_metacity_class_init (GWDThemeMetacityClass *metacity_class)
     object_class->constructed = gwd_theme_metacity_constructed;
     object_class->dispose = gwd_theme_metacity_dispose;
 
+    theme_class->scale_changed = gwd_theme_metacity_scale_changed;
     theme_class->style_updated = gwd_theme_metacity_style_updated;
     theme_class->draw_window_decoration = gwd_theme_metacity_draw_window_decoration;
     theme_class->calc_decoration_size = gwd_theme_metacity_calc_decoration_size;
