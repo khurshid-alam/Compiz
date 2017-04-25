@@ -62,9 +62,8 @@ frames_update_pango_contexts (gpointer key,
                               gpointer user_data)
 {
     decor_frame_t *frame = (decor_frame_t *) value;
-    GdkDisplay *display = gdk_display_get_default ();
-    GdkScreen *screen = gdk_display_get_default_screen (display);
-    gdouble dpi = gdk_screen_get_resolution (screen);
+    GWDTheme *theme = GWD_THEME (user_data);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     if (frame->pango_context == NULL)
         return;
@@ -72,14 +71,15 @@ frames_update_pango_contexts (gpointer key,
     /* FIXME: PangoContext created by gtk_widget_create_pango_context is not
      * automatically updated. Resolution is not only thing that can change...
      */
-    pango_cairo_context_set_resolution (frame->pango_context, dpi);
+    pango_cairo_context_set_resolution (frame->pango_context,
+                                        priv->dpi * priv->scale);
 }
 
 static void
 style_updated_cb (GtkWidget *widget,
                   GWDTheme  *theme)
 {
-    gwd_frames_foreach (frames_update_pango_contexts, NULL);
+    gwd_frames_foreach (frames_update_pango_contexts, theme);
 
     GWD_THEME_GET_CLASS (theme)->style_updated (theme);
 
@@ -195,6 +195,8 @@ notify_gtk_xft_dpi_cb (GtkSettings *settings,
         return;
 
     priv->dpi = dpi;
+
+    gwd_frames_foreach (frames_update_pango_contexts, theme);
 
     GWD_THEME_GET_CLASS (theme)->dpi_changed (theme);
 
