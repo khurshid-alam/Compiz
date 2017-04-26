@@ -26,6 +26,9 @@ usr/lib/*/compiz/*matecompat.*
 usr/share/compiz/*matecompat.*
 usr/lib/*/compiz/*mousepoll.*
 usr/share/compiz/*mousepoll.*
+usr/lib/*/compiz/*colorfilter.*
+usr/share/compiz/*colorfilter.*
+usr/share/compiz/colorfilter
 usr/lib/*/compiz/*move.*
 usr/share/compiz/*move.*
 usr/lib/*/compiz/*opengl.*
