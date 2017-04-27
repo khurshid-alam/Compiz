@@ -87,10 +87,14 @@ class ObsWindow :
 	ObsScreen       *oScreen;
 
 	int customFactor[MODIFIER_COUNT];
+	int startFactor[MODIFIER_COUNT];
 	int matchFactor[MODIFIER_COUNT];
 	
 	CompTimer	updateHandle;
 };
+
+#define OBS_SCREEN(s)							      \
+    ObsScreen *os = ObsScreen::get (s);
 
 class ObsPluginVTable :
     public CompPlugin::VTableForScreenAndWindow<ObsScreen, ObsWindow>

@@ -35,6 +35,13 @@
 		    <_long>Decrease the opacity of the window the pointer hovers.</_long>
 		    <default>&lt;Alt&gt;Button5</default>
 		</option>
+		<option name="default_opacity_spawn_value" type="int">
+		    <_short>New window default opacity value</_short>
+		    <_long>Default opacity when a new window is created (in percent).</_long>
+		    <min>1</min>
+		    <max>100</max>
+		    <default>100</default>
+		</option>
 		<option name="opacity_step" type="int">
 		    <_short>Step Size</_short>
 		    <_long>Opacity increment and decrement amount (in percent).</_long>
@@ -84,6 +91,13 @@
 		    <_long>Decrease the brightness of the window the pointer hovers.</_long>
 		    <default/>
 		</option>
+		<option name="default_brightness_spawn_value" type="int">
+		    <_short>New window default brightness value</_short>
+		    <_long>Default brightness when a new window is created (in percent).</_long>
+		    <min>1</min>
+		    <max>100</max>
+		    <default>100</default>
+		</option>
 		<option name="brightness_step" type="int">
 		    <_short>Step Size</_short>
 		    <_long>Brightness increment and decrement amount (in percent).</_long>
@@ -132,6 +146,13 @@
 		    <_short>Decrease Saturation Button</_short>
 		    <_long>Decrease the saturation of the window the pointer hovers.</_long>
 		    <default/>
+		</option>
+		<option name="default_saturation_spawn_value" type="int">
+		    <_short>New window default saturation value</_short>
+		    <_long>Default saturation when a new window is created (in percent).</_long>
+		    <min>1</min>
+		    <max>100</max>
+		    <default>100</default>
 		</option>
 		<option type="int" name="saturation_step">
 		    <_short>Step Size</_short>

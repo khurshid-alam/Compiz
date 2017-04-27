@@ -24,6 +24,7 @@
  */
 
 #include "obs.h"
+#include "obs_options.h"
 
 COMPIZ_PLUGIN_20090315 (obs, ObsPluginVTable);
 
@@ -60,7 +61,7 @@ ObsWindow::updatePaintModifier (unsigned int modifier)
     if (modifier == MODIFIER_OPACITY &&
 	(window->type ()& CompWindowTypeDesktopMask))
     {
-	customFactor[modifier] = 100;
+	customFactor[modifier] = startFactor[modifier];
 	matchFactor[modifier]  = 100;
     }
     else
@@ -279,11 +280,18 @@ ObsWindow::ObsWindow (CompWindow *w) :
     oScreen (ObsScreen::get (screen))
 {
     GLWindowInterface::setHandler (gWindow, false);
+    OBS_SCREEN(screen);
+    startFactor[MODIFIER_OPACITY] = os->optionGetDefaultOpacitySpawnValue ();
+    startFactor[MODIFIER_BRIGHTNESS] = os->optionGetDefaultBrightnessSpawnValue ();
+    startFactor[MODIFIER_SATURATION] = os->optionGetDefaultSaturationSpawnValue ();
 
     for (unsigned int i = 0; i < MODIFIER_COUNT; ++i)
     {
-	customFactor[i] = 100;
+	customFactor[i] = startFactor[i];
 	matchFactor[i]  = 100;
+	if (customFactor[i] != 100) {
+        modifierChanged (i);
+    }
 
 	/* defer initializing the factors from window matches as match evalution
 	 * means wrapped function calls */
