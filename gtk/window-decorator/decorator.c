@@ -27,6 +27,10 @@
 #include "gwd-settings.h"
 #include "gwd-theme-cairo.h"
 
+#ifdef USE_METACITY
+#include "gwd-theme-metacity.h"
+#endif
+
 static void
 draw_window_decoration (decor_t *decor)
 {
@@ -542,6 +546,12 @@ update_window_decoration_size (WnckWindow *win)
     gdk_error_trap_push ();
 
     buffer_surface = create_surface (d->width, d->height, style_window);
+
+#ifdef USE_METACITY
+    if (GWD_IS_THEME_METACITY (gwd_theme)) {
+      cairo_surface_set_device_scale (buffer_surface, 1, 1);
+    }
+#endif
 
     gdk_flush ();
 
