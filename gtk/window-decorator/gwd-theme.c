@@ -34,6 +34,13 @@ typedef struct
     PangoFontDescription *titlebar_font;
 
     GtkWidget            *style_window;
+
+    gulong                monitors_changed_id;
+    gboolean              fixed_scale;
+    gint                  scale;
+
+    gulong                gtk_xft_dpi_id;
+    gdouble               dpi;
 } GWDThemePrivate;
 
 enum
@@ -55,9 +62,8 @@ frames_update_pango_contexts (gpointer key,
                               gpointer user_data)
 {
     decor_frame_t *frame = (decor_frame_t *) value;
-    GdkDisplay *display = gdk_display_get_default ();
-    GdkScreen *screen = gdk_display_get_default_screen (display);
-    gdouble dpi = gdk_screen_get_resolution (screen);
+    GWDTheme *theme = GWD_THEME (user_data);
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     if (frame->pango_context == NULL)
         return;
@@ -65,14 +71,15 @@ frames_update_pango_contexts (gpointer key,
     /* FIXME: PangoContext created by gtk_widget_create_pango_context is not
      * automatically updated. Resolution is not only thing that can change...
      */
-    pango_cairo_context_set_resolution (frame->pango_context, dpi);
+    pango_cairo_context_set_resolution (frame->pango_context,
+                                        priv->dpi * priv->scale);
 }
 
 static void
 style_updated_cb (GtkWidget *widget,
                   GWDTheme  *theme)
 {
-    gwd_frames_foreach (frames_update_pango_contexts, NULL);
+    gwd_frames_foreach (frames_update_pango_contexts, theme);
 
     GWD_THEME_GET_CLASS (theme)->style_updated (theme);
 
@@ -103,6 +110,115 @@ create_style_window (GWDTheme *theme)
 }
 
 static void
+monitors_changed_cb (GdkScreen *screen,
+                     GWDTheme  *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    gint scale = gtk_widget_get_scale_factor (priv->style_window);
+
+    if (priv->scale == scale)
+        return;
+
+    priv->scale = scale;
+
+    GWD_THEME_GET_CLASS (theme)->scale_changed (theme);
+
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+track_window_scale (GWDTheme *theme)
+{
+    GdkScreen *screen = gdk_screen_get_default ();
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+ 
+    priv->monitors_changed_id = g_signal_connect (screen, "monitors-changed",
+                                                  G_CALLBACK (monitors_changed_cb),
+                                                  theme);
+
+    priv->fixed_scale = g_getenv ("GDK_SCALE") != NULL;
+    priv->scale = gtk_widget_get_scale_factor (priv->style_window);
+}
+
+static gdouble
+get_unscaled_dpi (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    gint xft_dpi;
+    gdouble dpi;
+
+    g_object_get (gtk_settings_get_default (), "gtk-xft-dpi", &xft_dpi, NULL);
+
+    if (xft_dpi > 0) {
+        const gchar *scale_env;
+
+        dpi = xft_dpi / 1024.0;
+
+        /* When using automatic scaling gtk-xft-dpi value is unscaled, but
+         * when it is disabled with GDK_SCALE or gdk_display_x11_set_scale then
+         * this value will be already scaled.
+         */
+        if (priv->fixed_scale) {
+            GdkScreen *screen = gdk_screen_get_default ();
+            GValue value = G_VALUE_INIT;
+
+            g_value_init (&value, G_TYPE_INT);
+
+            if (gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value))
+                dpi /= g_value_get_int (&value);
+        }
+
+        /* gtk-xft-dpi value is not scaled with GDK_DPI_SCALE, we need to do
+         * that manually if we want GDK_DPI_SCALE support in decorations.
+         */
+        scale_env = g_getenv ("GDK_DPI_SCALE");
+        if (scale_env) {
+            gdouble scale = g_ascii_strtod (scale_env, NULL);
+
+            if (scale != 0)
+                dpi *= scale;
+        }
+    } else {
+        dpi = 96.0;
+    }
+
+    return dpi;
+}
+
+static void
+notify_gtk_xft_dpi_cb (GtkSettings *settings,
+                       GParamSpec  *pspec,
+                       GWDTheme    *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+    gdouble dpi = get_unscaled_dpi (theme);
+
+    if (priv->dpi == dpi)
+        return;
+
+    priv->dpi = dpi;
+
+    gwd_frames_foreach (frames_update_pango_contexts, theme);
+
+    GWD_THEME_GET_CLASS (theme)->dpi_changed (theme);
+
+    decorations_changed (wnck_screen_get_default ());
+}
+
+static void
+track_xft_dpi (GWDTheme *theme)
+{
+    GtkSettings *settings = gtk_settings_get_default ();
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+
+    priv->gtk_xft_dpi_id = g_signal_connect (settings, "notify::gtk-xft-dpi",
+                                             G_CALLBACK (notify_gtk_xft_dpi_cb),
+                                             theme);
+
+    priv->dpi = get_unscaled_dpi (theme);
+}
+
+static void
 gwd_theme_constructed (GObject *object)
 {
     GWDTheme *theme = GWD_THEME (object);
@@ -110,6 +226,8 @@ gwd_theme_constructed (GObject *object)
     G_OBJECT_CLASS (gwd_theme_parent_class)->constructed (object);
 
     create_style_window (theme);
+    track_window_scale (theme);
+    track_xft_dpi (theme);
 }
 
 static void
@@ -124,6 +242,20 @@ gwd_theme_dispose (GObject *object)
     priv->titlebar_font = NULL;
 
     g_clear_pointer (&priv->style_window, gtk_widget_destroy);
+
+    if (priv->monitors_changed_id != 0) {
+        GdkScreen *screen = gdk_screen_get_default ();
+
+        g_signal_handler_disconnect (screen, priv->monitors_changed_id);
+        priv->monitors_changed_id = 0;
+    }
+
+    if (priv->gtk_xft_dpi_id != 0) {
+        GtkSettings *settings = gtk_settings_get_default ();
+
+        g_signal_handler_disconnect (settings, priv->gtk_xft_dpi_id);
+        priv->gtk_xft_dpi_id = 0;
+    }
 
     G_OBJECT_CLASS (gwd_theme_parent_class)->dispose (object);
 }
@@ -166,6 +298,16 @@ gwd_theme_set_property (GObject      *object,
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
     }
+}
+
+static void
+gwd_theme_real_dpi_changed (GWDTheme *theme)
+{
+}
+
+static void
+gwd_theme_real_scale_changed (GWDTheme *theme)
+{
 }
 
 static void
@@ -260,6 +402,8 @@ gwd_theme_class_init (GWDThemeClass *theme_class)
     object_class->get_property = gwd_theme_get_property;
     object_class->set_property = gwd_theme_set_property;
 
+    theme_class->dpi_changed = gwd_theme_real_dpi_changed;
+    theme_class->scale_changed = gwd_theme_real_scale_changed;
     theme_class->style_updated = gwd_theme_real_style_updated;
     theme_class->get_shadow = gwd_theme_real_get_shadow;
     theme_class->draw_window_decoration = gwd_theme_real_draw_window_decoration;
@@ -322,6 +466,22 @@ gwd_theme_get_settings (GWDTheme *theme)
     GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
 
     return priv->settings;
+}
+
+gdouble
+gwd_theme_get_dpi (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+
+    return priv->dpi;
+}
+
+gint
+gwd_theme_get_scale (GWDTheme *theme)
+{
+    GWDThemePrivate *priv = gwd_theme_get_instance_private (theme);
+
+    return priv->scale;
 }
 
 GtkWidget *
