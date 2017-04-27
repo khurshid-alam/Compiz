@@ -1,3 +1,31 @@
+compiz (1:0.9.13.1+17.10.20170427-0ubuntu1) artful; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Ensure that surfaces used by metacity theme have device scale set to
+    1 (LP: #1530277). (LP: #1530277)
+  * gtk-window-decorator: require libmetacity 3.22.0 or newer.
+  * Fix initial serverFrame position. (LP: #1390157, #1579421)
+  * Fix move rectangle size.
+  * gtk-window-decorator: scale window decorations on HiDPI (LP:
+    #1530277)
+
+  [ Colomban Wendling ]
+  * Restore the ColorChooser plugin by porting it to new OpenGL plugin
+    API.
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/65compiz_profile-on-session: don't export
+    COMPIZ_CONFIG_PROFILE in unity
+
+  [ Martin Wimpress ]
+  * Mate: don't use the workaround plugin (LP: #1611797)
+
+  [ ksamak ]
+  * obs: added default o/b/s spawn values for new windows
+  * debian: added pacakging for colorfilter plugin
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 27 Apr 2017 06:41:27 +0000
+
 compiz (1:0.9.13.1+17.04.20170109-0ubuntu1) zesty; urgency=medium
 
   [ Eleni Maria Stea ]
