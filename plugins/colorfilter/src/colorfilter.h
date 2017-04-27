@@ -37,8 +37,17 @@ class ColorfilterFunction
 {
     public:
 
-	GLFragment::FunctionId id;
-	CompString	       name;
+	CompString	shader;
+	CompString	name;
+
+	ColorfilterFunction (const CompString &name);
+
+	bool load (CompString fname);
+	bool loaded () const { return !shader.empty (); }
+
+    private:
+
+	void programCleanName (CompString &name);
 };
 
 class ColorfilterScreen :
@@ -57,20 +66,11 @@ class ColorfilterScreen :
 	int  currentFilter; /* 0 : cumulative mode
 			       0 < c <= count : single mode */
 
-	/* The plugin can not immediately load the filters because it needs to
-	 * know what texture target it will use : when required, this boolean
-	 * is set to TRUE and filters will be loaded on next filtered window
-	 * texture painting */
+	std::vector <std::shared_ptr <ColorfilterFunction> > filtersFunctions;
 
-	bool	  			    filtersLoaded;
-	std::vector <ColorfilterFunction *> filtersFunctions;
-
-	ColorfilterFunction *
-	findFragmentFunction (int id);
-	
 	void
 	toggle ();
-	
+
 	void
 	switchFilter ();
 
@@ -93,10 +93,7 @@ class ColorfilterScreen :
 	unloadFilters ();
 
 	int
-	loadFilters (GLTexture *texture);
-	
-	void
-	windowAdd (CompWindow *w);
+	loadFilters ();
 
 	void
 	matchsChanged (CompOption		      *opt,
@@ -113,10 +110,6 @@ class ColorfilterScreen :
 	void
 	damageDecorations (CompOption		  *opt,
 			   ColorfilterOptions::Options num);
-
-
-
-
 };
 
 #define FILTER_SCREEN(s)						       \
@@ -129,7 +122,6 @@ class ColorfilterWindow :
     public:
 
 	ColorfilterWindow (CompWindow *);
-	~ColorfilterWindow ();
 
 	CompWindow *window;
 	CompositeWindow *cWindow;
@@ -138,9 +130,10 @@ class ColorfilterWindow :
 	bool		isFiltered;
 
 	void
-	glDrawTexture (GLTexture	  	*texture,
-		       GLFragment::Attrib	&attrib,
-		       unsigned int	  	mask);
+	glDrawTexture (GLTexture                 *texture,
+		       const GLMatrix            &transform,
+		       const GLWindowPaintAttrib &attrib,
+		       unsigned int              mask);
 
 	void
 	toggle ();

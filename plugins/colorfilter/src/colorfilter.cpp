@@ -21,32 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 #include "colorfilter.h"
-#include "parser.h"
+#include <fstream>
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 COMPIZ_PLUGIN_20090315 (colorfilter, ColorfilterPluginVTable);
 
-/*
- * Find fragment function by id (imported from compiz-core/src/fragment.c)
- */
-ColorfilterFunction *
-ColorfilterScreen::findFragmentFunction (int id)
-{
-    foreach (ColorfilterFunction *function, filtersFunctions)
-    {
-	if (function->id == (unsigned int) id)
-	    return function;
-    }
-
-    return NULL;
-}
-
 /* Actions handling functions ----------------------------------------------- */
-
-void
-toggleWindowFunctions (ColorfilterWindow *cfw, bool enabled)
-{
-    cfw->gWindow->glDrawTextureSetEnabled (cfw, enabled);
-}
 
 /*
  * Toggle filtering for a specific window
@@ -65,7 +46,7 @@ ColorfilterWindow::toggle ()
 
     /* Ensure window is going to be repainted */
     cWindow->addDamage ();
-    toggleWindowFunctions (this, isFiltered);
+    gWindow->glDrawTextureSetEnabled (this, isFiltered);
 }
 
 /*
@@ -89,9 +70,6 @@ ColorfilterScreen::toggle ()
 void
 ColorfilterScreen::switchFilter ()
 {
-    GLFragment::FunctionId id;
-    ColorfilterFunction *function;
-
     /* % (count + 1) because of the cumulative filters mode */
     currentFilter = (currentFilter + 1) % (filtersFunctions.size () + 1);
     if (currentFilter == 0)
@@ -99,13 +77,12 @@ ColorfilterScreen::switchFilter ()
 			"Cumulative filters mode");
     else
     {
-	id = filtersFunctions.at (currentFilter - 1)->id;
-	if (id)
+	std::shared_ptr <ColorfilterFunction> func = filtersFunctions.at (currentFilter - 1);
+	if (func && func->loaded ())
 	{
-	    function = findFragmentFunction (id);
 	    compLogMessage ("colorfilter", CompLogLevelInfo,
 			    "Single filter mode (using %s filter)",
-			    function->name.c_str ());
+			    func->name.c_str ());
 	}
 	else
 	{
@@ -135,7 +112,7 @@ ColorfilterScreen::toggleWindow (CompAction         *action,
     CompWindow *w =
       screen->findWindow (CompOption::getIntOptionNamed (options, "window", 0));
 
-    if (w && GL::fragmentProgram)
+    if (w && GL::shaders)
 	ColorfilterWindow::get (w)->toggle ();
 
     return true;
@@ -149,9 +126,7 @@ ColorfilterScreen::toggleScreen (CompAction         *action,
 				 CompAction::State  state,
 				 CompOption::Vector options)
 {
-    screen->findWindow (CompOption::getIntOptionNamed (options, "root", 0));
-
-    if (GL::fragmentProgram)
+    if (GL::shaders)
 	toggle ();
 
     return true;
@@ -165,7 +140,7 @@ ColorfilterScreen::filterSwitch (CompAction         *action,
 				 CompAction::State  state,
 				 CompOption::Vector options)
 {
-    if (GL::fragmentProgram)
+    if (GL::shaders)
 	switchFilter ();
 
     return true;
@@ -179,41 +154,100 @@ ColorfilterScreen::filterSwitch (CompAction         *action,
 void
 ColorfilterScreen::unloadFilters ()
 {
-    if (!filtersFunctions.empty ())
+    filtersFunctions.clear ();
+    /* Reset current filter */
+    currentFilter = 0;
+}
+
+ColorfilterFunction::ColorfilterFunction (const CompString &name_) :
+    name(name_)
+{
+    programCleanName(name);
+}
+
+/*
+ * Clean program name string
+ */
+void
+ColorfilterFunction::programCleanName (CompString &name)
+{
+    std::replace_if (name.begin (), name.end (),
+		     [] (char c) { return !isalnum (c); }, '_');
+}
+
+/*
+ * File reader function
+ */
+bool
+ColorfilterFunction::load (CompString fname)
+{
+    std::ifstream fp;
+    int length;
+    char *buffer;
+    const char *home = getenv ("HOME");
+    CompString path;
+
+    if (!boost::algorithm::ends_with (fname, ".frag"))
+	fname += ".frag";
+
+    /* Try to open file fname as is */
+    fp.open (fname.c_str ());
+
+    /* If failed, try as user filter file (in ~/.compiz/data/filters) */
+    if (!fp.is_open () && home && home[0] != '\0')
     {
-	/* Destroy loaded filters one by one */
-	while (!filtersFunctions.empty ())
-	{
-	    ColorfilterFunction *function = filtersFunctions.back ();
-	    if (function->id)
-		GLFragment::destroyFragmentFunction (function->id);
-
-	    delete function;
-
-	    filtersFunctions.pop_back ();
-	}
-	/* Reset current filter */
-	currentFilter = 0;
+	path = CompString (home) + "/.compiz/data/filters/" + fname;
+	fp.open (path.c_str ());
     }
+
+    /* If failed again, try as system wide data file
+     * (in PREFIX/share/compiz/filters) */
+    if (!fp.is_open ())
+    {
+	path = CompString (DATADIR) + "/data/filters/" + fname;
+	fp.open (path.c_str ());
+    }
+
+    /* If failed again & again, abort */
+    if (!fp.is_open ())
+    {
+	return false;
+    }
+
+    /* get length of file: */
+    fp.seekg (0, std::ios::end);
+    length = fp.tellg ();
+    length++;
+    fp.seekg (0, std::ios::beg);
+
+    /* allocate memory */
+    buffer = new char [length];
+
+    /* read data as a block: */
+    fp.read (buffer, length - 1);
+    buffer[length - 1] = '\0';
+    fp.close ();
+
+    shader = buffer;
+
+    delete[] buffer;
+
+    return true;
 }
 
 /*
  * Load filters from a list of files for current screen
  */
 int
-ColorfilterScreen::loadFilters (GLTexture *texture)
+ColorfilterScreen::loadFilters ()
 {
-    int target, loaded, count;
-    GLFragment::FunctionId function;
+    int loaded, count;
     CompString name, file;
     CompOption::Value::Vector filters;
-    FragmentParser *parser = new FragmentParser ();
-    ColorfilterFunction *func;
+    std::shared_ptr <ColorfilterFunction> func;
 
     /* Free previously loaded filters and malloc */
     unloadFilters ();
-
-    filtersLoaded = true;
 
     /* Fetch filters filenames */
     filters = optionGetFilters ();
@@ -221,17 +255,13 @@ ColorfilterScreen::loadFilters (GLTexture *texture)
 
     //filtersFunctions.resize (count);
 
-    /* The texture target that will be used for some ops */
-    if (texture->target () == GL_TEXTURE_2D)
-	target = COMP_FETCH_TARGET_2D;
-    else
-	target = COMP_FETCH_TARGET_RECT;
-
     /* Load each filter one by one */
     loaded = 0;
     for (int i = 0; i < count; i++)
     {
 	name = CompString (basename (filters.at (i).s ().c_str ()));
+	if (boost::algorithm::ends_with (name, ".frag"))
+	    name.erase (name.end () - 5, name.end ());
 	file = filters.at (i).s ();
 	if (name.empty ())
 	{
@@ -242,17 +272,15 @@ ColorfilterScreen::loadFilters (GLTexture *texture)
 	compLogMessage ("colorfilter", CompLogLevelInfo,
 			"Loading filter %s (item %s).", name.c_str (),
 			file.c_str ());
-	function = parser->loadFragmentProgram (file, name, target);
 
-	func = new ColorfilterFunction ();
+	func = std::shared_ptr <ColorfilterFunction> (new ColorfilterFunction (name));
 	if (!func)
 	    continue;
 
-	func->name = name;
-	func->id   = function;
+	func->load (file);
 
 	filtersFunctions.push_back (func);
-	if (func && function)
+	if (func && func->loaded ())
 	    loaded++;
     }
 
@@ -270,8 +298,6 @@ ColorfilterScreen::loadFilters (GLTexture *texture)
 	    cfw->cWindow->addDamage (w);
     }
 
-    delete parser;
-
     return loaded;
 }
 
@@ -279,51 +305,41 @@ ColorfilterScreen::loadFilters (GLTexture *texture)
  * Wrapper that enables filters if the window is filtered
  */
 void
-ColorfilterWindow::glDrawTexture (GLTexture 		   *texture,
-				  GLFragment::Attrib &attrib,
-				  unsigned int		   mask)
+ColorfilterWindow::glDrawTexture (GLTexture                 *texture,
+				  const GLMatrix            &transform,
+				  const GLWindowPaintAttrib &attrib,
+				  unsigned int              mask)
 {
-    GLFragment::FunctionId function;
-
     FILTER_SCREEN (screen);
 
-    bool shouldFilter = isFiltered;
+    bool shouldFilter = false;
 
-    foreach (GLTexture *tex, gWindow->textures ())
+    if (isFiltered && !cfs->filtersFunctions.empty ())
     {
-	if (tex->name () != texture->name ())
-	    shouldFilter = false;
+	if (cfs->optionGetFilterDecorations ())
+	    shouldFilter = true;
+	else
+	{
+	    foreach (GLTexture *tex, gWindow->textures ())
+	    {
+		if (tex->name () == texture->name ())
+		{
+		    shouldFilter = true;
+		    break;
+		}
+	    }
+	}
     }
 
-    /* We are filtering a decoration */
-    if ((cfs->optionGetFilterDecorations () &&
-	isFiltered &&
-	!cfs->filtersFunctions.empty ()))
-	shouldFilter = true;
-
-    /* Check if filters have to be loaded and load them if so
-     * Maybe should this check be done only if a filter is going to be applied
-     * for this texture? */
-    if (!cfs->filtersLoaded)
-	cfs->loadFilters (texture);
-
-    /* Filter texture if :
-     *   o GL_ARB_fragment_program available
-     *   o Filters are loaded
-     *   o Texture's window is filtered */
-    /* Note : if required, filter window contents only and not decorations
-     * (use that w->texture->name != texture->name for decorations) */
-    if (shouldFilter) // ???
+    if (shouldFilter)
     {
-	GLFragment::Attrib fa = attrib;
 	if (cfs->currentFilter == 0) /* Cumulative filters mode */
 	{
 	    /* Enable each filter one by one */
-	    foreach (ColorfilterFunction *func, cfs->filtersFunctions)
+	    foreach (std::shared_ptr <ColorfilterFunction> func, cfs->filtersFunctions)
 	    {
-		function = func->id;
-		if (function)
-		    fa.addFunction (function);
+		if (func->loaded ())
+		    gWindow->addShaders (func->name, "", func->shader);
 	    }
 	}
 	/* Single filter mode */
@@ -331,30 +347,13 @@ ColorfilterWindow::glDrawTexture (GLTexture 		   *texture,
 	{
 	    /* Enable the currently selected filter if possible (i.e. if it
 	     * was successfully loaded) */
-	    function = cfs->filtersFunctions.at (cfs->currentFilter - 1)->id;
-	    if (function)
-		fa.addFunction (function);
+	    std::shared_ptr <ColorfilterFunction> func = cfs->filtersFunctions.at (cfs->currentFilter - 1);
+	    if (func && func->loaded ())
+		gWindow->addShaders (func->name, "", func->shader);
 	}
-	gWindow->glDrawTexture (texture, fa, mask);
     }
-    else /* Not filtering */
-    {
-	gWindow->glDrawTexture (texture, attrib, mask);
-    }
-}
 
-/*
- * Filter windows when they are open if they match the filtering rules
- */
-void
-ColorfilterScreen::windowAdd (CompWindow *w)
-{
-    FILTER_WINDOW (w);
-
-    /* cfw->isFiltered is initialized to false in InitWindow, so we only
-       have to toggle it to true if necessary */
-    if (cfw->isFiltered && optionGetFilterMatch ().evaluate (w))
-	cfw->toggle ();
+    gWindow->glDrawTexture (texture, transform, attrib, mask);
 }
 
 /* Internal stuff ----------------------------------------------------------- */
@@ -408,9 +407,7 @@ void
 ColorfilterScreen::filtersChanged (CompOption		       *opt,
 				   ColorfilterOptions::Options num)
 {
-    /* Just set the filtersLoaded boolean to false, unloadFilters will be
-     * called in loadFilters */
-    filtersLoaded = false;
+    loadFilters ();
 }
 
 /*
@@ -428,8 +425,7 @@ ColorfilterScreen::ColorfilterScreen (CompScreen *screen) :
     cScreen (CompositeScreen::get (screen)),
     gScreen (GLScreen::get (screen)),
     isFiltered (false),
-    currentFilter (0),
-    filtersLoaded (false)
+    currentFilter (0)
 {
     optionSetToggleWindowKeyInitiate (boost::bind (
 				&ColorfilterScreen::toggleWindow, this, _1, _2,
@@ -453,11 +449,12 @@ ColorfilterScreen::ColorfilterScreen (CompScreen *screen) :
     optionSetFilterDecorationsNotify (boost::bind (
 				&ColorfilterScreen::damageDecorations, this, _1,
 				_2));
+
+    loadFilters ();
 };
 
 ColorfilterScreen::~ColorfilterScreen ()
 {
-    writeSerializedData ();
     unloadFilters ();
 }
 
@@ -469,17 +466,19 @@ ColorfilterWindow::ColorfilterWindow (CompWindow *window) :
     isFiltered (false)
 {
     GLWindowInterface::setHandler (gWindow, false);
-}
 
-ColorfilterWindow::~ColorfilterWindow ()
-{
-    writeSerializedData ();
+    FILTER_SCREEN (screen);
+
+    /* Filter windows when they are open if the screen is filtered and they
+     * match the filtering rules */
+    if (cfs->isFiltered && cfs->optionGetFilterMatch ().evaluate (window))
+	toggle ();
 }
 
 bool
 ColorfilterPluginVTable::init ()
 {
-    if (!GL::fragmentProgram)
+    if (!GL::shaders)
 	compLogMessage ("colorfilter", CompLogLevelWarn, "No fragment" \
 			"support, the plugin will continue to load but nothing"\
 			"will happen");
