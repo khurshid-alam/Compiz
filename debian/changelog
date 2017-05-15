@@ -1,3 +1,10 @@
+compiz (1:0.9.13.1+17.10.20170515-0ubuntu1) artful; urgency=medium
+
+  [ Martin Wimpress ]
+  * mate: Avoid artefacts of Windows Thumbnail Previews (LP: #1606369)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 15 May 2017 05:51:32 +0000
+
 compiz (1:0.9.13.1+17.10.20170427-0ubuntu1) artful; urgency=medium
 
   [ Alberts Muktupāvels ]
