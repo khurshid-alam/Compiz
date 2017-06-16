@@ -1,3 +1,13 @@
+compiz (1:0.9.13.1+17.10.20170616-0ubuntu1) artful; urgency=medium
+
+  [ Martin Wimpress ]
+  * Mate: tune profile for faster switcher and Super+L support
+
+  [ ksamak ]
+  * showmouse: added autostart option
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 16 Jun 2017 15:17:48 +0000
+
 compiz (1:0.9.13.1+17.10.20170515-0ubuntu1) artful; urgency=medium
 
   [ Martin Wimpress ]
