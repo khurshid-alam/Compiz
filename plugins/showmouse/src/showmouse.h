@@ -140,6 +140,9 @@ class ShowmouseScreen :
 	MousePoller    pollHandle;
 
 	void
+	startupToggle ();
+
+	void
 	preparePaint (int);
 
 	bool

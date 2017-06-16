@@ -660,6 +660,17 @@ ShowmouseScreen::initiate (CompAction         *action,
     return true;
 }
 
+void
+ShowmouseScreen::startupToggle ()
+{
+    if (optionGetActivateAtStartup ())
+    {
+	active = true;
+	toggleFunctions (true);
+	gScreen->glPaintOutputSetEnabled (gScreen, true);
+    }
+}
+
 ShowmouseScreen::ShowmouseScreen (CompScreen *screen) :
     PluginClassHandler <ShowmouseScreen, CompScreen> (screen),
     cScreen (CompositeScreen::get (screen)),
@@ -687,6 +698,8 @@ ShowmouseScreen::ShowmouseScreen (CompScreen *screen) :
 						this,  _1, _2, _3));
     optionSetInitiateEdgeTerminate (boost::bind (&ShowmouseScreen::terminate,
 						 this,  _1, _2, _3));
+
+    optionSetActivateAtStartupNotify (boost::bind (&ShowmouseScreen::startupToggle, this));
 }
 
 ShowmouseScreen::~ShowmouseScreen ()
