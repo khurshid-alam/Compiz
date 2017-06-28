@@ -838,6 +838,13 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     GLint origSrc, origDst;
 
     bool blend = optionGetBlend ();
+
+    if (blend && borderColor[3] == 65535)
+    {
+	if (optionGetMode () == MoveOptions::ModeOutline || fillColor[3] == 65535)
+	    blend = false;
+    }
+
     if (blend)
     {
 #ifdef USE_GLES
