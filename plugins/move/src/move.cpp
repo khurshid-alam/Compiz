@@ -577,10 +577,6 @@ moveHandleMotionEvent (CompScreen *s,
 void
 MoveScreen::handleEvent (XEvent *event)
 {
-    Box box;
-    if (getMovingRectangle (&box))
-	damageMovingRectangle (&box);
-
     switch (event->type)
     {
 	case ButtonPress:
@@ -848,20 +844,6 @@ bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
     return status;
 }
 
-void
-MoveScreen::damageMovingRectangle (BoxPtr pBox)
-{
-    int x1, x2, y1, y2;
-
-    x1 = pBox->x1 - 1;
-    y1 = pBox->y1 - 1;
-    x2 = pBox->x2 + 1;
-    y2 = pBox->y2 + 1;
-
-    if (cScreen)
-	cScreen->damageRegion (CompRect (x1, y1, x2 - x1, y2 - y1));
-}
-
 bool
 MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 				    CompOutput *output,
@@ -981,13 +963,12 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    CompositeScreen *cScreen = CompositeScreen::get (screen);
     if (cScreen)
     {
 	CompRect damage (box.x1 - borderWidth,
 			 box.y1 - borderWidth,
-			 box.x2 - box.x1 + 2,
-			 box.y2 - box.y1 + 2);
+			 box.x2 - box.x1 + borderWidth * 2,
+			 box.y2 - box.y1 + borderWidth * 2);
 	cScreen->damageRegion (damage);
     }
 
