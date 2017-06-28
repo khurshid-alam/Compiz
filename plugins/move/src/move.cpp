@@ -829,6 +829,8 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (!getMovingRectangle(&box))
 	return false;
 
+    const unsigned short MaxUShort = std::numeric_limits <unsigned short>::max ();
+    const float MaxUShortFloat = MaxUShort;
     GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
     GLMatrix sTransform (transform);
 
@@ -839,9 +841,9 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 
     bool blend = optionGetBlend ();
 
-    if (blend && borderColor[3] == 65535)
+    if (blend && borderColor[3] == MaxUShort)
     {
-	if (optionGetMode () == MoveOptions::ModeOutline || fillColor[3] == 65535)
+	if (optionGetMode () == MoveOptions::ModeOutline || fillColor[3] == MaxUShort)
 	    blend = false;
     }
 
@@ -859,10 +861,10 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 #endif
     }
 
-    bc[3] = blend ? ((float) borderColor[3] / 65535.0f) : 65535.0f;
-    bc[0] = ((float) borderColor[0] / 65535.0f) * bc[3];
-    bc[1] = ((float) borderColor[1] / 65535.0f) * bc[3];
-    bc[2] = ((float) borderColor[2] / 65535.0f) * bc[3];
+    bc[3] = blend ? ((float) borderColor[3] / MaxUShortFloat) : MaxUShortFloat;
+    bc[0] = ((float) borderColor[0] / MaxUShortFloat) * bc[3];
+    bc[1] = ((float) borderColor[1] / MaxUShortFloat) * bc[3];
+    bc[2] = ((float) borderColor[2] / MaxUShortFloat) * bc[3];
 
     vertexData[0] = box.x1;
     vertexData[1] = box.y1;
@@ -913,10 +915,10 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     /* fill rectangle */
     if (fillColor)
     {
-	fc[3] = blend ? fillColor[3] : 0.85f * 65535;
-	fc[0] = fillColor[0] * (unsigned long) fc[3] / 65535;
-	fc[1] = fillColor[1] * (unsigned long) fc[3] / 65535;
-	fc[2] = fillColor[2] * (unsigned long) fc[3] / 65535;
+	fc[3] = blend ? fillColor[3] : 0.85f * MaxUShortFloat;
+	fc[0] = fillColor[0] * (unsigned long) fc[3] / MaxUShortFloat;
+	fc[1] = fillColor[1] * (unsigned long) fc[3] / MaxUShortFloat;
+	fc[2] = fillColor[2] * (unsigned long) fc[3] / MaxUShortFloat;
 
 	streamingBuffer->begin (GL_TRIANGLE_STRIP);
 	streamingBuffer->addColors (1, fc);
