@@ -34,9 +34,6 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
-static float pos_x, pos_y;
-static bool paint_rectangle;
-
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -49,13 +46,9 @@ moveInitiate (CompAction         *action,
     if (ms->optionGetMode () != MoveOptions::ModeNormal)
     {
 	ms->gScreen->glPaintOutputSetEnabled (ms, true);
-	paint_rectangle = true;
-	pos_x = pos_y = 0;
-    }
-    else
-    {
-	ms->gScreen->glPaintOutputSetEnabled (ms, false);
-	paint_rectangle = false;
+	ms->paintRect = true;
+	ms->rectX = 0;
+	ms->rectY = 0;
     }
 
     Window xid = CompOption::getIntOptionNamed (options, "window");
@@ -188,26 +181,15 @@ moveTerminate (CompAction         *action,
 {
     MOVE_SCREEN (screen);
 
-    if (ms->optionGetMode () != MoveOptions::ModeNormal)
-    {
-	ms->gScreen->glPaintOutputSetEnabled (ms, true);
-	paint_rectangle = true;
-    }
-    else
-    {
-	ms->gScreen->glPaintOutputSetEnabled (ms, false);
-	paint_rectangle = false;
-    }
-
     if (ms->w)
     {
 	MOVE_WINDOW (ms->w);
 
-	if (ms->optionGetMode () != MoveOptions::ModeNormal) {
+	if (ms->paintRect)
+	{
+	    ms->paintRect = false;
 	    ms->gScreen->glPaintOutputSetEnabled (ms, false);
-	    paint_rectangle = false;
-
-	    mw->window->move (pos_x, pos_y, true);
+	    mw->window->move (ms->rectX, ms->rectY, true);
 	}
 
 	if (state & CompAction::StateCancel)
@@ -564,8 +546,8 @@ moveHandleMotionEvent (CompScreen *s,
 	    }
 	    else
 	    {
-		pos_x += wX + dx - w->geometry ().x ();
-		pos_y += wY + dy - w->geometry ().y ();
+		ms->rectX += wX + dx - w->geometry ().x ();
+		ms->rectY += wY + dy - w->geometry ().y ();
 	    }
 
 	    ms->x -= dx;
@@ -753,6 +735,9 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     status (RectangleOut),
     releaseButton (0),
     grab (NULL),
+    paintRect(false),
+    rectX(0),
+    rectY(0),
     hasCompositing (false),
     yConstrained (false)
 {
@@ -780,16 +765,7 @@ MoveScreen::MoveScreen (CompScreen *screen) :
     ScreenInterface::setHandler (screen);
     GLScreenInterface::setHandler (gScreen);
 
-    if (optionGetMode () != MoveOptions::ModeNormal)
-    {
-	paint_rectangle = true;
-	gScreen->glPaintOutputSetEnabled (this, true);
-    }
-    else
-    {
-	paint_rectangle = false;
-	gScreen->glPaintOutputSetEnabled (this, false);
-    }
+    gScreen->glPaintOutputSetEnabled (this, false);
 }
 
 MoveScreen::~MoveScreen ()
@@ -801,12 +777,7 @@ MoveScreen::~MoveScreen ()
 bool
 MoveScreen::getMovingRectangle (BoxPtr pBox)
 {
-    if (optionGetMode () == MoveOptions::ModeNormal)
-	return false;
-
     MOVE_SCREEN (screen);
-    if (!ms)
-	return false;
 
     CompWindow *w = ms->w;
     if (!w)
@@ -817,8 +788,8 @@ MoveScreen::getMovingRectangle (BoxPtr pBox)
     int wWidth  = w->geometry ().widthIncBorders () + w->border ().left + w->border ().right;
     int wHeight = w->geometry ().heightIncBorders () + w->border ().top + w->border ().bottom;
 
-    pBox->x1 = wX + pos_x;
-    pBox->y1 = wY + pos_y;
+    pBox->x1 = wX + ms->rectX;
+    pBox->y1 = wY + ms->rectY;
 
     pBox->x2 = pBox->x1 + wWidth;
     pBox->y2 = pBox->y1 + wHeight;
@@ -834,13 +805,17 @@ bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 {
     bool status = gScreen->glPaintOutput (attrib, transform, region, output, mask);
 
-    if (status && paint_rectangle)
+    if (status && paintRect)
     {
 	unsigned short *borderColor = optionGetBorderColor ();
-	unsigned short *fillColor = optionGetFillColor ();
+	unsigned short *fillColor = NULL;
 
-	return glPaintMovingRectangle (transform, output, borderColor, (optionGetMode() == MoveOptions::ModeRectangle) ? fillColor : NULL);
+	if (optionGetMode() == MoveOptions::ModeRectangle)
+	    fillColor = optionGetFillColor ();
+
+	return glPaintMovingRectangle (transform, output, borderColor, fillColor);
     }
+
     return status;
 }
 

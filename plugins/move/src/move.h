@@ -95,6 +95,10 @@ class MoveScreen :
 
 	unsigned int origState;
 
+	bool    paintRect;
+	int     rectX;
+	int     rectY;
+
 	int	snapOffX;
 	int	snapBackX;
 
