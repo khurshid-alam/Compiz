@@ -532,7 +532,7 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 	Animation& anim = *iter;
 
 	float curve = powf (CURVE_ANIMATION, -anim.progress);
-	float alpha = (optionGetFillColorAlpha () / MaxUShortFloat) * anim.opacity;
+	float alpha = blend ? (optionGetFillColorAlpha () / MaxUShortFloat) * anim.opacity : 0.85;
 	color = optionGetFillColor ();
 
 	colorData[0] = alpha * color[0];
@@ -570,7 +570,7 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 				      anim.currentRect.height () - 2);
 
 	/* draw outline */
-	alpha = (optionGetOutlineColorAlpha () / MaxUShortFloat) * anim.opacity;
+	alpha = blend ? (optionGetOutlineColorAlpha () / MaxUShortFloat) * anim.opacity : 1;
 	color = optionGetOutlineColor ();
 
 	colorData[0] = alpha * color[0];
@@ -603,7 +603,7 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     if (!animating)
     {
 	/* draw filled rectangle */
-	float alpha = optionGetFillColorAlpha () / MaxUShortFloat;
+	float alpha = blend ? optionGetFillColorAlpha () / MaxUShortFloat : 0.85;
 	color = optionGetFillColor ();
 
 	colorData[0] = alpha * color[0];
