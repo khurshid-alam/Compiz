@@ -96,7 +96,6 @@ class Animation
 	CompRect targetRect;
 	CompRect currentRect;
 	GLfloat  opacity;
-	GLfloat  timer;
 	Window   window;
 	int      duration;
 	bool     complete;
