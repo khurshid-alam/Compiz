@@ -886,6 +886,7 @@ GridScreen::handleEvent (XEvent *event)
 		    animations.at (current).currentRect	= w->serverBorderRect ();
 		    animations.at (current).duration = optionGetAnimationDuration ();
 		    animations.at (current).timer = animations.at (current).duration;
+		    animations.at (current).fadeOutTimer = animations.at (current).duration;
 		    animations.at (current).targetRect = desiredSlot;
 		    animations.at (current).window = w->id();
 
@@ -1205,7 +1206,11 @@ GridScreen::preparePaint (int msSinceLastPaint)
 	    anim.timer = 0;
 
 	if (anim.fadingOut)
-	    anim.opacity -= msSinceLastPaint * 0.002;
+	{
+	    anim.fadeOutTimer -= msSinceLastPaint;
+	    double progress = (anim.duration - anim.fadeOutTimer) / anim.duration;anim.opacity = 1.0 - progress;
+	    anim.opacity = 1.0 - progress;
+	}
 	else
 	    if (anim.opacity < 1.0f)
 		anim.opacity = anim.progress * anim.progress;
@@ -1222,7 +1227,7 @@ GridScreen::preparePaint (int msSinceLastPaint)
 	anim.progress =	(anim.duration - anim.timer) / anim.duration;
     }
 
-    if (optionGetDrawStretchedWindow ())
+    if (optionGetDrawStretchedWindow () && !optionGetDisableBlend ())
     {
 	CompWindow *cw = screen->findWindow (CompOption::getIntOptionNamed (o, "window"));
 
@@ -1296,6 +1301,7 @@ Animation::Animation ()
     duration = 0;
     complete = false;
     fadingOut = false;
+    fadeOutTimer = 0.0f;
     window = 0;
 }
 
