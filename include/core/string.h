@@ -28,12 +28,15 @@
 
 #include <string>
 #include <list>
+#include <vector>
 #include <cstdarg>
 
 typedef std::string CompString;
 typedef std::list<CompString> CompStringList;
+typedef std::vector<CompString> CompStringVector;
 
 CompString compPrintf (const char *format, ...);
 CompString compPrintf (const char *format, va_list ap);
+CompStringVector compGetRegexMatches (const CompString& regexStr, const CompString& string);
 
 #endif

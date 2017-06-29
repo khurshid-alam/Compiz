@@ -1,5 +1,6 @@
 /*
  * Copyright © 2008 Dennis Kasprzyk
+ * Copyright © 2017 Canonical Ltd.
  *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without
@@ -21,11 +22,13 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Authors: Dennis Kasprzyk <onestone@compiz-fusion.org>
+ *          Marco Trevisan <marco.trevisan@canonical.com>
  */
 
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>
+#include <regex.h>
 
 #include <core/string.h>
 
@@ -85,4 +88,41 @@ CompString compPrintf (const char *format, va_list ap)
     CompString rv (str);
     delete [] str;
     return rv;
+}
+
+CompStringVector
+compGetRegexMatches(const CompString& regexStr,
+		    const CompString& string)
+{
+    /* We might have used std::regex here, but it's not available for gcc-4.8 */
+    CompStringVector matches;
+    regex_t regex;
+    int ret;
+
+    ret = regcomp (&regex, regexStr.c_str (), REG_EXTENDED);
+
+    if (ret != 0)
+	return matches;
+
+    std::vector<regmatch_t> sub_matches (regex.re_nsub + 1);
+    ret = regexec (&regex, string.c_str (), sub_matches.size (), sub_matches.data (), 0);
+
+    if (ret == REG_NOMATCH)
+	return matches;
+
+    for (const auto& sub_match : sub_matches)
+    {
+	if (sub_match.rm_so >= 0)
+	{
+	    size_t sub_len = sub_match.rm_eo - sub_match.rm_so;
+	    matches.push_back (string.substr (sub_match.rm_so, sub_len));
+	} else {
+	    /* We keep this empty so the clients might access to all the subs */
+	    matches.push_back (CompString ());
+	}
+    }
+
+    regfree (&regex);
+
+    return matches;
 }
