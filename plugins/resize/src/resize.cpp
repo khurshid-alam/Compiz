@@ -87,6 +87,7 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
 
     BoxRec   	   box;
+    CompRegion     damageRegion;
     GLMatrix 	   sTransform (transform);
     GLfloat         vertexData [12];
     GLfloat         vertexData2[24];
@@ -195,11 +196,40 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 #endif
 
     CompositeScreen *cScreen = CompositeScreen::get (screen);
-    CompRect damage (box.x1 - borderWidth,
-                     box.y1 - borderWidth,
-                     box.x2 - box.x1 + 2 * borderWidth,
-                     box.y2 - box.y1 + 2 * borderWidth);
-    cScreen->damageRegion (damage);
+
+    if (optionGetMode () == ResizeOptions::ModeOutline)
+    {
+	// Top
+	damageRegion += CompRect (box.x1 - borderWidth,
+				  box.y1 - borderWidth,
+				  box.x2 - box.x1 + borderWidth * 2,
+				  borderWidth + 1);
+	// Right
+	damageRegion += CompRect (box.x2 - borderWidth,
+				  box.y1 - borderWidth,
+				  borderWidth + 1,
+				  box.y2 - box.y1 + borderWidth * 2);
+	// Bottom
+	damageRegion += CompRect (box.x1 - borderWidth,
+				  box.y2 - borderWidth,
+				  box.x2 - box.x1 + borderWidth * 2,
+				  borderWidth + 1);
+	// Left
+	damageRegion += CompRect (box.x1 - borderWidth,
+				  box.y1 - borderWidth,
+				  borderWidth + 1,
+				  box.y2 - box.y1 + borderWidth * 2);
+    }
+    else
+    {
+	CompRect damage (box.x1 - borderWidth,
+			 box.y1 - borderWidth,
+			 box.x2 - box.x1 + borderWidth * 2,
+			 box.y2 - box.y1 + borderWidth * 2);
+	damageRegion += damage;
+    }
+
+    cScreen->damageRegion (damageRegion);
 }
 
 bool
