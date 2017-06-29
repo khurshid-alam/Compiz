@@ -508,7 +508,8 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     GLVertexBuffer  *streamingBuffer = GLVertexBuffer::streamingBuffer ();
     GLfloat         vertexData[12];
     GLushort        colorData[4];
-    GLushort        *color;
+    unsigned short *color, *fillColor, *outlineColor;
+    unsigned short  averageFillColor[4];
     GLboolean       isBlendingEnabled;
     bool            blend = !optionGetDisableBlend ();
 
@@ -527,13 +528,25 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 	glEnable (GL_BLEND);
     }
 
+    fillColor = optionGetFillColor ();
+    outlineColor = optionGetOutlineColor ();
+
+    if (optionGetUseDesktopAverageColor ())
+    {
+        const unsigned short *averageColor = screen->averageColor ();
+        outlineColor = const_cast<unsigned short *>(averageColor);
+	memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
+	averageFillColor[3] = std::numeric_limits<unsigned short>::max () * 0.6;
+	fillColor = averageFillColor;
+    }
+
     for (iter = animations.begin (); iter != animations.end () && animating; ++iter)
     {
 	Animation& anim = *iter;
 
 	float curve = powf (CURVE_ANIMATION, -anim.progress);
-	float alpha = blend ? (optionGetFillColorAlpha () / MaxUShortFloat) * anim.opacity : 0.85;
-	color = optionGetFillColor ();
+	float alpha = blend ? (fillColor[3] / MaxUShortFloat) * anim.opacity : 0.85;
+	color = fillColor;
 
 	colorData[0] = alpha * color[0];
 	colorData[1] = alpha * color[1];
@@ -570,8 +583,8 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 				      anim.currentRect.height () - 2);
 
 	/* draw outline */
-	alpha = blend ? (optionGetOutlineColorAlpha () / MaxUShortFloat) * anim.opacity : 1;
-	color = optionGetOutlineColor ();
+	alpha = blend ? (outlineColor[3] / MaxUShortFloat) * anim.opacity : 1;
+	color = outlineColor;
 
 	colorData[0] = alpha * color[0];
 	colorData[1] = alpha * color[1];
@@ -603,8 +616,8 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     if (!animating)
     {
 	/* draw filled rectangle */
-	float alpha = blend ? optionGetFillColorAlpha () / MaxUShortFloat : 0.85;
-	color = optionGetFillColor ();
+	float alpha = blend ? fillColor[3] / MaxUShortFloat : 0.85;
+	color = fillColor;
 
 	colorData[0] = alpha * color[0];
 	colorData[1] = alpha * color[1];
@@ -638,8 +651,8 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 			  rect.height () - 2);
 
 	/* draw outline */
-	alpha = optionGetOutlineColorAlpha () / MaxUShortFloat;
-	color = optionGetOutlineColor ();
+	alpha = outlineColor[3] / MaxUShortFloat;
+	color = outlineColor;
 
 	colorData[0] = alpha * color[0];
 	colorData[1] = alpha * color[1];
