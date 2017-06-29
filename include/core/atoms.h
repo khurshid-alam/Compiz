@@ -158,6 +158,8 @@ namespace Atoms {
 
     extern Atom startupId;
 
+    extern Atom gnomeRepresentativeColors;
+
     void init (Display *dpy);
 };
 

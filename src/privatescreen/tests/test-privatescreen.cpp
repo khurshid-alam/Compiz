@@ -82,6 +82,7 @@ public:
     MOCK_METHOD1(_matchPropertyChanged, void (CompWindow *));
     MOCK_METHOD0(_outputChangeNotify, void ());
     MOCK_METHOD2(_cursorChangeNotify, void (const CompString&, int));
+    MOCK_METHOD1(_averageColorChangeNotify, void (const unsigned short*));
 
     MOCK_METHOD0(outputDevs, CompOutput::vector & ());
     MOCK_METHOD2(setWindowState, void (unsigned int state, Window id));
@@ -199,6 +200,7 @@ public:
     MOCK_CONST_METHOD0(getTopServerWindow, CompWindow * ());
     MOCK_METHOD0(getCoreOptions, CoreOptions& ());
     MOCK_CONST_METHOD0(colormap, Colormap ());
+    MOCK_CONST_METHOD0(averageColor, const unsigned short * ());
     MOCK_METHOD1(setCurrentDesktop, void (unsigned int desktop));
     MOCK_CONST_METHOD0(activeWindow, Window ());
     MOCK_CONST_METHOD1(grabWindowIsNot, bool (Window w));

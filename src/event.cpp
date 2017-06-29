@@ -1821,6 +1821,11 @@ CompScreenImpl::_handleEvent (XEvent *event)
 	    if (w)
 		w->priv->updateStartupId ();
 	}
+	else if (event->xproperty.atom == Atoms::gnomeRepresentativeColors)
+	{
+	    if (event->xproperty.window == privateScreen.rootWindow())
+		privateScreen.updateAverageColor (event->xproperty.atom);
+	}
 	else if (event->xproperty.atom == XA_WM_CLASS)
 	{
 	    w = findWindow (event->xproperty.window);

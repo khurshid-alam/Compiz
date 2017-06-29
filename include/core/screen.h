@@ -156,6 +156,8 @@ class ScreenInterface : public WrapableInterface<CompScreen, ScreenInterface> {
 	virtual void addSupportedAtoms (std::vector<Atom>& atoms);
 
 	virtual void cursorChangeNotify (const CompString& theme, int size);
+
+	virtual void averageColorChangeNotify (const unsigned short *color);
 };
 
 namespace compiz { namespace private_screen {
@@ -221,7 +223,7 @@ protected:
 }
 
 class CompScreen :
-    public WrapableHandler<ScreenInterface, 19>,
+    public WrapableHandler<ScreenInterface, 20>,
     public PluginClassStorage, // TODO should be an interface here
     public CompSize,
     public virtual ::compiz::DesktopWindowCount,
@@ -273,6 +275,8 @@ public:
 		  std::vector<Atom>& atoms);
     WRAPABLE_HND (18, ScreenInterface, void, cursorChangeNotify,
 		  const CompString&, int);
+    WRAPABLE_HND (19, ScreenInterface, void, averageColorChangeNotify,
+		  const unsigned short *);
 
     unsigned int allocPluginClassIndex ();
     void freePluginClassIndex (unsigned int index);
@@ -418,6 +422,7 @@ public:
     virtual CompWindow * getTopServerWindow() const = 0;
     virtual CoreOptions& getCoreOptions() = 0;
     virtual Colormap colormap() const = 0;
+    virtual const unsigned short * averageColor() const = 0;
     virtual void setCurrentDesktop (unsigned int desktop) = 0;
     virtual Window activeWindow() const = 0;
     virtual void updatePassiveButtonGrabs(Window serverFrame) = 0;
@@ -453,6 +458,7 @@ private:
     virtual void _matchPropertyChanged(CompWindow *) = 0;
     virtual void _outputChangeNotify() = 0;
     virtual void _cursorChangeNotify(const CompString&, int) = 0;
+    virtual void _averageColorChangeNotify(const unsigned short*) = 0;
 };
 
 #endif

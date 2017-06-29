@@ -155,6 +155,8 @@ namespace Atoms {
 
     Atom startupId;
 
+    Atom gnomeRepresentativeColors;
+
     void init (Display *dpy)
     {
 	supported         = XInternAtom (dpy, "_NET_SUPPORTED", 0);
@@ -325,5 +327,7 @@ namespace Atoms {
 	atomPair  = XInternAtom (dpy, "ATOM_PAIR", 0);
 
 	startupId = XInternAtom (dpy, "_NET_STARTUP_ID", 0);
+
+	gnomeRepresentativeColors = XInternAtom (dpy, "_GNOME_BACKGROUND_REPRESENTATIVE_COLORS", 0);
     }
 };
