@@ -886,7 +886,6 @@ GridScreen::handleEvent (XEvent *event)
 		    animations.at (current).currentRect	= w->serverBorderRect ();
 		    animations.at (current).duration = optionGetAnimationDuration ();
 		    animations.at (current).timer = animations.at (current).duration;
-		    animations.at (current).fadeOutTimer = animations.at (current).duration;
 		    animations.at (current).targetRect = desiredSlot;
 		    animations.at (current).window = w->id();
 
@@ -1207,15 +1206,16 @@ GridScreen::preparePaint (int msSinceLastPaint)
 
 	if (anim.fadingOut)
 	{
-	    anim.fadeOutTimer -= msSinceLastPaint;
-	    double progress = (anim.duration - anim.fadeOutTimer) / anim.duration;anim.opacity = 1.0 - progress;
-	    anim.opacity = 1.0 - progress;
+	    GLfloat progress_delta = static_cast<GLfloat>(msSinceLastPaint) / static_cast<GLfloat>(anim.duration);
+	    anim.opacity -= progress_delta;
 	}
 	else
+	{
 	    if (anim.opacity < 1.0f)
 		anim.opacity = anim.progress * anim.progress;
 	    else
 		anim.opacity = 1.0f;
+	}
 
 	if (anim.opacity < 0)
 	{
@@ -1301,7 +1301,6 @@ Animation::Animation ()
     duration = 0;
     complete = false;
     fadingOut = false;
-    fadeOutTimer = 0.0f;
     window = 0;
 }
 
