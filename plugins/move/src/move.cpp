@@ -939,8 +939,13 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 
     if (blend)
     {
-	glEnable (GL_BLEND);
-	glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable (GL_BLEND);
+#ifdef USE_GLES
+	glBlendFuncSeparate (origSrc, origDst,
+			     origSrcAlpha, origDstAlpha);
+#else
+	glBlendFunc (origSrc, origDst);
+#endif
     }
 
     if (cScreen)
