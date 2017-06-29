@@ -3260,7 +3260,7 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 	}
 
 	if ((type & cps::GrabType::KEYBOARD) &&
-            !eventManager.topGrab (cps::GrabType::KEYBOARD))
+	    !eventManager.topGrab (cps::GrabType::KEYBOARD))
 	{
 	    status = XGrabKeyboard (dpy,
 				    eventManager.getGrabWindow (), true,
@@ -3278,7 +3278,7 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 		    }
 		    else
 		    {
-		    	XUngrabPointer (dpy, CurrentTime);
+			XUngrabPointer (dpy, CurrentTime);
 		    }
 		}
 
@@ -3349,7 +3349,7 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    }
 	    else
 	    {
-	        XUngrabPointer (privateScreen.dpy, CurrentTime);
+		XUngrabPointer (privateScreen.dpy, CurrentTime);
 	    }
 	}
 
@@ -4333,10 +4333,10 @@ void
 PrivateScreen::updateCursors (const CompString& theme, int size)
 {
     if (size > 0)
-        XcursorSetDefaultSize (dpy, size);
+	XcursorSetDefaultSize (dpy, size);
 
     if (!theme.empty())
-        XcursorSetTheme (dpy, theme.c_str());
+	XcursorSetTheme (dpy, theme.c_str());
 
     for (auto it = begin (cursors); it != end (cursors); ++it)
     {
