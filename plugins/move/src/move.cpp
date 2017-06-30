@@ -839,6 +839,9 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     GLfloat vertexData2[24];
     GLushort fc[4], bc[4], averageFillColor[4];
     GLint origSrc, origDst;
+#ifdef USE_GLES
+    GLint origSrcAlpha, origDstAlpha;
+#endif
 
     if (optionGetUseDesktopAverageColor ())
     {
@@ -867,7 +870,6 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (blend)
     {
 #ifdef USE_GLES
-	GLint origSrcAlpha, origDstAlpha;
 	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
 	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
 	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);

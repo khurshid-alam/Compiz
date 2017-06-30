@@ -94,7 +94,10 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     GLMatrix 	   sTransform (transform);
     GLfloat         vertexData [12];
     GLfloat         vertexData2[24];
-    GLint    	   origSrc, origDst;
+    GLint          origSrc, origDst;
+#ifdef USE_GLES
+    GLint          origSrcAlpha, origDstAlpha;
+#endif
     GLushort	    fc[4], bc[4], averageFillColor[4];
 
     if (optionGetUseDesktopAverageColor ())
@@ -124,7 +127,6 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     if (blend)
     {
 #ifdef USE_GLES
-	GLint origSrcAlpha, origDstAlpha;
 	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
 	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
 	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);
