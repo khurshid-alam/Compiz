@@ -533,11 +533,15 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 
     if (optionGetUseDesktopAverageColor ())
     {
-        const unsigned short *averageColor = screen->averageColor ();
-        outlineColor = const_cast<unsigned short *>(averageColor);
-	memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
-	averageFillColor[3] = std::numeric_limits<unsigned short>::max () * 0.6;
-	fillColor = averageFillColor;
+	const unsigned short *averageColor = screen->averageColor ();
+
+	if (averageColor)
+	{
+	    outlineColor = const_cast<unsigned short *>(averageColor);
+	    memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
+	    averageFillColor[3] = MaxUShort * 0.6;
+	    fillColor = averageFillColor;
+	}
     }
 
     for (iter = animations.begin (); iter != animations.end () && animating; ++iter)
