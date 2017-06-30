@@ -509,7 +509,7 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
     GLfloat         vertexData[12];
     GLushort        colorData[4];
     unsigned short *color, *fillColor, *outlineColor;
-    unsigned short  averageFillColor[4];
+    unsigned short  averageFillColor[4], averageOutlineColor[4];
     GLboolean       isBlendingEnabled;
     bool            blend = !optionGetDisableBlend ();
 
@@ -537,10 +537,26 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 
 	if (averageColor)
 	{
-	    outlineColor = const_cast<unsigned short *>(averageColor);
 	    memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
-	    averageFillColor[3] = MaxUShort * 0.6;
+	    averageFillColor[3] = MaxUShortFloat * 0.6;
 	    fillColor = averageFillColor;
+
+	    // Generate a lighter color based on border to create more contrast
+	    unsigned int averageColorLevel = (averageColor[0] + averageColor[1] + averageColor[2]) / 3;
+	    unsigned short *oc = averageOutlineColor;
+
+	    float colorMultiplier;
+	    if (averageColorLevel > MaxUShortFloat * 0.3)
+		colorMultiplier = 0.5; // make it darker
+	    else
+		colorMultiplier = 4.0; // make it lighter
+
+	    oc[3] = averageColor[3];
+	    oc[0] = MIN(MaxUShortFloat, ((float) averageColor[0]) * colorMultiplier) * oc[3] / MaxUShortFloat;
+	    oc[1] = MIN(MaxUShortFloat, ((float) averageColor[1]) * colorMultiplier) * oc[3] / MaxUShortFloat;
+	    oc[2] = MIN(MaxUShortFloat, ((float) averageColor[2]) * colorMultiplier) * oc[3] / MaxUShortFloat;
+
+	    outlineColor = averageOutlineColor;
 	}
     }
 
