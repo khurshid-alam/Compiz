@@ -833,6 +833,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     const float MaxUShortFloat = MaxUShort;
     GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
     GLMatrix sTransform (transform);
+    bool usingAverageColors = false;
 
     GLfloat vertexData[12];
     GLfloat vertexData2[24];
@@ -845,6 +846,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 
 	if (averageColor)
 	{
+	    usingAverageColors = true;
 	    borderColor = const_cast<unsigned short *>(averageColor);
 	    memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
 	    averageFillColor[3] = MaxUShort * 0.6;
@@ -941,11 +943,10 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     static const int defaultBorderWidth = 2;
     int borderWidth = defaultBorderWidth;
 
-    if (optionGetIncreaseBorderContrast ())
+    if (optionGetIncreaseBorderContrast() || usingAverageColors)
     {
 	// Generate a lighter color based on border to create more contrast
 	unsigned int averageColorLevel = (borderColor[0] + borderColor[1] + borderColor[2]) / 3;
-	borderWidth *= 2;
 
 	float colorMultiplier;
 	if (averageColorLevel > MaxUShort * 0.3)
@@ -958,12 +959,19 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 	bc[1] = MIN(MaxUShortFloat, ((float) borderColor[1]) * colorMultiplier) * bc[3] / MaxUShortFloat;
 	bc[2] = MIN(MaxUShortFloat, ((float) borderColor[2]) * colorMultiplier) * bc[3] / MaxUShortFloat;
 
-	glLineWidth (borderWidth);
-	streamingBuffer->begin (GL_LINES);
-	streamingBuffer->addVertices (8, &vertexData2[0]);
-	streamingBuffer->addColors (1, bc);
-	streamingBuffer->end ();
-	streamingBuffer->render (sTransform);
+	if (optionGetIncreaseBorderContrast ())
+	{
+	    borderWidth *= 2;
+
+	    glLineWidth (borderWidth);
+	    streamingBuffer->begin (GL_LINES);
+	    streamingBuffer->addVertices (8, &vertexData2[0]);
+	    streamingBuffer->addColors (1, bc);
+	    streamingBuffer->end ();
+	    streamingBuffer->render (sTransform);
+	} else if (usingAverageColors) {
+	    borderColor = bc;
+	}
     }
 
     bc[3] = blend ? borderColor[3] : MaxUShortFloat;
