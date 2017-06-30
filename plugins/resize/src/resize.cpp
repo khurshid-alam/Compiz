@@ -216,9 +216,9 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 
 	float colorMultiplier;
 	if (averageColorLevel > MaxUShort * 0.3)
-	    colorMultiplier = 0.5; // make it darker
+	    colorMultiplier = 0.7; // make it darker
 	else
-	    colorMultiplier = 4.0; // make it lighter
+	    colorMultiplier = 2.0; // make it lighter
 
 	bc[3] = borderColor[3];
 	bc[0] = MIN(MaxUShortFloat, ((float) borderColor[0]) * colorMultiplier) * bc[3] / MaxUShortFloat;

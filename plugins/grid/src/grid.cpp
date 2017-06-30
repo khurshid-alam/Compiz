@@ -547,9 +547,9 @@ GridScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 
 	    float colorMultiplier;
 	    if (averageColorLevel > MaxUShortFloat * 0.3)
-		colorMultiplier = 0.5; // make it darker
+		colorMultiplier = 0.7; // make it darker
 	    else
-		colorMultiplier = 4.0; // make it lighter
+		colorMultiplier = 2.0; // make it lighter
 
 	    oc[3] = averageColor[3];
 	    oc[0] = MIN(MaxUShortFloat, ((float) averageColor[0]) * colorMultiplier) * oc[3] / MaxUShortFloat;
