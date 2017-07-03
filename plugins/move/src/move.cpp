@@ -43,14 +43,6 @@ moveInitiate (CompAction         *action,
 
     MOVE_SCREEN (screen);
 
-    if (ms->optionGetMode () != MoveOptions::ModeNormal)
-    {
-	ms->gScreen->glPaintOutputSetEnabled (ms, true);
-	ms->paintRect = true;
-	ms->rectX = 0;
-	ms->rectY = 0;
-    }
-
     Window xid = CompOption::getIntOptionNamed (options, "window");
 
     w = screen->findWindow (xid);
@@ -148,6 +140,19 @@ moveInitiate (CompAction         *action,
 		int yRoot = w->geometry ().y () + (w->size ().height () / 2);
 
 		s->warpPointer (xRoot - pointerX, yRoot - pointerY);
+	    }
+
+	    if (ms->optionGetMode () != MoveOptions::ModeNormal)
+	    {
+                MOVE_WINDOW (w);
+
+		ms->gScreen->glPaintOutputSetEnabled (ms, true);
+		ms->paintRect = true;
+		ms->rectX = 0;
+		ms->rectY = 0;
+
+                if (mw->cWindow)
+		    mw->cWindow->addDamage ();
 	    }
 
 	    if (ms->moveOpacity != OPAQUE)
