@@ -108,7 +108,7 @@ compGetRegexMatches(const CompString& regexStr,
     std::smatch subMatches;
     std::regex regex(regexStr);
 
-    if (!std::regex_match(string, subMatches, regex))
+    if (std::regex_match(string, subMatches, regex))
     {
 	for (const auto& subMatch : subMatches)
 	    matches.push_back (subMatch.str ());
