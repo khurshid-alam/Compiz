@@ -1427,6 +1427,113 @@ PrivateScreen::updateResources ()
 	screen->cursorChangeNotify (cursorTheme, cursorSize);
 }
 
+void
+PrivateScreen::updateAverageColor (Atom atom)
+{
+    Atom	  actual_type;
+    int		  result, format;
+    unsigned long n, left;
+    unsigned char *data;
+
+    auto previousAverageColor = averageColor;
+    averageColor.clear ();
+
+    result = XGetWindowProperty (dpy, root,
+				 atom, 0L, 65536, False,
+				 XA_STRING, &actual_type, &format,
+				 &n, &left, &data);
+
+    if (result != Success || !data || actual_type != XA_STRING)
+    {
+	if (previousAverageColor != averageColor)
+	    screen->averageColorChangeNotify (averageColor.data ());
+
+	XFree (data);
+	return;
+    }
+
+    CompString colors (reinterpret_cast<char *> (data));
+    bool found_valid;
+    double r, g, b, a;
+    found_valid = false;
+    r = g = b = 0.0;
+    a = 1.0;
+    const CompString rgba_regex = R"((rgba?))"
+				  R"(\s*\(\s*([0-9]{1,3})\s*,)"
+				  R"(\s*([0-9]{1,3})\s*,)"
+				  R"(\s*([0-9]{1,3})\s*)"
+				  R"((,\s*((0*(\.[0-9]+)|1(\.0*)?)?)\s*)?\))";
+
+    std::vector<CompString> matches = compGetRegexMatches (rgba_regex, colors);
+
+    if (matches.size () > 4)
+    {
+	try
+	{
+	    found_valid = true;
+	    r = std::stoi (matches[2]) / 255.0;
+	    g = std::stoi (matches[3]) / 255.0;
+	    b = std::stoi (matches[4]) / 255.0;
+
+	    if (matches[1] == "rgba")
+	    {
+		if (matches.size () > 6 && !matches[6].empty ())
+		    a = std::stod (matches[6][0] == '.' ? '0'+matches[6] : matches[6]);
+		else
+		    found_valid = false;
+	    }
+	} catch (std::exception const& except) {
+	    found_valid = false;
+	    compLogMessage ("core", CompLogLevelWarn, "%s: failed to parse '%s' color string",
+			    except.what (), colors.c_str ());
+	}
+    } else {
+	size_t color_len = (colors.length () - 1) / 3;
+
+	if (color_len > 0 && color_len <= 4)
+	{
+	    CompString hex_regex = "#([[:xdigit:]]{" + std::to_string(color_len) + "})" +
+				   "([[:xdigit:]]{" + std::to_string(color_len) + "})" +
+				   "([[:xdigit:]]{" + std::to_string(color_len) + "})" +
+				   "([[:xdigit:]]{" + std::to_string(color_len) + "})?$";
+	    std::vector<CompString> matches = compGetRegexMatches (hex_regex, colors);
+	    if (matches.size () == 5)
+	    {
+		try
+		{
+		    double max_value = static_cast<float> ((1 << (4 * color_len)) - 1);
+		    found_valid = true;
+		    r = std::stoi (matches[1], 0, 16) / max_value;
+		    g = std::stoi (matches[2], 0, 16) / max_value;
+		    b = std::stoi (matches[3], 0, 16) / max_value;
+
+		    if (!matches[4].empty ())
+			a = std::stoi (matches[4], 0, 16) / max_value;
+		} catch (std::exception const& except) {
+		    found_valid = false;
+		    compLogMessage ("core", CompLogLevelWarn, "%s: failed to parse '%s' color string",
+				    except.what (), colors.c_str ());
+		}
+	    }
+	}
+    }
+
+    if (found_valid)
+    {
+	const double MaxUShort = std::numeric_limits<unsigned short>::max ();
+	averageColor.resize (4);
+	averageColor[0] = MAX (0, MIN (r * MaxUShort, MaxUShort));
+	averageColor[1] = MAX (0, MIN (g * MaxUShort, MaxUShort));
+	averageColor[2] = MAX (0, MIN (b * MaxUShort, MaxUShort));
+	averageColor[3] = MAX (0, MIN (a * MaxUShort, MaxUShort));
+    }
+
+    XFree (data);
+
+    if (previousAverageColor != averageColor)
+	screen->averageColorChangeNotify (averageColor.data ());
+}
+
 bool
 CompScreen::fileToImage (CompString &name,
 			 CompSize   &size,
@@ -3153,7 +3260,7 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 	}
 
 	if ((type & cps::GrabType::KEYBOARD) &&
-            !eventManager.topGrab (cps::GrabType::KEYBOARD))
+	    !eventManager.topGrab (cps::GrabType::KEYBOARD))
 	{
 	    status = XGrabKeyboard (dpy,
 				    eventManager.getGrabWindow (), true,
@@ -3171,7 +3278,7 @@ PrivateScreen::pushGrabGeneric (cps::GrabType type,
 		    }
 		    else
 		    {
-		    	XUngrabPointer (dpy, CurrentTime);
+			XUngrabPointer (dpy, CurrentTime);
 		    }
 		}
 
@@ -3242,7 +3349,7 @@ CompScreenImpl::removeGrab (CompScreen::GrabHandle handle,
 	    }
 	    else
 	    {
-	        XUngrabPointer (privateScreen.dpy, CurrentTime);
+		XUngrabPointer (privateScreen.dpy, CurrentTime);
 	    }
 	}
 
@@ -4226,10 +4333,10 @@ void
 PrivateScreen::updateCursors (const CompString& theme, int size)
 {
     if (size > 0)
-        XcursorSetDefaultSize (dpy, size);
+	XcursorSetDefaultSize (dpy, size);
 
     if (!theme.empty())
-        XcursorSetTheme (dpy, theme.c_str());
+	XcursorSetTheme (dpy, theme.c_str());
 
     for (auto it = begin (cursors); it != end (cursors); ++it)
     {
@@ -4248,6 +4355,18 @@ void
 CompScreenImpl::_cursorChangeNotify (const CompString& theme, int size)
 {
     privateScreen.updateCursors (theme, size);
+}
+
+void
+CompScreen::averageColorChangeNotify (const unsigned short* color)
+{
+    WRAPABLE_HND_FUNCTN (averageColorChangeNotify, color);
+    _averageColorChangeNotify (color);
+}
+
+void
+CompScreenImpl::_averageColorChangeNotify (const unsigned short* color)
+{
 }
 
 /* Returns default viewport for some window geometry. If the window spans
@@ -4395,6 +4514,10 @@ ScreenInterface::addSupportedAtoms (std::vector<Atom>& atoms)
 void
 ScreenInterface::cursorChangeNotify (const CompString& theme, int size)
     WRAPABLE_DEF (cursorChangeNotify, theme, size)
+
+void
+ScreenInterface::averageColorChangeNotify (const unsigned short *color)
+    WRAPABLE_DEF (averageColorChangeNotify, color)
 
 Window
 CompScreenImpl::root ()
@@ -4841,6 +4964,12 @@ CompScreenImpl::colormap() const
     return privateScreen.colormap;
 }
 
+const unsigned short *
+CompScreenImpl::averageColor() const
+{
+    return privateScreen.averageColor.data ();
+}
+
 void
 CompScreenImpl::setCurrentDesktop (unsigned int desktop)
 {
@@ -5269,6 +5398,8 @@ PrivateScreen::initDisplay (const char *name, cps::History& history, unsigned in
 
     XIGetClientPointer (dpy, None, &clientPointerDeviceId);
     updateResources ();
+
+    updateAverageColor (Atoms::gnomeRepresentativeColors);
 
     /* Attempt to gain SubstructureRedirectMask */
     CompScreenImpl::checkForError (dpy);

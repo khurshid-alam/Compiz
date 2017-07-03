@@ -569,6 +569,11 @@
 			<default>350</default>
 			<min>0</min>
 		</option>
+		<option name="use_desktop_average_color" type="bool">
+		    <_short>Use Desktop average color</_short>
+		    <_long>Try to use the desktop average color if defined by your DE.</_long>
+		    <default>true</default>
+		</option>
 		<option name="outline_color" type="color">
 			<_short>Preview Outline Color</_short>
 			<_long>Color and opacity of the resize indicator preview outline.</_long>

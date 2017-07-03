@@ -692,6 +692,8 @@ class PrivateScreen :
 
 	void updateResources ();
 
+	void updateAverageColor (Atom atom);
+
 	Window getActiveWindow (Window root);
 
 	void setWindowState (unsigned int state, Window id);
@@ -776,6 +778,8 @@ public:
     int screenNum;
     unsigned int nDesktop;
     unsigned int currentDesktop;
+
+    std::vector<unsigned short> averageColor;
 
     CompOutput fullscreenOutput;
     CompScreenEdge screenEdge[SCREEN_EDGE_NUM];
@@ -1092,6 +1096,7 @@ class CompScreenImpl : public CompScreen,
 	virtual CompWindow * getTopServerWindow() const;
 	virtual CoreOptions& getCoreOptions();
 	virtual Colormap colormap() const;
+	virtual const unsigned short * averageColor() const;
 	virtual void setCurrentDesktop (unsigned int desktop);
 	virtual Window activeWindow() const;
 	virtual bool grabWindowIsNot(Window w) const;
@@ -1187,6 +1192,7 @@ class CompScreenImpl : public CompScreen,
         virtual void _matchPropertyChanged(CompWindow *);
         virtual void _outputChangeNotify();
         virtual void _cursorChangeNotify(const CompString&, int);
+        virtual void _averageColorChangeNotify(const unsigned short*);
 
 	void grabServer ();
 	void ungrabServer ();

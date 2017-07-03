@@ -58,6 +58,16 @@
 	        <long>Maximizes the window vertically if the top or bottom screen edge is hit while resizing</long>
 	        <default>true</default>
 	    </option>
+	    <option name="increase_border_contrast" type="bool">
+		<_short>Use a double-border in 'Rectangle' and 'Outline' modes</_short>
+		<_long>Increase the contrast of the border using a lighter color.</_long>
+		<default>true</default>
+	    </option>
+	    <option name="use_desktop_average_color" type="bool">
+		<_short>Use Desktop average colors</_short>
+		<_long>Try to use the desktop average color if defined by your DE (overrides custom colors).</_long>
+		<default>true</default>
+	    </option>
 	    <option name="border_color" type="color">
 		<_short>Border Color</_short>
 		<_long>Border color used for outline and rectangle resize modes</_long>

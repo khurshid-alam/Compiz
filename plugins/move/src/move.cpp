@@ -34,6 +34,9 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
+static const int defaultBorderWidth = 2;
+static const int biggerBorderWidthMultiplier = 2;
+
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -42,14 +45,6 @@ moveInitiate (CompAction         *action,
     CompWindow *w;
 
     MOVE_SCREEN (screen);
-
-    if (ms->optionGetMode () != MoveOptions::ModeNormal)
-    {
-	ms->gScreen->glPaintOutputSetEnabled (ms, true);
-	ms->paintRect = true;
-	ms->rectX = 0;
-	ms->rectY = 0;
-    }
 
     Window xid = CompOption::getIntOptionNamed (options, "window");
 
@@ -148,6 +143,19 @@ moveInitiate (CompAction         *action,
 		int yRoot = w->geometry ().y () + (w->size ().height () / 2);
 
 		s->warpPointer (xRoot - pointerX, yRoot - pointerY);
+	    }
+
+	    if (ms->optionGetMode () != MoveOptions::ModeNormal)
+	    {
+		Box box;
+
+		ms->gScreen->glPaintOutputSetEnabled (ms, true);
+		ms->paintRect = true;
+		ms->rectX = 0;
+		ms->rectY = 0;
+
+		if (ms->getMovingRectangle (&box))
+		    ms->damageMovingRectangle (&box);
 	    }
 
 	    if (ms->moveOpacity != OPAQUE)
@@ -797,6 +805,61 @@ MoveScreen::getMovingRectangle (BoxPtr pBox)
     return true;
 }
 
+bool
+MoveScreen::damageMovingRectangle (BoxPtr pBox)
+{
+    CompRegion damageRegion;
+    int borderWidth;
+
+    if (!cScreen || !pBox)
+	return false;
+
+    borderWidth = defaultBorderWidth;
+
+    if (optionGetIncreaseBorderContrast ())
+	borderWidth *= biggerBorderWidthMultiplier;
+
+    if (optionGetMode () == MoveOptions::ModeRectangle)
+    {
+	    CompRect damage (pBox->x1 - borderWidth,
+			     pBox->y1 - borderWidth,
+			     pBox->x2 - pBox->x1 + borderWidth * 2,
+			     pBox->y2 - pBox->y1 + borderWidth * 2);
+	    damageRegion += damage;
+    }
+    else if (optionGetMode () == MoveOptions::ModeOutline)
+    {
+	    // Top
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      pBox->x2 - pBox->x1 + borderWidth * 2,
+				      borderWidth * 2);
+	    // Right
+	    damageRegion += CompRect (pBox->x2 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      borderWidth + borderWidth / 2,
+				      pBox->y2 - pBox->y1 + borderWidth * 2);
+	    // Bottom
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y2 - borderWidth,
+				      pBox->x2 - pBox->x1 + borderWidth * 2,
+				      borderWidth * 2);
+	    // Left
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      borderWidth + borderWidth / 2,
+				      pBox->y2 - pBox->y1 + borderWidth * 2);
+    }
+
+    if (!damageRegion.isEmpty ())
+    {
+	cScreen->damageRegion (damageRegion);
+	return true;
+    }
+
+    return false;
+}
+
 bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 				const GLMatrix &transform,
 				const CompRegion &region,
@@ -833,11 +896,31 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     const float MaxUShortFloat = MaxUShort;
     GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer ();
     GLMatrix sTransform (transform);
+    bool usingAverageColors = false;
 
     GLfloat vertexData[12];
     GLfloat vertexData2[24];
-    GLushort fc[4], bc[4];
+    GLushort fc[4], bc[4], averageFillColor[4];
     GLint origSrc, origDst;
+#ifdef USE_GLES
+    GLint origSrcAlpha, origDstAlpha;
+#endif
+
+    if (optionGetUseDesktopAverageColor ())
+    {
+	const unsigned short *averageColor = screen->averageColor ();
+
+	if (averageColor)
+	{
+	    usingAverageColors = true;
+	    borderColor = const_cast<unsigned short *>(averageColor);
+	    memcpy (averageFillColor, averageColor, 4 * sizeof (unsigned short));
+	    averageFillColor[3] = MaxUShort * 0.6;
+
+	    if (fillColor)
+		fillColor = averageFillColor;
+	}
+    }
 
     bool blend = optionGetBlend ();
 
@@ -850,7 +933,6 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     if (blend)
     {
 #ifdef USE_GLES
-	GLint origSrcAlpha, origDstAlpha;
 	glGetIntegerv (GL_BLEND_SRC_RGB, &origSrc);
 	glGetIntegerv (GL_BLEND_DST_RGB, &origDst);
 	glGetIntegerv (GL_BLEND_SRC_ALPHA, &origSrcAlpha);
@@ -860,11 +942,6 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 	glGetIntegerv (GL_BLEND_DST, &origDst);
 #endif
     }
-
-    bc[3] = blend ? ((float) borderColor[3] / MaxUShortFloat) : MaxUShortFloat;
-    bc[0] = ((float) borderColor[0] / MaxUShortFloat) * bc[3];
-    bc[1] = ((float) borderColor[1] / MaxUShortFloat) * bc[3];
-    bc[2] = ((float) borderColor[2] / MaxUShortFloat) * bc[3];
 
     vertexData[0] = box.x1;
     vertexData[1] = box.y1;
@@ -928,11 +1005,47 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     }
 
     /* draw outline */
-    static const int borderWidth = 2;
+    int borderWidth = defaultBorderWidth;
 
-    glLineWidth (borderWidth);
+    if (optionGetIncreaseBorderContrast() || usingAverageColors)
+    {
+	// Generate a lighter color based on border to create more contrast
+	unsigned int averageColorLevel = (borderColor[0] + borderColor[1] + borderColor[2]) / 3;
+
+	float colorMultiplier;
+	if (averageColorLevel > MaxUShort * 0.3)
+	    colorMultiplier = 0.7; // make it darker
+	else
+	    colorMultiplier = 2.0; // make it lighter
+
+	bc[3] = borderColor[3];
+	bc[0] = MIN(MaxUShortFloat, ((float) borderColor[0]) * colorMultiplier) * bc[3] / MaxUShortFloat;
+	bc[1] = MIN(MaxUShortFloat, ((float) borderColor[1]) * colorMultiplier) * bc[3] / MaxUShortFloat;
+	bc[2] = MIN(MaxUShortFloat, ((float) borderColor[2]) * colorMultiplier) * bc[3] / MaxUShortFloat;
+
+	if (optionGetIncreaseBorderContrast ())
+	{
+	    borderWidth *= biggerBorderWidthMultiplier;
+
+	    glLineWidth (borderWidth);
+	    streamingBuffer->begin (GL_LINES);
+	    streamingBuffer->addVertices (8, &vertexData2[0]);
+	    streamingBuffer->addColors (1, bc);
+	    streamingBuffer->end ();
+	    streamingBuffer->render (sTransform);
+	} else if (usingAverageColors) {
+	    borderColor = bc;
+	}
+    }
+
+    bc[3] = blend ? borderColor[3] : MaxUShortFloat;
+    bc[0] = borderColor[0] * bc[3] / MaxUShortFloat;
+    bc[1] = borderColor[1] * bc[3] / MaxUShortFloat;
+    bc[2] = borderColor[2] * bc[3] / MaxUShortFloat;
+
+    glLineWidth (defaultBorderWidth);
     streamingBuffer->begin (GL_LINES);
-    streamingBuffer->addColors (1, borderColor);
+    streamingBuffer->addColors (1, bc);
     streamingBuffer->addVertices (8, &vertexData2[0]);
     streamingBuffer->end ();
     streamingBuffer->render (sTransform);
@@ -948,44 +1061,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 #endif
     }
 
-    if (cScreen)
-    {
-    	CompRegion damageRegion;
-
-    	if (optionGetMode () == MoveOptions::ModeOutline)
-        {
-	    // Top
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y1 - borderWidth,
-				      box.x2 - box.x1 + borderWidth * 2,
-				      borderWidth + 1);
-	    // Right
-	    damageRegion += CompRect (box.x2 - borderWidth,
-				      box.y1 - borderWidth,
-				      borderWidth + 1,
-				      box.y2 - box.y1 + borderWidth * 2);
-	    // Bottom
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y2 - borderWidth,
-				      box.x2 - box.x1 + borderWidth * 2,
-				      borderWidth + 1);
-	    // Left
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y1 - borderWidth,
-				      borderWidth + 1,
-				      box.y2 - box.y1 + borderWidth * 2);
-        }
-        else
-    	{
-	    CompRect damage (box.x1 - borderWidth,
-			     box.y1 - borderWidth,
-			     box.x2 - box.x1 + borderWidth * 2,
-			     box.y2 - box.y1 + borderWidth * 2);
-	    damageRegion += damage;
-	}
-
-	cScreen->damageRegion (damageRegion);
-    }
+    damageMovingRectangle (&box);
 
     return true;
 }
