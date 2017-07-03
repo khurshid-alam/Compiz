@@ -75,7 +75,7 @@ class MoveScreen :
 			    unsigned int);
 
 	bool getMovingRectangle (BoxPtr pbox);
-	void damageMovingRectangle (BoxPtr pbox);
+	bool damageMovingRectangle (BoxPtr pbox);
 	bool glPaintMovingRectangle (const GLMatrix &transform, CompOutput *output, unsigned short *borderColor, unsigned short *fillColor);
 
 	CompWindow *w;

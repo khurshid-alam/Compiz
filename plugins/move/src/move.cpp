@@ -34,6 +34,9 @@
 
 COMPIZ_PLUGIN_20090315 (move, MovePluginVTable)
 
+static const int defaultBorderWidth = 2;
+static const int biggerBorderWidthMultiplier = 2;
+
 static bool
 moveInitiate (CompAction         *action,
 	      CompAction::State  state,
@@ -144,15 +147,15 @@ moveInitiate (CompAction         *action,
 
 	    if (ms->optionGetMode () != MoveOptions::ModeNormal)
 	    {
-                MOVE_WINDOW (w);
+		Box box;
 
 		ms->gScreen->glPaintOutputSetEnabled (ms, true);
 		ms->paintRect = true;
 		ms->rectX = 0;
 		ms->rectY = 0;
 
-                if (mw->cWindow)
-		    mw->cWindow->addDamage ();
+		if (ms->getMovingRectangle (&box))
+		    ms->damageMovingRectangle (&box);
 	    }
 
 	    if (ms->moveOpacity != OPAQUE)
@@ -802,6 +805,61 @@ MoveScreen::getMovingRectangle (BoxPtr pBox)
     return true;
 }
 
+bool
+MoveScreen::damageMovingRectangle (BoxPtr pBox)
+{
+    CompRegion damageRegion;
+    int borderWidth;
+
+    if (!cScreen || !pBox)
+	return false;
+
+    borderWidth = defaultBorderWidth;
+
+    if (optionGetIncreaseBorderContrast ())
+	borderWidth *= biggerBorderWidthMultiplier;
+
+    if (optionGetMode () == MoveOptions::ModeRectangle)
+    {
+	    CompRect damage (pBox->x1 - borderWidth,
+			     pBox->y1 - borderWidth,
+			     pBox->x2 - pBox->x1 + borderWidth * 2,
+			     pBox->y2 - pBox->y1 + borderWidth * 2);
+	    damageRegion += damage;
+    }
+    else if (optionGetMode () == MoveOptions::ModeOutline)
+    {
+	    // Top
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      pBox->x2 - pBox->x1 + borderWidth * 2,
+				      borderWidth * 2);
+	    // Right
+	    damageRegion += CompRect (pBox->x2 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      borderWidth + borderWidth / 2,
+				      pBox->y2 - pBox->y1 + borderWidth * 2);
+	    // Bottom
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y2 - borderWidth,
+				      pBox->x2 - pBox->x1 + borderWidth * 2,
+				      borderWidth * 2);
+	    // Left
+	    damageRegion += CompRect (pBox->x1 - borderWidth,
+				      pBox->y1 - borderWidth,
+				      borderWidth + borderWidth / 2,
+				      pBox->y2 - pBox->y1 + borderWidth * 2);
+    }
+
+    if (!damageRegion.isEmpty ())
+    {
+	cScreen->damageRegion (damageRegion);
+	return true;
+    }
+
+    return false;
+}
+
 bool MoveScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 				const GLMatrix &transform,
 				const CompRegion &region,
@@ -947,7 +1005,6 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
     }
 
     /* draw outline */
-    static const int defaultBorderWidth = 2;
     int borderWidth = defaultBorderWidth;
 
     if (optionGetIncreaseBorderContrast() || usingAverageColors)
@@ -968,7 +1025,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 
 	if (optionGetIncreaseBorderContrast ())
 	{
-	    borderWidth *= 2;
+	    borderWidth *= biggerBorderWidthMultiplier;
 
 	    glLineWidth (borderWidth);
 	    streamingBuffer->begin (GL_LINES);
@@ -1004,44 +1061,7 @@ MoveScreen::glPaintMovingRectangle (const GLMatrix &transform,
 #endif
     }
 
-    if (cScreen)
-    {
-	CompRegion damageRegion;
-
-	if (optionGetMode () == MoveOptions::ModeOutline)
-	{
-	    // Top
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y1 - borderWidth,
-				      box.x2 - box.x1 + borderWidth * 2,
-				      borderWidth * 2);
-	    // Right
-	    damageRegion += CompRect (box.x2 - borderWidth,
-				      box.y1 - borderWidth,
-				      borderWidth + borderWidth / 2,
-				      box.y2 - box.y1 + borderWidth * 2);
-	    // Bottom
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y2 - borderWidth,
-				      box.x2 - box.x1 + borderWidth * 2,
-				      borderWidth * 2);
-	    // Left
-	    damageRegion += CompRect (box.x1 - borderWidth,
-				      box.y1 - borderWidth,
-				      borderWidth + borderWidth / 2,
-				      box.y2 - box.y1 + borderWidth * 2);
-	}
-	else
-	{
-	    CompRect damage (box.x1 - borderWidth,
-			     box.y1 - borderWidth,
-			     box.x2 - box.x1 + borderWidth * 2,
-			     box.y2 - box.y1 + borderWidth * 2);
-	    damageRegion += damage;
-	}
-
-	cScreen->damageRegion (damageRegion);
-    }
+    damageMovingRectangle (&box);
 
     return true;
 }
