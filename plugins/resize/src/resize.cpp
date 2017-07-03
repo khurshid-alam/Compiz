@@ -273,7 +273,7 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 	damageRegion += CompRect (box.x1 - borderWidth,
 				  box.y1 - borderWidth,
 				  box.x2 - box.x1 + borderWidth * 2,
-				  borderWidth + borderWidth / 2);
+				  borderWidth * 2);
 	// Right
 	damageRegion += CompRect (box.x2 - borderWidth,
 				  box.y1 - borderWidth,
@@ -283,7 +283,7 @@ ResizeScreen::glPaintRectangle (const GLScreenPaintAttrib &sAttrib,
 	damageRegion += CompRect (box.x1 - borderWidth,
 				  box.y2 - borderWidth,
 				  box.x2 - box.x1 + borderWidth * 2,
-				  borderWidth + borderWidth / 2);
+				  borderWidth * 2);
 	// Left
 	damageRegion += CompRect (box.x1 - borderWidth,
 				  box.y1 - borderWidth,
