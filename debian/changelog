@@ -1,3 +1,15 @@
+compiz (1:0.9.13.1+17.10.20170703-0ubuntu1) artful; urgency=medium
+
+  * move: damage all the border area in outline mode and ignore
+    transparent colors (LP: #1700859)
+  * grid: ignore alpha in colors when not blending, and fix animations
+    (LP: #1700859)
+  * resize: add support for disabling transparency and avoid over-
+    damaging in outline mode (LP: #1700859)
+  * Screen: add averageColor to get the current desktop average color
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 03 Jul 2017 15:21:34 +0000
+
 compiz (1:0.9.13.1+17.10.20170616-0ubuntu1) artful; urgency=medium
 
   [ Martin Wimpress ]
