@@ -78,6 +78,11 @@
 		    <alpha>0x1919</alpha>
 		</default>
 	    </option>
+	    <option name="disable_blend" type="bool">
+		<_short>Disable Transparency</_short>
+		<_long>Disable blending.</_long>
+		<default>false</default>
+	    </option>
 	    <subgroup>
 			<_short>Specific Window Matches</_short>
 			<option name="normal_match" type="match">

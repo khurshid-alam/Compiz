@@ -487,13 +487,13 @@ ResizeLogic::handleMotionEvent (int xRoot, int yRoot)
 	che = he;
 
 	if (w->constrainNewWindowSize (wi, he, &cwi, &che) &&
-	    mode != ResizeOptions::ModeNormal)
+	    mode != ResizeOptions::ModeNormal &&
+	    mode != ResizeOptions::ModeOutline)
 	{
 	    Box box;
 
 	    /* Also, damage relevant paint rectangles */
-	    if (mode == ResizeOptions::ModeRectangle ||
-	        mode == ResizeOptions::ModeOutline)
+	    if (mode == ResizeOptions::ModeRectangle)
 		getPaintRectangle (&box);
 	    else if (mode == ResizeOptions::ModeStretch)
 		getStretchRectangle (&box);
@@ -518,7 +518,8 @@ ResizeLogic::handleMotionEvent (int xRoot, int yRoot)
 					     xRoot, yRoot,
 					     wX, wY, wWidth, wHeight); /*in*/
 
-	if (mode != ResizeOptions::ModeNormal)
+	if (mode != ResizeOptions::ModeNormal &&
+	    mode != ResizeOptions::ModeOutline)
 	{
 	    if (mode == ResizeOptions::ModeStretch)
 		getStretchRectangle (&box);
@@ -532,7 +533,8 @@ ResizeLogic::handleMotionEvent (int xRoot, int yRoot)
 
 	computeGeometry (wi, he);
 
-	if (mode != ResizeOptions::ModeNormal)
+	if (mode != ResizeOptions::ModeNormal &&
+	    mode != ResizeOptions::ModeOutline)
 	{
 	    if (mode == ResizeOptions::ModeStretch)
 		getStretchRectangle (&box);
@@ -541,7 +543,7 @@ ResizeLogic::handleMotionEvent (int xRoot, int yRoot)
 
 	    damageRectangle (&box);
 	}
-	else
+	else if (mode == ResizeOptions::ModeNormal)
 	{
 	    updateWindowSize ();
 	}
