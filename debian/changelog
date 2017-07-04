@@ -1,3 +1,11 @@
+compiz (1:0.9.13.1+17.10.20170704-0ubuntu1) artful; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Use AnyPropertyType when getting _MOTIF_WM_HINTS property. (LP:
+    #1702297)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 04 Jul 2017 13:02:08 +0000
+
 compiz (1:0.9.13.1+17.10.20170703-0ubuntu1) artful; urgency=medium
 
   * move: damage all the border area in outline mode and ignore
