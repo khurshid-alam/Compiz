@@ -1839,7 +1839,7 @@ cps::XWindowInfo::getMwmHints (Window       id,
 
     result = XGetWindowProperty (dpy, id,
 				 Atoms::mwmHints,
-				 0L, 20L, false, Atoms::mwmHints,
+				 0L, 20L, false, AnyPropertyType,
 				 &actual, &format, &n, &left, &data);
 
     if (result == Success && data)

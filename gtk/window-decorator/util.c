@@ -75,7 +75,7 @@ get_mwm_prop (Window xwindow)
     gdk_error_trap_push ();
 
     result = XGetWindowProperty (xdisplay, xwindow, mwm_hints_atom,
-				 0L, 20L, FALSE, mwm_hints_atom,
+				 0L, 20L, FALSE, AnyPropertyType,
 				 &actual, &format, &n, &left, &data);
 
     err = gdk_error_trap_pop ();
