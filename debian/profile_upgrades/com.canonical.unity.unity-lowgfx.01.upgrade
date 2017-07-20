@@ -1,0 +1,12 @@
+[grid]
++s0_animation_duration = 0
++s0_draw_stretched_window = false
+
+[move]
++s0_mode = 2
++s0_increase_border_contrast = true
++s0_lazy_positioning = true
+
+[resize]
++s0_mode = 2
++s0_increase_border_contrast = true
