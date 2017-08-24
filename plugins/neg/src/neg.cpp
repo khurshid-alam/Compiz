@@ -435,9 +435,9 @@ NegScreen::optionChanged (CompOption          *opt,
 	    {
 		NEG_WINDOW (w);
 		nw->toggle ();
-        }
+	    }
 	}
-    default:
+	default:
 	break;
     }
 }
@@ -463,8 +463,8 @@ NegScreen::NegScreen (CompScreen *screen) :
 					      _1, _2));
 	optionSetNegDecorationsNotify (boost::bind (&NegScreen::optionChanged, this,
 					  _1, _2));
-	optionSetActivateAtStartupNotify (boost::bind (&NegScreen::optionChanged, this,
-					  _1, _2));
+    optionSetActivateAtStartupNotify (boost::bind (&NegScreen::optionChanged, this,
+						   _1, _2));
 
 }
 	
