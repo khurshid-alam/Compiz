@@ -785,7 +785,8 @@ PrivateScreen::getNextXEvent (XEvent &ev)
 	    if (peekEvent.type != MotionNotify)
 		break;
 
-	    XNextEvent (dpy, &peekEvent);
+	    /* Overwrite previous MotionNotify event */
+	    XNextEvent (dpy, &ev);
 	}
     }
 
