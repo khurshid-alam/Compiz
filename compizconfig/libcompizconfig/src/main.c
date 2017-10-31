@@ -3012,6 +3012,15 @@ typedef struct _PluginSortHelper
     CCSPluginList after;
 } PluginSortHelper;
 
+static int
+PluginCompare (const void *_a, const void *_b)
+{
+    const PluginSortHelper *a = _a;
+    const PluginSortHelper *b = _b;
+
+    return strcmp (ccsPluginGetName (a->plugin), ccsPluginGetName (b->plugin));
+}
+
 CCSStringList
 ccsGetSortedPluginStringListDefault (CCSContext * context)
 {
@@ -3051,6 +3060,9 @@ ccsGetSortedPluginStringListDefault (CCSContext * context)
 	plugins[i].plugin = list->data;
 	plugins[i].after = NULL;
     }
+
+    /* Sort alphabetically first, to get a stable order. */
+    qsort (plugins, len, sizeof (PluginSortHelper), PluginCompare);
 
     for (i = 0; i < len; ++i)
     {
