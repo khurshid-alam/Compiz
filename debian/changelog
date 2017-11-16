@@ -1,3 +1,18 @@
+compiz (1:0.9.13.1+18.04.20171116-0ubuntu1) bionic; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * unity-lowgfx.ini: remove unsupported unity option
+
+  [ Samuel Thibault ]
+  * X11: keep the last MotionNotify when collapsing them (LP: #1728870)
+  * compizconfig: load modules in alphabetical order instead of
+    undefined order (LP: #1729045)
+
+  [ ksamak ]
+  * neg: added hook to react to change in ccsm, for autostart option
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Thu, 16 Nov 2017 03:25:54 +0000
+
 compiz (1:0.9.13.1+17.10.20170901-0ubuntu1) artful; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
