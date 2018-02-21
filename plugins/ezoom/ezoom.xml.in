@@ -70,6 +70,21 @@
 			    <alpha>0x4fff</alpha>
 			</default>
 		</option>
+		<option name="zoom_smoothing" type="int">
+			<_short>Zoom Smoothing Algorithm</_short>
+			<_long>Select algorithm for smoothing the zoom rendering</_long>
+			<min>0</min>
+			<max>1</max>
+			<default>1</default>
+			<desc>
+			    <value>0</value>
+			    <_name>None</_name>
+			</desc>
+			<desc>
+			    <value>1</value>
+			    <_name>Bilinear</_name>
+			</desc>
+		</option>
 	    </group>
 	    <group>
 		<_short>Mouse Behaviour</_short>

@@ -140,6 +140,34 @@ isZoomed (int out)
     return false;
 }
 
+static inline GLenum
+setZoomSmoothing (GLScreen *gScreen)
+{
+    ZOOM_SCREEN (screen);
+
+    GLenum oldFilter = zs->gScreen->textureFilter ();
+    switch (zs->optionGetZoomSmoothing ())
+    {
+	case EzoomOptions::ZoomSmoothingNone:
+	    zs->gScreen->setTextureFilter (GL_NEAREST);
+	    break;
+
+	case EzoomOptions::ZoomSmoothingBilinear:
+	    zs->gScreen->setTextureFilter (GL_LINEAR);
+	    break;
+    }
+
+    return oldFilter;
+}
+
+static void
+restoreZoomSmoothing (GLScreen *gScreen, GLenum oldFilter)
+{
+    ZOOM_SCREEN (screen);
+
+    zs->gScreen->setTextureFilter (oldFilter);
+}
+
 /* Returns the distance to the defined edge in zoomed pixels.  */
 int
 EZoomScreen::distanceToEdge (int                   out,
@@ -502,6 +530,8 @@ EZoomScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
     bool status;
     int  out = output->id ();
 
+    GLenum oldFilter = setZoomSmoothing (gScreen);
+
     if (isActive (out))
     {
 	GLScreenPaintAttrib sa         = attrib;
@@ -528,6 +558,8 @@ EZoomScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 
     if (grabIndex)
 	drawBox (transform, output, box);
+
+    restoreZoomSmoothing (gScreen, oldFilter);
 
     return status;
 }
@@ -1158,6 +1190,8 @@ EZoomScreen::drawCursor (CompOutput    *output,
 	    return;
 	}
 
+	GLenum oldFilter = setZoomSmoothing (gScreen);
+
 	GLMatrix       sTransform = transform;
 	float          scaleFactor;
 	int            ax, ay;
@@ -1220,6 +1254,8 @@ EZoomScreen::drawCursor (CompOutput    *output,
 
 	glBindTexture (GL_TEXTURE_2D, 0);
 	glDisable (GL_BLEND);
+
+	restoreZoomSmoothing (gScreen, oldFilter);
     }
 }
 
