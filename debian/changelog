@@ -1,3 +1,15 @@
+compiz (1:0.9.13.1+18.04.20180221.1-0ubuntu1) bionic; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * Region: define static const functions returning infinite and empty
+    regions (LP: #1749957, #1750619)
+
+  [ Samuel Thibault ]
+  * ezoom: Add option to choose between no smoothing and linear
+    smoothing (LP: #1736446)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 21 Feb 2018 17:34:08 +0000
+
 compiz (1:0.9.13.1+18.04.20171116-0ubuntu1) bionic; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
