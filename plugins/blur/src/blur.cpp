@@ -449,7 +449,7 @@ BlurScreen::damageCutoff ()
 	 * and then use the real damage in order to determine what blur regions
 	 * should be updated
 	 */
-	backbufferUpdateRegionThisFrame &= emptyRegion;
+	backbufferUpdateRegionThisFrame &= CompRegion::empty ();
 	CompRegion frameAgeDamage = damageQuery->damageForFrameAge (cScreen->getFrameAge ());
 	foreach (CompWindow *w, screen->windows ())
 	{
@@ -466,7 +466,7 @@ BlurScreen::damageCutoff ()
 		continue;
 
 	    if (!bw->projectedBlurRegion.isEmpty ())
-		bw->projectedBlurRegion &= emptyRegion;
+		bw->projectedBlurRegion &= CompRegion::empty ();
 
 	    GLMatrix screenSpace;
 	    screenSpace.toScreenSpace (this->output, -DEFAULT_Z_CAMERA);
@@ -561,7 +561,7 @@ BlurWindow::glTransformationComplete (const GLMatrix   &matrix,
 	clientThreshold = 0;
 
     if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
-	reg = &infiniteRegion;
+	reg = &CompRegion::infinite ();
     else
 	reg = &region;
 
@@ -1218,7 +1218,7 @@ BlurWindow::projectRegion (CompOutput     *output,
     GLTexture::MatrixList ml;
 
     gWindow->vertexBuffer ()->begin ();
-    gWindow->glAddGeometry (ml, bScreen->tmpRegion2, infiniteRegion);
+    gWindow->glAddGeometry (ml, bScreen->tmpRegion2, CompRegion::infinite ());
 
     if (!gWindow->vertexBuffer ()->end ())
 	return;
@@ -1627,7 +1627,7 @@ BlurWindow::glDraw (const GLMatrix      &transform,
 		const CompRegion      *reg = NULL;
 
 		if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
-		    reg = &infiniteRegion;
+		    reg = &CompRegion::infinite ();
 		else
 		    reg = &region;
 

@@ -768,7 +768,7 @@ RingScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 		RING_WINDOW (w);
 
 		status |= rw->gWindow->glPaint (rw->gWindow->paintAttrib (),
-						sTransform, infiniteRegion, 0);
+						sTransform, CompRegion::infinite (), 0);
 	    }
 
 	if (mState != RingStateIn)

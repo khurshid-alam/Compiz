@@ -790,7 +790,7 @@ SwitchScreen::glPaintOutput (const GLScreenPaintAttrib &sAttrib,
 		sw->cWindow->damaged ())
 	    {
 		sw->gWindow->glPaint (sw->gWindow->paintAttrib (),
-				      sTransform, infiniteRegion, 0);
+				      sTransform, CompRegion::infinite (), 0);
 	    }
 	}
     }

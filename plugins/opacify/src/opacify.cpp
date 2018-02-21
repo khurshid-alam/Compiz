@@ -407,7 +407,7 @@ OpacifyScreen::OpacifyScreen (CompScreen *screen) :
     isToggle  (optionGetInitToggle ()),
     newActive (NULL),
     active    (screen->activeWindow ()),
-    intersect (emptyRegion),
+    intersect (CompRegion::empty ()),
     justMoved (false)
 {
     ScreenInterface::setHandler (screen, false);

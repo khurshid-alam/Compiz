@@ -1440,7 +1440,7 @@ ResizeLogic::initiateResize (CompAction		*action,
 		lastGoodSize     = w->serverSize ();
 
 		/* Combine the work areas of all outputs */
-		constraintRegion = emptyRegion;
+		constraintRegion = CompRegion::empty ();
 		foreach (CompOutput &output, mScreen->outputDevs ())
 		    constraintRegion += output.workArea ();
 	    }

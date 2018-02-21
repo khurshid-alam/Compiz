@@ -52,6 +52,9 @@ class CompRegion {
         CompRegion (const CompRect &);
 	~CompRegion ();
 
+	static const CompRegion &infinite();
+	static const CompRegion &empty();
+
 	/**
 	 * Returns a CompRect which encapsulates a given CompRegion
 	 */
@@ -192,8 +195,5 @@ class CompRegionRef : public CompRegion
 	explicit CompRegionRef (Region);
 	~CompRegionRef ();
 };
-
-extern const CompRegion infiniteRegion;
-extern const CompRegion emptyRegion;
 
 #endif

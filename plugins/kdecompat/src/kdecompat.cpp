@@ -323,7 +323,7 @@ KDECompatWindow::glPaint (const GLWindowPaintAttrib &attrib,
 		matrices[0].y0 -= (tw->y () * icon->matrix ().yy);
 
 		gtw->vertexBuffer ()->begin ();
-		gtw->glAddGeometry (matrices, tw->geometry (), infiniteRegion);
+		gtw->glAddGeometry (matrices, tw->geometry (), CompRegion::infinite ());
 		gtw->vertexBuffer ()->end ();
 	    }
 	}
@@ -343,7 +343,7 @@ KDECompatWindow::glPaint (const GLWindowPaintAttrib &attrib,
 
 	    if (!gtw->textures ().empty ())
 		gtw->glDraw (wTransform, attrib,
-				 infiniteRegion, paintMask);
+				 CompRegion::infinite (), paintMask);
 	    else if (icon)
 		gtw->glDrawTexture (icon, wTransform, attrib, paintMask);
 	}

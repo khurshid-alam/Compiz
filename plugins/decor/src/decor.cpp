@@ -253,7 +253,7 @@ DecorWindow::glDecorate (const GLMatrix     &transform,
 		     PAINT_WINDOW_WITH_OFFSET_MASK)))
 	    preg = &region;
 	else if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
-	    preg = &infiniteRegion;
+	    preg = &CompRegion::infinite ();
 	else if (mClipGroup)
 	{
 	    tmpRegion = mOutputRegion;

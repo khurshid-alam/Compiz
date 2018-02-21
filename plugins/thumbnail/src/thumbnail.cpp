@@ -908,7 +908,7 @@ ThumbScreen::thumbPaintThumb (Thumbnail      *t,
 	   very ugly but necessary until the vertex stage has been made
 	   fully pluggable. */
 	gWindow->glAddGeometrySetCurrentIndex (MAXSHORT);
-	gWindow->glDraw (wTransform, sAttrib, infiniteRegion, mask);
+	gWindow->glDraw (wTransform, sAttrib, CompRegion::infinite (), mask);
 
 	gScreen->setTextureFilter (filter);
     }

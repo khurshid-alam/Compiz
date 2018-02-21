@@ -208,12 +208,12 @@ BonanzaAnim::step (float time)
         }
         
 	Region pointsRegion = XPolygonRegion (&pts[0], 20, WindingRule);;
-	mDrawRegion = CompRegionRef(pointsRegion) - emptyRegion.united (rect);
+	mDrawRegion = CompRegionRef(pointsRegion) - CompRegion::empty ().united (rect);
 	XDestroyRegion (pointsRegion);
     }
     else
     {
-    	mDrawRegion = emptyRegion;
+    	mDrawRegion = CompRegion::empty ();
     }
 
 

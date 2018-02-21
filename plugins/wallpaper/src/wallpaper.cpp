@@ -450,7 +450,7 @@ WallpaperWindow::drawBackgrounds (const GLMatrix            &transform,
 
     gWindow->glAddGeometry (tmpMatrixList, screen->region (),
 			    (mask & PAINT_WINDOW_TRANSFORMED_MASK) ?
-			    infiniteRegion : region);
+			    CompRegion::infinite () : region);
 
     if (ws->optionGetCycleWallpapers ())
 	tmpAttrib.opacity *= fadingIn ? (1.0f - ws->alpha) : ws->alpha;
