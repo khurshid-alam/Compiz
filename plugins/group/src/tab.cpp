@@ -2015,7 +2015,7 @@ GroupScreen::recalcSlotPos (GroupTabBarSlot *slot,
     space = optionGetThumbSpace ();
     thumbSize = optionGetThumbSize ();
 
-    slot->mRegion = emptyRegion;
+    slot->mRegion = CompRegion::empty ();
 
     /* Padding between slots, account for this */
     box.setX (space + ((thumbSize + space) * slotPos));

@@ -950,7 +950,7 @@ PrivateWindow::updateRegion ()
     const CompWindow::Geometry &geom = attrib.override_redirect ?
 					   priv->geometry : priv->serverGeometry;
 
-    priv->region = priv->inputRegion = emptyRegion;
+    priv->region = priv->inputRegion = CompRegion::empty ();
 
     r.x      = -geom.border ();
     r.y      = -geom.border ();
@@ -6658,7 +6658,7 @@ CompWindow::updateFrameRegion ()
 {
     if (priv->serverFrame)
     {
-	priv->frameRegion = emptyRegion;
+	priv->frameRegion = CompRegion::empty ();
 
 	updateFrameRegion (priv->frameRegion);
 

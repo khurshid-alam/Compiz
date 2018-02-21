@@ -38,16 +38,18 @@
 
 template class std::vector<CompRegion>;
 
-const CompRegion infiniteRegion (CompRect (MINSHORT, MINSHORT,
-				           MAXSHORT * 2, MAXSHORT * 2));
-const CompRegion emptyRegion;
-
-/* Alternate emptyRegion, mostly just required to construct infiniteRegion
-   when emptyRegion may still be uninitialized */
-static const CompRegion &
-_emptyRegion ()
+const CompRegion &
+CompRegion::empty ()
 {
     static const CompRegion r;
+    return r;
+}
+
+const CompRegion &
+CompRegion::infinite ()
+{
+    static const CompRegion r(CompRect (MINSHORT, MINSHORT,
+				        MAXSHORT * 2, MAXSHORT * 2));
     return r;
 }
 
@@ -59,7 +61,7 @@ CompRegion::CompRegion ()
 CompRegion::CompRegion (const CompRegion &c)
 {
     init ();
-    XUnionRegion (_emptyRegion ().handle (), c.handle (), handle ());
+    XUnionRegion (empty ().handle (), c.handle (), handle ());
 }
 
 CompRegion::CompRegion ( int x, int y, int w, int h)
@@ -73,7 +75,7 @@ CompRegion::CompRegion ( int x, int y, int w, int h)
     rect.width = w;
     rect.height = h;
     
-    XUnionRectWithRegion (&rect, _emptyRegion ().handle (), handle ());
+    XUnionRectWithRegion (&rect, empty ().handle (), handle ());
 }
 
 CompRegion::CompRegion (const CompRect &r)
@@ -87,7 +89,7 @@ CompRegion::CompRegion (const CompRect &r)
     rect.width = r.width ();
     rect.height = r.height ();
     
-    XUnionRectWithRegion (&rect, _emptyRegion ().handle (), handle ());
+    XUnionRectWithRegion (&rect, empty ().handle (), handle ());
 }
 
 CompRegion::CompRegion (Region external)
@@ -129,7 +131,7 @@ CompRegion::handle () const
 CompRegion &
 CompRegion::operator= (const CompRegion &c)
 {
-    XUnionRegion (emptyRegion.handle (), c.handle (), handle ());
+    XUnionRegion (empty ().handle (), c.handle (), handle ());
     return *this;
 }
 

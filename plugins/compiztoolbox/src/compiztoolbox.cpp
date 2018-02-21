@@ -504,7 +504,7 @@ BaseSwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
 	   very ugly but necessary until the vertex stage has been made
 	   fully pluggable. */
 	gWindow->glAddGeometrySetCurrentIndex (MAXSHORT);
-	gWindow->glDraw (wTransform, sAttrib, infiniteRegion, mask);
+	gWindow->glDraw (wTransform, sAttrib, CompRegion::infinite (), mask);
 	gWindow->glAddGeometrySetCurrentIndex (addWindowGeometryIndex);
 
 	gScreen->setTextureFilter (filter);
@@ -552,7 +552,7 @@ BaseSwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
 	gWindow->vertexBuffer ()->begin ();
 
 	gWindow->glAddGeometrySetCurrentIndex (MAXSHORT);
-	gWindow->glAddGeometry (matrix, iconReg, infiniteRegion);
+	gWindow->glAddGeometry (matrix, iconReg, CompRegion::infinite ());
 	gWindow->glAddGeometrySetCurrentIndex (addWindowGeometryIndex);
 
 	if (gWindow->vertexBuffer ()->end ())

@@ -326,7 +326,7 @@ BurnAnim::step ()
     }
     else
     {
-	mDrawRegion = emptyRegion;
+	mDrawRegion = CompRegion::empty ();
     }
     mUseDrawRegion = (fabs (newProgress) > 1e-5);
 

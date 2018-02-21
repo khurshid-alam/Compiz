@@ -1155,7 +1155,7 @@ ShiftScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 		mActiveSlot = &mDrawSlots[i];
 		{
 		    sw->gWindow->glPaint (sw->gWindow->paintAttrib (), rTransform,
-					  infiniteRegion, 0);
+					  CompRegion::infinite (), 0);
 		}
 	    }
 
@@ -1248,7 +1248,7 @@ ShiftScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 	    mActiveSlot = &mDrawSlots[i];
 	    {
 		sw->gWindow->glPaint (sw->gWindow->paintAttrib (), sTransform,
-				      infiniteRegion, 0);
+				      CompRegion::infinite (), 0);
 	    }
 	}
 
@@ -1288,7 +1288,7 @@ ShiftScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 		SHIFT_WINDOW (w);
 
 		sw->gWindow->glPaint (sw->gWindow->paintAttrib (), sTransform,
-				      infiniteRegion, 0);
+				      CompRegion::infinite (), 0);
 	    }
 
 	    mPaintingAbove = false;

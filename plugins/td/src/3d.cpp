@@ -458,7 +458,7 @@ TdScreen::cubePaintViewport (const GLScreenPaintAttrib &attrib,
 
 		GL::shaders = false;
 		tdw->gWindow->glPaint (tdw->gWindow->paintAttrib (), mTransform,
-				  infiniteRegion, newMask);
+				  CompRegion::infinite (), newMask);
 		GL::shaders = true;
 
 		gScreen->glDisableOutputClipping ();

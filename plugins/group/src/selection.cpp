@@ -249,7 +249,7 @@ Selection::selectRegion ()
 		  MIN (mY1, mY2) + 4;
 
     rect = CompRect (x, y, width, height);
-    reg = emptyRegion.united (rect);
+    reg = CompRegion::empty ().united (rect);
 
     gs->cScreen->damageRegion (reg);
 

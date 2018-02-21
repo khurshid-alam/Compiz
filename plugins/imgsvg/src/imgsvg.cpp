@@ -230,7 +230,7 @@ SvgWindow::glDraw (const GLMatrix     &transform,
 	return status;
 
     const CompRegion &reg = (mask & PAINT_WINDOW_TRANSFORMED_MASK) ?
-			    infiniteRegion : region;
+			    CompRegion::infinite () : region;
 
     if (context && reg.numRects ())
     {

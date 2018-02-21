@@ -41,7 +41,7 @@ GenericDecorClipGroup::doPopClippable (DecorClippableInterface *dc)
     if (it != mClippables.end ())
     {
 	dc->setOwner (NULL);
-	dc->updateShadow (emptyRegion);
+	dc->updateShadow (CompRegion::empty ());
 	mClippables.erase (it);
 	regenerateClipRegion ();
 
@@ -54,7 +54,7 @@ GenericDecorClipGroup::doPopClippable (DecorClippableInterface *dc)
 void
 GenericDecorClipGroup::doRegenerateClipRegion ()
 {
-    mRegion -= infiniteRegion;
+    mRegion -= CompRegion::infinite ();
 
     foreach (DecorClippableInterface *clippable, mClippables)
     {

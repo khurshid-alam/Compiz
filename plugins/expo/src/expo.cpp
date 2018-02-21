@@ -1336,7 +1336,7 @@ ExpoWindow::glDraw (const GLMatrix            &transform,
 	/* reset geometry and paint */
 	gWindow->vertexBuffer ()->begin ();
 	gWindow->vertexBuffer ()->end ();
-	paintGlow (transform, attrib, infiniteRegion, mask);
+	paintGlow (transform, attrib, CompRegion::infinite (), mask);
     }
 
     return status;

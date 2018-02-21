@@ -380,7 +380,7 @@ StackswitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 		matl.push_back (matrix);
 
 		gWindow->geometry ().reset ();
-		gWindow->glAddGeometry (matl, iconReg, infiniteRegion);
+		gWindow->glAddGeometry (matl, iconReg, CompRegion::infinite ());
 
 		if (gWindow->geometry ().vCount)
 		{
@@ -888,7 +888,7 @@ StackswitchScreen::glPaintOutput (const GLScreenPaintAttrib &attrib,
 
 		STACKSWITCH_WINDOW (w);
 
-		sw->gWindow->glPaint (sw->gWindow->paintAttrib (), sTransform, infiniteRegion, 0);
+		sw->gWindow->glPaint (sw->gWindow->paintAttrib (), sTransform, CompRegion::infinite (), 0);
 	    }
 	}
 

@@ -829,7 +829,7 @@ GroupWindow::glDraw (const GLMatrix           &transform,
     if (mGroup && (mGroup->mWindows.size () > 1) && mGlowQuads)
     {
 	if (mask & PAINT_WINDOW_TRANSFORMED_MASK)
-	    paintRegion = CompRegion (infiniteRegion);
+	    paintRegion = CompRegion (CompRegion::infinite ());
 
 	if (paintRegion.numRects ())
 	{

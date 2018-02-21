@@ -181,7 +181,7 @@ TEST_F (BackbufferTrackingCallbacks, NoTrackIntoCurrentIfCallbackFalse)
     allowDamage (false);
     CompRegion damage (100, 100, 100, 100);
     roster->dirtyAreaOnCurrentFrame (damage);
-    EXPECT_EQ (emptyRegion, roster->currentFrameDamage ());
+    EXPECT_EQ (CompRegion::empty (), roster->currentFrameDamage ());
 }
 
 TEST_F (BackbufferTracking, DirtyAreaSubtraction)
@@ -210,7 +210,7 @@ TEST_F (BackbufferTracking, NoDirtyAreaForLastFrame)
     CompRegion all (0, 0, screen.width (), screen.height ());
     roster->dirtyAreaOnCurrentFrame (all);
     roster->incrementFrameAges ();
-    EXPECT_EQ (emptyRegion, roster->damageForFrameAge (1));
+    EXPECT_EQ (CompRegion::empty (), roster->damageForFrameAge (1));
 }
 
 TEST_F (BackbufferTracking, DirtyAreaIfMoreSinceLastFrame)
@@ -429,21 +429,21 @@ TEST_F (AgeingDamageBuffers, DirtyAreaOnInvalidRosters)
 {
     EXPECT_CALL (mockDamageAgeTracker, dirtyAreaOnCurrentFrame (_)).Times (0);
     ageing.unobserve (mockDamageAgeTracker);
-    ageing.markAreaDirty (emptyRegion);
+    ageing.markAreaDirty (CompRegion::empty ());
 }
 
 TEST_F (AgeingDamageBuffers, SubtractObscuredAreaOnInvalidRosters)
 {
     EXPECT_CALL (mockDamageAgeTracker, subtractObscuredArea (_)).Times (0);
     ageing.unobserve (mockDamageAgeTracker);
-    ageing.subtractObscuredArea (emptyRegion);
+    ageing.subtractObscuredArea (CompRegion::empty ());
 }
 
 TEST_F (AgeingDamageBuffers, AddOverdrawAreaOnInvalidRosters)
 {
     EXPECT_CALL (mockDamageAgeTracker, overdrawRegionOnPaintingFrame (_)).Times (0);
     ageing.unobserve (mockDamageAgeTracker);
-    ageing.markAreaDirtyOnLastFrame (emptyRegion);
+    ageing.markAreaDirtyOnLastFrame (CompRegion::empty ());
 }
 
 
