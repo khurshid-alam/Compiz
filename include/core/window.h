@@ -100,6 +100,9 @@ class StartupSequence;
 #define CompWindowTypeFullscreenMask   (1 << 15)
 #define CompWindowTypeUnknownMask      (1 << 16)
 
+#define APPEARS_FOCUSED_MASK (CompWindowTypeDockMask | \
+                              CompWindowTypeSplashMask)
+
 #define NO_FOCUS_MASK (CompWindowTypeDesktopMask | \
 		       CompWindowTypeDockMask    | \
 		       CompWindowTypeSplashMask)
