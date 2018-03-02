@@ -2276,14 +2276,14 @@ static const unsigned short _NET_WM_STATE_TOGGLE = 2;
 				}
 			    }
 
-			    active->changeState (active->focused () || w->type () & APPEARS_FOCUSED_MASK ?
+			    active->changeState (active->focused () || (w->type () & APPEARS_FOCUSED_MASK) ?
 						 active->state () | CompWindowStateFocusedMask :
 						 active->state () & ~CompWindowStateFocusedMask);
 
 			    active->priv->updatePassiveButtonGrabs ();
 			}
 
-			if (w->focused () || w->type () & APPEARS_FOCUSED_MASK)
+			if (w->focused () || (w->type () & APPEARS_FOCUSED_MASK))
 			    state |= w->state () | CompWindowStateFocusedMask;
 			else
 			    state &= w->state () & ~CompWindowStateFocusedMask;
