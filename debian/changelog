@@ -1,3 +1,10 @@
+compiz (1:0.9.13.1+18.04.20180302-0ubuntu1) bionic; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Make docks and spashscreens appear focused.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 02 Mar 2018 17:02:45 +0000
+
 compiz (1:0.9.13.1+18.04.20180221.1-0ubuntu1) bionic; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
