@@ -6170,6 +6170,9 @@ CompWindow::CompWindow (Window            aboveId,
 
 	screen->getMwmHints (priv->id, &priv->mwmFunc, &priv->mwmDecor);
 
+	if (priv->type & APPEARS_FOCUSED_MASK)
+	    priv->state |= CompWindowStateFocusedMask;
+
 	if (!(priv->type & (CompWindowTypeDesktopMask | CompWindowTypeDockMask)))
 	{
 	    priv->desktop = screen->getWindowProp (priv->id, Atoms::winDesktop,
