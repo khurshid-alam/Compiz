@@ -70,7 +70,7 @@
 				</option>
 				<option name="speed" type="float">
 					<_short>Speed</_short>
-					<_long>Zoom Speed</_long>
+					<_long>Zoom Change Speed</_long>
 					<default>1.5</default>
 					<min>0.1</min>
 					<max>50</max>
@@ -78,7 +78,7 @@
 				</option>
 				<option name="timestep" type="float">
 					<_short>Timestep</_short>
-					<_long>Zoom Timestep</_long>
+					<_long>Zoom Change Timestep</_long>
 					<default>1.2</default>
 					<min>0.1</min>
 					<max>50</max>
