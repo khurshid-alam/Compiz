@@ -231,7 +231,6 @@ class IdleSettingsParser:
         self.PluginList = [p for p in self.Context.Plugins.items() if FilterPlugin(p[1])]
         nCategories = len (main.MainPage.RightWidget._boxes)
         self.CategoryLoadIconsList = list(range(3, nCategories)) # Skip the first 3
-        print('Loading icons...')
 
         gobject.timeout_add (150, self.Wait)
 
