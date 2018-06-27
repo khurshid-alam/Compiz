@@ -164,8 +164,8 @@ cdef struct CCSSettingStringInfo:
     Bool                    extensible
 
 cdef struct CCSSettingListInfo:
-    CCSSettingType listType
-    void *         listInfo # actually CCSSettingInfo *, works around pyrex
+    CCSSettingType   listType
+    CCSSettingInfo * listInfo
 
 cdef struct CCSSettingActionInfo:
     Bool internal
@@ -974,7 +974,8 @@ cdef class Plugin:
 
     property EnableConflicts:
         def __get__ (self):
-            cdef CCSPluginConflictList * pl, * pls
+            cdef CCSPluginConflictList * pl
+            cdef CCSPluginConflictList * pls
             cdef CCSPluginConflict * pc
             cdef CCSPluginList * ppl
             cdef CCSPlugin * plg
@@ -1002,7 +1003,8 @@ cdef class Plugin:
 
     property DisableConflicts:
         def __get__ (self):
-            cdef CCSPluginConflictList * pl, * pls
+            cdef CCSPluginConflictList * pl
+            cdef CCSPluginConflictList * pls
             cdef CCSPluginConflict * pc
             cdef CCSPluginList * ppl
             cdef CCSPlugin * plg

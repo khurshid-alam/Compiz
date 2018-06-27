@@ -52,7 +52,7 @@ Build-Depends: cmake (>= 2.8.5),
                libprotobuf-dev,
                protobuf-compiler,
                python-all-dev,
-               python-pyrex,
+               cython,
                gsettings-desktop-schemas-dev,
                xserver-xorg-dev (>= 0.7.0),
 Standards-Version: 3.9.8
