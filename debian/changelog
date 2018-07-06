@@ -1,3 +1,25 @@
+compiz (1:0.9.13.1+18.04.20180302-0ubuntu2) UNRELEASED; urgency=medium
+
+  [ Samuel Thibault ]
+  * Update lintian override for compiz-core: bumped ABI.
+  * rules: Include architecture.mk instead of defining DEB_* variables.
+
+  [ Cyril Brulebois ]
+  * Fix missing attributions in debian/copyright (Closes: #848545):
+     - List copyright holders for all po/* files.
+     - List copyright holders for some cmake files.
+     - List copyright holders for some gtk window decorator files.
+     - List copyright holder for some animationplus files.
+     - List copyright holders for borrowed files in libdecoration.
+     - List copyright holders for all plugins.
+
+  [ Andreas Beckmann ]
+  * compiz-plugins-default: Fix upgrading from the squeeze packages by adding
+    Breaks+Replaces: compiz-core (<< 1:0.9.4+bzr20110606-0ubuntu3).
+    (Closes: #860780)
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Fri, 06 Jul 2018 14:34:54 +0300
+
 compiz (1:0.9.13.1+18.04.20180302-0ubuntu1) bionic; urgency=medium
 
   [ Alberts Muktupāvels ]
