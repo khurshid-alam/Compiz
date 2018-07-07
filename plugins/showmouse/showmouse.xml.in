@@ -42,7 +42,7 @@
 				<option name="guide_thickness" type="int">
 					<_short>Guide thickness</_short>
 					<_long>How thick mouse guides should be, in pixels.</_long>
-					<default>0</default>
+					<default>12</default>
 					<min>0</min>
 					<max>20</max><!-- search for "XML" in showmouse.cpp -->
 					<precision>1</precision>
@@ -83,7 +83,7 @@
 				<option name="emitters" type="int">
 					<_short>Emitters</_short>
 					<_long>Number of particle emitters (0 to disable).</_long>
-					<default>3</default>
+					<default>0</default>
 					<min>0</min>
 					<max>10</max>
 				</option>
