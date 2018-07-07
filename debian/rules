@@ -3,8 +3,8 @@
 
 export COMPIZ_DEB_BUILD=1
 
-DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
-DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+include /usr/share/dpkg/architecture.mk
+
 python2_version := $(shell pyversions --requested --version debian/control)
 gles2_architectures := armel armhf
 
