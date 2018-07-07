@@ -30,8 +30,6 @@ include_directories (
     "include"
     )
 
-set (COMPIZ_SYSCONFDIR "/etc" CACHE PATH "/etc")
-
 option (USE_PROTOBUF
 	"Use Google Protocol Buffers library for faster XML loading"
 	ON
