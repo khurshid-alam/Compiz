@@ -28,17 +28,17 @@ string (REPLACE "\n" "" PY_VERSION ${PY_VERSION})
 set (PY_BUILD_DIR lib.linux-${PROC_ARCH}-${PY_VERSION})
 set (PY_SCRIPTS_DIR scripts-${PY_VERSION})
 set (PY_COMPIZCONFIG_SRC ${CMAKE_CURRENT_BINARY_DIR}/compizconfig.c)
-set (PY_COMPIZCONFIG_PYREX ${CMAKE_CURRENT_SOURCE_DIR}/src/compizconfig.pyx)
+set (PY_COMPIZCONFIG_CYTHON ${CMAKE_CURRENT_SOURCE_DIR}/src/compizconfig.pyx)
 
-find_program(PYREXC_BIN pyrexc)
-if(NOT PYREXC_BIN)
-  message(FATAL_ERROR "Can not build because pyrexc binary not found.")
+find_program(CYTHON_BIN cython)
+if(NOT CYTHON_BIN)
+  message(FATAL_ERROR "Can not build because cython binary not found.")
 endif()
 
 add_custom_command (OUTPUT ${PY_COMPIZCONFIG_SRC}
-		    COMMAND ${PYREXC_BIN} -o ${PY_COMPIZCONFIG_SRC} ${PY_COMPIZCONFIG_PYREX}
+		    COMMAND ${CYTHON_BIN} -o ${PY_COMPIZCONFIG_SRC} ${PY_COMPIZCONFIG_CYTHON}
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		    DEPENDS ${PY_COMPIZCONFIG_PYREX})
+		    DEPENDS ${PY_COMPIZCONFIG_CYTHON})
 
 file (READ ${CMAKE_SOURCE_DIR}/VERSION COMPIZ_RELEASE_VERSION LIMIT 12 OFFSET 0)
 string (STRIP ${COMPIZ_RELEASE_VERSION} COMPIZ_RELEASE_VERSION)
@@ -50,7 +50,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/compizconfig-python.pc.in
 include_directories (${PYTHON_INCLUDE_DIRS}
 		     ${COMPIZCONFIG_INCLUDE_DIRS})
 
-# pyrex generates code that does type-punning, this trips
+# cython generates code that does type-punning, this trips
 # up -Werror
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-strict-aliasing")
 
