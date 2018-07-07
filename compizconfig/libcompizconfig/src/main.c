@@ -575,7 +575,7 @@ scanDirectoryForProfiles (const char *directory)
     int num = scandir (directory, &nameList, profileNameFilter, alphasort);
 
     if (num == -1)
-	ccsError ("error occurred during scandir: %s", strerror (errno));
+	ccsError ("error occurred during scandir(%s): %s", directory, strerror (errno));
     else if (num == 0)
 	return NULL;
     else if (num > 0)
