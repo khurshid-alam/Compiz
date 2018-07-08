@@ -34,6 +34,8 @@ from cgi import escape as protect_pango_markup
 import operator
 import itertools
 
+Gtk = gtk
+
 import locale
 import gettext
 locale.setlocale(locale.LC_ALL, "")
@@ -121,7 +123,7 @@ class ActionImage (gtk.Alignment):
         if action in self.map: action = self.map[action]
         self.add (Image (name = action, type = ImageThemed, size = 22))
 
-class SizedButton (gtk.Button):
+class SizedButton (Gtk.Button):
 
     minWidth = -1
     minHeight = -1
@@ -138,7 +140,7 @@ class SizedButton (gtk.Button):
         newHeight = max (height, self.minHeight)
         self.set_size_request (newWidth, newHeight)
 
-class PrettyButton (gtk.Button):
+class PrettyButton (Gtk.Button):
 
     __gsignals__ = {
         'expose-event'      : 'override',
@@ -187,16 +189,16 @@ class PrettyButton (gtk.Button):
         if has_focus:
             self.unset_flags (gtk.HAS_FOCUS)
 
-        ret = gtk.Button.do_expose_event (self, event)
+        ret = Gtk.Button.do_expose_event (self, event)
 
         if has_focus:
             self.set_flags (gtk.HAS_FOCUS)
 
         return ret
 
-class Label(gtk.Label):
+class Label(Gtk.Label):
     def __init__(self, value = "", wrap = 160):
-        gtk.Label.__init__(self, value)
+        Gtk.Label.__init__(self, value)
         self.props.xalign = 0
         self.props.wrap_mode = pango.WRAP_WORD
         self.set_line_wrap(True)
@@ -206,8 +208,8 @@ class NotFoundBox(gtk.Alignment):
     def __init__(self, value=""):
         gtk.Alignment.__init__(self, 0.5, 0.5, 0.0, 0.0)
         
-        box = gtk.HBox()
-        self.Warning = gtk.Label()
+        box = Gtk.HBox()
+        self.Warning = Gtk.Label()
         self.Markup = _("<span size=\"large\"><b>No matches found.</b> </span><span>\n\n Your filter \"<b>%s</b>\" does not match any items.</span>")
         value = protect_pango_markup(value)
         self.Warning.set_markup(self.Markup % value)

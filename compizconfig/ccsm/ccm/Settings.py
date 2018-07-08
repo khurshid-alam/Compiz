@@ -31,6 +31,8 @@ from ccm.Widgets import *
 from ccm.Utils import *
 from ccm.Pages import *
 
+Gtk = gtk
+
 import locale
 import gettext
 locale.setlocale(locale.LC_ALL, "")
@@ -53,13 +55,13 @@ class Setting(object):
 
         self.Blocked = 0
         self.EBox = gtk.EventBox()
-        self.Box = gtk.HBox()
+        self.Box = Gtk.HBox()
         self.EBox.set_visible_window(False)
         if Setting:
             self.EBox.set_sensitive(not Setting.ReadOnly)
         self.Box.set_spacing(5)
         self.EBox.add(self.Box)
-        self.Reset = gtk.Button()
+        self.Reset = Gtk.Button()
         if not Settings:
             self.MakeLabel()
             markup = "%s\n<small><i>%s</i></small>" % (self.Setting.LongDesc, self.Setting.Name)
@@ -109,7 +111,7 @@ class Setting(object):
         if not self.Setting:
             return
 
-        label = gtk.Label()
+        label = Gtk.Label()
         desc = protect_pango_markup (self.Setting.ShortDesc)
         style = "%s"
         if self.Setting.Integrated:
@@ -399,7 +401,7 @@ class BoolSetting (StockSetting):
     def _Init (self):
         StockSetting._Init(self)
         self.Label.set_size_request(-1, -1)
-        self.CheckButton = gtk.CheckButton ()
+        self.CheckButton = Gtk.CheckButton ()
         align = gtk.Alignment(yalign=0.5)
         align.add(self.CheckButton)
         self.Box.pack_end(align, False, False, 0)
@@ -505,7 +507,7 @@ class ColorSetting(StockSetting):
 
 class BaseListSetting(Setting):
     def _Init(self):
-        self.Widget = gtk.VBox()
+        self.Widget = Gtk.VBox()
         self.EditDialog = None        
         self.EditDialogOpen = False
         self.PageToBeRefreshed = None
@@ -540,7 +542,7 @@ class BaseListSetting(Setting):
         self.Scroll.add(self.View)
         self.Widget.pack_start(self.Scroll, True, True, 0)
         self.Widget.set_child_packing(self.Scroll, True, True, 0, gtk.PACK_START)
-        buttonBox = gtk.HBox(False)
+        buttonBox = Gtk.HBox(False)
         buttonBox.set_spacing(5)
         buttonBox.set_border_width(5)
         self.Widget.pack_start(buttonBox, False, False, 0)
@@ -551,7 +553,7 @@ class BaseListSetting(Setting):
                  (gtk.STOCK_GO_DOWN, self.Move, 'down', False),)
         self.Buttons = {}
         for stock, callback, data, sensitive in buttonTypes:
-            b = gtk.Button(stock)
+            b = Gtk.Button(stock)
             b.set_use_stock(True)
             buttonBox.pack_start(b, False, False, 0)
             if data is not None:
@@ -628,7 +630,7 @@ class BaseListSetting(Setting):
 
     def _MakeEditDialog(self):
         dlg = gtk.Dialog(_("Edit"))
-        vbox = gtk.VBox(spacing=TableX)
+        vbox = Gtk.VBox(spacing=TableX)
         vbox.props.border_width = 6
         dlg.vbox.pack_start(vbox, True, True, 0)
         dlg.set_default_size(500, -1)
@@ -791,7 +793,7 @@ class EnumFlagsSetting(Setting):
         sortedItems = sorted(self.Setting.Info[1][2].items(), key=EnumSettingKeyFunc)
         self.minVal = sortedItems[0][1]
         for key, value in sortedItems:
-            box = gtk.CheckButton(key)
+            box = Gtk.CheckButton(key)
             self.Checks.append((key, box))
             table.attach(box, col, col+1, row, row+1, TableDef, TableDef, TableX, TableX)
             box.connect('toggled', self.Changed)
@@ -800,10 +802,10 @@ class EnumFlagsSetting(Setting):
                 col = 0
                 row += 1
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.pack_start(self.Reset, False, False, 0)
 
-        hbox = gtk.HBox()
+        hbox = Gtk.HBox()
         hbox.pack_start(table, True, True, 0)
         hbox.pack_start(vbox, False, False, 0)
 
@@ -842,7 +844,7 @@ class RestrictedStringFlagsSetting(Setting):
         self.ItemsByValue = info[1]
         sortedItems = info[2]
         for key, value in sortedItems:
-            box = gtk.CheckButton(key)
+            box = Gtk.CheckButton(key)
             self.Checks.append((key, box))
             table.attach(box, col, col+1, row, row+1, TableDef, TableDef, TableX, TableX)
             box.connect('toggled', self.Changed)
@@ -851,10 +853,10 @@ class RestrictedStringFlagsSetting(Setting):
                 col = 0
                 row += 1
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.pack_start(self.Reset, False, False, 0)
 
-        hbox = gtk.HBox()
+        hbox = Gtk.HBox()
         hbox.pack_start(table, True, True, 0)
         hbox.pack_start(vbox, False, False, 0)
 
@@ -890,7 +892,7 @@ class EditableActionSetting (StockSetting):
 
         self.Label.set_size_request(-1, -1)
 
-        editButton = gtk.Button ()
+        editButton = Gtk.Button ()
         editButton.add (Image (name = gtk.STOCK_EDIT, type = ImageStock,
                                size = gtk.ICON_SIZE_BUTTON))
         editButton.set_tooltip_text(_("Edit %s" % self.Setting.ShortDesc))
@@ -1030,20 +1032,20 @@ class KeySetting (EditableActionSetting):
         dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default ()
         dlg.set_default_response (gtk.RESPONSE_OK)
 
-        mainBox = gtk.VBox ()
+        mainBox = Gtk.VBox ()
         alignment = gtk.Alignment ()
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (mainBox)
         dlg.vbox.pack_start (alignment, True, True, 0)
 
-        checkButton = gtk.CheckButton (_("Enabled"))
+        checkButton = Gtk.CheckButton (_("Enabled"))
         active = len (self.current) \
                  and self.current.lower () not in ("disabled", "none")
         checkButton.set_active (active)
         checkButton.set_tooltip_text(self.Setting.LongDesc)
         mainBox.pack_start (checkButton, True, True, 0)
 
-        box = gtk.VBox ()
+        box = Gtk.VBox ()
         checkButton.connect ("toggled", ShowHideBox, box, dlg)
         mainBox.pack_start (box, True, True, 0)
 
@@ -1064,7 +1066,7 @@ class KeySetting (EditableActionSetting):
         grabber.set_tooltip_text (self.Setting.LongDesc)
         box.pack_start (grabber, True, True, 0)
 
-        label = gtk.Label (self.current)
+        label = Gtk.Label (self.current)
         label.set_tooltip_text (self.Setting.LongDesc)
         alignment = gtk.Alignment (0.5, 0.5)
         alignment.set_padding (15, 0, 0, 0)
@@ -1182,20 +1184,20 @@ class ButtonSetting (EditableActionSetting):
         dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default ()
         dlg.set_default_response (gtk.RESPONSE_OK)
 
-        mainBox = gtk.VBox ()
+        mainBox = Gtk.VBox ()
         alignment = gtk.Alignment ()
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (mainBox)
         dlg.vbox.pack_start (alignment, True, True, 0)
 
-        checkButton = gtk.CheckButton (_("Enabled"))
+        checkButton = Gtk.CheckButton (_("Enabled"))
         active = len (self.current) \
                  and self.current.lower () not in ("disabled", "none")
         checkButton.set_active (active)
         checkButton.set_tooltip_text (self.Setting.LongDesc)
         mainBox.pack_start (checkButton, True, True, 0)
 
-        box = gtk.VBox ()
+        box = Gtk.VBox ()
         checkButton.connect ("toggled", ShowHideBox, box, dlg)
         mainBox.pack_start (box, True, True, 0)
 
@@ -1463,13 +1465,13 @@ class SubGroupArea(object):
         self.Name = name
         settings = sorted(GetSettings(subGroup), key=SettingKeyFunc)
         if not name:
-            self.Child = self.Widget = gtk.VBox()
+            self.Child = self.Widget = Gtk.VBox()
         else:
             self.Widget = gtk.Frame()
             self.Expander = gtk.Expander(name)
             self.Widget.add(self.Expander)
             self.Expander.set_expanded(False)
-            self.Child = gtk.VBox()
+            self.Child = Gtk.VBox()
             self.Expander.add(self.Child)
 
         self.Child.set_spacing(TableX)

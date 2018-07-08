@@ -35,6 +35,8 @@ from ccm.Utils import *
 from ccm.Constants import *
 from ccm.Conflicts import *
 
+Gtk = gtk
+
 import locale
 import gettext
 locale.setlocale(locale.LC_ALL, "")
@@ -223,9 +225,9 @@ class GroupView(gtk.TreeView):
 
 # Selector Buttons
 #
-class SelectorButtons(gtk.HBox):
+class SelectorButtons(Gtk.HBox):
     def __init__(self):
-        gtk.HBox.__init__(self)
+        Gtk.HBox.__init__(self)
         self.set_border_width(10)
         self.set_spacing(5)
         self.buttons = []
@@ -240,7 +242,7 @@ class SelectorButtons(gtk.HBox):
 
     def add_button(self, label, callback):
         arrow = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
-        button = gtk.Button(label)
+        button = Gtk.Button(label)
         button.set_relief(gtk.RELIEF_NONE)
         button.connect('clicked', self.on_button_clicked, callback)
         if self.get_children():
@@ -271,7 +273,7 @@ class SelectorBox(gtk.ScrolledWindow):
         self.viewport.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse(backgroundColor))
         self.props.hscrollbar_policy = gtk.POLICY_NEVER
         self.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
-        self.box = gtk.VBox()
+        self.box = Gtk.VBox()
         self.box.set_spacing(5)
         self.viewport.add(self.box)
         self.add(self.viewport)
@@ -284,18 +286,18 @@ class SelectorBox(gtk.ScrolledWindow):
         self.box.destroy()
 
     def add_item(self, item, callback, markup="%s", image=None, info=None):
-        button = gtk.Button()
+        button = Gtk.Button()
         label = Label(wrap=170)
         text = protect_pango_markup(item)
         label.set_markup(markup % text or _("General"))
-        labelBox = gtk.VBox()
+        labelBox = Gtk.VBox()
         labelBox.set_spacing(5)
         labelBox.pack_start(label, True, True, 0)
         if info:
             infoLabel = Label()
             infoLabel.set_markup("<span size='small'>%s</span>" % info)
             labelBox.pack_start(infoLabel, True, True, 0)
-        box = gtk.HBox()
+        box = Gtk.HBox()
         box.set_spacing(5)
         if image:
             box.pack_start(image, False, False, 0)
@@ -935,7 +937,7 @@ class Popup (gtk.Window):
         self.set_decorated (decorated)
         self.set_property("skip-taskbar-hint", True)
         if text:
-            label = gtk.Label (text)
+            label = Gtk.Label (text)
             align = gtk.Alignment ()
             align.set_padding (20, 20, 20, 20)
             align.add (label)
@@ -950,7 +952,7 @@ class Popup (gtk.Window):
 
 # Key Grabber
 #
-class KeyGrabber (gtk.Button):
+class KeyGrabber (Gtk.Button):
 
     __gsignals__    = {"changed" : (gobject.SIGNAL_RUN_FIRST,
                                     gobject.TYPE_NONE,
@@ -1022,7 +1024,7 @@ class KeyGrabber (gtk.Button):
         if self.label:
             if key != None and mods != None:
                 self.emit ("current-changed", key, mods)
-            gtk.Button.set_label (self, self.label)
+            Gtk.Button.set_label (self, self.label)
             return
         if key == None and mods == None:
             key = self.key
@@ -1030,11 +1032,11 @@ class KeyGrabber (gtk.Button):
         label = GetAcceleratorName (key, mods)
         if not len (label):
             label = _("Disabled")
-        gtk.Button.set_label (self, label)
+        Gtk.Button.set_label (self, label)
 
 # Match Button
 #
-class MatchButton(gtk.Button):
+class MatchButton(Gtk.Button):
 
     __gsignals__    = {"changed" : (gobject.SIGNAL_RUN_FIRST,
                                     gobject.TYPE_NONE,
@@ -1169,11 +1171,11 @@ class MatchButton(gtk.Button):
 
         # Value
         label = Label (_("Value"))
-        box = gtk.HBox ()
+        box = Gtk.HBox ()
         box.set_spacing (5)
         entry = gtk.Entry ()
         entry.connect ('changed', self._check_entry_value, dlg)
-        button = gtk.Button (_("Grab"))
+        button = Gtk.Button (_("Grab"))
         button.connect ('clicked', self.grab_value, entry, type_chooser)
         box.pack_start (entry, True, True, 0)
         box.pack_start (button, False, False, 0)
@@ -1189,7 +1191,7 @@ class MatchButton(gtk.Button):
 
         # Invert
         label = Label (_("Invert"))
-        check = gtk.CheckButton ()
+        check = Gtk.CheckButton ()
         rows.append ((label, check))
 
         row = 0
@@ -1213,7 +1215,7 @@ class MatchButton(gtk.Button):
 
         dlg.destroy ()
 
-class FileButton (gtk.Button):
+class FileButton (Gtk.Button):
     __gsignals__    = {"changed" : (gobject.SIGNAL_RUN_FIRST,
                                     gobject.TYPE_NONE,
                                     [gobject.TYPE_STRING])}
@@ -1223,7 +1225,7 @@ class FileButton (gtk.Button):
     _path      = ""
 
     def __init__ (self, context, entry, directory=False, image=False, path=""):
-        gtk.Button.__init__ (self)
+        Gtk.Button.__init__ (self)
 
         self._entry = entry
         self._directory = directory
@@ -1386,7 +1388,7 @@ class FirstRun (gtk.MessageDialog):
         self.set_markup("<b>%s</b>" % title)
         message = _("This tool allows you to deeply configure Compiz's settings. Some options may be incompatible with each other. Unless used with care, it is possible to be left with an unusable desktop.")
         self.format_secondary_markup(message)
-        check_button = gtk.CheckButton(label=_("Show this warning next time?"))
+        check_button = Gtk.CheckButton(label=_("Show this warning next time?"))
         check_button.set_active(True)
         self.vbox.pack_start(check_button, True, True, 2)
         check_button.show()
@@ -1409,7 +1411,7 @@ class FirstRun (gtk.MessageDialog):
 
 # Plugin Button
 #
-class PluginButton (gtk.HBox):
+class PluginButton (Gtk.HBox):
 
     __gsignals__    = {"clicked"   : (gobject.SIGNAL_RUN_FIRST,
                                       gobject.TYPE_NONE,
@@ -1421,13 +1423,13 @@ class PluginButton (gtk.HBox):
     _plugin = None
 
     def __init__ (self, plugin, useMissingImage = False):
-        gtk.HBox.__init__(self)
+        Gtk.HBox.__init__(self)
         self._plugin = plugin
 
         image = Image (plugin.Name, ImagePlugin, 32, useMissingImage)
         label = Label (plugin.ShortDesc, 120)
         label.connect ('style-set', self.style_set)
-        box = gtk.HBox ()
+        box = Gtk.HBox ()
         box.set_spacing (5)
         box.pack_start (image, False, False, 0)
         box.pack_start (label, True, True, 0)
@@ -1442,7 +1444,7 @@ class PluginButton (gtk.HBox):
             blacklist_plugins.append('unityshell')
 
         if plugin.Name not in blacklist_plugins:
-            enable = gtk.CheckButton ()
+            enable = Gtk.CheckButton ()
             enable.set_tooltip_text(_("Enable %s") % plugin.ShortDesc)
             enable.set_active (plugin.Enabled)
             enable.set_sensitive (plugin.Context.AutoSort)
@@ -1506,7 +1508,7 @@ class PluginButton (gtk.HBox):
 
 # Category Box
 #
-class CategoryBox(gtk.VBox):
+class CategoryBox(Gtk.VBox):
 
     _plugins = None
     _unfiltered_plugins = None
@@ -1519,7 +1521,7 @@ class CategoryBox(gtk.VBox):
     _current_plugins = 0
 
     def __init__ (self, context, name, plugins=None, categoryIndex=0):
-        gtk.VBox.__init__ (self)
+        Gtk.VBox.__init__ (self)
 
         self.set_spacing (5)
 
@@ -1541,7 +1543,7 @@ class CategoryBox(gtk.VBox):
         # Keep unfiltered list of plugins for correct background icon loading
         self._unfiltered_plugins = self._plugins
 
-        header = gtk.HBox ()
+        header = Gtk.HBox ()
         header.set_border_width (5)
         header.set_spacing (10)
         label = Label ('', -1)
@@ -1660,7 +1662,7 @@ class PluginWindow(gtk.ScrolledWindow):
         self.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
         self.connect ('size-allocate', self.rebuild_boxes)
 
-        self._box = gtk.VBox ()
+        self._box = Gtk.VBox ()
         self._box.set_spacing (5)
 
         self._not_found_box = NotFoundBox ()
