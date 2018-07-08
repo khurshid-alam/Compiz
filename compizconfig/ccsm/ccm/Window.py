@@ -112,4 +112,4 @@ class MainWin(Gtk.Window):
                         currentPage.RefreshPage(basePlugin, self)
                     break
 
-Gtk.window_set_default_icon_name('ccsm')
+gtk.window_set_default_icon_name('ccsm')

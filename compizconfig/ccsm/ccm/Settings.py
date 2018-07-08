@@ -637,7 +637,7 @@ class BaseListSetting(Setting):
         dlg.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE)
         dlg.set_default_response(gtk.RESPONSE_CLOSE)
 
-        group = Gtk.SizeGroup(Gtk.SIZE_GROUP_HORIZONTAL)
+        group = gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
         for widget in self.Widgets:
             vbox.pack_start(widget.EBox, False, False, 0)
             group.add_widget(widget.Label)

@@ -242,7 +242,7 @@ class SelectorButtons(Gtk.HBox):
         self.buttons = []
 
     def add_button(self, label, callback):
-        arrow = Gtk.Arrow(Gtk.ARROW_RIGHT, Gtk.SHADOW_NONE)
+        arrow = gtk.Arrow(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
         button = Gtk.Button(label)
         button.set_relief(gtk.RELIEF_NONE)
         button.connect('clicked', self.on_button_clicked, callback)
@@ -998,20 +998,20 @@ class KeyGrabber (Gtk.Button):
     def on_key_press_event (self, widget, event):
         mods = event.state & Gtk.accelerator_get_default_mod_mask ()
 
-        if event.keyval in (Gtk.keysyms.Escape, Gtk.keysyms.Return) \
+        if event.keyval in (gtk.keysyms.Escape, gtk.keysyms.Return) \
             and not mods:
-            if event.keyval == Gtk.keysyms.Escape:
+            if event.keyval == gtk.keysyms.Escape:
                 self.emit ("changed", self.key, self.mods)
             self.end_key_grab ()
             self.set_label ()
             return
 
         key = gtk.gdk.keyval_to_lower (event.keyval)
-        if (key == Gtk.keysyms.ISO_Left_Tab):
-            key = Gtk.keysyms.Tab
+        if (key == gtk.keysyms.ISO_Left_Tab):
+            key = gtk.keysyms.Tab
 
         if Gtk.accelerator_valid (key, mods) \
-           or (key == Gtk.keysyms.Tab and mods):
+           or (key == gtk.keysyms.Tab and mods):
             self.set_label (key, mods)
             self.end_key_grab ()
             self.key = key
