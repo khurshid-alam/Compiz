@@ -54,7 +54,7 @@ class Setting(object):
             self.CurrentRow = None
 
         self.Blocked = 0
-        self.EBox = gtk.EventBox()
+        self.EBox = Gtk.EventBox()
         self.Box = Gtk.HBox()
         self.EBox.set_visible_window(False)
         if Setting:
@@ -86,7 +86,7 @@ class Setting(object):
         self.RemoveUpdater()
 
     def GetColumn(self, num):
-        return (str, gtk.TreeViewColumn(self.Setting.ShortDesc, gtk.CellRendererText(), text=num))
+        return (str, Gtk.TreeViewColumn(self.Setting.ShortDesc, Gtk.CellRendererText(), text=num))
 
     def PureVirtual (self, func):
         message = "Missing %(function)s function for %(name)s setting (%(class)s)"
@@ -214,7 +214,7 @@ class StockSetting(Setting):
 class StringSetting(StockSetting):
     def _Init(self):
         StockSetting._Init(self)
-        self.Entry = gtk.Entry()
+        self.Entry = Gtk.Entry()
         self.Entry.connect('activate', self.Changed)
         self.Entry.connect('focus-out-event', self.Changed)
         self.Widget = self.Entry
@@ -273,9 +273,9 @@ class EnumSetting(StockSetting):
 
     def GetColumn(self, num):
         self.Num = num
-        cell = gtk.CellRendererCombo()
-        column = gtk.TreeViewColumn(self.Setting.ShortDesc, cell, text=num)
-        model = gtk.ListStore(str)
+        cell = Gtk.CellRendererCombo()
+        column = Gtk.TreeViewColumn(self.Setting.ShortDesc, cell, text=num)
+        model = Gtk.ListStore(str)
         for property, value in [("model", model), ("text_column", 0),
                                 ("editable", False), ("has_entry", False)]:
             cell.set_property (property, value)
@@ -340,9 +340,9 @@ class RestrictedStringSetting(StockSetting):
 
     def GetColumn(self, num):
         self.Num = num
-        cell = gtk.CellRendererCombo()
-        column = gtk.TreeViewColumn(self.Setting.ShortDesc, cell, text=num)
-        model = gtk.ListStore(str)
+        cell = Gtk.CellRendererCombo()
+        column = Gtk.TreeViewColumn(self.Setting.ShortDesc, cell, text=num)
+        model = Gtk.ListStore(str)
         for property, value in [("model", model), ("text_column", 0),
                                 ("editable", False), ("has_entry", False)]:
             cell.set_property (property, value)
@@ -402,7 +402,7 @@ class BoolSetting (StockSetting):
         StockSetting._Init(self)
         self.Label.set_size_request(-1, -1)
         self.CheckButton = Gtk.CheckButton ()
-        align = gtk.Alignment(yalign=0.5)
+        align = Gtk.Alignment(yalign=0.5)
         align.add(self.CheckButton)
         self.Box.pack_end(align, False, False, 0)
         self.CheckButton.connect ('toggled', self.Changed)
@@ -421,10 +421,10 @@ class BoolSetting (StockSetting):
 
     def GetColumn (self, num):
         self.Num = num
-        cell = gtk.CellRendererToggle()
+        cell = Gtk.CellRendererToggle()
         cell.set_property("activatable", True)
         cell.connect('toggled', self.CellToggled)
-        return (bool, gtk.TreeViewColumn(self.Setting.ShortDesc, cell, active=num))
+        return (bool, Gtk.TreeViewColumn(self.Setting.ShortDesc, cell, active=num))
 
 class NumberSetting(StockSetting):
 
@@ -478,7 +478,7 @@ class ColorSetting(StockSetting):
 
     def _Init(self):
         StockSetting._Init(self)
-        self.Button = gtk.ColorButton()
+        self.Button = Gtk.ColorButton()
         self.Button.set_size_request (100, -1)
         self.Button.set_use_alpha(True)
         self.Button.connect('color-set', self.Changed)
@@ -491,7 +491,7 @@ class ColorSetting(StockSetting):
         return ["#%.4x%.4x%.4x%.4x" %tuple(seq) for seq in self.Setting.Value]
 
     def GetColumn(self, num):
-        return (str, gtk.TreeViewColumn(self.Setting.ShortDesc, CellRendererColor(), text=num))
+        return (str, Gtk.TreeViewColumn(self.Setting.ShortDesc, CellRendererColor(), text=num))
 
     def _Read(self):
         col = gtk.gdk.Color()
@@ -518,8 +518,8 @@ class BaseListSetting(Setting):
 
         types, cols = self.ListInfo()
         self.Types = types
-        self.Store = gtk.ListStore(*types)
-        self.View = gtk.TreeView(self.Store)
+        self.Store = Gtk.ListStore(*types)
+        self.View = Gtk.TreeView(self.Store)
         self.View.set_headers_visible(True)
 
         for widget in self.Widgets:
@@ -536,7 +536,7 @@ class BaseListSetting(Setting):
         self.Select.set_mode(gtk.SELECTION_SINGLE)
         self.Select.connect('changed', self.SelectionChanged)
         self.Widget.set_spacing(5)
-        self.Scroll = gtk.ScrolledWindow()
+        self.Scroll = Gtk.ScrolledWindow()
         self.Scroll.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
         self.Scroll.props.vscrollbar_policy = gtk.POLICY_NEVER
         self.Scroll.add(self.View)
@@ -629,7 +629,7 @@ class BaseListSetting(Setting):
             self._Delete(row)
 
     def _MakeEditDialog(self):
-        dlg = gtk.Dialog(_("Edit"))
+        dlg = Gtk.Dialog(_("Edit"))
         vbox = Gtk.VBox(spacing=TableX)
         vbox.props.border_width = 6
         dlg.vbox.pack_start(vbox, True, True, 0)
@@ -637,7 +637,7 @@ class BaseListSetting(Setting):
         dlg.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE)
         dlg.set_default_response(gtk.RESPONSE_CLOSE)
 
-        group = gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+        group = Gtk.SizeGroup(Gtk.SIZE_GROUP_HORIZONTAL)
         for widget in self.Widgets:
             vbox.pack_start(widget.EBox, False, False, 0)
             group.add_widget(widget.Label)
@@ -786,7 +786,7 @@ class EnumFlagsSetting(Setting):
 
     def _Init(self):
         frame = gtk.Frame(self.Setting.ShortDesc)
-        table = gtk.Table()
+        table = Gtk.Table()
         
         row = col = 0
         self.Checks = []
@@ -835,7 +835,7 @@ class RestrictedStringFlagsSetting(Setting):
 
     def _Init(self):
         frame = gtk.Frame(self.Setting.ShortDesc)
-        table = gtk.Table()
+        table = Gtk.Table()
         
         row = col = 0
         self.Checks = []
@@ -907,7 +907,7 @@ class EditableActionSetting (StockSetting):
 
 
     def RunEditDialog (self, widget):
-        dlg = gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
+        dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
         dlg.set_position (gtk.WIN_POS_CENTER_ON_PARENT)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
@@ -1023,7 +1023,7 @@ class KeySetting (EditableActionSetting):
                 new = current.replace ("%s_R" % modifier, "")
             label.set_text (self.GetLabelText (new))
 
-        dlg = gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
+        dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
         dlg.set_position (gtk.WIN_POS_CENTER_ALWAYS)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_icon (self.Widget.get_toplevel ().get_icon ())
@@ -1033,7 +1033,7 @@ class KeySetting (EditableActionSetting):
         dlg.set_default_response (gtk.RESPONSE_OK)
 
         mainBox = Gtk.VBox ()
-        alignment = gtk.Alignment ()
+        alignment = Gtk.Alignment ()
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (mainBox)
         dlg.vbox.pack_start (alignment, True, True, 0)
@@ -1176,7 +1176,7 @@ class ButtonSetting (EditableActionSetting):
             else:
                 box.hide ()
                 dialog.resize (1, 1)
-        dlg = gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
+        dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
         dlg.set_position (gtk.WIN_POS_CENTER_ALWAYS)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_modal (True)
@@ -1185,7 +1185,7 @@ class ButtonSetting (EditableActionSetting):
         dlg.set_default_response (gtk.RESPONSE_OK)
 
         mainBox = Gtk.VBox ()
-        alignment = gtk.Alignment ()
+        alignment = Gtk.Alignment ()
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (mainBox)
         dlg.vbox.pack_start (alignment, True, True, 0)
@@ -1339,7 +1339,7 @@ class EdgeSetting (EditableActionSetting):
         self.Button.set_label (label)
 
     def RunEdgeSelector (self, widget):
-        dlg = gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
+        dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
         dlg.set_position (gtk.WIN_POS_CENTER_ON_PARENT)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_modal (True)
@@ -1348,7 +1348,7 @@ class EdgeSetting (EditableActionSetting):
         dlg.set_default_response (gtk.RESPONSE_OK)
         
         selector = SingleEdgeSelector (self.current)
-        alignment = gtk.Alignment ()
+        alignment = Gtk.Alignment ()
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (selector)
 
@@ -1467,7 +1467,7 @@ class SubGroupArea(object):
         if not name:
             self.Child = self.Widget = Gtk.VBox()
         else:
-            self.Widget = gtk.Frame()
+            self.Widget = Gtk.Frame()
             self.Expander = gtk.Expander(name)
             self.Widget.add(self.Expander)
             self.Expander.set_expanded(False)

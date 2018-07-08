@@ -38,12 +38,12 @@ gettext.bindtextdomain("ccsm", DataDir + "/locale")
 gettext.textdomain("ccsm")
 _ = gettext.gettext
 
-class MainWin(gtk.Window):
+class MainWin(Gtk.Window):
 
     currentCategory = None
 
     def __init__(self, Context, pluginPage=None, categoryName=None):
-        gtk.Window.__init__(self)
+        Gtk.Window.__init__(self)
         self.ShowingPlugin = None
         self.Context = Context
         self.connect("destroy", self.Quit)
@@ -71,7 +71,7 @@ class MainWin(gtk.Window):
             self.MainPage.ToggleCategory(None, categoryName)
 
     def Quit(self, *args):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def SetPage(self, page):
         if page == self.CurrentPage:
@@ -112,4 +112,4 @@ class MainWin(gtk.Window):
                         currentPage.RefreshPage(basePlugin, self)
                     break
 
-gtk.window_set_default_icon_name('ccsm')
+Gtk.window_set_default_icon_name('ccsm')
