@@ -271,7 +271,7 @@ class SelectorBox(Gtk.ScrolledWindow):
     def __init__(self, backgroundColor):
         Gtk.ScrolledWindow.__init__(self)
         self.viewport = Gtk.Viewport()
-        #self.viewport.modify_bg(Gtk.StateType.NORMAL, Gdk.Color.parse(backgroundColor))
+        self.viewport.modify_bg(Gtk.StateType.NORMAL, Gdk.Color.parse(backgroundColor))
         self.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         self.box = Gtk.VBox()
@@ -1426,7 +1426,6 @@ class PluginButton (Gtk.HBox):
 
         image = Image (plugin.Name, ImagePlugin, 32, useMissingImage)
         label = Label (plugin.ShortDesc, 120)
-        label.connect ('style-set', self.style_set)
         box = Gtk.HBox ()
         box.set_spacing (5)
         box.pack_start (image, False, False, 0)
@@ -1452,15 +1451,6 @@ class PluginButton (Gtk.HBox):
         self.pack_start (button, False, False, 0)
 
         self.set_size_request (220, -1)
-
-    StyleBlock = 0
-
-    def style_set (self, widget, previous):
-        if self.StyleBlock > 0:
-            return
-        self.StyleBlock += 1
-        #widget.modify_fg(Gtk.StateType.NORMAL, widget.style.text[Gtk.StateType.NORMAL])
-        self.StyleBlock -= 1
 
     def enable_plugin (self, widget):
 
@@ -1674,7 +1664,6 @@ class PluginWindow(Gtk.ScrolledWindow):
             self._box.pack_start (category_box, False, False, 0)
 
         viewport = Gtk.Viewport ()
-        viewport.connect("style-set", self.set_viewport_style)
         viewport.set_focus_vadjustment (self.get_vadjustment ())
         viewport.add (self._box)
         self.add (viewport)
@@ -1683,13 +1672,6 @@ class PluginWindow(Gtk.ScrolledWindow):
         buttons = category_box.get_buttons ()
         for button in buttons:
             button.connect('clicked', self.show_plugin_page)
-
-    def set_viewport_style (self, widget, previous):
-        if self._style_block > 0:
-            return
-        self._style_block += 1
-        #widget.modify_bg(Gtk.StateType.NORMAL, widget.style.base[Gtk.StateType.NORMAL])
-        self._style_block -= 1
 
     def filter_boxes (self, text, level=FilterAll):
         found = False

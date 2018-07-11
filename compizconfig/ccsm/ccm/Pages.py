@@ -136,8 +136,10 @@ class PluginPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
-        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
+        context = widget.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.SELECTED)
+        for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+            widget.modify_fg(state, color.to_color())
         self.StyleBlock -= 1
 
     def ResetFocus(self, widget, data):
@@ -410,8 +412,10 @@ class FilterPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
-        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
+        context = widget.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.SELECTED)
+        for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+            widget.modify_fg(state, color.to_color())
         self.StyleBlock -= 1
 
     def Filter(self, text, level=FilterAll):
@@ -750,8 +754,10 @@ class ProfileBackendPage(object):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
-        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
+        context = widget.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.SELECTED)
+        for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+            widget.modify_fg(state, color.to_color())
         self.StyleBlock -= 1
 
     def UpdateProfiles (self, current=_("Default")):
@@ -1164,8 +1170,10 @@ class PreferencesPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
-        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
+        context = widget.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.SELECTED)
+        for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+            widget.modify_fg(state, color.to_color())
         self.StyleBlock -= 1
 
     def ShowAboutDialog(self, widget):
@@ -1289,8 +1297,10 @@ class MainPage(object):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
-        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
+        context = widget.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.SELECTED)
+        for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+            widget.modify_fg(state, color.to_color())
         self.StyleBlock -= 1
 
     def ShowPlugin(self, widget, plugin):
