@@ -20,16 +20,13 @@
 #          Christopher Williams (christopherw@verizon.net)
 # Copyright (C) 2007 Quinn Storm
 
-import pygtk
-import gtk
-import gtk.gdk
+from gi.repository import Gtk
+from gi.repository import Gdk
 
 from ccm.Pages import *
 from ccm.Utils import *
 from ccm.Constants import *
 from ccm.Conflicts import *
-
-Gtk = gtk
 
 import locale
 import gettext
@@ -62,7 +59,7 @@ class MainWin(Gtk.Window):
         self.CurrentPage = None
         self.SetPage(self.MainPage)
 
-        self.LeftPane.set_size_request(self.LeftPane.size_request()[0], -1)
+        self.LeftPane.set_size_request(self.LeftPane.size_request().width, -1)
         self.show_all()
 
         if pluginPage in self.Context.Plugins:
@@ -83,8 +80,8 @@ class MainWin(Gtk.Window):
         if self.CurrentPage:
             leftWidget = self.CurrentPage.LeftWidget
             rightWidget = self.CurrentPage.RightWidget
-            leftWidget.hide_all()
-            rightWidget.hide_all()
+            leftWidget.hide()
+            rightWidget.hide()
             self.LeftPane.remove(leftWidget)
             self.RightPane.remove(rightWidget)
             if self.CurrentPage != self.MainPage:
@@ -112,4 +109,4 @@ class MainWin(Gtk.Window):
                         currentPage.RefreshPage(basePlugin, self)
                     break
 
-gtk.window_set_default_icon_name('ccsm')
+Gtk.Window.set_default_icon_name('ccsm')

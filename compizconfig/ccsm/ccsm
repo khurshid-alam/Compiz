@@ -26,10 +26,14 @@ DBUS_CCSM_INTERFACE = 'org.compiz_fusion.ccsm'
 # from the D-Bus specification
 DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER = 1
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('PangoCairo', '1.0')
+
 from optparse import OptionParser
-import pygtk
-pygtk.require('2.0')
-import gtk
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GdkX11
 import sys
 import os
 
@@ -76,8 +80,8 @@ def try_register_dbus ():
 
     else:
         try:
-            display = gtk.gdk.display_get_default()
-            startup_id = gtk.gdk.x11_display_get_startup_notification_id(display)
+            display = Gdk.Display.get_default()
+            startup_id = GdkX11.X11Display.get_startup_notification_id(display)
             obj.present(startup_id or "")
             print('Another CCSM instance already running')
             sys.exit(0)
@@ -86,9 +90,6 @@ def try_register_dbus ():
             return
 
 dbusObj = try_register_dbus()
-
-if gtk.pygtk_version < (2,12,0):
-    raise SystemExit("PyGtk 2.12.0 or later required")
 
 import compizconfig
 import ccm
@@ -132,4 +133,4 @@ else:
     warning = ccm.FirstRun(mainWin)
     warning.show_all()
 
-gtk.main()
+Gtk.main()

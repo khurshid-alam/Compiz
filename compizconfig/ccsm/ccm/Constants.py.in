@@ -20,18 +20,17 @@
 #          Christopher Williams (christopherw@verizon.net)
 # Copyright (C) 2007 Quinn Storm
 
-import pygtk
-import gtk
-import gtk.gdk
+from gi.repository import Gtk
+from gi.repository import Gdk
 import os
 
 # Current Screen
 #
-CurrentScreenNum = gtk.gdk.display_get_default().get_default_screen().get_number()
+CurrentScreenNum = Gdk.Screen.get_default().get_number()
 
 # Settings Table
 #
-TableDef = gtk.FILL | gtk.EXPAND
+TableDef = Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND
 TableX   = 4
 TableY   = 2
 

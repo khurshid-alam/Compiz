@@ -313,6 +313,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
          python-compizconfig (>= ${source:Version}),
+         python-gi-cairo
          python-gtk2,
 Recommends: compiz-plugins-default
 Description: Compiz configuration settings manager

@@ -20,10 +20,9 @@
 #          Christopher Williams (christopherw@verizon.net)
 # Copyright (C) 2007 Quinn Storm
 
-import pygtk
-import gtk
-import gobject
-import gtk.gdk
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
 
 import compizconfig
 ccs = compizconfig
@@ -33,9 +32,6 @@ from ccm.Settings import *
 from ccm.Conflicts import *
 from ccm.Utils import *
 from ccm.Widgets import *
-
-Gtk = gtk
-GObject = gobject
 
 import locale
 import gettext
@@ -140,8 +136,8 @@ class PluginPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        for state in (gtk.STATE_NORMAL, gtk.STATE_PRELIGHT, gtk.STATE_ACTIVE):
-            widget.modify_fg(state, widget.style.bg[gtk.STATE_SELECTED])
+        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
         self.StyleBlock -= 1
 
     def ResetFocus(self, widget, data):
@@ -260,8 +256,8 @@ class FilterPage(GenericPage):
         
         # Entry FIXME find a solution with std gtk
         self.FilterEntry = ClearEntry()
-        self.FilterEntry.set_icon_from_icon_name(gtk.ENTRY_ICON_PRIMARY, "input-keyboard")
-        self.FilterEntry.set_icon_tooltip_text(gtk.ENTRY_ICON_PRIMARY, _("Grab Keys"))
+        self.FilterEntry.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, "input-keyboard")
+        self.FilterEntry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY, _("Grab Keys"))
         self.FilterEntry.connect('icon-press', self.GrabKey)
 
         self.FilterEntry.set_tooltip_text(_("Enter a filter.\nClick the keyboard image to grab a key for which to search."))
@@ -326,19 +322,19 @@ class FilterPage(GenericPage):
         self.SelectorBoxes.set_spacing(5)
 
         scroll = Gtk.ScrolledWindow()
-        scroll.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
-        scroll.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
+        scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.add(self.PluginBox)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
-        scroll.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
-        scroll.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
+        scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.add(self.GroupBox)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
         scroll.add(self.SubGroupBox)
-        scroll.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
-        scroll.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
+        scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         self.RightChild.pack_start(self.SelectorButtons, False, False, 0)
         self.RightChild.pack_start(self.SelectorBoxes, False, False, 0)
@@ -347,8 +343,8 @@ class FilterPage(GenericPage):
         self.SettingsBox = Gtk.VBox()
         ebox.add(self.SettingsBox)
         self.SettingsBox.set_border_width(5)
-        self.SettingsArea.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
-        self.SettingsArea.props.vscrollbar_policy = gtk.POLICY_ALWAYS
+        self.SettingsArea.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        self.SettingsArea.props.vscrollbar_policy = Gtk.PolicyType.ALWAYS
         self.SettingsArea.set_border_width(5)
         self.SettingsArea.add_with_viewport(ebox)
         self.RightChild.pack_start(self.SettingsArea, True, True, 0)
@@ -408,8 +404,8 @@ class FilterPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        for state in (gtk.STATE_NORMAL, gtk.STATE_PRELIGHT, gtk.STATE_ACTIVE):
-            widget.modify_fg(state, widget.style.bg[gtk.STATE_SELECTED])
+        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
         self.StyleBlock -= 1
 
     def Filter(self, text, level=FilterAll):
@@ -433,7 +429,7 @@ class FilterPage(GenericPage):
         self.FilterEntry.set_text(new)
 
     def GrabKey(self, widget, pos, event):
-        if pos != gtk.ENTRY_ICON_PRIMARY:
+        if pos != Gtk.EntryIconPosition.PRIMARY:
             return
         grabber = KeyGrabber(label = _("Grab key combination"))
         self.LeftWidget.pack_start(grabber, False, False, 0)
@@ -663,11 +659,11 @@ class ProfileBackendPage(object):
         profileBox.set_spacing(5)
         profileAdd = Gtk.Button()
         profileAdd.set_tooltip_text(_("Add a New Profile"))
-        profileAdd.set_image(gtk.image_new_from_stock(gtk.STOCK_ADD, gtk.ICON_SIZE_BUTTON))
+        profileAdd.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
         self.ProfileRemoveButton = profileRemove = Gtk.Button()
         profileRemove.set_tooltip_text(_("Remove This Profile"))
-        profileRemove.set_image(gtk.image_new_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_BUTTON))
-        self.ProfileComboBox = gtk.combo_box_new_text()
+        profileRemove.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_REMOVE, Gtk.IconSize.BUTTON))
+        self.ProfileComboBox = Gtk.ComboBoxText()
         self.ProfileComboBox.set_sensitive(self.Context.CurrentBackend.ProfileSupport)
         self.ProfileComboBox.append_text(_("Default"))
         active = -1
@@ -697,10 +693,10 @@ class ProfileBackendPage(object):
         profileExportButton.set_tooltip_text(_("Export your CompizConfig Profile"))
         profileResetButton = Gtk.Button(_("Reset to defaults"))
         profileResetButton.set_tooltip_text(_("Reset your CompizConfig Profile to the global defaults"))
-        profileResetButton.set_image(gtk.image_new_from_stock(gtk.STOCK_CLEAR, gtk.ICON_SIZE_BUTTON))
-        profileImportButton.set_image(gtk.image_new_from_stock(gtk.STOCK_OPEN, gtk.ICON_SIZE_BUTTON))
-        profileImportAsButton.set_image(gtk.image_new_from_stock(gtk.STOCK_OPEN, gtk.ICON_SIZE_BUTTON))
-        profileExportButton.set_image(gtk.image_new_from_stock(gtk.STOCK_SAVE, gtk.ICON_SIZE_BUTTON))
+        profileResetButton.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_CLEAR, Gtk.IconSize.BUTTON))
+        profileImportButton.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.BUTTON))
+        profileImportAsButton.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.BUTTON))
+        profileExportButton.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_SAVE, Gtk.IconSize.BUTTON))
         profileImportButton.connect("clicked", self.ImportProfile)
         profileImportAsButton.connect("clicked", self.ImportProfileAs)
         profileExportButton.connect("clicked", self.ExportProfile)
@@ -714,7 +710,7 @@ class ProfileBackendPage(object):
         rightChild.pack_start(self.ProfileImportExportBox, False, False, 5)
 
         # Backends
-        backendBox = gtk.combo_box_new_text()
+        backendBox = Gtk.ComboBoxText()
         active = 0
         for i, name in enumerate(self.Context.Backends):
             backend = self.Context.Backends[name]
@@ -748,8 +744,8 @@ class ProfileBackendPage(object):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        for state in (gtk.STATE_NORMAL, gtk.STATE_PRELIGHT, gtk.STATE_ACTIVE):
-            widget.modify_fg(state, widget.style.bg[gtk.STATE_SELECTED])
+        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
         self.StyleBlock -= 1
 
     def UpdateProfiles (self, current=_("Default")):
@@ -802,7 +798,7 @@ class ProfileBackendPage(object):
         filter.set_name(_("Profiles (*.profile)"))
         chooser.add_filter(filter)
 
-        filter = gtk.FileFilter()
+        filter = Gtk.FileFilter()
         filter.add_pattern("*")
         filter.set_name(_("All files"))
         chooser.add_filter(filter)
@@ -821,26 +817,26 @@ class ProfileBackendPage(object):
     
     def ExportProfile(self, widget):
         main = widget.get_toplevel()
-        b = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK)
-        chooser = gtk.FileChooserDialog(title=_("Save file.."), parent=main, buttons=b, action=gtk.FILE_CHOOSER_ACTION_SAVE)
+        b = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        chooser = Gtk.FileChooserDialog(title=_("Save file.."), parent=main, buttons=b, action=Gtk.FileChooserAction.SAVE)
         chooser.set_current_folder(os.environ.get("HOME"))
         self.CreateFilter(chooser)
         ret = chooser.run()
 
         path = chooser.get_filename()
         chooser.destroy()
-        if ret == gtk.RESPONSE_OK:
-            dlg = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_YES_NO)
+        if ret == Gtk.ResponseType.OK:
+            dlg = Gtk.MessageDialog(type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO)
             dlg.set_markup(_("Do you want to skip default option values while exporting your profile?"))
             ret = dlg.run()
             dlg.destroy()
             if not path.endswith(".profile"):
                 path = "%s.profile" % path
-            self.Context.Export(path, ret == gtk.RESPONSE_YES)
+            self.Context.Export(path, ret == Gtk.ResponseType.YES)
 
     def ImportProfileDialog (self, main):
-        b = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-             gtk.STOCK_OPEN, gtk.RESPONSE_OK)
+        b = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
         chooser = Gtk.FileChooserDialog (title = _("Open file.."),
                                          parent = main, buttons = b)
         chooser.set_current_folder (os.environ.get ("HOME"))
@@ -849,15 +845,15 @@ class ProfileBackendPage(object):
 
         path = chooser.get_filename ()
         chooser.destroy ()
-        if ret == gtk.RESPONSE_OK:
+        if ret == Gtk.ResponseType.OK:
             return path
         return None
 
     def ProfileNameDialog (self, main):
-        dlg = gtk.Dialog (_("Enter a profile name"), main,
-                          gtk.DIALOG_MODAL)
-        dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button (gtk.STOCK_ADD, gtk.RESPONSE_OK)
+        dlg = Gtk.Dialog (_("Enter a profile name"), main,
+                          Gtk.DialogFlags.MODAL)
+        dlg.add_button (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button (Gtk.STOCK_ADD, Gtk.ResponseType.OK)
         
         entry = Gtk.Entry ()
         label = Gtk.Label (_("Please enter a name for the new profile:"))
@@ -869,7 +865,7 @@ class ProfileBackendPage(object):
         ret = dlg.run ()
         text = entry.get_text ()
         dlg.destroy()
-        if ret == gtk.RESPONSE_OK:
+        if ret == Gtk.ResponseType.OK:
             return text
         return None
 
@@ -952,16 +948,16 @@ class PluginListPage(object):
         # Left/Right buttons
         self.MiddleButtonBox = buttonBox = Gtk.VBox()
         buttonBox.set_spacing(5)
-        boxAlignment = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+        boxAlignment = Gtk.Alignment(xalign=0.0, yalign=0.5, xscale=0.0, yscale=0.0)
         boxAlignment.add(buttonBox)
 
         rightButton = Gtk.Button()
-        rightImage = Image(gtk.STOCK_GO_FORWARD, ImageStock, gtk.ICON_SIZE_BUTTON)
+        rightImage = Image(Gtk.STOCK_GO_FORWARD, ImageStock, Gtk.IconSize.BUTTON)
         rightButton.set_image(rightImage)
         rightButton.connect("clicked", self.EnablePlugins)
 
         leftButton = Gtk.Button()
-        leftImage = Image(gtk.STOCK_GO_BACK, ImageStock, gtk.ICON_SIZE_BUTTON)
+        leftImage = Image(Gtk.STOCK_GO_BACK, ImageStock, Gtk.IconSize.BUTTON)
         leftButton.set_image(leftImage)
         leftButton.connect("clicked", self.EnabledPluginsList.delete)
 
@@ -972,7 +968,7 @@ class PluginListPage(object):
         enabledBox = Gtk.VBox()
         enabledBox.set_spacing(10)
 
-        enabledAlignment = gtk.Alignment(0.5, 0.0, 0.0, 0.0)
+        enabledAlignment = Gtk.Alignment(xalign=0.5, yalign=0.0, xscale=0.0, yscale=0.0)
         self.EnabledButtonBox = enabledButtonBox = Gtk.HBox()
         enabledButtonBox.set_spacing(5)
         enabledAlignment.add(enabledButtonBox)
@@ -1022,11 +1018,11 @@ class PluginListPage(object):
 
         autoSort = widget.get_active()
         if not autoSort:
-            dlg = gtk.MessageDialog(type=gtk.MESSAGE_WARNING, buttons=gtk.BUTTONS_YES_NO)
+            dlg = Gtk.MessageDialog(type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.YES_NO)
             dlg.set_markup(_("Do you really want to disable automatic plugin sorting? This will also disable conflict handling. You should only do this if you know what you are doing."))
             response = dlg.run()
             dlg.destroy()
-            if response == gtk.RESPONSE_NO:
+            if response == Gtk.ResponseType.NO:
                 self.Block += 1
                 widget.set_active(True)
                 self.Block -= 1
@@ -1059,9 +1055,9 @@ class PluginListPage(object):
 
     def AddPlugin(self, widget):
         dlg = Gtk.Dialog(_("Add plugin"))
-        dlg.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default()
-        dlg.set_default_response(gtk.RESPONSE_OK)
+        dlg.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK).grab_default()
+        dlg.set_default_response(Gtk.ResponseType.OK)
         
         label = Gtk.Label(_("Plugin name:"))
         label.set_tooltip_text(_("Insert plugin name"))
@@ -1077,7 +1073,7 @@ class PluginListPage(object):
         ret = dlg.run()
         dlg.destroy()
 
-        if ret == gtk.RESPONSE_OK:
+        if ret == Gtk.ResponseType.OK:
             self.EnabledPluginsList.append(entry.get_text())
 
     def EnablePlugins(self, widget):
@@ -1127,8 +1123,8 @@ class PreferencesPage(GenericPage):
         aboutLabel.set_markup(HeaderMarkup % (_("About")))
         aboutLabel.connect("style-set", self.HeaderStyleSet)
         aboutButton = Gtk.Button()
-        aboutButton.set_relief(gtk.RELIEF_NONE)
-        aboutImage = Image(gtk.STOCK_ABOUT, ImageStock, gtk.ICON_SIZE_BUTTON)
+        aboutButton.set_relief(Gtk.ReliefStyle.NONE)
+        aboutImage = Image(Gtk.STOCK_ABOUT, ImageStock, Gtk.IconSize.BUTTON)
         aboutFrame = Gtk.HBox()
         aboutFrame.set_spacing(5)
         aboutFrame.pack_start(aboutImage, False, False, 0)
@@ -1162,8 +1158,8 @@ class PreferencesPage(GenericPage):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        for state in (gtk.STATE_NORMAL, gtk.STATE_PRELIGHT, gtk.STATE_ACTIVE):
-            widget.modify_fg(state, widget.style.bg[gtk.STATE_SELECTED])
+        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
         self.StyleBlock -= 1
 
     def ShowAboutDialog(self, widget):
@@ -1195,7 +1191,7 @@ class MainPage(object):
 
         # Screens
         if len(getScreens()) > 1:
-            screenBox = gtk.combo_box_new_text()
+            screenBox = Gtk.ComboBoxText()
             for screen in getScreens():
                 screenBox.append_text(_("Screen %i") % screen)
             name = self.Context.CurrentBackend.Name
@@ -1221,7 +1217,7 @@ class MainPage(object):
             categoryToggleIcon = Image (name = iconName, type = ImageCategory,
                                         size = 22)
             categoryToggleLabel = Label (label)
-            align = gtk.Alignment (0, 0.5, 1, 1)
+            align = Gtk.Alignment (xalign=0, yalign=0.5, xscale=1, yscale=1)
             align.set_padding (0, 0, 0, 10)
             align.add (categoryToggleIcon)
             categoryToggleBox = Gtk.HBox ()
@@ -1246,10 +1242,10 @@ class MainPage(object):
         searchLabel.set_markup(HeaderMarkup % (_("Advanced Search")))
         searchLabel.connect("style-set", self.HeaderStyleSet)
         searchImage = Gtk.Image()
-        searchImage.set_from_stock(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_BUTTON)
+        searchImage.set_from_stock(Gtk.STOCK_GO_FORWARD, Gtk.IconSize.BUTTON)
         searchButton = PrettyButton()
         searchButton.connect("clicked", self.ShowAdvancedFilter)
-        searchButton.set_relief(gtk.RELIEF_NONE)
+        searchButton.set_relief(Gtk.ReliefStyle.NONE)
         searchFrame = Gtk.HBox()
         searchFrame.pack_start(searchLabel, False, False, 0)
         searchFrame.pack_end(searchImage, False, False, 0)
@@ -1260,10 +1256,10 @@ class MainPage(object):
         prefLabel.set_markup(HeaderMarkup % (_("Preferences")))
         prefLabel.connect("style-set", self.HeaderStyleSet)
         prefImage = Gtk.Image()
-        prefImage.set_from_stock(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_BUTTON)
+        prefImage.set_from_stock(Gtk.STOCK_GO_FORWARD, Gtk.IconSize.BUTTON)
         prefButton = PrettyButton()
         prefButton.connect("clicked", self.ShowPreferences)
-        prefButton.set_relief(gtk.RELIEF_NONE)
+        prefButton.set_relief(Gtk.ReliefStyle.NONE)
         prefFrame = Gtk.HBox()
         prefFrame.pack_start(prefLabel, False, False, 0)
         prefFrame.pack_end(prefImage, False, False, 0)
@@ -1287,8 +1283,8 @@ class MainPage(object):
         if self.StyleBlock > 0:
             return
         self.StyleBlock += 1
-        for state in (gtk.STATE_NORMAL, gtk.STATE_PRELIGHT, gtk.STATE_ACTIVE):
-            widget.modify_fg(state, widget.style.bg[gtk.STATE_SELECTED])
+        #for state in (Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE):
+        #    widget.modify_fg(state, widget.style.bg[Gtk.StateType.SELECTED])
         self.StyleBlock -= 1
 
     def ShowPlugin(self, widget, plugin):
@@ -1332,12 +1328,12 @@ class Page(object):
 
     def Wrap(self):
         scroll = Gtk.ScrolledWindow()
-        scroll.props.hscrollbar_policy = gtk.POLICY_NEVER
-        scroll.props.vscrollbar_policy = gtk.POLICY_AUTOMATIC
+        scroll.props.hscrollbar_policy = Gtk.PolicyType.NEVER
+        scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
 
         view = Gtk.Viewport()
         view.set_border_width(5)
-        view.set_shadow_type(gtk.SHADOW_NONE)
+        view.set_shadow_type(Gtk.ShadowType.NONE)
 
         scroll.add(view)
         view.add(self.Widget)

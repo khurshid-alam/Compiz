@@ -20,9 +20,9 @@
 #          Christopher Williams (christopherw@verizon.net)
 # Copyright (C) 2007 Quinn Storm
 
-import pygtk
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
 import os
 
 from ccm.Constants import *
@@ -30,8 +30,6 @@ from ccm.Conflicts import *
 from ccm.Widgets import *
 from ccm.Utils import *
 from ccm.Pages import *
-
-Gtk = gtk
 
 import locale
 import gettext
@@ -67,8 +65,8 @@ class Setting(object):
             markup = "%s\n<small><i>%s</i></small>" % (self.Setting.LongDesc, self.Setting.Name)
             self.EBox.set_tooltip_markup(markup)
             self.Reset.set_tooltip_text(_("Reset setting to the default value"))
-        self.Reset.set_image (Image (name = gtk.STOCK_CLEAR, type = ImageStock,
-                                     size = gtk.ICON_SIZE_BUTTON))
+        self.Reset.set_image (Image (name = Gtk.STOCK_CLEAR, type = ImageStock,
+                                     size = Gtk.IconSize.BUTTON))
         self.Reset.connect('clicked', self.DoReset)
         self._Init()
 
@@ -119,7 +117,7 @@ class Setting(object):
         label.set_markup(style % desc)
         label.props.xalign = 0
         label.set_size_request(160, -1)
-        label.props.wrap_mode = pango.WRAP_WORD
+        label.props.wrap_mode = Gtk.WrapMode.WORD
         label.set_line_wrap(True)
         self.Label = label
 
@@ -251,7 +249,7 @@ class EnumSetting(StockSetting):
 
     def _Init(self):
         StockSetting._Init(self)
-        self.Combo = gtk.combo_box_new_text()
+        self.Combo = Gtk.ComboBoxText()
         if self.List:
             self.Info = self.Setting.Info[1][2]
         else:
@@ -308,7 +306,7 @@ class RestrictedStringSetting(StockSetting):
 
     def _Init(self):
         StockSetting._Init(self)
-        self.Combo = gtk.combo_box_new_text()
+        self.Combo = Gtk.ComboBoxText()
         if self.List:
             info = self.Setting.Info[1]
         else:
@@ -441,8 +439,8 @@ class NumberSetting(StockSetting):
             self.Inc = info[2]
         inc = self.Inc
         self.NoneValue = info[0]
-        self.Adj = gtk.Adjustment(0, info[0], info[1], inc, inc*10)
-        self.Spin = gtk.SpinButton(self.Adj)
+        self.Adj = Gtk.Adjustment(0, info[0], info[1], inc, inc*10)
+        self.Spin = Gtk.SpinButton(adjustment=self.Adj)
         self.Spin.set_value(self.Get())
         self.Spin.connect("value-changed", self.Changed)
         self.Widget = self.Spin
@@ -483,7 +481,7 @@ class ColorSetting(StockSetting):
         self.Button.set_use_alpha(True)
         self.Button.connect('color-set', self.Changed)
 
-        self.Widget = gtk.Alignment (1, 0.5)
+        self.Widget = Gtk.Alignment (xalign=1, yalign=0.5)
         self.Widget.add (self.Button)
         self.Box.pack_start(self.Widget, True, True, 0)
 
@@ -494,9 +492,9 @@ class ColorSetting(StockSetting):
         return (str, Gtk.TreeViewColumn(self.Setting.ShortDesc, CellRendererColor(), text=num))
 
     def _Read(self):
-        col = gtk.gdk.Color()
         value = self.Get()
-        col.red, col.green, col.blue = value[:3]
+        red, green, blue = value[:3]
+        col = Gdk.Color(red, green, blue)
         self.Button.set_color(col)
         self.Button.set_alpha(value[3])
 
@@ -533,24 +531,24 @@ class BaseListSetting(Setting):
         self.View.connect('button-press-event', self.ButtonPressEvent)
         self.View.connect('key-press-event', self.KeyPressEvent)
         self.Select = self.View.get_selection()
-        self.Select.set_mode(gtk.SELECTION_SINGLE)
+        self.Select.set_mode(Gtk.SelectionMode.SINGLE)
         self.Select.connect('changed', self.SelectionChanged)
         self.Widget.set_spacing(5)
         self.Scroll = Gtk.ScrolledWindow()
-        self.Scroll.props.hscrollbar_policy = gtk.POLICY_AUTOMATIC
-        self.Scroll.props.vscrollbar_policy = gtk.POLICY_NEVER
+        self.Scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        self.Scroll.props.vscrollbar_policy = Gtk.PolicyType.NEVER
         self.Scroll.add(self.View)
         self.Widget.pack_start(self.Scroll, True, True, 0)
-        self.Widget.set_child_packing(self.Scroll, True, True, 0, gtk.PACK_START)
+        self.Widget.set_child_packing(self.Scroll, True, True, 0, Gtk.PackType.START)
         buttonBox = Gtk.HBox(False)
         buttonBox.set_spacing(5)
         buttonBox.set_border_width(5)
         self.Widget.pack_start(buttonBox, False, False, 0)
-        buttonTypes = ((gtk.STOCK_NEW, self.Add, None, True),
-                 (gtk.STOCK_DELETE, self.Delete, None, False), 
-                 (gtk.STOCK_EDIT, self.Edit, None, False),
-                 (gtk.STOCK_GO_UP, self.Move, 'up', False), 
-                 (gtk.STOCK_GO_DOWN, self.Move, 'down', False),)
+        buttonTypes = ((Gtk.STOCK_NEW, self.Add, None, True),
+                 (Gtk.STOCK_DELETE, self.Delete, None, False), 
+                 (Gtk.STOCK_EDIT, self.Edit, None, False),
+                 (Gtk.STOCK_GO_UP, self.Move, 'up', False), 
+                 (Gtk.STOCK_GO_DOWN, self.Move, 'down', False),)
         self.Buttons = {}
         for stock, callback, data, sensitive in buttonTypes:
             b = Gtk.Button(stock)
@@ -563,18 +561,18 @@ class BaseListSetting(Setting):
             b.set_sensitive(sensitive)
             self.Buttons[stock] = b
 
-        self.Popup = gtk.Menu()
+        self.Popup = Gtk.Menu()
         self.PopupItems = {}
-        edit = gtk.ImageMenuItem(stock_id=gtk.STOCK_EDIT)
+        edit = Gtk.ImageMenuItem.new_from_stock(stock_id=Gtk.STOCK_EDIT)
         edit.connect('activate', self.Edit)
         edit.set_sensitive(False)
         self.Popup.append(edit)
-        self.PopupItems[gtk.STOCK_EDIT] = edit
-        delete = gtk.ImageMenuItem(stock_id=gtk.STOCK_DELETE)
+        self.PopupItems[Gtk.STOCK_EDIT] = edit
+        delete = Gtk.ImageMenuItem.new_from_stock(stock_id=Gtk.STOCK_DELETE)
         delete.connect('activate', self.Delete)
         delete.set_sensitive(False)
         self.Popup.append(delete)
-        self.PopupItems[gtk.STOCK_DELETE] = delete
+        self.PopupItems[Gtk.STOCK_DELETE] = delete
         self.Popup.show_all()
 
         buttonBox.pack_end(self.Reset, False, False, 0)
@@ -634,10 +632,10 @@ class BaseListSetting(Setting):
         vbox.props.border_width = 6
         dlg.vbox.pack_start(vbox, True, True, 0)
         dlg.set_default_size(500, -1)
-        dlg.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE)
-        dlg.set_default_response(gtk.RESPONSE_CLOSE)
+        dlg.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        dlg.set_default_response(Gtk.ResponseType.CLOSE)
 
-        group = gtk.SizeGroup(gtk.SIZE_GROUP_HORIZONTAL)
+        group = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
         for widget in self.Widgets:
             vbox.pack_start(widget.EBox, False, False, 0)
             group.add_widget(widget.Label)
@@ -665,7 +663,7 @@ class BaseListSetting(Setting):
         self.EditDialogOpen = True
         self.EditDialog.show_all()
         response = self.EditDialog.run()
-        self.EditDialog.hide_all()
+        self.EditDialog.hide()
         self.EditDialogOpen = False
 
         if self.PageToBeRefreshed:
@@ -701,19 +699,19 @@ class BaseListSetting(Setting):
     def SelectionChanged(self, selection):
 
         model, it = selection.get_selected()
-        for widget in (self.Buttons[gtk.STOCK_EDIT], self.Buttons[gtk.STOCK_DELETE],
-                       self.PopupItems[gtk.STOCK_EDIT], self.PopupItems[gtk.STOCK_DELETE]):
+        for widget in (self.Buttons[Gtk.STOCK_EDIT], self.Buttons[Gtk.STOCK_DELETE],
+                       self.PopupItems[Gtk.STOCK_EDIT], self.PopupItems[Gtk.STOCK_DELETE]):
             widget.set_sensitive(it is not None)
             
         if it is not None:
             path = model.get_path(it)
             if path is not None:
                 row = path[0]
-                self.Buttons[gtk.STOCK_GO_UP].set_sensitive(row > 0)
-                self.Buttons[gtk.STOCK_GO_DOWN].set_sensitive(row < (len(model) - 1))
+                self.Buttons[Gtk.STOCK_GO_UP].set_sensitive(row > 0)
+                self.Buttons[Gtk.STOCK_GO_DOWN].set_sensitive(row < (len(model) - 1))
         else:
-            self.Buttons[gtk.STOCK_GO_UP].set_sensitive(False)
-            self.Buttons[gtk.STOCK_GO_DOWN].set_sensitive(False)
+            self.Buttons[Gtk.STOCK_GO_UP].set_sensitive(False)
+            self.Buttons[Gtk.STOCK_GO_DOWN].set_sensitive(False)
 
     def ButtonPressEvent(self, treeview, event):
         if event.button == 3:
@@ -726,7 +724,7 @@ class BaseListSetting(Setting):
             return True
 
     def KeyPressEvent(self, treeview, event):
-        if gtk.gdk.keyval_name(event.keyval) == "Delete":
+        if Gdk.keyval_name(event.keyval) == "Delete":
             model, it = treeview.get_selection().get_selected()
             if it is not None:
                 path = model.get_path(it)
@@ -785,7 +783,7 @@ class MultiListSetting(BaseListSetting):
 class EnumFlagsSetting(Setting):
 
     def _Init(self):
-        frame = gtk.Frame(self.Setting.ShortDesc)
+        frame = Gtk.Frame(label=self.Setting.ShortDesc)
         table = Gtk.Table()
         
         row = col = 0
@@ -834,7 +832,7 @@ class EnumFlagsSetting(Setting):
 class RestrictedStringFlagsSetting(Setting):
 
     def _Init(self):
-        frame = gtk.Frame(self.Setting.ShortDesc)
+        frame = Gtk.Frame(label=self.Setting.ShortDesc)
         table = Gtk.Table()
         
         row = col = 0
@@ -887,14 +885,14 @@ class EditableActionSetting (StockSetting):
 
     def _Init (self, widget, action):
         StockSetting._Init(self)
-        alignment = gtk.Alignment (0, 0.5)
+        alignment = Gtk.Alignment (xalign=0, yalign=0.5)
         alignment.add (widget)
 
         self.Label.set_size_request(-1, -1)
 
         editButton = Gtk.Button ()
-        editButton.add (Image (name = gtk.STOCK_EDIT, type = ImageStock,
-                               size = gtk.ICON_SIZE_BUTTON))
+        editButton.add (Image (name = Gtk.STOCK_EDIT, type = ImageStock,
+                               size = Gtk.IconSize.BUTTON))
         editButton.set_tooltip_text(_("Edit %s" % self.Setting.ShortDesc))
         editButton.connect ("clicked", self.RunEditDialog)
 
@@ -908,16 +906,16 @@ class EditableActionSetting (StockSetting):
 
     def RunEditDialog (self, widget):
         dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
-        dlg.set_position (gtk.WIN_POS_CENTER_ON_PARENT)
+        dlg.set_position (Gtk.WindowPosition.CENTER_ON_PARENT)
         dlg.set_transient_for (self.Widget.get_toplevel ())
-        dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default()
-        dlg.set_default_response (gtk.RESPONSE_OK)
+        dlg.add_button (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button (Gtk.STOCK_OK, Gtk.ResponseType.OK).grab_default()
+        dlg.set_default_response (Gtk.ResponseType.OK)
         
-        entry = gtk.Entry (max = 200)
+        entry = Gtk.Entry (max_length = 200)
         entry.set_text (self.GetDialogText ())
-        entry.connect ("activate", lambda *a: dlg.response (gtk.RESPONSE_OK))
-        alignment = gtk.Alignment (0.5, 0.5, 1, 1)
+        entry.connect ("activate", lambda *a: dlg.response (Gtk.ResponseType.OK))
+        alignment = Gtk.Alignment (xalign=0.5, yalign=0.5, xscale=1, yscale=1)
         alignment.set_padding (10, 10, 10, 10)
         alignment.add (entry)
 
@@ -928,7 +926,7 @@ class EditableActionSetting (StockSetting):
         ret = dlg.run ()
         dlg.destroy ()
 
-        if ret != gtk.RESPONSE_OK:
+        if ret != Gtk.ResponseType.OK:
             return
 
         self.HandleDialogText (entry.get_text ().strip ())
@@ -959,7 +957,7 @@ class KeySetting (EditableActionSetting):
             self.Read ()
 
     def ReorderKeyString (self, accel):
-        key, mods = gtk.accelerator_parse (accel)
+        key, mods = Gtk.accelerator_parse (accel)
         return GetAcceleratorName (key, mods)
 
     def GetDialogText (self):
@@ -1024,13 +1022,13 @@ class KeySetting (EditableActionSetting):
             label.set_text (self.GetLabelText (new))
 
         dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
-        dlg.set_position (gtk.WIN_POS_CENTER_ALWAYS)
+        dlg.set_position (Gtk.WindowPosition.CENTER_ALWAYS)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_icon (self.Widget.get_toplevel ().get_icon ())
         dlg.set_modal (True)
-        dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default ()
-        dlg.set_default_response (gtk.RESPONSE_OK)
+        dlg.add_button (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button (Gtk.STOCK_OK, Gtk.ResponseType.OK).grab_default ()
+        dlg.set_default_response (Gtk.ResponseType.OK)
 
         mainBox = Gtk.VBox ()
         alignment = Gtk.Alignment ()
@@ -1056,11 +1054,11 @@ class KeySetting (EditableActionSetting):
         currentMods.rstrip ("|")
         modifierSelector = ModifierSelector (currentMods)
         modifierSelector.set_tooltip_text (self.Setting.LongDesc)
-        alignment = gtk.Alignment (0.5)
+        alignment = Gtk.Alignment (xalign=0.5)
         alignment.add (modifierSelector)
         box.pack_start (alignment, True, True, 0)
 
-        key, mods = gtk.accelerator_parse (self.current)
+        key, mods = Gtk.accelerator_parse (self.current)
         grabber = KeyGrabber (key = key, mods = mods,
                               label = _("Grab key combination"))
         grabber.set_tooltip_text (self.Setting.LongDesc)
@@ -1068,7 +1066,7 @@ class KeySetting (EditableActionSetting):
 
         label = Gtk.Label (self.current)
         label.set_tooltip_text (self.Setting.LongDesc)
-        alignment = gtk.Alignment (0.5, 0.5)
+        alignment = Gtk.Alignment (xalign=0.5, yalign=0.5)
         alignment.set_padding (15, 0, 0, 0)
         alignment.add (label)
         box.pack_start (alignment, True, True, 0)
@@ -1085,7 +1083,7 @@ class KeySetting (EditableActionSetting):
         ret = dlg.run ()
         dlg.destroy ()
 
-        if ret != gtk.RESPONSE_OK:
+        if ret != Gtk.ResponseType.OK:
             return
 
         if not checkButton.get_active ():
@@ -1177,12 +1175,12 @@ class ButtonSetting (EditableActionSetting):
                 box.hide ()
                 dialog.resize (1, 1)
         dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
-        dlg.set_position (gtk.WIN_POS_CENTER_ALWAYS)
+        dlg.set_position (Gtk.WindowPosition.CENTER_ALWAYS)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_modal (True)
-        dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default ()
-        dlg.set_default_response (gtk.RESPONSE_OK)
+        dlg.add_button (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button (Gtk.STOCK_OK, Gtk.ResponseType.OK).grab_default ()
+        dlg.set_default_response (Gtk.ResponseType.OK)
 
         mainBox = Gtk.VBox ()
         alignment = Gtk.Alignment ()
@@ -1219,7 +1217,7 @@ class ButtonSetting (EditableActionSetting):
         modifierSelector.set_tooltip_text(self.Setting.LongDesc)
         box.pack_start (modifierSelector, True, True, 0)
 
-        buttonCombo = gtk.combo_box_new_text ()
+        buttonCombo = Gtk.ComboBoxText ()
         currentButton = 1
         for i in range (99, 0, -1):
             if "Button%d" % i in self.current:
@@ -1242,7 +1240,7 @@ class ButtonSetting (EditableActionSetting):
         ret = dlg.run ()
         dlg.destroy ()
 
-        if ret != gtk.RESPONSE_OK:
+        if ret != Gtk.ResponseType.OK:
             return
 
         if not checkButton.get_active ():
@@ -1276,7 +1274,7 @@ class ButtonSetting (EditableActionSetting):
 prevent any left click and thus break your configuration. Do you really want \
 to set \"%s\" button to Button1 ?") % self.Setting.ShortDesc)
             response = warning.run ()
-            if response != gtk.RESPONSE_YES:
+            if response != Gtk.ResponseType.YES:
                 return
         conflict = ButtonConflict (self.Setting, button)
         if conflict.Resolve (GlobalUpdater):
@@ -1340,12 +1338,12 @@ class EdgeSetting (EditableActionSetting):
 
     def RunEdgeSelector (self, widget):
         dlg = Gtk.Dialog (_("Edit %s") % self.Setting.ShortDesc)
-        dlg.set_position (gtk.WIN_POS_CENTER_ON_PARENT)
+        dlg.set_position (Gtk.WindowPosition.CENTER_ON_PARENT)
         dlg.set_transient_for (self.Widget.get_toplevel ())
         dlg.set_modal (True)
-        dlg.add_button (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        dlg.add_button (gtk.STOCK_OK, gtk.RESPONSE_OK).grab_default()
-        dlg.set_default_response (gtk.RESPONSE_OK)
+        dlg.add_button (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dlg.add_button (Gtk.STOCK_OK, Gtk.ResponseType.OK).grab_default()
+        dlg.set_default_response (Gtk.ResponseType.OK)
         
         selector = SingleEdgeSelector (self.current)
         alignment = Gtk.Alignment ()
@@ -1359,7 +1357,7 @@ class EdgeSetting (EditableActionSetting):
         ret = dlg.run ()
         dlg.destroy ()
 
-        if ret != gtk.RESPONSE_OK:
+        if ret != Gtk.ResponseType.OK:
             return
 
         self.EdgeEdited (selector.current)
@@ -1468,7 +1466,7 @@ class SubGroupArea(object):
             self.Child = self.Widget = Gtk.VBox()
         else:
             self.Widget = Gtk.Frame()
-            self.Expander = gtk.Expander(name)
+            self.Expander = Gtk.Expander(label=name)
             self.Widget.add(self.Expander)
             self.Expander.set_expanded(False)
             self.Child = Gtk.VBox()
