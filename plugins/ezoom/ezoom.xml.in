@@ -99,7 +99,7 @@
 		<option type="bool" name="spec_target_focus">
 		    <_short>Target Focused Window on Specific Zoom</_short>
 		    <_long>Check this to target the focused window when jumping to a specific zoom level. Uncheck this to target the mouse.</_long>
-		    <default>true</default>
+		    <default>false</default>
 		</option>
 		<option type="float" name="zoom_specific_1">
 		    <_short>Specific Zoom 1</_short>
