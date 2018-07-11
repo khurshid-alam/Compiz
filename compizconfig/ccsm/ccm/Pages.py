@@ -324,17 +324,23 @@ class FilterPage(GenericPage):
         scroll = Gtk.ScrolledWindow()
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.set_min_content_width(250)
+        scroll.set_min_content_height(180)
         scroll.add(self.PluginBox)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.set_min_content_width(220)
+        scroll.set_min_content_height(180)
         scroll.add(self.GroupBox)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
         scroll.add(self.SubGroupBox)
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
+        scroll.set_min_content_width(220)
+        scroll.set_min_content_height(180)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         self.RightChild.pack_start(self.SelectorButtons, False, False, 0)
         self.RightChild.pack_start(self.SelectorBoxes, False, False, 0)

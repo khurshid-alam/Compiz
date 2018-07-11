@@ -156,19 +156,17 @@ class PluginView(Gtk.TreeView):
             liststore.append([plugin.ShortDesc, Image(plugin.Name, type=ImagePlugin).props.pixbuf, 
                 plugin.Enabled, plugin])
         
-        column = self.insert_column_with_attributes(0, _('Plugin'), Gtk.CellRendererPixbuf(), pixbuf=1, sensitive=2)
-
-        if column is None:
-            return
+        self.insert_column_with_attributes(0, _('Plugin'), Gtk.CellRendererPixbuf(), pixbuf=1, sensitive=2)
+        column = self.get_column(0)
 
         cell = Gtk.CellRendererText()
         cell.props.wrap_width = 200
-        column.pack_start(cell, True, True, 0)
+        column.pack_start(cell, True)
         column.set_attributes(cell, text=0)
         self.model.set_visible_func(self.VisibleFunc)
         self.get_selection().connect('changed', self.SelectionChanged)
 
-    def VisibleFunc(self, model, iter):
+    def VisibleFunc(self, model, iter, data):
         return model[iter][3].Name in self.Plugins
 
     def Filter(self, plugins):
