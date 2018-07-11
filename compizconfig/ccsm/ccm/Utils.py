@@ -34,6 +34,9 @@ from cgi import escape as protect_pango_markup
 import operator
 import itertools
 
+Gtk = gtk
+GObject = gobject
+
 import locale
 import gettext
 locale.setlocale(locale.LC_ALL, "")
@@ -46,8 +49,8 @@ if not IconDir in IconTheme.get_search_path():
     IconTheme.prepend_search_path(IconDir)
 
 def gtk_process_events ():
-    while gtk.events_pending ():
-        gtk.main_iteration ()
+    while Gtk.events_pending ():
+        Gtk.main_iteration ()
 
 def getScreens():
     screens = []
@@ -64,11 +67,11 @@ def getDefaultScreen():
 def protect_markup_dict (dict_):
     return dict((k, protect_pango_markup (v)) for (k, v) in dict_.items())
 
-class Image (gtk.Image):
+class Image (Gtk.Image):
 
     def __init__ (self, name = None, type = ImageNone, size = 32,
                   useMissingImage = False):
-        gtk.Image.__init__ (self)
+        Gtk.Image.__init__ (self)
 
         if not name:
             return
@@ -86,14 +89,14 @@ class Image (gtk.Image):
                     name = "plugin-" + name
                     try:
                         pixbuf = IconTheme.load_icon (name, size, 0)
-                    except gobject.GError:
+                    except GObject.GError:
                         pixbuf = IconTheme.load_icon ("plugin-unknown", size, 0)
                 
                 elif type == ImageCategory:
                     name = "plugins-" + name
                     try:
                         pixbuf = IconTheme.load_icon (name, size, 0)
-                    except gobject.GError:
+                    except GObject.GError:
                         pixbuf = IconTheme.load_icon ("plugins-unknown", size, 0)
                 
                 else:
@@ -103,10 +106,10 @@ class Image (gtk.Image):
             
             elif type == ImageStock:
                 self.set_from_stock (name, size)
-        except gobject.GError as e:
+        except GObject.GError as e:
             self.set_from_stock (gtk.STOCK_MISSING_IMAGE, gtk.ICON_SIZE_BUTTON)
 
-class ActionImage (gtk.Alignment):
+class ActionImage (Gtk.Alignment):
 
     map = {
             "keyboard"  : "input-keyboard",
@@ -121,7 +124,7 @@ class ActionImage (gtk.Alignment):
         if action in self.map: action = self.map[action]
         self.add (Image (name = action, type = ImageThemed, size = 22))
 
-class SizedButton (gtk.Button):
+class SizedButton (Gtk.Button):
 
     minWidth = -1
     minHeight = -1
@@ -138,7 +141,7 @@ class SizedButton (gtk.Button):
         newHeight = max (height, self.minHeight)
         self.set_size_request (newWidth, newHeight)
 
-class PrettyButton (gtk.Button):
+class PrettyButton (Gtk.Button):
 
     __gsignals__ = {
         'expose-event'      : 'override',
@@ -194,20 +197,20 @@ class PrettyButton (gtk.Button):
 
         return ret
 
-class Label(gtk.Label):
+class Label(Gtk.Label):
     def __init__(self, value = "", wrap = 160):
-        gtk.Label.__init__(self, value)
+        Gtk.Label.__init__(self, value)
         self.props.xalign = 0
         self.props.wrap_mode = pango.WRAP_WORD
         self.set_line_wrap(True)
         self.set_size_request(wrap, -1)
 
-class NotFoundBox(gtk.Alignment):
+class NotFoundBox(Gtk.Alignment):
     def __init__(self, value=""):
         gtk.Alignment.__init__(self, 0.5, 0.5, 0.0, 0.0)
         
-        box = gtk.HBox()
-        self.Warning = gtk.Label()
+        box = Gtk.HBox()
+        self.Warning = Gtk.Label()
         self.Markup = _("<span size=\"large\"><b>No matches found.</b> </span><span>\n\n Your filter \"<b>%s</b>\" does not match any items.</span>")
         value = protect_pango_markup(value)
         self.Warning.set_markup(self.Markup % value)
@@ -232,16 +235,16 @@ class IdleSettingsParser:
         nCategories = len (main.MainPage.RightWidget._boxes)
         self.CategoryLoadIconsList = list(range(3, nCategories)) # Skip the first 3
 
-        gobject.timeout_add (150, self.Wait)
+        GObject.timeout_add (150, self.Wait)
 
     def Wait(self):
         if not self.PluginList:
             return False
         
         if len (self.CategoryLoadIconsList) == 0: # If we're done loading icons
-            gobject.idle_add (self.ParseSettings)
+            GObject.idle_add (self.ParseSettings)
         else:
-            gobject.idle_add (self.LoadCategoryIcons)
+            GObject.idle_add (self.LoadCategoryIcons)
         
         return False
     
@@ -254,7 +257,7 @@ class IdleSettingsParser:
 
         self.PluginList.remove (self.PluginList[0])
 
-        gobject.timeout_add (200, self.Wait)
+        GObject.timeout_add (200, self.Wait)
 
         return False
 
@@ -272,7 +275,7 @@ class IdleSettingsParser:
 
         self.CategoryLoadIconsList.remove (self.CategoryLoadIconsList[0])
 
-        gobject.timeout_add (150, self.Wait)
+        GObject.timeout_add (150, self.Wait)
 
         return False
 
@@ -287,7 +290,7 @@ class Updater:
     def SetContext (self, context):
         self.Context = context
 
-        gobject.timeout_add (2000, self.Update)
+        GObject.timeout_add (2000, self.Update)
 
     def Append (self, widget):
         reference = weakref.ref(widget)
@@ -401,7 +404,7 @@ def GetSettings(group, types=None):
 
 def GetAcceleratorName(key, mods):
     # <Primary> is <Control> everywhere except for Mac OS
-    return gtk.accelerator_name(key, mods).replace('<Primary>', '<Control>')
+    return Gtk.accelerator_name(key, mods).replace('<Primary>', '<Control>')
 
 # Support python 2.4
 try:

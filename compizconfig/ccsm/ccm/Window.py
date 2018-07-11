@@ -29,6 +29,8 @@ from ccm.Utils import *
 from ccm.Constants import *
 from ccm.Conflicts import *
 
+Gtk = gtk
+
 import locale
 import gettext
 locale.setlocale(locale.LC_ALL, "")
@@ -36,12 +38,12 @@ gettext.bindtextdomain("ccsm", DataDir + "/locale")
 gettext.textdomain("ccsm")
 _ = gettext.gettext
 
-class MainWin(gtk.Window):
+class MainWin(Gtk.Window):
 
     currentCategory = None
 
     def __init__(self, Context, pluginPage=None, categoryName=None):
-        gtk.Window.__init__(self)
+        Gtk.Window.__init__(self)
         self.ShowingPlugin = None
         self.Context = Context
         self.connect("destroy", self.Quit)
@@ -49,10 +51,10 @@ class MainWin(gtk.Window):
         self.set_title(_("CompizConfig Settings Manager"))
         
         # Build the panes
-        self.MainBox = gtk.HBox()
+        self.MainBox = Gtk.HBox()
         self.add(self.MainBox)
-        self.LeftPane = gtk.VBox()
-        self.RightPane = gtk.VBox()
+        self.LeftPane = Gtk.VBox()
+        self.RightPane = Gtk.VBox()
         self.RightPane.set_border_width(5)
         self.MainBox.pack_start(self.LeftPane, False, False, 0)
         self.MainBox.pack_start(self.RightPane, True, True, 0)
@@ -69,7 +71,7 @@ class MainWin(gtk.Window):
             self.MainPage.ToggleCategory(None, categoryName)
 
     def Quit(self, *args):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def SetPage(self, page):
         if page == self.CurrentPage:
