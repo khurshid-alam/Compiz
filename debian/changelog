@@ -1,3 +1,14 @@
+compiz (1:0.9.13.1+18.10.20180711-0ubuntu1) cosmic; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * ccsm: prepare for PyGObject
+
+  [ Samuel Thibault ]
+  * Do not enable "Target Focused Window on Specific Zoom" by default
+    (LP: #1763692)
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Wed, 11 Jul 2018 15:31:07 +0000
+
 compiz (1:0.9.13.1+18.10.20180707-0ubuntu1) cosmic; urgency=medium
 
   [ Samuel Thibault ]
