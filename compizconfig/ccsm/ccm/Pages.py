@@ -794,7 +794,7 @@ class ProfileBackendPage(object):
         return False
 
     def ProfileChangedAddTimeout(self, widget):
-        Gobject.timeout_add (500, self.ProfileChanged, widget)
+        GObject.timeout_add (500, self.ProfileChanged, widget)
 
     def CreateFilter(self, chooser):
         filter = Gtk.FileFilter()
@@ -927,7 +927,7 @@ class ProfileBackendPage(object):
         return False
 
     def BackendChangedAddTimeout(self, widget):
-        Gobject.timeout_add (500, self.BackendChanged, widget)
+        GObject.timeout_add (500, self.BackendChanged, widget)
 
 # Plugin List Page
 #
