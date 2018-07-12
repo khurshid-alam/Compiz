@@ -1376,6 +1376,7 @@ class GroupPage(Page):
         self.Label.set_padding(4, 4, 4, 4)
         label = Gtk.Label("<b>%s</b>" %(protect_pango_markup(name or _('General'))))
         label.set_use_markup(True)
+        label.set_xalign(0.0)
         self.Label.add(label)
         if '' in group:
             sga = SubGroupArea('', group[''][1])
