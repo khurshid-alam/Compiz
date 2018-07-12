@@ -1624,6 +1624,7 @@ class PluginWindow(Gtk.ScrolledWindow):
     _viewport      = None
     _boxes         = None
     _box           = None
+    _ncols         = 2
 
     def __init__ (self, context, categories=[], plugins=[]):
         Gtk.ScrolledWindow.__init__ (self)
@@ -1648,7 +1649,7 @@ class PluginWindow(Gtk.ScrolledWindow):
 
         self.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
-        self.connect ('size-allocate', self.rebuild_boxes)
+        self.connect ('size-allocate', self.on_size_allocate)
 
         self._box = Gtk.VBox ()
         self._box.set_spacing (5)
@@ -1692,15 +1693,27 @@ class PluginWindow(Gtk.ScrolledWindow):
                 viewport.remove (self._not_found_box)
                 viewport.add (self._box)
 
-        self.queue_resize()
+        self.rebuild_boxes()
         self.show_all()
 
-    def rebuild_boxes (self, widget, request):
-        ncols = request.width / 220
+    def on_size_allocate (self, widget, request):
+        ncols = int (request.width / 220)
         width = ncols * (220 + 2 * TableX) + 40
+
         if width > request.width:
             ncols -= 1
 
+        if self._ncols == ncols:
+            return
+
+        self._ncols = ncols
+        GObject.idle_add(self.idle_rebuild_boxes)
+
+    def idle_rebuild_boxes(self):
+        self.rebuild_boxes()
+        return False
+
+    def rebuild_boxes (self):
         pos = 0
         last_box = None
         children = self._box.get_children ()
@@ -1716,7 +1729,7 @@ class PluginWindow(Gtk.ScrolledWindow):
                 if box not in children:
                     self._box.pack_start (box, False, False, 0)
                     self._box.reorder_child (box, pos)
-                box.rebuild_table (ncols)
+                box.rebuild_table (self._ncols)
                 box.show_separator (False)
                 pos += 1
 
