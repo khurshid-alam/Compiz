@@ -355,6 +355,7 @@ class FilterPage(GenericPage):
         self.SettingsArea.props.vscrollbar_policy = Gtk.PolicyType.ALWAYS
         self.SettingsArea.set_border_width(5)
         self.SettingsArea.add_with_viewport(ebox)
+        self.SettingsArea.set_shadow_type (Gtk.ShadowType.IN)
         self.RightChild.pack_start(self.SettingsArea, True, True, 0)
 
         GlobalUpdater.Block += 1
