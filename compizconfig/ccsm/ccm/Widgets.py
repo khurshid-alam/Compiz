@@ -174,6 +174,9 @@ class PluginView(Gtk.TreeView):
         self.model.refilter()
 
     def SelectionChanged(self, selection):
+        if self.SelectionHandler is None:
+            return None
+
         model, iter = selection.get_selected()
         if iter is None:
             return self.SelectionHandler(None)
@@ -218,6 +221,9 @@ class GroupView(Gtk.TreeView):
             self.props.no_show_all = True
 
     def SelectionChanged(self, selection):
+        if self.SelectionHandler is None:
+            return None
+
         model, iter = selection.get_selected()
         if iter is None:
             return None

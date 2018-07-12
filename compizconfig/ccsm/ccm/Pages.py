@@ -511,6 +511,9 @@ class FilterPage(GenericPage):
         self.CurrentGroup = None
         self.CurrentSubGroup = None
 
+        self.GroupBox.SelectionHandler = None
+        self.SubGroupBox.SelectionHandler = None
+
         self.UpdateSelectorButtons()
         if not selector:
             self.UpdateGroupBox()
@@ -522,6 +525,9 @@ class FilterPage(GenericPage):
             self.PackSettingsBox(plugins=[self.CurrentPlugin])
         else:
             self.PackSettingsBox()
+
+        self.GroupBox.SelectionHandler = self.GroupChanged
+        self.SubGroupBox.SelectionHandler = self.SubGroupChanged
 
         self.RightChild.show_all()
 
