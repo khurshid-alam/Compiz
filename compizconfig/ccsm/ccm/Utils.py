@@ -139,7 +139,6 @@ class PrettyButton (Gtk.Button):
                         "focus"   : False,
                         "pointer" : False
                       }
-        self.set_size_request (200, -1)
         self.set_relief (Gtk.ReliefStyle.NONE)
         self.connect ("focus-in-event", self.update_state_in, "focus")
         self.connect ("focus-out-event", self.update_state_out, "focus")

@@ -1624,7 +1624,7 @@ class PluginWindow(Gtk.ScrolledWindow):
     _viewport      = None
     _boxes         = None
     _box           = None
-    _ncols         = 2
+    _ncols         = 1
 
     def __init__ (self, context, categories=[], plugins=[]):
         Gtk.ScrolledWindow.__init__ (self)
@@ -1702,6 +1702,9 @@ class PluginWindow(Gtk.ScrolledWindow):
 
         if width > request.width:
             ncols -= 1
+
+        if ncols < 1:
+            ncols = 1
 
         if self._ncols == ncols:
             return
