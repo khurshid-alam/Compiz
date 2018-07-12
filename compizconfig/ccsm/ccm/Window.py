@@ -21,7 +21,6 @@
 # Copyright (C) 2007 Quinn Storm
 
 from gi.repository import Gtk
-from gi.repository import Gdk
 
 from ccm.Pages import *
 from ccm.Utils import *
