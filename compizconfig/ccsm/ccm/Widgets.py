@@ -490,9 +490,6 @@ class ModifierSelector (Gtk.DrawingArea):
         if not self._surface:
             self.redraw ()
         cr.set_source_surface (self._surface)
-        area = self.get_allocation ()
-        cr.rectangle (area.x, area.y, area.width, area.height)
-        cr.clip ()
         cr.paint ()
         return False
 
@@ -685,9 +682,6 @@ class EdgeSelector (Gtk.DrawingArea):
         if not self._surface:
             self.redraw ()
         cr.set_source_surface (self._surface)
-        area = self.get_allocation ()
-        cr.rectangle (area.x, area.y, area.width, area.height)
-        cr.clip ()
         cr.paint ()
         return False
 
