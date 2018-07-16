@@ -78,7 +78,7 @@ class CellRendererColor(Gtk.CellRenderer):
         Gtk.CellRenderer.__init__(self)
 
     def _parse_color(self):
-        color = Gdk.Color_parse(self._text[:-4])
+        color = Gdk.Color.parse(self._text[:-4])
         alpha = int("0x%s" % self._text[-4:], base=16)
         self._color = [color.red/65535.0, color.green/65535.0, color.blue/65535.0, alpha/65535.0]
 
@@ -155,7 +155,7 @@ class PluginView(Gtk.TreeView):
         for plugin in sorted(plugins.values(), key=PluginKeyFunc):
             liststore.append([plugin.ShortDesc, Image(plugin.Name, type=ImagePlugin).props.pixbuf, 
                 plugin.Enabled, plugin])
-        
+
         self.insert_column_with_attributes(0, _('Plugin'), Gtk.CellRendererPixbuf(), pixbuf=1, sensitive=2)
         column = self.get_column(0)
 
@@ -1278,7 +1278,7 @@ class FileButton (Gtk.Button):
             return
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size (path, 128, 128)
-        except gobject.GError:
+        except GObject.GError:
             return
         widget.get_preview_widget ().set_from_pixbuf (pixbuf)
 
