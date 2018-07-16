@@ -312,8 +312,12 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          ${python:Depends},
+         gir1.2-gdkpixbuf-2.0,
+         gir1.2-gtk-3.0,
+         gir1.2-pango-1.0,
          python-compizconfig (>= ${source:Version}),
-         python-gtk2,
+         python-gi,
+         python-gi-cairo,
 Recommends: compiz-plugins-default
 Description: Compiz configuration settings manager
  The OpenCompositing Project brings 3D desktop visual effects that improve

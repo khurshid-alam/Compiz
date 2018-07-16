@@ -22,20 +22,15 @@
 
 import os
 
-import pygtk
-import gtk
-import gtk.gdk
-import gobject
-import pango
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
 import weakref
 
 from ccm.Constants import *
 from cgi import escape as protect_pango_markup
 import operator
 import itertools
-
-Gtk = gtk
-GObject = gobject
 
 import locale
 import gettext
@@ -44,7 +39,7 @@ gettext.bindtextdomain("ccsm", DataDir + "/locale")
 gettext.textdomain("ccsm")
 _ = gettext.gettext
 
-IconTheme = gtk.icon_theme_get_default()
+IconTheme = Gtk.IconTheme.get_default()
 if not IconDir in IconTheme.get_search_path():
     IconTheme.prepend_search_path(IconDir)
 
@@ -54,15 +49,14 @@ def gtk_process_events ():
 
 def getScreens():
     screens = []
-    display = gtk.gdk.display_get_default()
+    display = Gdk.Display.get_default()
     nScreens = display.get_n_screens()
     for i in range(nScreens):
         screens.append(i)
     return screens
 
 def getDefaultScreen():
-    display = gtk.gdk.display_get_default()
-    return display.get_default_screen().get_number()
+    return Gdk.Screen.get_default().get_number()
 
 def protect_markup_dict (dict_):
     return dict((k, protect_pango_markup (v)) for (k, v) in dict_.items())
@@ -77,8 +71,8 @@ class Image (Gtk.Image):
             return
 
         if useMissingImage:
-            self.set_from_stock (gtk.STOCK_MISSING_IMAGE,
-                                 gtk.ICON_SIZE_LARGE_TOOLBAR)
+            self.set_from_stock (Gtk.STOCK_MISSING_IMAGE,
+                                 Gtk.IconSize.LARGE_TOOLBAR)
             return
 
         try:
@@ -107,7 +101,7 @@ class Image (Gtk.Image):
             elif type == ImageStock:
                 self.set_from_stock (name, size)
         except GObject.GError as e:
-            self.set_from_stock (gtk.STOCK_MISSING_IMAGE, gtk.ICON_SIZE_BUTTON)
+            self.set_from_stock (Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.BUTTON)
 
 class ActionImage (Gtk.Alignment):
 
@@ -119,32 +113,21 @@ class ActionImage (Gtk.Alignment):
           }
 
     def __init__ (self, action):
-        gtk.Alignment.__init__ (self, 0, 0.5)
+        Gtk.Alignment.__init__ (self, xalign=0, yalign=0.5)
         self.set_padding (0, 0, 0, 10)
         if action in self.map: action = self.map[action]
         self.add (Image (name = action, type = ImageThemed, size = 22))
 
 class SizedButton (Gtk.Button):
 
-    minWidth = -1
-    minHeight = -1
-
     def __init__ (self, minWidth = -1, minHeight = -1):
         super (SizedButton, self).__init__ ()
-        self.minWidth = minWidth
-        self.minHeight = minHeight
-        self.connect ("size-request", self.adjust_size)
-
-    def adjust_size (self, widget, requisition):
-        width, height = requisition.width, requisition.height
-        newWidth = max (width, self.minWidth)
-        newHeight = max (height, self.minHeight)
-        self.set_size_request (newWidth, newHeight)
+        self.set_size_request (minWidth, minHeight)
 
 class PrettyButton (Gtk.Button):
 
     __gsignals__ = {
-        'expose-event'      : 'override',
+        'draw' : 'override',
     }
 
     _old_toplevel = None
@@ -155,8 +138,7 @@ class PrettyButton (Gtk.Button):
                         "focus"   : False,
                         "pointer" : False
                       }
-        self.set_size_request (200, -1)
-        self.set_relief (gtk.RELIEF_NONE)
+        self.set_relief (Gtk.ReliefStyle.NONE)
         self.connect ("focus-in-event", self.update_state_in, "focus")
         self.connect ("focus-out-event", self.update_state_out, "focus")
         self.connect ("hierarchy-changed", self.hierarchy_changed)
@@ -165,35 +147,34 @@ class PrettyButton (Gtk.Button):
         if old_toplevel == self._old_toplevel:
             return
 
-        if not old_toplevel and self.state != gtk.STATE_NORMAL:
-            self.set_state(gtk.STATE_PRELIGHT)
-            self.set_state(gtk.STATE_NORMAL)
+        if not old_toplevel and self.get_state () != Gtk.StateType.NORMAL:
+            self.set_state(Gtk.StateType.PRELIGHT)
+            self.set_state(Gtk.StateType.NORMAL)
 
         self._old_toplevel = old_toplevel
 
-
     def update_state_in (self, *args):
         state = args[-1]
-        self.set_state (gtk.STATE_PRELIGHT)
+        self.set_state (Gtk.StateType.PRELIGHT)
         self.states[state] = True
 
     def update_state_out (self, *args):
         state = args[-1]
         self.states[state] = False
         if True in self.states.values ():
-            self.set_state (gtk.STATE_PRELIGHT)
+            self.set_state (Gtk.StateType.PRELIGHT)
         else:
-            self.set_state (gtk.STATE_NORMAL)
+            self.set_state (Gtk.StateType.NORMAL)
 
-    def do_expose_event (self, event):
-        has_focus = self.flags () & gtk.HAS_FOCUS
+    def do_draw (self, cr):
+        has_focus = self.get_state_flags () & Gtk.StateFlags.FOCUSED
         if has_focus:
-            self.unset_flags (gtk.HAS_FOCUS)
+            self.unset_state_flags (Gtk.StateFlags.FOCUSED)
 
-        ret = gtk.Button.do_expose_event (self, event)
+        ret = Gtk.Button.do_draw (self, cr)
 
         if has_focus:
-            self.set_flags (gtk.HAS_FOCUS)
+            self.set_state_flags (Gtk.StateFlags.FOCUSED, False)
 
         return ret
 
@@ -201,13 +182,14 @@ class Label(Gtk.Label):
     def __init__(self, value = "", wrap = 160):
         Gtk.Label.__init__(self, value)
         self.props.xalign = 0
-        self.props.wrap_mode = pango.WRAP_WORD
+        self.props.wrap_mode = Gtk.WrapMode.WORD
+        self.props.max_width_chars = 20;
         self.set_line_wrap(True)
         self.set_size_request(wrap, -1)
 
 class NotFoundBox(Gtk.Alignment):
     def __init__(self, value=""):
-        gtk.Alignment.__init__(self, 0.5, 0.5, 0.0, 0.0)
+        Gtk.Alignment.__init__(self, xalign=0.5, yalign=0.5, xscale=0.0, yscale=0.0)
         
         box = Gtk.HBox()
         self.Warning = Gtk.Label()
