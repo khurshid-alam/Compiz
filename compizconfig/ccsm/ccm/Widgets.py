@@ -1644,6 +1644,7 @@ class PluginWindow(Gtk.ScrolledWindow):
                     self._categories[category] = []
                 self._categories[category].append(plugin)
 
+        self.set_shadow_type (Gtk.ShadowType.IN)
         self.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         self.connect ('size-allocate', self.on_size_allocate)
@@ -1662,6 +1663,7 @@ class PluginWindow(Gtk.ScrolledWindow):
             self._box.pack_start (category_box, False, False, 0)
 
         viewport = Gtk.Viewport ()
+        viewport.get_style_context ().add_class (Gtk.STYLE_CLASS_VIEW)
         viewport.set_focus_vadjustment (self.get_vadjustment ())
         viewport.add (self._box)
         self.add (viewport)
