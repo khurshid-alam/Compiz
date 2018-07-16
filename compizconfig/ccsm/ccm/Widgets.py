@@ -199,8 +199,7 @@ class GroupView(Gtk.TreeView):
         self.append_column(column)
 
         self.get_selection().connect('changed', self.SelectionChanged)
-        self.hide()
-        self.props.no_show_all = True
+        self.show()
 
     def Update(self, items):
         self.model.clear()
@@ -214,11 +213,9 @@ class GroupView(Gtk.TreeView):
                 length += 1
 
         if length:
-            self.show_all()
-            self.props.no_show_all = False
+            self.get_parent().show()
         else:
-            self.hide()
-            self.props.no_show_all = True
+            self.get_parent().hide()
 
     def SelectionChanged(self, selection):
         if self.SelectionHandler is None:
