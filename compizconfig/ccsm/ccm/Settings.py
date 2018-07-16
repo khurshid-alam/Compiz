@@ -661,7 +661,7 @@ class BaseListSetting(Setting):
 
         self.EditDialogOpen = True
         self.EditDialog.show_all()
-        response = self.EditDialog.run()
+        self.EditDialog.run()
         self.EditDialog.hide()
         self.EditDialogOpen = False
 
