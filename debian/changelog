@@ -1,3 +1,10 @@
+compiz (1:0.9.13.1+18.10.20180716-0ubuntu1) cosmic; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * ccsm: port to PyGObject and GTK+ 3.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Mon, 16 Jul 2018 11:21:08 +0000
+
 compiz (1:0.9.13.1+18.10.20180711.1-0ubuntu1) cosmic; urgency=medium
 
   [ Alberts Muktupāvels ]
