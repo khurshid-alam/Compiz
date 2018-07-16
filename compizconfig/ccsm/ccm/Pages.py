@@ -26,11 +26,15 @@ from gi.repository import GObject
 import compizconfig
 ccs = compizconfig
 
-from ccm.Constants import *
-from ccm.Settings import *
-from ccm.Conflicts import *
-from ccm.Utils import *
-from ccm.Widgets import *
+from ccm.Constants import CurrentScreenNum, KeyModifier, HeaderMarkup, ImagePlugin, ImageCategory, ImageStock, FilterName, FilterLongDesc, FilterValue, FilterCategory, FilterAll, DataDir
+from ccm.Settings import BaseListSetting, SubGroupArea
+from ccm.Conflicts import PluginConflict
+from ccm.Utils import gtk_process_events, getScreens, Image, PrettyButton, Label, NotFoundBox, GlobalUpdater, CategoryKeyFunc, GroupIndexKeyFunc, PluginKeyFunc, GetSettings, GetAcceleratorName
+from ccm.Widgets import ClearEntry, PluginView, GroupView, SelectorButtons, ScrolledList, Popup, KeyGrabber, AboutDialog, PluginWindow
+
+from cgi import escape as protect_pango_markup
+
+import os
 
 import locale
 import gettext

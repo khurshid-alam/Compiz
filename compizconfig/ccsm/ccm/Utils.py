@@ -20,17 +20,14 @@
 #          Christopher Williams (christopherw@verizon.net)
 # Copyright (C) 2007 Quinn Storm
 
-import os
-
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
 import weakref
 
-from ccm.Constants import *
+from ccm.Constants import ImageNone, ImagePlugin, ImageCategory, ImageThemed, ImageStock, DataDir, IconDir
 from cgi import escape as protect_pango_markup
 import operator
-import itertools
 
 import locale
 import gettext
