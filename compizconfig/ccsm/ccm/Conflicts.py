@@ -519,4 +519,3 @@ class PluginConflict(Conflict):
             return answer, choice
         
         return answer
-        e
