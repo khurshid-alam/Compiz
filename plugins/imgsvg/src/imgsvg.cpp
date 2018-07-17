@@ -327,7 +327,7 @@ SvgWindow::glDraw (const GLMatrix     &transform,
 		finiTexture (context->texture[1]);
 		initTexture (source, context->texture[1], CompSize ());
 
-		memset (&context->rect, 0, sizeof (BoxRec));
+		context->rect = CompRect ();
 		context->size.setWidth (0);
 		context->size.setHeight (0);
 	    }
