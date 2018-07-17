@@ -78,26 +78,26 @@ class Image (Gtk.Image):
         try:
             if type in  (ImagePlugin, ImageCategory, ImageThemed):
                 pixbuf = None
-                
+
                 if type == ImagePlugin:
                     name = "plugin-" + name
                     try:
-                        pixbuf = IconTheme.load_icon (name, size, 0)
+                        pixbuf = IconTheme.load_icon (name, size, Gtk.IconLookupFlags.FORCE_SIZE)
                     except GObject.GError:
-                        pixbuf = IconTheme.load_icon ("plugin-unknown", size, 0)
-                
+                        pixbuf = IconTheme.load_icon ("plugin-unknown", size, Gtk.IconLookupFlags.FORCE_SIZE)
+
                 elif type == ImageCategory:
                     name = "plugins-" + name
                     try:
-                        pixbuf = IconTheme.load_icon (name, size, 0)
+                        pixbuf = IconTheme.load_icon (name, size, Gtk.IconLookupFlags.FORCE_SIZE)
                     except GObject.GError:
-                        pixbuf = IconTheme.load_icon ("plugins-unknown", size, 0)
-                
+                        pixbuf = IconTheme.load_icon ("plugins-unknown", size, Gtk.IconLookupFlags.FORCE_SIZE)
+
                 else:
-                    pixbuf = IconTheme.load_icon (name, size, 0)
+                    pixbuf = IconTheme.load_icon (name, size, Gtk.IconLookupFlags.FORCE_SIZE)
 
                 self.set_from_pixbuf (pixbuf)
-            
+
             elif type == ImageStock:
                 self.set_from_stock (name, size)
         except GObject.GError as e:
