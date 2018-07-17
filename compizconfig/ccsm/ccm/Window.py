@@ -22,10 +22,8 @@
 
 from gi.repository import Gtk
 
-from ccm.Pages import *
-from ccm.Utils import *
-from ccm.Constants import *
-from ccm.Conflicts import *
+from ccm.Pages import PluginPage, MainPage
+from ccm.Constants import DataDir
 
 import locale
 import gettext

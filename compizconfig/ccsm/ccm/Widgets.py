@@ -26,15 +26,17 @@ from gi.repository import GObject
 from gi.repository import PangoCairo
 from gi.repository import GdkPixbuf
 import cairo
+from cgi import escape as protect_pango_markup
 from math import pi, sqrt
 import time
+import os
 import re
 import mimetypes
 mimetypes.init()
 
-from ccm.Utils import *
-from ccm.Constants import *
-from ccm.Conflicts import *
+from ccm.Utils import IconTheme, gtk_process_events, Image, PrettyButton, Label, NotFoundBox, GlobalUpdater, PluginSetting, SettingKeyFunc, CategoryKeyFunc, PluginKeyFunc, GetSettings, GetAcceleratorName
+from ccm.Constants import TableX, TableY, ImagePlugin, ImageCategory, ImageStock, FilterName, FilterLongDesc, FilterCategory, FilterAll, DataDir, PixmapDir, ConfDir, ConfFile, Version
+from ccm.Conflicts import EdgeConflict, FeatureRequirement, PluginConflict
 
 import locale
 import gettext

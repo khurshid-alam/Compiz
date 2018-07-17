@@ -22,8 +22,8 @@
 
 from gi.repository import Gtk
 
-from ccm.Constants import *
-from ccm.Utils import *
+from ccm.Constants import DataDir
+from ccm.Utils import protect_markup_dict, GetSettings
 
 import locale
 import gettext

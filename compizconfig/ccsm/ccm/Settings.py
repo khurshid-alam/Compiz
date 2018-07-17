@@ -22,13 +22,13 @@
 
 from gi.repository import Gtk
 from gi.repository import Gdk
-import os
 
-from ccm.Constants import *
-from ccm.Conflicts import *
-from ccm.Widgets import *
-from ccm.Utils import *
-from ccm.Pages import *
+from ccm.Constants import TableDef, TableX, KeyModifier, Edges, ImageStock, FilterName, FilterLongDesc, FilterValue, FilterAll, DataDir
+from ccm.Conflicts import KeyConflict, ButtonConflict, EdgeConflict
+from ccm.Widgets import CellRendererColor, ModifierSelector, SingleEdgeSelector, KeyGrabber, MatchButton, FileButton, ErrorDialog, WarningDialog
+from ccm.Utils import Image, ActionImage, SizedButton, GlobalUpdater, PureVirtualError, SettingKeyFunc, EnumSettingKeyFunc, HasOnlyType, GetSettings, GetAcceleratorName
+
+from cgi import escape as protect_pango_markup
 
 import locale
 import gettext
@@ -661,7 +661,7 @@ class BaseListSetting(Setting):
 
         self.EditDialogOpen = True
         self.EditDialog.show_all()
-        response = self.EditDialog.run()
+        self.EditDialog.run()
         self.EditDialog.hide()
         self.EditDialogOpen = False
 
