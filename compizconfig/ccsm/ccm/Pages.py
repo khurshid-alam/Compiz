@@ -327,6 +327,7 @@ class FilterPage(GenericPage):
         self.SelectorBoxes.set_spacing(5)
 
         scroll = Gtk.ScrolledWindow()
+        scroll.set_shadow_type (Gtk.ShadowType.IN)
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.set_min_content_width(250)
@@ -334,6 +335,8 @@ class FilterPage(GenericPage):
         scroll.add(self.PluginBox)
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
+        scroll.set_no_show_all(True)
+        scroll.set_shadow_type (Gtk.ShadowType.IN)
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.set_min_content_width(220)
@@ -342,6 +345,8 @@ class FilterPage(GenericPage):
         self.SelectorBoxes.pack_start(scroll, False, False, 0)
         scroll = Gtk.ScrolledWindow()
         scroll.add(self.SubGroupBox)
+        scroll.set_no_show_all(True)
+        scroll.set_shadow_type (Gtk.ShadowType.IN)
         scroll.props.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         scroll.set_min_content_width(220)

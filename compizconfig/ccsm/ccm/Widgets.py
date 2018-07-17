@@ -201,8 +201,7 @@ class GroupView(Gtk.TreeView):
         self.append_column(column)
 
         self.get_selection().connect('changed', self.SelectionChanged)
-        self.hide()
-        self.props.no_show_all = True
+        self.show()
 
     def Update(self, items):
         self.model.clear()
@@ -216,11 +215,9 @@ class GroupView(Gtk.TreeView):
                 length += 1
 
         if length:
-            self.show_all()
-            self.props.no_show_all = False
+            self.get_parent().show()
         else:
-            self.hide()
-            self.props.no_show_all = True
+            self.get_parent().hide()
 
     def SelectionChanged(self, selection):
         if self.SelectionHandler is None:
@@ -1649,6 +1646,7 @@ class PluginWindow(Gtk.ScrolledWindow):
                     self._categories[category] = []
                 self._categories[category].append(plugin)
 
+        self.set_shadow_type (Gtk.ShadowType.IN)
         self.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.props.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC
         self.connect ('size-allocate', self.on_size_allocate)
@@ -1667,6 +1665,7 @@ class PluginWindow(Gtk.ScrolledWindow):
             self._box.pack_start (category_box, False, False, 0)
 
         viewport = Gtk.Viewport ()
+        viewport.get_style_context ().add_class (Gtk.STYLE_CLASS_VIEW)
         viewport.set_focus_vadjustment (self.get_vadjustment ())
         viewport.add (self._box)
         self.add (viewport)
