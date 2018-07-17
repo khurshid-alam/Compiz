@@ -123,19 +123,19 @@ class test (Command):
     user_options = []
 
     def initialize_options (self):
-	self.cwd = None
+        self.cwd = None
 
     def finalize_options (self):
-	self.cwd = os.getcwd ()
+        self.cwd = os.getcwd ()
 
     def run (self):
-	assert os.getcwd () == self.cwd, 'Must be in package root: %s' % self.cwd
-	loader = unittest.TestLoader ()
+        assert os.getcwd () == self.cwd, 'Must be in package root: %s' % self.cwd
+        loader = unittest.TestLoader ()
 
-	tests = loader.discover (os.getcwd (), pattern='test*')
-	result = unittest.TestResult ()
+        tests = loader.discover (os.getcwd (), pattern='test*')
+        result = unittest.TestResult ()
 
-	unittest.TextTestRunner (verbosity=2).run (tests)
+        unittest.TextTestRunner (verbosity=2).run (tests)
 
 
 setup (
@@ -144,12 +144,11 @@ setup (
   description      = "CompizConfig Python",
   url              = "https://launchpad.net/compiz",
   license          = "GPL",
-  maintainer	   = "Guillaume Seguin",
+  maintainer       = "Guillaume Seguin",
   maintainer_email = "guillaume@segu.in",
   cmdclass         = {"uninstall" : uninstall,
                       "install" : install,
                       "install_data" : install_data,
-                      "build"     : build,
-		      "test"  : test}
+                      "build" : build,
+                      "test" : test}
 )
-
