@@ -1636,6 +1636,10 @@ WallScreen::WallScreen (CompScreen *screen) :
     moveWindow (None),
     focusDefault (true),
     transform (NoTransformation),
+    switcherContext {},
+    thumbContext {},
+    highlightContext {},
+    arrowContext {},
     windowIsDragMoved (false)
 {
     ScreenInterface::setHandler (screen);
@@ -1646,10 +1650,6 @@ WallScreen::WallScreen (CompScreen *screen) :
     // to prevent crashes in XCloseDisplay
     dlopen ("libcairo.so.2", RTLD_LAZY);
 
-    memset (&switcherContext, 0, sizeof (WallCairoContext));
-    memset (&thumbContext, 0, sizeof (WallCairoContext));
-    memset (&highlightContext, 0, sizeof (WallCairoContext));
-    memset (&arrowContext, 0, sizeof (WallCairoContext));
     createCairoContexts (true);
 
 #define setAction(action, dir, win) \
