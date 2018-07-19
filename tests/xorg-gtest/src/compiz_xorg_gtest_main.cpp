@@ -125,7 +125,6 @@ void SetupSignalHandlers ()
 	SIGSTKFLT,
 	SIGIO,
 	SIGPWR,
-	SIGUNUSED,
     };
 
     struct sigaction action;

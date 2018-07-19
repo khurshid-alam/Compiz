@@ -22,7 +22,6 @@
  *
  * Authored by: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
-#include <tr1/tuple>
 #include <gtest/gtest.h>
 #include "wall-offset.h"
 
@@ -170,7 +169,7 @@ namespace
 	},
     };
 
-    typedef std::tr1::tuple <OffsetParameters, unsigned int> AnimParam;
+    typedef testing::tuple <OffsetParameters, unsigned int> AnimParam;
 }
 
 class ExpoWallOffsetTestAnimations :
@@ -190,8 +189,8 @@ class ExpoWallOffsetTestAnimations :
 
 TEST_P (ExpoWallOffsetTestAnimations, TestAnimationValues)
 {
-    const OffsetParameters &offset (std::tr1::get <0> (GetParam ()));
-    const unsigned int     &index (std::tr1::get <1> (GetParam ()));
+    const OffsetParameters &offset (testing::get <0> (GetParam ()));
+    const unsigned int     &index (testing::get <1> (GetParam ()));
 
     RecordProperty ("outputWidth", offset.outputWidth);
     RecordProperty ("outputHeight", offset.outputHeight);

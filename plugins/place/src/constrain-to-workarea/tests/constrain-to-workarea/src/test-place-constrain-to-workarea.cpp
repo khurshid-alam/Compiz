@@ -23,7 +23,6 @@
  * Authored by: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
 
-#include <tr1/tuple>
 #include <test-constrain-to-workarea.h>
 #include <constrain-to-workarea.h>
 #include <iostream>
@@ -180,22 +179,22 @@ TEST_F (PlaceClampGeometryToWorkArea, ChangePositionIfSizeChanged)
 
 namespace
 {
-typedef std::tr1::tuple <cw::Geometry, cwe::Extents> ConstrainPositionToWorkAreaParam;
+typedef testing::tuple <cw::Geometry, cwe::Extents> ConstrainPositionToWorkAreaParam;
 
 const cw::Geometry & WindowGeometry (const ConstrainPositionToWorkAreaParam &p)
 {
-    return std::tr1::get <0> (p);
+    return testing::get <0> (p);
 }
 
 const cwe::Extents & WindowExtents (const ConstrainPositionToWorkAreaParam &p)
 {
-    return std::tr1::get <1> (p);
+    return testing::get <1> (p);
 }
 
 CompPoint InitialPosition (const ConstrainPositionToWorkAreaParam &p)
 {
     /* Initial position is where the window is right now */
-    return (std::tr1::get <0> (p)).pos ();
+    return (testing::get <0> (p)).pos ();
 }
 
 const CompRect  WArea (50, 50, 900, 1900);
