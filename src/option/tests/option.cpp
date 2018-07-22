@@ -234,10 +234,10 @@ TEST (CompOption, AssignDefaultActionValueToUnsetTypeClearsOldStateKeepsInfo)
 
     /* We don't care about the old action's state, so get
      * rid of it */
-    ASSERT_EQ (option.value ().action ().state (), 0);
+    ASSERT_EQ (option.value ().action ().state (), 0u);
 
     /* We do want to keep the non-stateful data which is
      * pure info */
     ASSERT_EQ (option.value ().action ().button ().button (), 1);
-    ASSERT_EQ (option.value ().action ().button ().modifiers (), 1 << 1);
+    ASSERT_EQ (option.value ().action ().button ().modifiers (), 1u << 1);
 }

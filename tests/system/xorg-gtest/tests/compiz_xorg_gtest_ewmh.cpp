@@ -133,7 +133,7 @@ TEST_F (CompizXorgSystemEWMH, InitialViewportGeometry)
 
     ASSERT_EQ (XA_CARDINAL, actualType);
     ASSERT_EQ (32, actualFmt);
-    ASSERT_EQ (2, nItems);
+    ASSERT_EQ (2u, nItems);
 
     unsigned long *geometry = reinterpret_cast <unsigned long *> (property);
 

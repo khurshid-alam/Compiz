@@ -82,9 +82,9 @@ TEST(CCSObjectTest, TestTypeAllocation)
     unsigned int j = CCS_INTERFACE_TYPE_DUMMY;
     unsigned int k = CCS_INTERFACE_TYPE_DUMMY2;
 
-    EXPECT_EQ (i, 1);
-    EXPECT_EQ (j ,1);
-    EXPECT_EQ (k, 2);
+    EXPECT_EQ (i, 1u);
+    EXPECT_EQ (j, 1u);
+    EXPECT_EQ (k, 2u);
 }
 
 TEST(CCSObjectTest, InterfaceAdd)
@@ -95,7 +95,7 @@ TEST(CCSObjectTest, InterfaceAdd)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     ccsObjectFinalize (to);
@@ -144,13 +144,13 @@ TEST(CCSObjectTest, InterfaceRemove)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     ccsObjectRemoveInterface (to, 1);
 
     EXPECT_EQ (NULL, ((CCSObject *) to)->interfaces);
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0u);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interface_types);
 
     free (to);
@@ -164,7 +164,7 @@ TEST(CCSObjectTest, InterfaceFetchCall)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     const DummyInterface *myDummyInterface = (const DummyInterface *) ccsObjectGetInterface (to, 1);
@@ -177,7 +177,7 @@ TEST(CCSObjectTest, InterfaceFetchCall)
     ccsObjectRemoveInterface (to, 1);
 
     EXPECT_EQ (NULL, ((CCSObject *) to)->interfaces);
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0u);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interface_types);
 
     free (to);
@@ -246,7 +246,7 @@ TEST(CCSObjectTest, TestFinalizeFreesEverything)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     int *i = (int *) malloc (sizeof (int));
@@ -264,7 +264,7 @@ TEST(CCSObjectTest, TestFinalizeFreesEverything)
 
     EXPECT_EQ (NULL, ((CCSObject *) to)->priv);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interfaces);
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0u);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interface_types);
 
     free (to);
@@ -292,7 +292,7 @@ TEST(CCSObjectTest, TestReallocFailures)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (NULL, ((CCSObject *) to)->interfaces);
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0u);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interface_types);
 
     free (to);
@@ -306,27 +306,27 @@ TEST(CCSObjectTest, TestAllocatedMemoryOnRemove)
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     ccsObjectAddInterface (to, (const CCSInterface *) &SomeDummyInterface, 2);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 2);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 2u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 1);
 
     ccsObjectRemoveInterface (to, 1);
 
     EXPECT_EQ (*((CCSObject *) to)->interfaces, (const CCSInterface *) (&SomeDummyInterface));
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1);
-    EXPECT_EQ (((CCSObject *) to)->n_allocated_interfaces, 2);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 1u);
+    EXPECT_EQ (((CCSObject *) to)->n_allocated_interfaces, 2u);
     EXPECT_EQ (*((CCSObject *) to)->interface_types, 2);
 
     ccsObjectRemoveInterface (to, 2);
 
     EXPECT_EQ (NULL, ((CCSObject *) to)->interfaces);
-    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0);
-    EXPECT_EQ (((CCSObject *) to)->n_allocated_interfaces, 0);
+    EXPECT_EQ (((CCSObject *) to)->n_interfaces, 0u);
+    EXPECT_EQ (((CCSObject *) to)->n_allocated_interfaces, 0u);
     EXPECT_EQ (NULL, ((CCSObject *) to)->interface_types);
 
     free (to);

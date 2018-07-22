@@ -139,7 +139,7 @@ TEST_F (CCSGSettingsWrapperWithMemoryBackendEnvGoodAllocatorTest, TestGetGSettin
 
 TEST_F (CCSGSettingsWrapperWithMemoryBackendEnvGoodAllocatorAutoInitTest, TestSetValueOnWrapper)
 {
-    const unsigned int VALUE = 2;
+    const int VALUE = 2;
     const std::string KEY ("integer-setting");
     boost::shared_ptr <GVariant> variant (g_variant_new ("i", VALUE, NULL),
 					  boost::bind (g_variant_unref, _1));

@@ -141,7 +141,7 @@ TEST_F (CompizXorgSystemStackingTest, TestCreateWindowsAndRestackRelativeToEachO
     /* Check the client list to see that w2 > w1 */
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
 
-    ASSERT_EQ (clientList.size (), 2);
+    ASSERT_EQ (clientList.size (), 2u);
     EXPECT_EQ (clientList.front (), w1);
     EXPECT_EQ (clientList.back (), w2);
 }
@@ -170,7 +170,7 @@ TEST_F (CompizXorgSystemStackingTest, TestCreateWindowsAndRestackRelativeToEachO
 								       -1,
 								       matcher)));
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
-    ASSERT_EQ (clientList.size (), 1);
+    ASSERT_EQ (clientList.size (), 1u);
 
     Window w1 = ct::CreateNormalWindow (dpy);
     Window w2 = ct::CreateNormalWindow (dpy);
@@ -202,7 +202,7 @@ TEST_F (CompizXorgSystemStackingTest, TestCreateWindowsAndRestackRelativeToEachO
     clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
 
     /* Check the client list to see that dock > w2 > w1 */
-    ASSERT_EQ (clientList.size (), 3);
+    ASSERT_EQ (clientList.size (), 3u);
 
     std::list <Window>::iterator it = clientList.begin ();
 
@@ -247,7 +247,7 @@ TEST_F (CompizXorgSystemStackingTest, TestMapWindowWithOldUserTime)
 
     /* Check the client list to see that w2 > w3 > w1 */
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
-    ASSERT_EQ (clientList.size (), 3);
+    ASSERT_EQ (clientList.size (), 3u);
 
     std::list <Window>::iterator it = clientList.begin ();
     EXPECT_EQ (*it++, w1);
@@ -292,7 +292,7 @@ TEST_F (CompizXorgSystemStackingTest, TestMapWindowAndDenyFocus)
 								       matcher)));
     /* Check the client list to see that w2 > w3 > w1 */
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
-    ASSERT_EQ (clientList.size (), 3);
+    ASSERT_EQ (clientList.size (), 3u);
 
     std::list <Window>::iterator it = clientList.begin ();
     EXPECT_EQ (*it++, w1);
@@ -324,7 +324,7 @@ TEST_F (CompizXorgSystemStackingTest, TestCreateRelativeToDestroyedWindowFindsAn
 								       -1,
 								       matcher)));
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
-    ASSERT_EQ (clientList.size (), 1);
+    ASSERT_EQ (clientList.size (), 1u);
 
     Window w1 = ct::CreateNormalWindow (dpy);
     Window w2 = ct::CreateNormalWindow (dpy);
@@ -374,7 +374,7 @@ TEST_F (CompizXorgSystemStackingTest, TestCreateRelativeToDestroyedWindowFindsAn
 
     std::list <Window>::iterator it = clientList.begin ();
 
-    EXPECT_EQ (3, clientList.size ());
+    EXPECT_EQ (3u, clientList.size ());
     EXPECT_EQ (w1, (*it++));
     EXPECT_EQ (w3, (*it++));
     EXPECT_EQ (dock, (*it++));
@@ -429,7 +429,7 @@ TEST_F(CompizXorgSystemStackingTest, TestWindowsDontStackAboveTransientForWindow
     std::list <Window>::iterator it = clientList.begin ();
 
     /* Assert,  w1 > dock > w2 */
-    EXPECT_EQ (3, clientList.size ());
+    EXPECT_EQ (3u, clientList.size ());
 
     EXPECT_EQ (w2, (*it++));
     EXPECT_EQ (dock, (*it++));

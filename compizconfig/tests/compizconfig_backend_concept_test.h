@@ -840,7 +840,7 @@ TEST_P (CCSBackendConformanceTestProfileHandling, TestGetExistingProfiles)
 	boost::shared_ptr <_CCSStringList> existingProfiles (ccsBackendGetExistingProfiles (backend, context.get ()),
 							     boost::bind (ccsStringListFree, _1, TRUE));
 
-	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 4);
+	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 4u);
 
 	/* Default profile must always be there */
 	EXPECT_THAT (existingProfiles.get (), IsStringItemInStringCCSList (Eq (PROFILE_DEFAULT)));
@@ -874,7 +874,7 @@ TEST_P (CCSBackendConformanceTestProfileHandling, TestDeleteNonCurrentProfile)
 	boost::shared_ptr <_CCSStringList> existingProfiles (ccsBackendGetExistingProfiles (backend, context.get ()),
 							     boost::bind (ccsStringListFree, _1, TRUE));
 
-	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 3);
+	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 3u);
 
 	/* Default profile must always be there */
 	EXPECT_THAT (existingProfiles.get (), IsStringItemInStringCCSList (Eq (PROFILE_DEFAULT)));
@@ -911,7 +911,7 @@ TEST_P (CCSBackendConformanceTestProfileHandling, TestDeleteNonExistantCurrentPr
 	boost::shared_ptr <_CCSStringList> existingProfiles (ccsBackendGetExistingProfiles (backend, context.get ()),
 							     boost::bind (ccsStringListFree, _1, TRUE));
 
-	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 4);
+	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 4u);
 
 	/* Default profile must always be there */
 	EXPECT_THAT (existingProfiles.get (), IsStringItemInStringCCSList (Eq (PROFILE_DEFAULT)));
@@ -952,7 +952,7 @@ TEST_P (CCSBackendConformanceTestProfileHandling, TestDeleteCurrentProfile)
 	boost::shared_ptr <_CCSStringList> existingProfiles (ccsBackendGetExistingProfiles (backend, context.get ()),
 							     boost::bind (ccsStringListFree, _1, TRUE));
 
-	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 2);
+	ASSERT_EQ (ccsStringListLength (existingProfiles.get ()), 2u);
 	/* Default profile must always be there */
 	EXPECT_THAT (existingProfiles.get (), IsStringItemInStringCCSList (Eq (PROFILE_DEFAULT)));
 
@@ -966,4 +966,3 @@ TEST_P (CCSBackendConformanceTestProfileHandling, TestDeleteCurrentProfile)
 }
 
 #endif
-

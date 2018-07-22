@@ -262,7 +262,7 @@ TEST_F(CCSGSettingsTestIndependent, TestGetSchemaNameForPlugin)
 
     size_t pos = schemaNameStr.find (PLUGIN_SCHEMA_ID_PREFIX, 0);
 
-    EXPECT_EQ (pos, 0);
+    EXPECT_EQ (pos, 0u);
 
     g_free (schemaName);
 }
@@ -430,7 +430,7 @@ TEST_F(CCSGSettingsTestIndependent, TestDecomposeGSettingsPath)
 
     ASSERT_TRUE (decomposeGSettingsPath (compiz_gsettings_path.c_str (), &pluginName, &screenNum));
     EXPECT_EQ (std::string (pluginName), "PLUGINNAME");
-    EXPECT_EQ (screenNum, 0);
+    EXPECT_EQ (screenNum, 0u);
 
     g_free (pluginName);
 }
@@ -448,7 +448,7 @@ TEST_F(CCSGSettingsTestIndependent, TestDecomposeGSettingsPathBadPathname)
 
     EXPECT_FALSE (decomposeGSettingsPath (compiz_gsettings_path.c_str (), &pluginNameC, &screenNum));
     EXPECT_EQ (std::string (pluginNameC), "aaa");
-    EXPECT_EQ (screenNum, 1);
+    EXPECT_EQ (screenNum, 1u);
 }
 
 TEST_F(CCSGSettingsTestIndependent, TestMakeCompizProfilePath)
@@ -698,7 +698,7 @@ TEST_F(CCSGSettingsTestPluginsWithSetKeysGVariantSetup, TestAppendToPluginsWithS
 						 &newWrittenPlugins,
 						 &newWrittenPluginsSize));
 
-    EXPECT_EQ (newWrittenPluginsSize, 3);
+    EXPECT_EQ (newWrittenPluginsSize, 3u);
     EXPECT_EQ (std::string (newWrittenPlugins[0]), std::string ("foo"));
     EXPECT_EQ (std::string (newWrittenPlugins[1]), std::string ("bar"));
     EXPECT_EQ (std::string (newWrittenPlugins[2]), std::string ("plugin"));
@@ -711,7 +711,7 @@ TEST_F(CCSGSettingsTestPluginsWithSetKeysGVariantSetup, TestAppendToPluginsWithS
 						  &newWrittenPlugins,
 						  &newWrittenPluginsSize));
 
-    EXPECT_EQ (newWrittenPluginsSize, 2);
+    EXPECT_EQ (newWrittenPluginsSize, 2u);
     EXPECT_EQ (std::string (newWrittenPlugins[0]), std::string ("foo"));
     EXPECT_EQ (std::string (newWrittenPlugins[1]), std::string ("bar"));
 }
@@ -849,7 +849,7 @@ TEST_F(CCSGSettingsTestFindSettingLossy, TestFilterAvailableSettingsByType)
 
     /* Needs to be expressed in terms of a boolean expression */
     ASSERT_THAT (filteredList, NotNull ());
-    EXPECT_EQ (ccsSettingListLength (filteredList), 1);
+    EXPECT_EQ (ccsSettingListLength (filteredList), 1u);
     EXPECT_EQ (filteredList->data, s1);
     EXPECT_NE (filteredList->data, s2);
     EXPECT_EQ (NULL, filteredList->next);
@@ -878,7 +878,7 @@ TEST_F(CCSGSettingsTestFindSettingLossy, TestFilterAvailableSettingsMatchingPart
 													 settingList);
 
     ASSERT_THAT (filteredList, NotNull ());
-    ASSERT_EQ (ccsSettingListLength (filteredList), 2);
+    ASSERT_EQ (ccsSettingListLength (filteredList), 2u);
     EXPECT_EQ (filteredList->data, s1);
     EXPECT_NE (filteredList->data, s3);
     ASSERT_THAT (filteredList->next, NotNull ());

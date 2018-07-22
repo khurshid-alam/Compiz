@@ -83,9 +83,10 @@ TEST_F(CompWindowGeometryTestGeometry, TestGeometry)
     /* change mask for x | y | width | height */
     rg  = compiz::window::Geometry (49, 99, 199, 299, 5);
     unsigned int mask = rg.changeMask (g);
+    unsigned int expected_mask = CHANGE_X | CHANGE_Y | CHANGE_WIDTH | CHANGE_HEIGHT;
 
     EXPECT_EQ (rg, compiz::window::Geometry (49, 99, 199, 299, 5));
-    EXPECT_EQ (mask, CHANGE_X | CHANGE_Y | CHANGE_WIDTH | CHANGE_HEIGHT);
+    EXPECT_EQ (mask, expected_mask);
 }
 
 TEST_F(CompWindowGeometryTestGeometry, TestBorders)
@@ -94,6 +95,6 @@ TEST_F(CompWindowGeometryTestGeometry, TestBorders)
 
     EXPECT_EQ (g.xMinusBorder (), 0);
     EXPECT_EQ (g.yMinusBorder (), 0);
-    EXPECT_EQ (g.widthIncBorders (), 3);
-    EXPECT_EQ (g.heightIncBorders (), 3);
+    EXPECT_EQ (g.widthIncBorders (), 3u);
+    EXPECT_EQ (g.heightIncBorders (), 3u);
 }

@@ -267,7 +267,7 @@ TEST_F (AutostartCompizXorgSystemICCCM, ConfigureRequestSendsBackAppropriateConf
     /* Check the client list to see that w1 > w2 */
     std::list <Window> clientList = ct::NET_CLIENT_LIST_STACKING (dpy);
 
-    ASSERT_EQ (2, clientList.size ());
+    ASSERT_EQ (2u, clientList.size ());
     EXPECT_EQ (w2, clientList.front ());
     EXPECT_EQ (w1, clientList.back ());
 }

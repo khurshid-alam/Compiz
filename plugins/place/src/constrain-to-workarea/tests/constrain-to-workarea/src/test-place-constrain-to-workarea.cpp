@@ -351,8 +351,8 @@ TEST (PlaceGetViewportRelativeCoordinates, OutsideInnerScreenWidth)
 
     CompPoint    position (cp::getViewportRelativeCoordinates (geom,
 							       SCREEN_SIZE));
-    EXPECT_EQ (SCREEN_SIZE.width () - (WINDOW_SIZE + 1),
-	       position.x ());
+		int x = SCREEN_SIZE.width () - (WINDOW_SIZE + 1);
+    EXPECT_EQ (x, position.x ());
 }
 
 TEST (PlaceGetViewportRelativeCoordinates, OutsideOuterScreenHeight)
@@ -376,8 +376,8 @@ TEST (PlaceGetViewportRelativeCoordinates, OutsideInnerScreenHeight)
 
     CompPoint    position (cp::getViewportRelativeCoordinates (geom,
 							       SCREEN_SIZE));
-    EXPECT_EQ (SCREEN_SIZE.height () - (WINDOW_SIZE + 1),
-	       position.y ());
+		int y = SCREEN_SIZE.height () - (WINDOW_SIZE + 1);
+    EXPECT_EQ (y, position.y ());
 }
 
 namespace
@@ -534,9 +534,10 @@ TEST (PlaceApplyWidthChange, ApplyWidthAndSetFlag)
     CompWindowExtents edgePositions (100, 200, 100, 200);
     XWindowChanges xwc;
     unsigned int mask = 0;
+    unsigned int expected_mask = CWWidth;
     ASSERT_TRUE (cp::applyWidthChange(edgePositions, xwc, mask));
     EXPECT_EQ (edgePositions.right - edgePositions.left, xwc.width);
-    EXPECT_EQ (CWWidth, mask);
+    EXPECT_EQ (expected_mask, mask);
 }
 
 TEST (PlaceApplyHeightChange, ReturnFalseIfNoChange)
@@ -553,7 +554,8 @@ TEST (PlaceApplyWidthChange, ApplyHeightAndSetFlag)
     CompWindowExtents edgePositions (100, 200, 100, 200);
     XWindowChanges xwc;
     unsigned int mask = 0;
+    unsigned int expected_mask = CWHeight;
     ASSERT_TRUE (cp::applyHeightChange(edgePositions, xwc, mask));
     EXPECT_EQ (edgePositions.bottom - edgePositions.top, xwc.height);
-    EXPECT_EQ (CWHeight, mask);
+    EXPECT_EQ (expected_mask, mask);
 }

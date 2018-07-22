@@ -325,7 +325,7 @@ TEST(RegionTest, subtract)
     typedef std::vector<CompRect> vcr;
     {
 	vcr const& rects = r1_r2.rects();
-	EXPECT_EQ(2, rects.size());
+	EXPECT_EQ(2u, rects.size());
 
 	for(vcr::const_iterator i = rects.begin(); i !=rects.end(); ++i)
 	{
@@ -358,7 +358,7 @@ TEST(RegionTest, subtract)
     typedef std::vector<CompRect> vcr;
     {
 	vcr const& rects = r1_rect2.rects();
-	EXPECT_EQ(2, rects.size());
+	EXPECT_EQ(2u, rects.size());
 
 	for(vcr::const_iterator i = rects.begin(); i !=rects.end(); ++i)
 	{
