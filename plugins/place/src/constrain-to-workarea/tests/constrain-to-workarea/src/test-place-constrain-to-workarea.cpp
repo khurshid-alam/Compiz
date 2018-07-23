@@ -47,7 +47,7 @@ class PlaceClampGeometryToWorkArea :
 	    workArea (50, 50, 900, 1900),
             flags (0)
         {
-	    memset (&extents, 0, sizeof (cwe::Extents));
+	    extents = cwe::Extents ();
         }
 
     protected:
@@ -209,7 +209,7 @@ class PlaceConstrainPositionToWorkArea :
 
 	PlaceConstrainPositionToWorkArea ()
         {
-	    memset (&extents, 0, sizeof (cwe::Extents));
+	    extents = cwe::Extents ();
         }
 
     protected:

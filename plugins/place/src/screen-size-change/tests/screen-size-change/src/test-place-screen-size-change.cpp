@@ -170,7 +170,7 @@ StubScreenSizeChangeObject::StubScreenSizeChangeObject (const cw::Geometry &g) :
     mCurrentWorkArea (50, 50, 1000, 1000),
     mCurrentGeometry (g)
 {
-    memset (&mCurrentExtents, 0, sizeof (cw::extents::Extents));
+    mCurrentExtents = cw::extents::Extents ();
 }
 
 StubScreenSizeChangeObject::~StubScreenSizeChangeObject ()
