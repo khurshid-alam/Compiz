@@ -1,3 +1,12 @@
+compiz (1:0.9.13.1+18.10.20180723-0ubuntu1) cosmic; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Fix build errors with GCC 8.1.
+  * Make tests build again with Google Test 1.8.0 and GCC 8.1.
+  * Build tests.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 23 Jul 2018 17:15:27 +0000
+
 compiz (1:0.9.13.1+18.10.20180717-0ubuntu1) cosmic; urgency=medium
 
   [ Alberts Muktupāvels ]
