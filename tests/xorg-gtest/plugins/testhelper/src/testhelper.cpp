@@ -103,7 +103,7 @@ TestHelperScreen::fetchAtom (const char *message)
 void
 TestHelperWindow::configureAndReport (long *data)
 {
-    XWindowChanges xwc;
+    XWindowChanges xwc = { 0 };
     XWindowChanges saved;
 
     xwc.x = data[0];
