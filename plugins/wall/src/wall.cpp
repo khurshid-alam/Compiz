@@ -53,6 +53,16 @@ static const unsigned short ARROW_SIZE = 33;
 
 COMPIZ_PLUGIN_20090315 (wall, WallPluginVTable);
 
+WallCairoContext::WallCairoContext () :
+    pixmap (0),
+    texture (0),
+    surface (NULL),
+    cr (NULL),
+    width (0),
+    height (0)
+{
+}
+
 void
 WallScreen::clearCairoLayer (cairo_t *cr)
 {
@@ -1636,10 +1646,6 @@ WallScreen::WallScreen (CompScreen *screen) :
     moveWindow (None),
     focusDefault (true),
     transform (NoTransformation),
-    switcherContext {},
-    thumbContext {},
-    highlightContext {},
-    arrowContext {},
     windowIsDragMoved (false)
 {
     ScreenInterface::setHandler (screen);
