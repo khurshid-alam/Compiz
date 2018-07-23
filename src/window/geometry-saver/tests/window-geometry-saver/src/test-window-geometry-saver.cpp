@@ -54,37 +54,42 @@ TEST_F(CompWindowGeometryTestSaver, TestSaver)
     /* g by default */
     compiz::window::Geometry rg;
     unsigned int             mask = saver.get (rg);
+    unsigned int             expected_mask;
 
-    EXPECT_EQ (mask, 0);
+    EXPECT_EQ (mask, 0u);
     EXPECT_EQ (rg, compiz::window::Geometry (100, 100, 300, 300, 5));
 
     /* Push X value on to the saved geometry */
     saver.push (g, CHANGE_X);
     mask = saver.get (rg);
+    expected_mask = CHANGE_X;
 
-    EXPECT_EQ (mask, CHANGE_X);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (100, 100, 300, 300, 5));
 
     /* Push Y and Width values on to the saved geometry */
     saver.push (g, CHANGE_Y | CHANGE_WIDTH);
     mask = saver.get (rg);
+    expected_mask = CHANGE_X | CHANGE_Y | CHANGE_WIDTH;
 
-    EXPECT_EQ (mask, CHANGE_X | CHANGE_Y | CHANGE_WIDTH);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (100, 100, 300, 300, 5));
 
     /* Pop Y value off the saved geoemtry */
     rg = compiz::window::Geometry ();
     mask = saver.pop (rg, CHANGE_Y);
+    expected_mask = CHANGE_Y;
 
-    EXPECT_EQ (mask, CHANGE_Y);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (0, 100, 0, 0, 0));
 
     /* Attempt to pop X Y and Height off the saved geometry,
      * but since Y is not saved, only expect X */
     rg = compiz::window::Geometry ();
     mask = saver.pop (rg, CHANGE_X | CHANGE_Y | CHANGE_HEIGHT);
+    expected_mask = CHANGE_X;
 
-    EXPECT_EQ (mask, CHANGE_X);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (100, 0, 0, 0, 0));
 
     /* Update the saved geometry (eg, workspace change) and
@@ -93,8 +98,9 @@ TEST_F(CompWindowGeometryTestSaver, TestSaver)
     g.setWidth (1200);
     saver.update (g, CHANGE_WIDTH);
     mask = saver.pop (rg, CHANGE_WIDTH);
+    expected_mask = CHANGE_WIDTH;
 
-    EXPECT_EQ (mask, CHANGE_WIDTH);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (0, 0, 1200, 0, 0));
 
     /* Try to push twice, only allow the first value to be popped off */
@@ -105,7 +111,8 @@ TEST_F(CompWindowGeometryTestSaver, TestSaver)
     saver.push (g, CHANGE_WIDTH);
 
     mask = saver.pop (rg, CHANGE_WIDTH);
+    expected_mask = CHANGE_WIDTH;
 
-    EXPECT_EQ (mask, CHANGE_WIDTH);
+    EXPECT_EQ (mask, expected_mask);
     EXPECT_EQ (rg, compiz::window::Geometry (0, 0, 1000, 0, 0));
 }

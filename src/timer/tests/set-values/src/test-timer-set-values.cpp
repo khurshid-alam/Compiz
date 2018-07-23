@@ -40,10 +40,10 @@ TEST_F(CompTimerTest, TimerSetValues)
      * expiry time in order to check them
      * for an accurate value of zero */
 
-    ASSERT_EQ (t1->minTime(), 100);
-    ASSERT_EQ (t1->maxTime(), 100);
-    ASSERT_EQ (t1->minLeft(), 0);
-    ASSERT_EQ (t1->maxLeft(), 0);
+    ASSERT_EQ (t1->minTime(), 100u);
+    ASSERT_EQ (t1->maxTime(), 100u);
+    ASSERT_EQ (t1->minLeft(), 0u);
+    ASSERT_EQ (t1->maxLeft(), 0u);
 
     delete t1;
 }

@@ -25,7 +25,6 @@
 
 #include <map>
 #include <memory>
-#include <tr1/tuple>
 #include <boost/shared_ptr.hpp>
 
 #include <glib_gslice_off_env.h>
@@ -158,7 +157,7 @@ namespace ccvg = compiz::config::integration::test::variant_generators;
 namespace ccvalg = compiz::config::integration::test::value_generators;
 namespace ccex = compiz::config::integration::test::expectations;
 
-typedef std::tr1::tuple <CCSSettingType,
+typedef testing::tuple <CCSSettingType,
 			 ccit::GSettingsIntegratedSettingInfo> CCSGSettingsIntegratedSettingTestInfo;
 
 class CCSGSettingsIntegratedSettingTest :
@@ -359,9 +358,9 @@ TEST_P (CCSGSettingsIntegratedSettingTest, MatchedTypesReturnValueMismatchedType
 {
     const std::string keyName ("mock");
     const ccit::GSettingsIntegratedSettingInfo &integratedSettingInfo =
-	    std::tr1::get <1> (GetParam ());
+	    testing::get <1> (GetParam ());
     const CCSSettingType                       createSettingType =
-	    std::tr1::get <0> (GetParam ());
+	    testing::get <0> (GetParam ());
 
     /* The GSettings Integrated setting takes ownership of these */
     CCSIntegratedSettingInfo *integratedSetting = ccsSharedIntegratedSettingInfoNew (keyName.c_str (),
@@ -401,9 +400,9 @@ TEST_P (CCSGSettingsIntegratedSettingTest, MatchedTypesReturnValueMismatchedType
 {
     const std::string keyName ("mock");
     const ccit::GSettingsIntegratedSettingInfo &integratedSettingInfo =
-	    std::tr1::get <1> (GetParam ());
+	    testing::get <1> (GetParam ());
     const CCSSettingType                       createSettingType =
-	    std::tr1::get <0> (GetParam ());
+	    testing::get <0> (GetParam ());
 
     CCSIntegratedSettingInfo *integratedSetting = ccsSharedIntegratedSettingInfoNew (keyName.c_str (),
 										     keyName.c_str (),

@@ -128,47 +128,47 @@ BaseDecorAcceptance::SetUp ()
 				  "UTF8_STRING",
 				  1);
 
-    ASSERT_NE (0, mUtf8StringAtom);
+    ASSERT_NE (0u, mUtf8StringAtom);
 
     mDecorationManagerNameAtom = XInternAtom (Display (),
 					     "_COMPIZ_DM_NAME",
 					     0);
 
-    ASSERT_NE (0, mDecorationManagerNameAtom);
+    ASSERT_NE (0u, mDecorationManagerNameAtom);
 
     mDecorationTypePixmap = XInternAtom (Display (),
 					 DECOR_TYPE_PIXMAP_ATOM_NAME,
 					 0);
 
-    ASSERT_NE (0, mDecorationTypePixmap);
+    ASSERT_NE (0u, mDecorationTypePixmap);
 
     mDecorationTypeWindow = XInternAtom (Display (),
 					 DECOR_TYPE_WINDOW_ATOM_NAME,
 					 0);
 
-    ASSERT_NE (0, mDecorationTypeWindow);
+    ASSERT_NE (0u, mDecorationTypeWindow);
 
     mDecorationTypeAtom = XInternAtom (Display (),
 				       DECOR_TYPE_ATOM_NAME,
 				       0);
 
-    ASSERT_NE (0, mDecorationTypeAtom);
+    ASSERT_NE (0u, mDecorationTypeAtom);
 
     mDecorationInputFrameAtom = XInternAtom (Display (),
 					     DECOR_INPUT_FRAME_ATOM_NAME,
 					     0);
 
-    ASSERT_NE (0, mDecorationInputFrameAtom);
+    ASSERT_NE (0u, mDecorationInputFrameAtom);
 
     mDecorationOutputFrameAtom = XInternAtom (Display (),
 					      DECOR_OUTPUT_FRAME_ATOM_NAME,
 					      0);
 
-    ASSERT_NE (0, mDecorationOutputFrameAtom);
+    ASSERT_NE (0u, mDecorationOutputFrameAtom);
 
     mRootWindow = DefaultRootWindow (Display ());
 
-    ASSERT_NE (0, mRootWindow);
+    ASSERT_NE (0u, mRootWindow);
 }
 
 ct::CompizProcess::PluginList
@@ -1608,7 +1608,7 @@ TEST_F (DecorWithPixmapDefaultsAcceptance, FallbackHasInputFrameInParent)
 							  parent,
 							  nChildren));
 
-    EXPECT_EQ (2, nChildren);
+    EXPECT_EQ (2u, nChildren);
 }
 
 namespace
@@ -1647,13 +1647,14 @@ TEST_F (DecorWithPixmapDefaultsAcceptance, FallbackNormalWindowExtentOnDecoratio
 							  parent,
 							  nChildren));
 
-    ASSERT_EQ (2, nChildren);
+    ASSERT_EQ (2u, nChildren);
 
+    Window noneWindow = None;
     Window decorationWindow = FindDecorationWindowFromChildren (Display (),
 								children,
 								nChildren);
 
-    ASSERT_NE (None, decorationWindow);
+    ASSERT_NE (noneWindow, decorationWindow);
 
     decor_extents_t borderExtents (DecorationExtents (ActiveBorderExtent,
 						      ActiveBorderExtent,

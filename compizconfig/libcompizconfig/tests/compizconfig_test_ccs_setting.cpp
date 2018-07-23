@@ -18,8 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <tr1/tuple>
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -1456,7 +1454,7 @@ FailSParam (const typename ValueContainer <T>::Ptr   &defaultValue,
 						      changeTo);
 }
 
-typedef std::tr1::tuple <SetParam::Ptr,
+typedef testing::tuple <SetParam::Ptr,
 			 SetMethod> SettingDefaultImplSetParamType;
 
 class SettingDefaultImplSet :
@@ -1466,8 +1464,8 @@ class SettingDefaultImplSet :
     public:
 
 	SettingDefaultImplSet () :
-	    setHarness (std::tr1::get <0> (GetParam ())),
-	    setMethod (std::tr1::get <1> (GetParam ()))
+	    setHarness (testing::get <0> (GetParam ())),
+	    setMethod (testing::get <1> (GetParam ()))
 	{
 	}
 

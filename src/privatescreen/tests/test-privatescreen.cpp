@@ -636,7 +636,7 @@ TEST(privatescreen_PluginManagerTest, verify_plugin_ordering)
     
     CompOption::Value::Vector merged = ps.mergedPluginList(extra);
 
-    ASSERT_EQ(merged.size(), 6);
+    ASSERT_EQ(merged.size(), 6u);
     ASSERT_EQ(merged[0].s(), "core");
     ASSERT_EQ(merged[1].s(), "alice");
     ASSERT_EQ(merged[2].s(), "bob");
@@ -992,12 +992,15 @@ TEST (privatescreen_ButtonPressEdgeEventManagementTest, AllowWhenEventButNotRoot
 
     grabList.grabsPush (new cps::Grab (None, "Nil"));
 
-    EXPECT_EQ (ce::processButtonPressOnEdgeWindow (edgeWindow,
+    int edge = ce::processButtonPressOnEdgeWindow (edgeWindow,
 						   rootWindow,
 						   0,
 						   rootWindow,
 						   grabList,
-						   screenEdges), topEdgeMask);
+						   screenEdges);
+
+    EXPECT_GT (edge, 0);
+    EXPECT_EQ (static_cast<unsigned int>(edge), topEdgeMask);
 
     grabList.grabsRemove (grabList.grabsBack ());
 }
@@ -1008,7 +1011,10 @@ TEST (privatescreen_ButtonPressEventManagementTest, SetEventWindowArgument)
 
     ce::EventArguments arguments (2);
     ce::setEventWindowInButtonPressArguments (arguments, activeWindow);
-    EXPECT_EQ (arguments[1].value ().i (), activeWindow);
+
+    Window window = arguments[1].value ().i ();
+
+    EXPECT_EQ (window, activeWindow);
 }
 
 namespace

@@ -23,7 +23,6 @@
  * Authored by: Sam Spilsbury <sam.spilsbury@canonical.com>
  */
 
-#include <tr1/tuple>
 #include <test-constrain-to-workarea.h>
 #include <constrain-to-workarea.h>
 #include <iostream>
@@ -48,7 +47,7 @@ class PlaceClampGeometryToWorkArea :
 	    workArea (50, 50, 900, 1900),
             flags (0)
         {
-	    memset (&extents, 0, sizeof (cwe::Extents));
+	    extents = cwe::Extents ();
         }
 
     protected:
@@ -180,22 +179,22 @@ TEST_F (PlaceClampGeometryToWorkArea, ChangePositionIfSizeChanged)
 
 namespace
 {
-typedef std::tr1::tuple <cw::Geometry, cwe::Extents> ConstrainPositionToWorkAreaParam;
+typedef testing::tuple <cw::Geometry, cwe::Extents> ConstrainPositionToWorkAreaParam;
 
 const cw::Geometry & WindowGeometry (const ConstrainPositionToWorkAreaParam &p)
 {
-    return std::tr1::get <0> (p);
+    return testing::get <0> (p);
 }
 
 const cwe::Extents & WindowExtents (const ConstrainPositionToWorkAreaParam &p)
 {
-    return std::tr1::get <1> (p);
+    return testing::get <1> (p);
 }
 
 CompPoint InitialPosition (const ConstrainPositionToWorkAreaParam &p)
 {
     /* Initial position is where the window is right now */
-    return (std::tr1::get <0> (p)).pos ();
+    return (testing::get <0> (p)).pos ();
 }
 
 const CompRect  WArea (50, 50, 900, 1900);
@@ -210,7 +209,7 @@ class PlaceConstrainPositionToWorkArea :
 
 	PlaceConstrainPositionToWorkArea ()
         {
-	    memset (&extents, 0, sizeof (cwe::Extents));
+	    extents = cwe::Extents ();
         }
 
     protected:
@@ -352,8 +351,8 @@ TEST (PlaceGetViewportRelativeCoordinates, OutsideInnerScreenWidth)
 
     CompPoint    position (cp::getViewportRelativeCoordinates (geom,
 							       SCREEN_SIZE));
-    EXPECT_EQ (SCREEN_SIZE.width () - (WINDOW_SIZE + 1),
-	       position.x ());
+		int x = SCREEN_SIZE.width () - (WINDOW_SIZE + 1);
+    EXPECT_EQ (x, position.x ());
 }
 
 TEST (PlaceGetViewportRelativeCoordinates, OutsideOuterScreenHeight)
@@ -377,8 +376,8 @@ TEST (PlaceGetViewportRelativeCoordinates, OutsideInnerScreenHeight)
 
     CompPoint    position (cp::getViewportRelativeCoordinates (geom,
 							       SCREEN_SIZE));
-    EXPECT_EQ (SCREEN_SIZE.height () - (WINDOW_SIZE + 1),
-	       position.y ());
+		int y = SCREEN_SIZE.height () - (WINDOW_SIZE + 1);
+    EXPECT_EQ (y, position.y ());
 }
 
 namespace
@@ -535,9 +534,10 @@ TEST (PlaceApplyWidthChange, ApplyWidthAndSetFlag)
     CompWindowExtents edgePositions (100, 200, 100, 200);
     XWindowChanges xwc;
     unsigned int mask = 0;
+    unsigned int expected_mask = CWWidth;
     ASSERT_TRUE (cp::applyWidthChange(edgePositions, xwc, mask));
     EXPECT_EQ (edgePositions.right - edgePositions.left, xwc.width);
-    EXPECT_EQ (CWWidth, mask);
+    EXPECT_EQ (expected_mask, mask);
 }
 
 TEST (PlaceApplyHeightChange, ReturnFalseIfNoChange)
@@ -554,7 +554,8 @@ TEST (PlaceApplyWidthChange, ApplyHeightAndSetFlag)
     CompWindowExtents edgePositions (100, 200, 100, 200);
     XWindowChanges xwc;
     unsigned int mask = 0;
+    unsigned int expected_mask = CWHeight;
     ASSERT_TRUE (cp::applyHeightChange(edgePositions, xwc, mask));
     EXPECT_EQ (edgePositions.bottom - edgePositions.top, xwc.height);
-    EXPECT_EQ (CWHeight, mask);
+    EXPECT_EQ (expected_mask, mask);
 }

@@ -52,10 +52,16 @@ set (
 
 # Almost everything is a shared library now, so almost everything needs -fPIC
 set (COMMON_FLAGS "-fPIC -Wall")
+set (COMMON_CXX_FLAGS "-std=c++11")
 
 option (COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS "Warn unused private fields" OFF)
 if (NOT COMPIZ_UNUSED_PRIVATE_FIELD_WARNINGS)
     set (COMMON_FLAGS "${COMMON_FLAGS} -Wno-unused-private-field")
+endif ()
+
+option (COMPIZ_SUBOBJECT_LINKAGE_WARNINGS "Warn about subobject linkage" OFF)
+if (NOT COMPIZ_SUBOBJECT_LINKAGE_WARNINGS)
+    set (COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -Wno-subobject-linkage")
 endif ()
 
 option (COMPIZ_UNUSED_LOCAL_TYPEDEFS_WARNINGS "Warn about unused local typedefs" OFF)
@@ -84,7 +90,7 @@ if (COMPIZ_WERROR)
 endif ()
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -std=c++11")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} ${COMMON_CXX_FLAGS}")
 
 set (COMMON_LINKER_FLAGS "-Wl,-zdefs")
 set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${COMMON_LINKER_FLAGS}")

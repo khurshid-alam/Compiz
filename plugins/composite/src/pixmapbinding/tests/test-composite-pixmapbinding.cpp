@@ -178,7 +178,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindSuccess)
 
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     EXPECT_CALL (*wp, releasePixmap ());
@@ -226,7 +226,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindSuccessNoRebind)
 
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     EXPECT_CALL (*wp, releasePixmap ());
@@ -274,7 +274,7 @@ TEST(CompositePixmapBinderTest, TestRebindAfterRelease)
     EXPECT_CALL (mpf, frozen ()).WillOnce (Return (false));
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     EXPECT_CALL (*wp, releasePixmap ());
@@ -295,7 +295,7 @@ TEST(CompositePixmapBinderTest, TestRebindAfterRelease)
 
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     EXPECT_CALL (*wp, releasePixmap ());
@@ -343,7 +343,7 @@ TEST(CompositePixmapBinderTest, TestNoRebindAfterReleaseWhenFrozen)
     EXPECT_CALL (mpf, frozen ()).WillOnce (Return (true));
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     pr.release ();
@@ -352,7 +352,7 @@ TEST(CompositePixmapBinderTest, TestNoRebindAfterReleaseWhenFrozen)
 
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
 
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 
     EXPECT_CALL (*wp, releasePixmap ());
@@ -387,7 +387,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindFailureWindowUnmapped)
 
     EXPECT_FALSE (pr.bind ());
 
-    EXPECT_EQ (pr.pixmap (), 0);
+    EXPECT_EQ (pr.pixmap (), 0u);
     EXPECT_EQ (pr.size (), CompSize (0, 0));
 }
 
@@ -420,7 +420,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindFailureWindowZeroSize)
 
     EXPECT_FALSE (pr.bind ());
 
-    EXPECT_EQ (pr.pixmap (), 0);
+    EXPECT_EQ (pr.pixmap (), 0u);
     EXPECT_EQ (pr.size (), CompSize (0, 0));
 }
 
@@ -458,7 +458,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindFailureNilPixmapReturned)
 
     EXPECT_FALSE (pr.bind ());
 
-    EXPECT_EQ (pr.pixmap (), 0);
+    EXPECT_EQ (pr.pixmap (), 0u);
     EXPECT_EQ (pr.size (), CompSize (0, 0));
 }
 
@@ -493,7 +493,7 @@ TEST(CompositePixmapBinderTest, TestInitialBindFailureWindowUnmappedSuccessOnRem
 
     EXPECT_FALSE (pr.bind ());
 
-    EXPECT_EQ (pr.pixmap (), 0);
+    EXPECT_EQ (pr.pixmap (), 0u);
     EXPECT_EQ (pr.size (), CompSize (0, 0));
 
     EXPECT_FALSE (pr.bind ());
@@ -519,6 +519,6 @@ TEST(CompositePixmapBinderTest, TestInitialBindFailureWindowUnmappedSuccessOnRem
     EXPECT_TRUE (pr.bind ());
 
     EXPECT_CALL (*wp, pixmap ()).WillOnce (Return (1));
-    EXPECT_EQ (pr.pixmap (), 1);
+    EXPECT_EQ (pr.pixmap (), 1u);
     EXPECT_EQ (pr.size (), CompSize (102, 202));
 }
