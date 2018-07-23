@@ -1649,8 +1649,7 @@ DecorWindow::update (bool allowDecoration)
 	    if (!wd)
 	    {
 		/* Error condition, reset frame extents */
-		CompWindowExtents emptyExtents;
-		memset (&emptyExtents, 0, sizeof (CompWindowExtents));
+		CompWindowExtents emptyExtents = CompWindowExtents ();
 		window->setWindowFrameExtents (&emptyExtents, &emptyExtents);
 		return false;
 	    }
@@ -1671,7 +1670,7 @@ DecorWindow::update (bool allowDecoration)
     }
     else
     {
-	CompWindowExtents emptyExtents;
+	CompWindowExtents emptyExtents = CompWindowExtents ();
 
 	if (wd)
 	{
@@ -1681,7 +1680,6 @@ DecorWindow::update (bool allowDecoration)
 
 	/* _NET_FRAME_EXTENTS should be updated before the frame
 	 * atom is */
-	memset (&emptyExtents, 0, sizeof (CompWindowExtents));
 
 	window->setWindowFrameExtents (&emptyExtents, &emptyExtents);
 

@@ -117,7 +117,7 @@ ParticleSystem::draw (const GLMatrix &transform, int offsetX, int offsetY)
     GLushort *colors = &mColorsCache[0];
 
     int cornersSize = sizeof (GLfloat) * 12;
-    int colorSize = sizeof (GLfloat) * 4;
+    int colorSize = sizeof (GLushort) * 4;
 
     GLfloat cornerCoords[12] = {0.0, 0.0,
 			       0.0, 1.0,

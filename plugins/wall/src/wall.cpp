@@ -53,6 +53,16 @@ static const unsigned short ARROW_SIZE = 33;
 
 COMPIZ_PLUGIN_20090315 (wall, WallPluginVTable);
 
+WallCairoContext::WallCairoContext () :
+    pixmap (0),
+    texture (0),
+    surface (NULL),
+    cr (NULL),
+    width (0),
+    height (0)
+{
+}
+
 void
 WallScreen::clearCairoLayer (cairo_t *cr)
 {
@@ -1646,10 +1656,6 @@ WallScreen::WallScreen (CompScreen *screen) :
     // to prevent crashes in XCloseDisplay
     dlopen ("libcairo.so.2", RTLD_LAZY);
 
-    memset (&switcherContext, 0, sizeof (WallCairoContext));
-    memset (&thumbContext, 0, sizeof (WallCairoContext));
-    memset (&highlightContext, 0, sizeof (WallCairoContext));
-    memset (&arrowContext, 0, sizeof (WallCairoContext));
     createCairoContexts (true);
 
 #define setAction(action, dir, win) \

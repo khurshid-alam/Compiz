@@ -45,8 +45,10 @@ typedef enum
 } ScreenTransformation;
 
 /* FIXME: put into own class? */
-typedef struct _WallCairoContext
+struct WallCairoContext
 {
+    WallCairoContext ();
+
     Pixmap          pixmap;
     GLTexture::List texture;
 
@@ -55,7 +57,7 @@ typedef struct _WallCairoContext
 
     int width;
     int height;
-} WallCairoContext;
+};
 
 /* classes */
 class WallScreen :
