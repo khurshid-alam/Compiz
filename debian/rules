@@ -7,6 +7,11 @@ include /usr/share/dpkg/architecture.mk
 
 python2_version := $(shell pyversions --requested --version debian/control)
 gles2_architectures := armel armhf
+build_testing := OFF
+
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	build_testing := ON
+endif
 
 # currently, segfault if CMAKE_BUILD_TYPE=Release
 export DEB_LDFLAGS_MAINT_STRIP=-Wl,-Bsymbolic-functions
@@ -20,9 +25,9 @@ CORE_ABIVERSION := $(shell sed -rn 's/^\#define[[:space:]]+CORE_ABIVERSION[[:spa
 override_dh_auto_configure:
         # right now, xorg-gtest won't compile on arm.
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
-	dh_auto_configure -- -DCOMPIZ_BUILD_WITH_RPATH=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPIZ_PACKAGING_ENABLED=TRUE -DCOMPIZ_DISABLE_GS_SCHEMAS_INSTALL=OFF -DCOMPIZ_DISABLE_PLUGIN_KDE=ON -DCOMPIZ_BUILD_TESTING=OFF -DUSE_KDE4=OFF -DBUILD_GLES=ON -DBUILD_XORG_GTEST=OFF
+	dh_auto_configure -- -DCOMPIZ_BUILD_WITH_RPATH=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPIZ_PACKAGING_ENABLED=TRUE -DCOMPIZ_DISABLE_GS_SCHEMAS_INSTALL=OFF -DCOMPIZ_DISABLE_PLUGIN_KDE=ON -DCOMPIZ_BUILD_TESTING=$(build_testing) -DUSE_KDE4=OFF -DBUILD_GLES=ON -DBUILD_XORG_GTEST=OFF
 else
-	dh_auto_configure -- -DCOMPIZ_BUILD_WITH_RPATH=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPIZ_PACKAGING_ENABLED=TRUE -DCOMPIZ_DISABLE_GS_SCHEMAS_INSTALL=OFF -DCOMPIZ_DISABLE_PLUGIN_KDE=ON -DCOMPIZ_BUILD_TESTING=OFF -DUSE_KDE4=OFF
+	dh_auto_configure -- -DCOMPIZ_BUILD_WITH_RPATH=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPIZ_PACKAGING_ENABLED=TRUE -DCOMPIZ_DISABLE_GS_SCHEMAS_INSTALL=OFF -DCOMPIZ_DISABLE_PLUGIN_KDE=ON -DCOMPIZ_BUILD_TESTING=$(build_testing) -DUSE_KDE4=OFF
 endif
 
 override_dh_install:
