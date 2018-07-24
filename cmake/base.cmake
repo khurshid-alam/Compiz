@@ -10,7 +10,6 @@ function (_print_configure_results)
 
     compiz_print_result_message ("protocol buffers" USE_PROTOBUF)
     compiz_print_result_message ("file system change notifications" HAVE_INOTIFY)
-    compiz_print_result_message ("Xig Tests" COMPIZ_XIG_TEST_FOUND)
 
     compiz_print_configure_footer ()
     compiz_print_plugin_stats ("${CMAKE_SOURCE_DIR}/plugins")
