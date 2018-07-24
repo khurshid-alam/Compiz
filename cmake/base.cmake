@@ -17,14 +17,6 @@ function (_print_configure_results)
 endfunction ()
 
 function (_check_compiz_cmake_macro)
-    find_file (_find_compiz FindCompiz.cmake PATHS ${CMAKE_ROOT}/Modules ${ARGN})
-    if (NOT _find_compiz)
-        compiz_color_message ("${_escape}[1;31mWARNING:${_escape}[0m")
-        message ("\"FindCompiz.cmake\" file not found in cmake module directories.")
-        message ("It should be installed to allow building of external compiz packages.")
-        message ("Call \"sudo make findcompiz_install\" to install it.\n")
-        compiz_print_configure_footer ()
-    endif ()
     install (FILES
 	     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCompiz.cmake
 	     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindOpenGLES2.cmake
@@ -35,14 +27,7 @@ function (_check_compiz_cmake_macro)
 	${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/FindCompiz.cmake ${CMAKE_ROOT}/Modules &&
 	${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/FindOpenGLES2.cmake ${CMAKE_ROOT}/Modules
     )
-    find_file (_find_compizconfig FindCompizConfig.cmake PATHS ${CMAKE_ROOT}/Modules ${ARGN})
-    if (NOT _find_compizconfig)
-	compiz_color_message ("${_escape}[1;31mWARNING:${_escape}[0m")
-	message ("\"FindCompizConfig.cmake\" file not found in cmake module directories.")
-	message ("It should be installed to allow building of external compiz packages.")
-	message ("Call \"sudo make findcompiz_install\" to install it.\n")
-	compiz_print_configure_footer ()
-    endif (NOT _find_compizconfig)
+
     install (FILES
 	     ${CMAKE_CURRENT_SOURCE_DIR}/compizconfig/libcompizconfig/cmake/FindCompizConfig.cmake
 	     DESTINATION
