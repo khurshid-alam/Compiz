@@ -10,10 +10,6 @@ endif ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
 #### CTest
 enable_testing()
 
-#### policies
-
-cmake_policy (SET CMP0002 OLD)
-
 set (CMAKE_SKIP_RPATH FALSE)
 
 pkg_check_modules (GL QUIET gl)
