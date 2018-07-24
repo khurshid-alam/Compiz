@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.6.3)
 
 include (FindPkgConfig)
 pkg_check_modules (COMPIZ_UNTEST REQUIRED gtk+-3.0 gl x11)
