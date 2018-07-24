@@ -12,7 +12,6 @@ enable_testing()
 
 #### policies
 
-cmake_policy (SET CMP0000 OLD)
 cmake_policy (SET CMP0002 OLD)
 cmake_policy (SET CMP0003 NEW)
 cmake_policy (SET CMP0005 OLD)
