@@ -26,9 +26,9 @@ SET( PRIVATE_HEADERS )
 
 add_definitions (
     -DHAVE_CONFIG_H
-    -DPLUGINDIR=\\\"${compiz_plugindir}\\\"
-    -DSHAREDIR=\\\"${compiz_sharedir}\\\"
-    -DMETADATADIR=\\\"${compiz_metadatadir}\\\"
+    -DPLUGINDIR="${compiz_plugindir}"
+    -DSHAREDIR="${compiz_sharedir}"
+    -DMETADATADIR="${compiz_metadatadir}"
 )
 
 SET( SRCS ${compiz_SOURCE_DIR}/src/plugin.cpp )

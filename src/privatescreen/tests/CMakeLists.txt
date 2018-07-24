@@ -26,14 +26,12 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-
 add_definitions (
     -DHAVE_CONFIG_H
-    -DPLUGINDIR=\\\"${compiz_plugindir}\\\"
-    -DSHAREDIR=\\\"${compiz_sharedir}\\\"
-    -DMETADATADIR=\\\"${compiz_metadatadir}\\\"
+    -DPLUGINDIR="${compiz_plugindir}"
+    -DSHAREDIR="${compiz_sharedir}"
+    -DMETADATADIR="${compiz_metadatadir}"
 )
-
 
 add_executable( 
   compiz_privatescreen_test

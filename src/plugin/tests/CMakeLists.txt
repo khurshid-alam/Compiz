@@ -10,11 +10,10 @@ include_directories(
 
 add_definitions (
     -DHAVE_CONFIG_H
-    -DPLUGINDIR=\\\"${compiz_plugindir}\\\"
-    -DSHAREDIR=\\\"${compiz_sharedir}\\\"
-    -DMETADATADIR=\\\"${compiz_metadatadir}\\\"
+    -DPLUGINDIR="${compiz_plugindir}"
+    -DSHAREDIR="${compiz_sharedir}"
+    -DMETADATADIR="${compiz_metadatadir}"
 )
-
 
 add_executable( 
   compiz_plugin_test
@@ -33,4 +32,3 @@ target_link_libraries(
 )
 
 compiz_discover_tests ( compiz_plugin_test COVERAGE compiz_plugin compiz_core )
-

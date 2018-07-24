@@ -82,9 +82,9 @@ include_directories (
 
 add_definitions (
     -DHAVE_CONFIG_H
-    -DPLUGINDIR=\\\"${compiz_plugindir}\\\"
-    -DSHAREDIR=\\\"${compiz_sharedir}\\\"
-    -DMETADATADIR=\\\"${compiz_metadatadir}\\\"
+    -DPLUGINDIR="${compiz_plugindir}"
+    -DSHAREDIR="${compiz_sharedir}"
+    -DMETADATADIR="${compiz_metadatadir}"
 )
 
 get_property (CORE_MOD_LIBRARY_DIRS

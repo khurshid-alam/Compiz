@@ -13,10 +13,11 @@ if (USE_GTK)
 	${DBUS_GLIB_INCLUDE_DIRS}
     )
 
+    string(REPLACE ";" " " LINGUAS "${ALL_LINGUAS}")
     add_definitions (
 	-DHAVE_CONFIG_H
-	-DALL_LINGUAS=\"${ALL_LINGUAS}\"
-	-DLOCALEDIR=\\\"${datadir}/locale\\\"
+	-DALL_LINGUAS=${LINGUAS}
+	-DLOCALEDIR="${datadir}/locale"
     )
 
     link_directories (
