@@ -46,10 +46,10 @@ if (GLIB_COMPILE_SCHEMAS)
 			DEPENDS ${_top_gschema_src}
 			VERBATIM)
 
-    add_custom_target (compiz_gsettings_schema
+    add_custom_target (compiz_config_gsettings_schema
 		       DEPENDS ${_top_gschema_dest})
 
-    add_gsettings_schema_to_recompilation_list (compiz_gsettings_schema)
+    add_gsettings_schema_to_recompilation_list (compiz_config_gsettings_schema)
 
     compiz_install_gsettings_schema (${_top_gschema_dest}
 				     ${_top_gschema_inst})
