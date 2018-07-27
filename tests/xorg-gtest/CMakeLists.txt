@@ -54,8 +54,5 @@ target_link_libraries (compiz_xorg_gtest_system_test
 		       ${COMPIZ_XORG_GTEST_COMMUNICATOR_LIBRARY}
 		       ${X11_XI_LIBRARIES})
 
-add_executable (xorg_gtest_wrapper
-		${CMAKE_CURRENT_SOURCE_DIR}/src/xorg_gtest_wrapper.cpp)
-
 add_subdirectory (communicator)
 add_subdirectory (plugins)
