@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: David Nusinow <dnusinow@debian.org>, Sean Finney <seanius@debian.org>, Cyril Brulebois <kibi@debian.org>
-Build-Depends: cmake (>= 2.8.5),
+Build-Depends: cmake (>= 2.8.12),
                debhelper (>= 9~),
                dh-migrations,
                dh-translations,

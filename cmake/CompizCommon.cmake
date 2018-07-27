@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6.3)
+cmake_minimum_required (VERSION 2.8.12)
 
 include (FindPkgConfig)
 
@@ -13,7 +13,6 @@ enable_testing()
 #### policies
 
 cmake_policy (SET CMP0002 OLD)
-cmake_policy (SET CMP0022 OLD)
 
 set (CMAKE_SKIP_RPATH FALSE)
 

@@ -208,7 +208,7 @@ target_link_libraries (
 # libraries that compiz_core depends on (contains).
 #
 set_target_properties (compiz_core PROPERTIES
-    LINK_INTERFACE_LIBRARIES ""
+    INTERFACE_LINK_LIBRARIES ""
 )
 
 target_link_libraries (
