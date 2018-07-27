@@ -9,11 +9,10 @@ include_directories(
 
 add_definitions (
     -DHAVE_CONFIG_H
-    -DPLUGINDIR=\\\"${compiz_plugindir}\\\"
-    -DSHAREDIR=\\\"${compiz_sharedir}\\\"
-    -DMETADATADIR=\\\"${compiz_metadatadir}\\\"
+    -DPLUGINDIR="${compiz_plugindir}"
+    -DSHAREDIR="${compiz_sharedir}"
+    -DMETADATADIR="${compiz_metadatadir}"
 )
-
 
 add_executable( 
   compiz_region_test
