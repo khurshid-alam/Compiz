@@ -1,3 +1,17 @@
+compiz (1:0.9.13.1+18.10.20180727-0ubuntu1) cosmic; urgency=medium
+
+  [ Alberts Muktupāvels ]
+  * Don't set CMP0000 policy to OLD.
+  * Don't set CMP0003 policy.
+  * Don't set CMP0005 policy to OLD.
+  * Don't set CMP0011 policy to OLD.
+  * Don't set CMP0022 policy to OLD.
+  * Don't set CMP0002 policy to OLD.
+  * Drop xig support. (LP: #1100128)
+  * Remove useless warnings.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Fri, 27 Jul 2018 08:19:53 +0000
+
 compiz (1:0.9.13.1+18.10.20180723-0ubuntu1) cosmic; urgency=medium
 
   [ Alberts Muktupāvels ]
