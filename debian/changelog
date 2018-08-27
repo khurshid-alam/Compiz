@@ -1,8 +1,9 @@
-compiz (1:0.9.13.1+18.10.20180727-0ubuntu2) UNRELEASED; urgency=medium
+compiz (1:0.9.13.1+18.10.20180827-0ubuntu1) cosmic; urgency=medium
 
+  [ Alberts Muktupāvels ]
   * No-change rebuild against CMake 3.12
 
- -- Alberts Muktupāvels <alberts.muktupavels@gmail.com>  Mon, 27 Aug 2018 16:13:17 +0300
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Mon, 27 Aug 2018 13:24:35 +0000
 
 compiz (1:0.9.13.1+18.10.20180727-0ubuntu1) cosmic; urgency=medium
 
