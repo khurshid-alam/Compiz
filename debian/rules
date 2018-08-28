@@ -72,6 +72,9 @@ endif
 override_dh_gencontrol:
 	dh_gencontrol -- -Vcoreabiversion=$(CORE_ABIVERSION)
 
+override_dh_auto_test:
+	dh_auto_test --no-parallel
+
 %:
 	dh $@ --parallel --with python2,migrations,translations
 
