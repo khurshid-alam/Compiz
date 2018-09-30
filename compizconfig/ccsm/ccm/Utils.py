@@ -122,11 +122,6 @@ class SizedButton (Gtk.Button):
         self.set_size_request (minWidth, minHeight)
 
 class PrettyButton (Gtk.Button):
-
-    __gsignals__ = {
-        'draw' : 'override',
-    }
-
     _old_toplevel = None
 
     def __init__ (self):
